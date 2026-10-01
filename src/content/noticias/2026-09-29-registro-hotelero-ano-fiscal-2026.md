@@ -4,6 +4,10 @@ description: "La ocupación subió a 72.6% en el año fiscal 2026 y la tarifa pr
 section: economia
 place: "Puerto Rico"
 date: 2026-09-29T12:03:00-04:00
+image: "images/el-morro.jpg"
+imageCaption: "El Castillo San Felipe del Morro, uno de los lugares más visitados por los turistas en San Juan. Imagen de archivo."
+imageCredit: "Foto: Godot13, CC BY-SA 4.0, vía Wikimedia Commons"
+imageCreditUrl: "https://commons.wikimedia.org/wiki/File:USA-2016-Puerto_Rico-San_Juan-Castillo_San_Felipe_del_Morro_10.jpg"
 sources:
   - name: "NotiCel"
     url: "https://noticel.com/economia/20260929/mejora-el-registro-hotelero-en-el-ano-fiscal-2026-pero-el-costo-por-noche-se-dispara/"

@@ -4,6 +4,10 @@ description: "La nueva política exige copia de la licencia de conducir y del ve
 section: puerto-rico
 place: "Vieques y Culebra"
 date: 2026-10-01T10:46:00-04:00
+image: "images/ferry-vieques.jpg"
+imageCaption: "Travesía en ferry hacia Vieques. Imagen de archivo."
+imageCredit: "Foto: Josefito123, CC BY-SA 4.0, vía Wikimedia Commons"
+imageCreditUrl: "https://commons.wikimedia.org/wiki/File:Ferry_a_Vieques_20260430_091651.jpg"
 sources:
   - name: "NotiCel"
     url: "https://noticel.com/noticias/20261001/anuncian-nueva-politica-para-reservaciones-de-vehiculos-realizadas-por-terceros-en-el-servicio-de-ferry/"

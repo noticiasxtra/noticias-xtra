@@ -19,6 +19,9 @@ const noticias = defineCollection({
     live: z.boolean().default(false),
     image: z.string().optional(),
     imageCaption: z.string().optional(),
+    imageCredit: z.string().optional(), // e.g. "Foto: NASA/Joel Kowsky (dominio público)"
+    imageCreditUrl: z.string().optional(), // link to the photo's license page
+    breaking: z.boolean().default(false), // eligible for the red ÚLTIMA HORA bar for 12 hours
     aiAssisted: z.boolean().default(true),
     sources: z.array(z.object({ name: z.string(), url: z.string().optional() })).default([]),
     related: z.array(z.string()).default([]),

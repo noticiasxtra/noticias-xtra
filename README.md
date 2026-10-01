@@ -92,6 +92,10 @@ Stick to **primary sources** (government agencies, municipalities, police, utili
 
 The `opinion` section is for signed columns and editorials. The AI script never writes there. Create the file by hand with `section: opinion` and `aiAssisted: false`; the article page labels it as opinion.
 
+### Red news bar
+
+The red bar at the top updates by itself every hour (the site rebuilds hourly). It shows, in order: a story marked `breaking: true` in the last 12 hours (ÚLTIMA HORA), our recent story that best matches what people in Puerto Rico are searching on Google (TENDENCIA), or our newest story (LO ÚLTIMO). To force a specific story, set `breaking` in `src/lib/site.ts`. Weather alerts drafted by the AI are marked `breaking: true` automatically.
+
 ## RSS feed
 
 The site publishes its own feed at `/rss.xml`. Social media tools like Buffer, Zapier, or Make can watch it and post new stories to Facebook, Instagram, and X automatically.

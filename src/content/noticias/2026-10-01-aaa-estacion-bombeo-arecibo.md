@@ -4,6 +4,10 @@ description: "La obra en Arecibo, que aún opera con equipo provisional y dos ta
 section: puerto-rico
 place: "Arecibo"
 date: 2026-10-01T15:49:00-04:00
+image: "images/rio-grande-arecibo.jpg"
+imageCaption: "Desembocadura del Río Grande de Arecibo. Imagen de archivo."
+imageCredit: "Foto: Ligocsicnarf89, CC BY 4.0, vía Wikimedia Commons"
+imageCreditUrl: "https://commons.wikimedia.org/wiki/File:1_Arecibo_River_mouth-2.jpg"
 sources:
   - name: "NotiCel"
     url: "https://noticel.com/noticias/20261001/aaa-promete-finalizar-para-noviembre-estacion-de-bombeo-en-arecibo/"

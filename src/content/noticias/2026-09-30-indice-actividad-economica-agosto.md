@@ -4,6 +4,10 @@ description: "El Índice de Actividad Económica llegó a su punto más alto en 
 section: economia
 place: "Puerto Rico"
 date: 2026-09-30T11:26:00-04:00
+image: "images/milla-de-oro.jpg"
+imageCaption: "La Milla de Oro, centro financiero en Hato Rey. Imagen de archivo."
+imageCredit: "Foto: Jose A. Perez, CC BY 2.0, vía Wikimedia Commons"
+imageCreditUrl: "https://commons.wikimedia.org/wiki/File:Rain_clouds_over_Milla_de_Oro_in_Hato_Rey%2C_Puerto_Rico.jpg"
 sources:
   - name: "NotiCel"
     url: "https://noticel.com/economia/20260930/aumento-la-actividad-economica-frente-a-agosto-del-2025-pero-sigue-rezagada-tras-nueve-meses-del-2026/"

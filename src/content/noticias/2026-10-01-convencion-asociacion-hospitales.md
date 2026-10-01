@@ -4,6 +4,10 @@ description: "La convención de la Asociación de Hospitales reunió a la gobern
 section: salud
 place: "Puerto Rico"
 date: 2026-10-01T13:29:00-04:00
+image: "images/estetoscopio.jpg"
+imageCaption: "Imagen de referencia."
+imageCredit: "Foto: Jacek Halicki, CC BY-SA 4.0, vía Wikimedia Commons"
+imageCreditUrl: "https://commons.wikimedia.org/wiki/File:2023_Stetoskop.jpg"
 sources:
   - name: "NotiCel"
     url: "https://noticel.com/noticias/20261001/convencion-de-la-asociacion-de-hospitales-discute-el-futuro-de-la-salud-en-puerto-rico/"

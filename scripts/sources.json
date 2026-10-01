@@ -4,7 +4,8 @@
     "type": "nws-alerts",
     "url": "https://api.weather.gov/alerts/active?area=PR",
     "section": "clima",
-    "place": "Puerto Rico"
+    "place": "Puerto Rico",
+    "breaking": true
   },
   {
     "name": "Centro Nacional de Huracanes (Atlántico)",

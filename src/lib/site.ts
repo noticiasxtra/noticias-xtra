@@ -11,7 +11,8 @@ export const SITE = {
   demoMode: true,
   // Where the "Envía tu denuncia" button sends readers' tips (opens their email app).
   tipEmail: '',
-  // Breaking news banner. Set to null to hide it. `id` is the story's file name without .md
+  // Red bar: chosen automatically (see src/lib/breaking.ts). Set this only to force a story by hand.
+  // `id` is the story's file name without .md, e.g. { text: 'Titular', id: '2026-10-01-mi-noticia' }
   breaking: null as
     | { text: string; id: string }
     | null,
@@ -43,6 +44,24 @@ export const SECTIONS = [
 ] as const;
 
 export type SectionId = (typeof SECTIONS)[number]['id'];
+
+/* Default photo for each section, used when a story has no image of its own.
+   All are free to use (public domain or Creative Commons) and must keep their credit. */
+type Photo = { src: string; caption: string; credit: string; creditUrl: string };
+const commons = (file: string) => `https://commons.wikimedia.org/wiki/File:${encodeURIComponent(file.replace(/ /g, '_'))}`;
+export const SECTION_IMAGES: Record<SectionId, Photo> = {
+  'puerto-rico': { src: 'images/pr-desde-el-aire-2.jpg', caption: 'Puerto Rico visto desde el espacio.', credit: 'Foto: NASA (dominio público)', creditUrl: commons('Puerto Rico From Above (154856 - 36 lrg).jpg') },
+  politica: { src: 'images/capitolio-pr.jpg', caption: 'El Capitolio de Puerto Rico, en San Juan.', credit: 'Foto: Brad Clinesmith, CC BY-SA 2.0, vía Wikimedia Commons', creditUrl: commons('Capitolio de Puerto Rico (28755163211) (cropped).jpg') },
+  gobierno: { src: 'images/la-fortaleza.jpg', caption: 'La Fortaleza, sede del Gobierno de Puerto Rico, en el Viejo San Juan.', credit: 'Foto: vxla, CC BY 2.0, vía Wikimedia Commons', creditUrl: commons('La Fortaleza in San Juan, Puerto Rico.jpg') },
+  'estados-unidos': { src: 'images/casa-blanca.jpg', caption: 'La Casa Blanca, en Washington D.C.', credit: 'Foto: Nishkid64 (dominio público), vía Wikimedia Commons', creditUrl: commons('North Façade White House.JPG') },
+  mundo: { src: 'images/tierra.jpg', caption: 'La Tierra vista desde el espacio.', credit: 'Imagen: NASA (dominio público)', creditUrl: commons('Blue Marble Western Hemisphere.jpg') },
+  economia: { src: 'images/milla-de-oro.jpg', caption: 'La Milla de Oro, centro financiero en Hato Rey.', credit: 'Foto: Jose A. Perez, CC BY 2.0, vía Wikimedia Commons', creditUrl: commons('Rain clouds over Milla de Oro in Hato Rey, Puerto Rico.jpg') },
+  deportes: { src: 'images/estadio-hiram-bithorn.jpg', caption: 'Estadio Hiram Bithorn, en San Juan.', credit: 'Foto: Servicio de Parques Nacionales (dominio público)', creditUrl: commons('Hiram Bithorn Stadium in Puerto Rico in 2013 (exterior).jpg') },
+  entretenimiento: { src: 'images/bellas-artes.jpg', caption: 'Centro de Bellas Artes Luis A. Ferré, en Santurce.', credit: 'Foto: Nortegawiki, CC0, vía Wikimedia Commons', creditUrl: commons('Fachada Centro de Bellas Artes Luis A. Ferré.jpg') },
+  clima: { src: 'images/pr-desde-el-aire.jpg', caption: 'La costa norte de Puerto Rico vista desde el espacio.', credit: 'Foto: NASA (dominio público)', creditUrl: commons('Puerto Rico From Above (154856 - 42 lrg).jpg') },
+  salud: { src: 'images/estetoscopio.jpg', caption: 'Imagen de referencia.', credit: 'Foto: Jacek Halicki, CC BY-SA 4.0, vía Wikimedia Commons', creditUrl: commons('2023 Stetoskop.jpg') },
+  opinion: { src: 'images/periodicos.jpg', caption: 'Imagen de referencia.', credit: 'Foto: Babak Farrokhi, CC BY 2.0, vía Wikimedia Commons', creditUrl: commons('Newspaper Stack (8582618448).jpg') },
+};
 
 export const ICONS: Record<SectionId, string> = {
   'puerto-rico': '<path d="M3 15c3-1 4-4 7-4s4 2 7 1 3-2 4-2M5 19h14"/><circle cx="17" cy="6" r="2"/>',

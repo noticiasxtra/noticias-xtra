@@ -4,6 +4,10 @@ description: "El paquete incluye protección contra el calor para menores en act
 section: gobierno
 place: "San Juan"
 date: 2026-10-01T17:00:00-04:00
+image: "images/la-fortaleza.jpg"
+imageCaption: "La Fortaleza, sede del Gobierno de Puerto Rico, en el Viejo San Juan. Imagen de archivo."
+imageCredit: "Foto: vxla, CC BY 2.0, vía Wikimedia Commons"
+imageCreditUrl: "https://commons.wikimedia.org/wiki/File:La_Fortaleza_in_San_Juan%2C_Puerto_Rico.jpg"
 sources:
   - name: "NotiCel"
     url: "https://noticel.com/noticias/20261001/firma-ocho-medidas-sobre-salud-deporte-autismo-desarrollo-economico-y-asuntos-comunitarios/"

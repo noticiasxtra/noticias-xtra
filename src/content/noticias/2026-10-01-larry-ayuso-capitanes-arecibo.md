@@ -4,6 +4,10 @@ description: "El exjugador, que ayudó a romper una sequía de 46 años sin camp
 section: deportes
 place: "Arecibo"
 date: 2026-10-01T14:48:00-04:00
+image: "images/canasto-baloncesto.jpg"
+imageCaption: "Imagen de referencia."
+imageCredit: "Foto: J.smith, CC BY-SA 4.0, vía Wikimedia Commons"
+imageCreditUrl: "https://commons.wikimedia.org/wiki/File:Basketball_net.jpg"
 sources:
   - name: "NotiCel"
     url: "https://noticel.com/deportes/20261001/larry-ayuso-toma-el-timon-en-los-capitanes-de-arecibo/"

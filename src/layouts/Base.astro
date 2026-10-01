@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import { SITE, SECTIONS, url } from '../lib/site';
+import { getBreaking } from '../lib/breaking';
 
 interface Props {
   title?: string;
@@ -15,6 +16,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site).toString();
 const ogImage = new URL(image ?? url('icon-512.png'), Astro.site).toString();
 const half = Math.ceil(SECTIONS.length / 2);
 const F = SITE.features;
+const breaking = await getBreaking();
 const today = new Date().toLocaleDateString('es-PR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'America/Puerto_Rico' });
 ---
 <!doctype html>
@@ -83,9 +85,9 @@ const today = new Date().toLocaleDateString('es-PR', { weekday: 'long', day: 'nu
       </div>
     </nav>
 
-    {SITE.breaking && (
+    {breaking && (
       <div class="breaking">
-        <div class="wrap"><b>ÚLTIMA HORA</b><a href={url(`noticia/${SITE.breaking.id}`)}>{SITE.breaking.text}</a></div>
+        <div class="wrap"><b>{breaking.label}</b><a href={url(`noticia/${breaking.id}`)}>{breaking.text}</a></div>
       </div>
     )}
 

@@ -4,6 +4,10 @@ description: "Una orden ejecutiva obliga a las agencias a integrarse al nuevo po
 section: estados-unidos
 place: "Washington D.C."
 date: 2026-09-29T18:00:00-04:00
+image: "images/casa-blanca.jpg"
+imageCaption: "La Casa Blanca, en Washington D.C. Imagen de archivo."
+imageCredit: "Foto: Nishkid64 (dominio público), vía Wikimedia Commons"
+imageCreditUrl: "https://commons.wikimedia.org/wiki/File:North_Fa%C3%A7ade_White_House.JPG"
 sources:
   - name: "La Casa Blanca"
     url: "https://www.whitehouse.gov/fact-sheets/2026/09/fact-sheet-president-donald-j-trump-streamlines-access-to-government-services-through-america-gov/"

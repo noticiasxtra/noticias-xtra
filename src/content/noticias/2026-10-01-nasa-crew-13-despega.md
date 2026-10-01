@@ -4,6 +4,10 @@ description: "Dos astronautas de la NASA, uno canadiense y un cosmonauta ruso pa
 section: estados-unidos
 place: "Cabo Cañaveral, Florida"
 date: 2026-10-01T12:30:00-04:00
+image: "images/crew-13-despegue.jpg"
+imageCaption: "El cohete Falcon 9 despega con la tripulación Crew-13 desde Cabo Cañaveral, Florida."
+imageCredit: "Foto: NASA/Joel Kowsky (dominio público)"
+imageCreditUrl: "https://commons.wikimedia.org/wiki/File:NASA%E2%80%99s_SpaceX_Crew-13_Launches.jpg"
 sources:
   - name: "NASA"
     url: "https://www.nasa.gov/news-release/nasas-spacex-crew-13-launches-to-international-space-station/"

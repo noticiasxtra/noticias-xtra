@@ -5,6 +5,10 @@ section: politica
 place: "San Juan"
 date: 2026-10-01T12:02:00-04:00
 featured: true
+image: "images/tribunal-federal-hato-rey.jpg"
+imageCaption: "Tribunal federal Clemente Ruiz Nazario, en Hato Rey. Imagen de archivo."
+imageCredit: "Foto: Jacob Uriel, CC BY 2.5, vía Wikimedia Commons"
+imageCreditUrl: "https://commons.wikimedia.org/wiki/File:Clemente_Ruiz_Nazario_Courthouse.jpg"
 sources:
   - name: "NotiCel"
     url: "https://noticel.com/ultima-hora/20261001/si-hay-fondos-federales-envueltos-nosotros-vamos-a-mirar-dice-jefe-de-fiscalia-federal/"

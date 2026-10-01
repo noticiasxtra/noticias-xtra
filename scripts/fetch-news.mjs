@@ -202,6 +202,7 @@ async function saveStory(story, item, src) {
     `place: ${yaml(story.place || src.place || 'Puerto Rico')}`,
     `date: ${date.toISOString()}`,
     'aiAssisted: true',
+    ...(src.breaking ? ['breaking: true'] : []), // e.g. weather alerts can go in the red ÚLTIMA HORA bar
     'sources:',
     ...sources,
     '---',
