@@ -26,6 +26,7 @@ const noticias = defineCollection({
     sources: z.array(z.object({ name: z.string(), url: z.string().optional() })).default([]),
     related: z.array(z.string()).default([]),
     draft: z.boolean().default(false),
+    correction: z.string().optional(), // shown at the end of the story, e.g. "2 de octubre: se corrigió la cifra de..." 
   }),
 });
 

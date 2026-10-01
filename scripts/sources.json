@@ -24,12 +24,30 @@
     "fullText": true
   },
   {
+    "name": "LUMA Energy",
+    "type": "rss",
+    "url": "https://lumapr.com/news/feed/",
+    "section": "puerto-rico",
+    "place": "Puerto Rico",
+    "fullText": true
+  },
+  {
+    "name": "Departamento de Salud de Puerto Rico",
+    "type": "page",
+    "url": "https://www.salud.pr.gov/",
+    "linkPattern": "^/CMS/\\d{3,}$",
+    "section": "salud",
+    "place": "Puerto Rico"
+  },
+  {
     "name": "Departamento de Justicia de EE.UU. (casos de Puerto Rico)",
     "type": "rss",
     "url": "https://www.justice.gov/news/rss?type=press_release&m=1",
     "section": "puerto-rico",
     "place": "Puerto Rico",
-    "keywords": ["Puerto Rico"],
+    "keywords": [
+      "Puerto Rico"
+    ],
     "fullText": true
   },
   {
@@ -38,7 +56,10 @@
     "url": "https://www.fema.gov/feeds/news.rss",
     "section": "puerto-rico",
     "place": "Puerto Rico",
-    "keywords": ["Puerto Rico", "Virgin Islands"],
+    "keywords": [
+      "Puerto Rico",
+      "Virgin Islands"
+    ],
     "fullText": true
   },
   {
@@ -47,7 +68,9 @@
     "url": "https://news.va.gov/feed/",
     "section": "puerto-rico",
     "place": "Puerto Rico",
-    "keywords": ["Puerto Rico"]
+    "keywords": [
+      "Puerto Rico"
+    ]
   },
   {
     "name": "La Casa Blanca",
@@ -63,7 +86,14 @@
     "url": "https://www.war.gov/DesktopModules/ArticleCS/RSS.ashx?ContentType=1&Site=945&max=10",
     "section": "estados-unidos",
     "place": "Washington D.C.",
-    "keywords": ["Puerto Rico", "Caribbean", "Venezuela", "Cuba", "Southern Command", "SOUTHCOM"],
+    "keywords": [
+      "Puerto Rico",
+      "Caribbean",
+      "Venezuela",
+      "Cuba",
+      "Southern Command",
+      "SOUTHCOM"
+    ],
     "fullText": true,
     "maxPerRun": 1
   },
@@ -82,7 +112,10 @@
     "url": "https://www.fda.gov/about-fda/contact-fda/stay-informed/rss-feeds/recalls/rss.xml",
     "section": "salud",
     "place": "Estados Unidos",
-    "keywords": ["Puerto Rico", "nationwide"],
+    "keywords": [
+      "Puerto Rico",
+      "nationwide"
+    ],
     "maxPerRun": 1
   },
   {

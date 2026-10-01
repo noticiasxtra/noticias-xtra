@@ -1,0 +1,30 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE, url } from '../lib/site';
+---
+<Base title="Quiénes somos" description="Noticias Xtra es un medio digital de Puerto Rico con noticias locales, de Estados Unidos y del mundo.">
+  <main class="wrap" id="main">
+    <div class="page">
+      <h1>Quiénes somos</h1>
+      <p>Noticias Xtra es un medio digital de Puerto Rico. Cada día publicamos noticias de nuestra isla, de Estados Unidos y del mundo, escritas en español sencillo para que cualquier lector las entienda sin esfuerzo.</p>
+
+      <h2>Lo que creemos</h2>
+      <p>Creemos en los valores que han sostenido a Puerto Rico por generaciones: la familia, la fe, el trabajo honrado, el respeto a la ley, la libertad y el buen uso del dinero del pueblo. Esos valores guían los temas a los que damos prioridad y se expresan abiertamente en nuestra sección de <a href={url('seccion/opinion')}>Opinión</a>.</p>
+      <p>En las noticias, nos limitamos a los hechos. Separamos claramente la información de la opinión para que el lector siempre sepa qué está leyendo.</p>
+
+      <h2>De dónde viene nuestra información</h2>
+      <p>Trabajamos con fuentes oficiales y primarias: comunicados de agencias de gobierno, avisos oficiales, documentos públicos y anuncios de entidades públicas en Puerto Rico, Estados Unidos y otros países. Cada noticia indica sus fuentes al final.</p>
+      <p>Usamos inteligencia artificial para preparar borradores, y un editor revisa cada noticia antes de publicarla. <a href={url('ia')}>Así usamos la IA</a>.</p>
+
+      <h2>Nuestras normas</h2>
+      <p>Lee nuestras <a href={url('normas-editoriales')}>normas editoriales y política de correcciones</a> y nuestra <a href={url('privacidad')}>política de privacidad</a>.</p>
+
+      <h2>Contacto</h2>
+      {SITE.email ? (
+        <p>Escríbenos a <a href={`mailto:${SITE.email}`}>{SITE.email}</a>. Si tienes una denuncia, usa la página <a href={url('contacto')}>Envía tu denuncia</a>.</p>
+      ) : (
+        <p>Muy pronto publicaremos nuestro correo de contacto.</p>
+      )}
+    </div>
+  </main>
+</Base>

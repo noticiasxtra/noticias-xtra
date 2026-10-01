@@ -109,7 +109,23 @@ async function readNwsAlerts(src) {
   });
 }
 
-const READERS = { rss: readFeed, 'nws-alerts': readNwsAlerts };
+// Agency page without a feed: collects links to press releases from a listing page.
+// `linkPattern` is a regular expression the link address must match (e.g. "^/CMS/\\d{3,}$").
+// These items have no date, so the first run only records what is already there (see main).
+async function readPage(src) {
+  const html = await (await get(src.url, 'text/html')).text();
+  const pattern = new RegExp(src.linkPattern);
+  const items = [];
+  for (const [, href, inner] of html.matchAll(/<a[^>]+href="([^"#]+)"[^>]*>([\s\S]*?)<\/a>/gi)) {
+    const title = stripHtml(inner).replace(/\s+/g, ' ').trim();
+    if (!pattern.test(href) || title.length < 25) continue;
+    const link = new URL(href, src.url).toString();
+    if (!items.some((i) => i.key === link)) items.push({ key: link, title, link, text: '', published: '', undated: true });
+  }
+  return items.slice(0, 15);
+}
+
+const READERS = { rss: readFeed, 'nws-alerts': readNwsAlerts, page: readPage };
 
 // Optionally load the full page text for more detail (only for official/primary sources)
 async function fullText(link) {
@@ -245,6 +261,14 @@ async function main() {
     try { items = await reader(src); } catch (e) { console.warn(`No se pudo leer ${src.name}: ${e.message}`); continue; }
     console.log(`${src.name}: ${items.length} elementos`);
 
+    // A watched page has no dates: the first time we see it, just remember what's there
+    // so old press releases are never drafted. From then on, only new links are drafted.
+    if (src.type === 'page' && items.length && !items.some((i) => seen.has(i.key))) {
+      items.forEach((i) => seen.add(i.key));
+      console.log('  (primera vez: se registraron los enlaces existentes sin redactar)');
+      continue;
+    }
+
     // Optional free pre-filter: only items that mention one of the source's keywords
     const keywords = (src.keywords || []).map((k) => k.toLowerCase());
     const matches = (item) => !keywords.length || keywords.some((k) => `${item.title} ${item.text}`.toLowerCase().includes(k));
@@ -262,7 +286,7 @@ async function main() {
 
       if (DRY_RUN) { console.log(`  [nuevo] ${item.title}`); continue; }
 
-      if (src.fullText && item.link) {
+      if ((src.fullText || item.undated) && item.link) {
         const page = await fullText(item.link);
         if (page.length > item.text.length) item.text = page;
       }

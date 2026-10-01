@@ -16,6 +16,11 @@ const canonical = new URL(Astro.url.pathname, Astro.site).toString();
 // Local images ('images/x.jpg') need the base path; full URLs are used as-is
 const ogImage = new URL(image ? (image.startsWith('http') ? image : url(image)) : url('icon-512.png'), Astro.site).toString();
 const half = Math.ceil(SECTIONS.length / 2);
+// Desktop header: these sections show next to the logo; the rest go in "Más"
+const PRIMARY = ['puerto-rico', 'estados-unidos', 'mundo', 'politica', 'economia', 'deportes'];
+const primary = SECTIONS.filter((s) => PRIMARY.includes(s.id));
+const more = SECTIONS.filter((s) => !PRIMARY.includes(s.id));
+const moreActive = more.some((s) => s.id === active) || active === 'videos';
 const F = SITE.features;
 const breaking = await getBreaking();
 const today = new Date().toLocaleDateString('es-PR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'America/Puerto_Rico' });
@@ -64,6 +69,17 @@ const today = new Date().toLocaleDateString('es-PR', { weekday: 'long', day: 'nu
         <a href={url()} class="logo" aria-label={`${SITE.name}, ir a portada`}>
           <img src={url('logo.svg')} alt={SITE.name} width="155" height="58" />
         </a>
+        <nav class="nav-inline" aria-label="Secciones">
+          <a href={url()} aria-current={active === 'home' ? 'page' : undefined}>Portada</a>
+          {primary.map((s) => <a href={url(`seccion/${s.id}`)} aria-current={active === s.id ? 'page' : undefined}>{s.name}</a>)}
+          <details class="more">
+            <summary class={moreActive ? 'on' : undefined}>Más</summary>
+            <div class="more-menu">
+              {more.map((s) => <a href={url(`seccion/${s.id}`)} aria-current={active === s.id ? 'page' : undefined}>{s.name}</a>)}
+              {F.videos && <a href={url('videos')} aria-current={active === 'videos' ? 'page' : undefined}>Videos</a>}
+            </div>
+          </details>
+        </nav>
         <div class="spacer"></div>
         <form class="search" role="search" action={url('buscar')} method="get">
           <label for="q" class="sr">Buscar noticias</label>
@@ -107,7 +123,10 @@ const today = new Date().toLocaleDateString('es-PR', { weekday: 'long', day: 'nu
           <ul>
             {F.live && <li><a href={url('en-vivo')}>Ver en vivo</a></li>}
             {F.videos && <li><a href={url('videos')}>Videos</a></li>}
+            <li><a href={url('quienes-somos')}>Quiénes somos</a></li>
+            <li><a href={url('normas-editoriales')}>Normas editoriales y correcciones</a></li>
             <li><a href={url('ia')}>Cómo usamos la IA</a></li>
+            <li><a href={url('privacidad')}>Política de privacidad</a></li>
             <li><a href={url('contacto')}>Envía tu denuncia</a></li>
             <li><a href={url('publicidad')}>Anúnciate con nosotros</a></li>
           </ul>
@@ -118,6 +137,12 @@ const today = new Date().toLocaleDateString('es-PR', { weekday: 'long', day: 'nu
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
     <script>
+      // Close the "Más" menu when clicking elsewhere or pressing Escape
+      const closeMore = (e?: Event) =>
+        document.querySelectorAll('details.more[open]').forEach((d) => { if (!e || !d.contains(e.target as Node)) d.removeAttribute('open'); });
+      document.addEventListener('click', closeMore);
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMore(); });
+
       // Relative times: "Hace 2 horas"
       function relTimes() {
         const now = Date.now();

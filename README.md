@@ -23,7 +23,9 @@ npm run dev      # opens the site at http://localhost:4321/noticias-xtra/
 | What | Where |
 | --- | --- |
 | News stories (one Markdown file each) | `src/content/noticias/` |
-| Site name, breaking banner, sections, videos, weather, demo mode | `src/lib/site.ts` |
+| Site name, newsroom email, sections, section photos, on/off features, demo mode | `src/lib/site.ts` |
+| Red news bar logic | `src/lib/breaking.ts` |
+| Photos (free licenses, credited in each caption) | `public/images/` |
 | Colors, fonts, layout | `src/styles/global.css` |
 | Header, menu, footer | `src/layouts/Base.astro` |
 | Pages (home, article, section, live, etc.) | `src/pages/` |
@@ -79,6 +81,7 @@ Add entries to `scripts/sources.json`. Supported types:
 
 - `rss`: any RSS or Atom feed (agency press releases, municipalities, official blogs). Set `"fullText": true` to read the full page for more detail.
 - `nws-alerts`: National Weather Service alerts (already set up for Puerto Rico).
+- `page`: an agency page with no feed (e.g. Departamento de Salud). Set `linkPattern` to a regular expression that matches the press-release links. The first run only records the links already there; later runs draft new ones.
 
 Optional fields for any source:
 

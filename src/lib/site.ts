@@ -9,8 +9,8 @@ export const SITE = {
   description: 'Noticias de Puerto Rico: gobierno, política, economía, deportes, entretenimiento y clima.',
   // Shows the "sitio de demostración" bar at the top. Set to false when going live.
   demoMode: true,
-  // Where the "Envía tu denuncia" button sends readers' tips (opens their email app).
-  tipEmail: '',
+  // Newsroom email: tips, corrections and privacy questions go here. Empty = pages say "muy pronto".
+  email: '',
   // Red bar: chosen automatically (see src/lib/breaking.ts). Set this only to force a story by hand.
   // `id` is the story's file name without .md, e.g. { text: 'Titular', id: '2026-10-01-mi-noticia' }
   breaking: null as

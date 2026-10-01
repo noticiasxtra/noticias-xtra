@@ -241,3 +241,30 @@ main.wrap.flush{padding-top:0}
 .grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:22px}
 .autogrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:22px}
 @media (max-width:460px){.grid2{grid-template-columns:1fr}}
+
+/* Desktop: section menu on the same row as the logo (the purple bar is used on smaller screens) */
+.nav-inline{display:none}
+@media (min-width:1101px){
+  .top{position:sticky;top:0;z-index:20;background:#fff;box-shadow:0 2px 0 var(--blue)}
+  .top .wrap{gap:14px;padding-top:10px;padding-bottom:10px}
+  .logo img{height:48px}
+  .nav{display:none}
+  .nav-inline{display:flex;align-items:center;gap:2px}
+  .nav-inline>a,.more summary{font-family:var(--head);font-weight:600;font-size:15px;color:var(--purple);padding:9px 11px;border-radius:6px;white-space:nowrap;cursor:pointer}
+  .nav-inline>a:hover,.more summary:hover,.more[open] summary{background:var(--soft)}
+  .nav-inline>a[aria-current="page"],.more summary.on{box-shadow:inset 0 -3px 0 var(--blue)}
+  .more{position:relative}
+  .more summary{list-style:none}
+  .more summary::-webkit-details-marker{display:none}
+  .more summary::after{content:"";display:inline-block;margin-left:6px;border:5px solid transparent;border-top-color:currentColor;border-bottom:0;vertical-align:middle}
+  .more-menu{position:absolute;top:calc(100% + 6px);left:0;z-index:30;display:grid;min-width:210px;padding:6px;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:0 10px 28px rgba(22,22,29,.14)}
+  .more-menu a{padding:9px 12px;border-radius:6px;font-family:var(--head);font-weight:600;font-size:15px;color:var(--ink)}
+  .more-menu a:hover,.more-menu a[aria-current="page"]{background:var(--soft);color:var(--purple)}
+  .search input{width:150px}
+}
+
+/* Policy pages */
+.page h2{font-size:21px;color:var(--purple);margin:28px 0 8px}
+.page ul{padding-left:22px}
+.page li{margin:6px 0}
+.page a{color:var(--purple);text-decoration:underline;text-underline-offset:2px}

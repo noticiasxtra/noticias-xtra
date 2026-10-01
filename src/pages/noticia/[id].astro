@@ -48,6 +48,7 @@ const more = stories
         <p class="caption">{caption}{credit && <> {creditUrl ? <a href={creditUrl} rel="noopener" target="_blank">{credit}</a> : credit}</>}</p>
         <div class="body"><Content /></div>
 
+        {d.correction && <p class="sources"><strong>Corrección:</strong> {d.correction} <a href={url('normas-editoriales')}>Nuestra política de correcciones</a></p>}
         {d.sources.length > 0 && (
           <p class="sources">Fuentes: {d.sources.map((src, i) => (
             <>{i > 0 && ', '}{src.url ? <a href={src.url} rel="noopener" target="_blank">{src.name}</a> : src.name}</>
