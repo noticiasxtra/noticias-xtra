@@ -1,6 +1,7 @@
 :root{
   --purple:#2B1185; --purple-dk:#1E0B5E; --blue:#1F90DA; --red:#D7263D;
   --ink:#16161D; --muted:#5C5F6E; --line:#E2E3EA; --soft:#F3F3F8; --bg:#FFFFFF;
+  --tint:#F4F1FC; /* soft lavender behind the logo */
   --head:"Poppins", "Segoe UI", system-ui, sans-serif;
   --body:"Noto Sans", "Segoe UI", system-ui, sans-serif;
   --wrap:1240px;
@@ -20,7 +21,8 @@ h1,h2,h3,h4{font-family:var(--head)}
 .demo{background:var(--soft);color:var(--muted);font-size:13px;text-align:center;padding:6px 12px;padding-top:calc(6px + env(safe-area-inset-top,0px))}
 
 /* Masthead: logo on the left | date + tip link | search */
-.masthead{background:#fff}
+.masthead{background:var(--tint);border-bottom:1px solid #E6E0F7}
+.masthead .search,.masthead .search-btn{background:#fff;border-color:#DCD5F2}
 .masthead .wrap{display:flex;align-items:center;gap:24px;padding-top:18px;padding-bottom:16px}
 .mh-left{order:1;margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:3px;font-size:13px;color:var(--muted);text-align:right}
 .mh-left a{color:var(--purple);font-weight:600}
@@ -40,18 +42,18 @@ h1,h2,h3,h4{font-family:var(--head)}
 @keyframes pulse{50%{opacity:.25}}
 
 /* Section menu: full width under the masthead, sticks to the top when scrolling */
-.nav{background:#fff;position:sticky;top:0;z-index:20;border-top:1px solid var(--line);border-bottom:3px solid var(--purple)}
+.nav{background:var(--purple);position:sticky;top:0;z-index:20;border-bottom:3px solid var(--blue)}
 .nav .wrap{display:flex;align-items:center;justify-content:flex-start}
 .nav-links{flex:1;display:flex;align-items:center;justify-content:space-between}
 /* All sections on one row, spread from under the logo to the right edge */
-.nav-links>a{flex:none;font-family:var(--head);font-weight:600;font-size:13px;letter-spacing:.02em;text-transform:uppercase;color:var(--ink);padding:13px 8px 11px;white-space:nowrap;border-bottom:3px solid transparent;margin-bottom:-3px}
+.nav-links>a{flex:none;font-family:var(--head);font-weight:600;font-size:13px;letter-spacing:.02em;text-transform:uppercase;color:#fff;opacity:.88;padding:13px 8px 11px;white-space:nowrap;border-bottom:3px solid transparent;margin-bottom:-3px}
 .nav-links>a:first-child{padding-left:0} /* "Portada" lines up under the logo */
 .nav-links>a:last-child{padding-right:0}
-.nav-links>a:hover{color:var(--purple)}
-.nav-links>a[aria-current="page"]{color:var(--purple);border-bottom-color:var(--blue)}
+.nav-links>a:hover{opacity:1}
+.nav-links>a[aria-current="page"]{opacity:1;border-bottom-color:#fff}
 /* Small logo that slides in beside the menu once the big one scrolls away */
 .nav-logo{display:flex;align-items:center;overflow:hidden;max-width:0;opacity:0;transition:max-width .25s,opacity .2s,margin .25s}
-.nav-logo img{display:block;height:30px;width:auto}
+.nav-logo img{display:block;height:30px;width:auto;filter:brightness(0) invert(1)} /* white logo on the purple bar */
 .nav.stuck .nav-logo{max-width:110px;opacity:1;margin-right:14px}
 .nav.stuck{box-shadow:0 4px 14px rgba(22,22,29,.08)}
 @media (prefers-reduced-motion:reduce){.nav-logo{transition:none}}
