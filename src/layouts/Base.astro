@@ -13,7 +13,8 @@ interface Props {
 const { title, description = SITE.description, active, image, article } = Astro.props;
 const fullTitle = title ? `${title} | ${SITE.name}` : `${SITE.name} | ${SITE.tagline}`;
 const canonical = new URL(Astro.url.pathname, Astro.site).toString();
-const ogImage = new URL(image ?? url('icon-512.png'), Astro.site).toString();
+// Local images ('images/x.jpg') need the base path; full URLs are used as-is
+const ogImage = new URL(image ? (image.startsWith('http') ? image : url(image)) : url('icon-512.png'), Astro.site).toString();
 const half = Math.ceil(SECTIONS.length / 2);
 const F = SITE.features;
 const breaking = await getBreaking();
