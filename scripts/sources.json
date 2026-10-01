@@ -1,0 +1,20 @@
+[
+  {
+    "name": "Servicio Nacional de Meteorología (alertas para Puerto Rico)",
+    "type": "nws-alerts",
+    "url": "https://api.weather.gov/alerts/active?area=PR",
+    "section": "clima",
+    "place": "Puerto Rico",
+    "enabled": true
+  },
+  {
+    "name": "EJEMPLO: comunicados de prensa de una agencia",
+    "type": "rss",
+    "url": "https://ejemplo.pr.gov/comunicados/feed",
+    "section": "gobierno",
+    "place": "Puerto Rico",
+    "fullText": true,
+    "enabled": false,
+    "_nota": "Cambia la url por el feed RSS real de la agencia o municipio y pon enabled en true."
+  }
+]

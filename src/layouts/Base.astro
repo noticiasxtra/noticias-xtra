@@ -1,0 +1,199 @@
+---
+import '../styles/global.css';
+import { SITE, SECTIONS, url } from '../lib/site';
+
+interface Props {
+  title?: string;
+  description?: string;
+  active?: string; // nav item to highlight: 'home', a section id, or 'videos'
+  image?: string;
+  article?: { published: Date; section: string };
+}
+const { title, description = SITE.description, active, image, article } = Astro.props;
+const fullTitle = title ? `${title} | ${SITE.name}` : `${SITE.name} | ${SITE.tagline}`;
+const canonical = new URL(Astro.url.pathname, Astro.site).toString();
+const ogImage = new URL(image ?? url('icon-512.png'), Astro.site).toString();
+const half = Math.ceil(SECTIONS.length / 2);
+const today = new Date().toLocaleDateString('es-PR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'America/Puerto_Rico' });
+---
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta name="theme-color" content="#2B1185" />
+    <link rel="icon" type="image/svg+xml" href={url('favicon.svg')} />
+    <link rel="icon" type="image/png" href={url('favicon.png')} />
+    <link rel="apple-touch-icon" href={url('apple-touch-icon.png')} />
+    <link rel="manifest" href={url('manifest.webmanifest')} />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:title" content={title ?? SITE.name} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:type" content={article ? 'article' : 'website'} />
+    <meta property="og:locale" content="es_PR" />
+    {article && <meta property="article:published_time" content={article.published.toISOString()} />}
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Noto+Sans:wght@400;600&display=swap" rel="stylesheet" />
+  </head>
+  <body data-base={url()}>
+    {SITE.demoMode && <div class="demo">Sitio de demostración. Las noticias que aparecen son ejemplos.</div>}
+    <div class="util">
+      <div class="wrap">
+        <span>{today}  |  {SITE.weatherLine}</span>
+        <div class="links">
+          <a href={url('contacto')}>Envía tu denuncia</a>
+          <a href={url('publicidad')}>Anúnciate</a>
+          <a href="#" data-app>Descarga la app</a>
+        </div>
+      </div>
+    </div>
+
+    <header class="top">
+      <div class="wrap">
+        <a href={url()} class="logo" aria-label={`${SITE.name}, ir a portada`}>
+          <img src={url('logo.svg')} alt={SITE.name} width="155" height="58" />
+        </a>
+        <div class="spacer"></div>
+        <form class="search" role="search" action={url('buscar')} method="get">
+          <label for="q" class="sr">Buscar noticias</label>
+          <input id="q" name="q" type="search" placeholder="Buscar noticias" />
+          <button type="submit" aria-label="Buscar">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M20 20l-4-4" /></svg>
+          </button>
+        </form>
+        <a href={url('en-vivo')} class="live-btn"><span class="dot"></span>En vivo</a>
+      </div>
+    </header>
+
+    <nav class="nav" aria-label="Secciones">
+      <div class="wrap">
+        <a href={url()} aria-current={active === 'home' ? 'page' : undefined}>Portada</a>
+        {SECTIONS.map((s) => (
+          <a href={url(`seccion/${s.id}`)} aria-current={active === s.id ? 'page' : undefined}>{s.name}</a>
+        ))}
+        <a href={url('videos')} aria-current={active === 'videos' ? 'page' : undefined}>Videos</a>
+      </div>
+    </nav>
+
+    {SITE.breaking && (
+      <div class="breaking">
+        <div class="wrap"><b>ÚLTIMA HORA</b><a href={url(`noticia/${SITE.breaking.id}`)}>{SITE.breaking.text}</a></div>
+      </div>
+    )}
+
+    <slot />
+
+    <footer>
+      <div class="wrap">
+        <div>
+          <a href={url()} class="flogo" aria-label={SITE.name}><img src={url('logo.svg')} alt="" /></a>
+          <p>Actualidad de Puerto Rico las 24 horas: noticias de tu pueblo, gobierno, deportes, entretenimiento y el tiempo.</p>
+        </div>
+        <div><h4>Secciones</h4><ul>{SECTIONS.slice(0, half).map((s) => <li><a href={url(`seccion/${s.id}`)}>{s.name}</a></li>)}</ul></div>
+        <div><h4>Más secciones</h4><ul>{SECTIONS.slice(half).map((s) => <li><a href={url(`seccion/${s.id}`)}>{s.name}</a></li>)}</ul></div>
+        <div>
+          <h4>{SITE.name}</h4>
+          <ul>
+            <li><a href={url('en-vivo')}>Ver en vivo</a></li>
+            <li><a href={url('videos')}>Videos</a></li>
+            <li><a href={url('ia')}>Cómo usamos la IA</a></li>
+            <li><a href={url('contacto')}>Envía tu denuncia</a></li>
+            <li><a href={url('publicidad')}>Anúnciate con nosotros</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="legal"><div class="wrap">© {new Date().getFullYear()} {SITE.name}.{SITE.demoMode && ' Sitio de demostración con contenido de ejemplo.'}</div></div>
+    </footer>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script>
+      // Relative times: "Hace 2 horas"
+      function relTimes() {
+        const now = Date.now();
+        document.querySelectorAll<HTMLTimeElement>('time[data-rel]').forEach((t) => {
+          const h = Math.floor((now - new Date(t.dateTime).getTime()) / 36e5);
+          if (h < 0) return;
+          if (h < 1) t.textContent = 'Hace minutos';
+          else if (h < 24) t.textContent = `Hace ${h} ${h === 1 ? 'hora' : 'horas'}`;
+        });
+      }
+      relTimes();
+
+      const toastEl = document.getElementById('toast')!;
+      let toastTimer: number | undefined;
+      function toast(msg: string) {
+        toastEl.textContent = msg;
+        toastEl.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = window.setTimeout(() => toastEl.classList.remove('show'), 2600);
+      }
+
+      document.querySelectorAll<HTMLElement>('[data-app]').forEach((b) =>
+        b.addEventListener('click', (e) => { e.preventDefault(); toast('La app estará disponible próximamente.'); }),
+      );
+      document.querySelectorAll<HTMLElement>('[data-play]').forEach((b) =>
+        b.addEventListener('click', () => toast('Video de demostración. Aquí se reproducirá el contenido real.')),
+      );
+
+      // Share buttons
+      document.querySelectorAll<HTMLButtonElement>('[data-share]').forEach((b) =>
+        b.addEventListener('click', async () => {
+          const u = encodeURIComponent(location.href);
+          const t = encodeURIComponent(document.title);
+          const kind = b.dataset.share;
+          if (kind === 'copy') {
+            try { await navigator.clipboard.writeText(location.href); toast('Enlace copiado'); }
+            catch { toast('Copia el enlace desde la barra del navegador'); }
+          }
+          if (kind === 'facebook') window.open(`https://www.facebook.com/sharer/sharer.php?u=${u}`, '_blank', 'noopener');
+          if (kind === 'whatsapp') window.open(`https://wa.me/?text=${t}%20${u}`, '_blank', 'noopener');
+        }),
+      );
+
+      // Newsletter (demo only: nothing is sent yet)
+      document.querySelectorAll<HTMLFormElement>('form[data-newsletter]').forEach((f) => {
+        const input = f.querySelector('input')!;
+        const err = f.querySelector<HTMLElement>('.err')!;
+        input.addEventListener('input', () => (err.hidden = true));
+        f.addEventListener('submit', (e) => {
+          e.preventDefault();
+          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.value.trim())) {
+            err.textContent = 'Escribe un correo válido, por ejemplo nombre@correo.com.';
+            err.hidden = false;
+            input.focus();
+            return;
+          }
+          f.hidden = true;
+          (f.nextElementSibling as HTMLElement).hidden = false;
+        });
+      });
+
+      // Tip form (demo only)
+      const tip = document.querySelector<HTMLFormElement>('form[data-tip]');
+      if (tip) {
+        const msg = tip.querySelector('textarea')!;
+        const err = tip.querySelector<HTMLElement>('.err')!;
+        const ok = tip.querySelector<HTMLElement>('.ok')!;
+        msg.addEventListener('input', () => (err.hidden = true));
+        tip.addEventListener('submit', (e) => {
+          e.preventDefault();
+          if (msg.value.trim().length < 10) {
+            err.textContent = 'Describe lo que está pasando en al menos una oración.';
+            err.hidden = false;
+            msg.focus();
+            return;
+          }
+          tip.reset();
+          ok.hidden = false;
+        });
+      }
+    </script>
+  </body>
+</html>

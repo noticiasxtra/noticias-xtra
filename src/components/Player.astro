@@ -1,0 +1,13 @@
+---
+import { url } from '../lib/site';
+interface Props { live?: boolean }
+const { live = false } = Astro.props;
+---
+<div class="player">
+  {live && <span class="badge live tag">EN VIVO</span>}
+  <div class="bug"><img src={url('logo.svg')} alt="" /></div>
+  <button type="button" data-play>
+    <span class="circle"><svg width="34" height="34" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg></span>
+    {live ? 'Ver transmisión' : 'Reproducir video'}
+  </button>
+</div>

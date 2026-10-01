@@ -1,0 +1,45 @@
+---
+// One story, in different sizes: mini (left column), card (grid), item (list row), big (section lead)
+import Ph from './Ph.astro';
+import Time from './Time.astro';
+import Label from './Label.astro';
+import { url, type Story } from '../lib/site';
+
+interface Props { story: Story; variant?: 'mini' | 'card' | 'item' | 'big' }
+const { story, variant = 'card' } = Astro.props;
+const href = url(`noticia/${story.id}`);
+const d = story.data;
+---
+{variant === 'mini' && (
+  <article class="mini">
+    <a href={href}><Ph sectionId={d.section} image={d.image} place={d.place} /><h3 class="hl">{d.title}</h3></a>
+    <Time date={d.date} />
+  </article>
+)}
+{variant === 'card' && (
+  <article class="card">
+    <a href={href} tabindex="-1" aria-hidden="true"><Ph sectionId={d.section} image={d.image} place={d.place} /></a>
+    <div style="margin-top:10px"><Label story={story} /></div>
+    <a href={href}><h3 class="hl" style="margin-top:0">{d.title}</h3></a>
+    <Time date={d.date} />
+  </article>
+)}
+{variant === 'item' && (
+  <article class="item">
+    <a href={href} tabindex="-1" aria-hidden="true"><Ph sectionId={d.section} image={d.image} place={d.place} /></a>
+    <div>
+      <Label story={story} />
+      <a href={href}><h3 class="hl">{d.title}</h3></a>
+      <Time date={d.date} />
+    </div>
+  </article>
+)}
+{variant === 'big' && (
+  <article class="big">
+    <a href={href} tabindex="-1" aria-hidden="true"><Ph sectionId={d.section} image={d.image} place={d.place} /></a>
+    <div style="margin-top:12px"><Label story={story} /></div>
+    <a href={href}><h3 class="hl" style="margin-top:0">{d.title}</h3></a>
+    <p>{d.description}</p>
+    <Time date={d.date} />
+  </article>
+)}

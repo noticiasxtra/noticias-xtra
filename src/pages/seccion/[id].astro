@@ -1,0 +1,38 @@
+---
+import Base from '../../layouts/Base.astro';
+import StoryCard from '../../components/StoryCard.astro';
+import VideoCard from '../../components/VideoCard.astro';
+import Sidebar from '../../components/Sidebar.astro';
+import { getStories, SECTIONS, VIDEOS, url } from '../../lib/site';
+
+export function getStaticPaths() {
+  return SECTIONS.map((s) => ({ params: { id: s.id }, props: { sec: s } }));
+}
+const { sec } = Astro.props;
+const list = (await getStories()).filter((s) => s.data.section === sec.id);
+const vids = VIDEOS.filter((v) => v.section === sec.id);
+---
+<Base title={sec.name} active={sec.id} description={`Noticias de ${sec.name} en Puerto Rico.`}>
+  <main class="wrap" id="main">
+    <div class="sec-h" style="margin-top:0"><h1 style="font-size:32px;margin:0;color:var(--purple)">{sec.name}</h1></div>
+    <div class="art-grid">
+      <div>
+        {list.length > 0 ? (
+          <div class="block">
+            <StoryCard story={list[0]} variant="big" />
+            <div class="list">{list.slice(1).map((s) => <StoryCard story={s} variant="item" />)}</div>
+          </div>
+        ) : (
+          <div class="empty"><p>Todavía no hay noticias de {sec.name.toLowerCase()} hoy.</p><a class="btn" href={url()}>Ir a la portada</a></div>
+        )}
+        {vids.length > 0 && (
+          <>
+            <div class="sec-h"><h2>Videos de {sec.name}</h2></div>
+            <div class="autogrid">{vids.map((v) => <VideoCard video={v} />)}</div>
+          </>
+        )}
+      </div>
+      <Sidebar />
+    </div>
+  </main>
+</Base>

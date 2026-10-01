@@ -1,0 +1,14 @@
+---
+import Ph from './Ph.astro';
+import Time from './Time.astro';
+import { section, url, type Video } from '../lib/site';
+interface Props { video: Video }
+const { video } = Astro.props;
+---
+<article class="vcard">
+  <a href={url(`video/${video.id}`)}>
+    <Ph sectionId={video.section} duration={video.duration} />
+    <h3 class="hl">{video.title}</h3>
+  </a>
+  <div class="time">{section(video.section).name}, <Time date={video.date} /></div>
+</article>

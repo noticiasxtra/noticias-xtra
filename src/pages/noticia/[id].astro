@@ -1,0 +1,72 @@
+---
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Ph from '../../components/Ph.astro';
+import Label from '../../components/Label.astro';
+import Time from '../../components/Time.astro';
+import StoryCard from '../../components/StoryCard.astro';
+import Sidebar from '../../components/Sidebar.astro';
+import { getStories, section, url, type Story } from '../../lib/site';
+
+export async function getStaticPaths() {
+  const stories = await getStories();
+  return stories.map((story) => ({ params: { id: story.id }, props: { story, stories } }));
+}
+
+interface Props { story: Story; stories: Story[] }
+const { story, stories } = Astro.props;
+const d = story.data;
+const s = section(d.section);
+const { Content } = await render(story);
+const more = stories
+  .filter((x) => x.id !== story.id)
+  .sort((a, b) => Number(b.data.section === d.section) - Number(a.data.section === d.section))
+  .slice(0, 4);
+---
+<Base title={d.title} description={d.description} active={d.section} image={d.image} article={{ published: d.date, section: s.name }}>
+  <main class="wrap" id="main">
+    <div class="art-grid">
+      <article class="art">
+        <div class="crumbs"><a href={url()}>Portada</a> / <a href={url(`seccion/${s.id}`)}>{s.name}</a></div>
+        <Label story={story} />
+        <h1>{d.title}</h1>
+        <p class="dek">{d.description}</p>
+        <div class="byline">
+          <div><strong>{d.author}</strong><br /><Time date={d.date} />, <span class="time">{d.place}</span></div>
+          <div class="share">
+            <button type="button" data-share="facebook">Facebook</button>
+            <button type="button" data-share="whatsapp">WhatsApp</button>
+            <button type="button" data-share="copy">Copiar enlace</button>
+          </div>
+        </div>
+        <Ph sectionId={d.section} image={d.image} place={d.place} alt={d.imageCaption ?? ''} />
+        <p class="caption">{d.imageCaption ?? `${d.place}. Imagen de referencia.`}</p>
+        <div class="body"><Content /></div>
+
+        {d.sources.length > 0 && (
+          <p class="sources">Fuentes: {d.sources.map((src, i) => (
+            <>{i > 0 && ', '}{src.url ? <a href={src.url} rel="noopener" target="_blank">{src.name}</a> : src.name}</>
+          ))}</p>
+        )}
+        {d.aiAssisted ? (
+          <div class="ai"><strong>Cómo se preparó esta noticia</strong>Redactada con ayuda de inteligencia artificial a partir de comunicados y documentos públicos, y revisada por un editor antes de publicarse. <a href={url('ia')}>Cómo usamos la IA</a></div>
+        ) : (
+          <div class="ai"><strong>Reportaje original</strong>Escrito por {d.author}.</div>
+        )}
+
+        <div class="sec-h"><h2>Te puede interesar</h2></div>
+        <div class="grid2">{more.map((x) => <StoryCard story={x} />)}</div>
+      </article>
+      <Sidebar />
+    </div>
+  </main>
+  <script type="application/ld+json" set:html={JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'NewsArticle',
+    headline: d.title,
+    description: d.description,
+    datePublished: d.date.toISOString(),
+    author: { '@type': 'Organization', name: d.author },
+    publisher: { '@type': 'Organization', name: 'Noticias Xtra' },
+  })} />
+</Base>

@@ -1,0 +1,33 @@
+---
+import Base from '../layouts/Base.astro';
+import { url } from '../lib/site';
+---
+<Base title="Buscar">
+  <main class="wrap" id="main">
+    <div class="sec-h" style="margin-top:0"><h1 style="font-size:28px;margin:0;color:var(--purple)" id="searchTitle">Buscar noticias</h1><span class="time" id="searchCount"></span></div>
+    <div class="list" id="results" data-index={url('search-index.json')}></div>
+  </main>
+  <script>
+    const box = document.getElementById('results')!;
+    const q = (new URLSearchParams(location.search).get('q') ?? '').trim();
+    const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
+    (document.getElementById('q') as HTMLInputElement).value = q;
+    if (!q) {
+      box.innerHTML = '<div class="empty"><p>Escribe un pueblo o un tema en el buscador, como “Caguas” o “béisbol”.</p></div>';
+    } else {
+      document.getElementById('searchTitle')!.textContent = `Resultados para “${q}”`;
+      const norm = (s: string) => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      fetch(box.dataset.index!)
+        .then((r) => r.json())
+        .then((items: Array<{ url: string; title: string; description: string; section: string; place: string; date: string; text: string }>) => {
+          const t = norm(q);
+          const hits = items.filter((i) => norm(`${i.title} ${i.description} ${i.place} ${i.text}`).includes(t));
+          document.getElementById('searchCount')!.textContent = `${hits.length} ${hits.length === 1 ? 'noticia' : 'noticias'}`;
+          box.innerHTML = hits.length
+            ? hits.map((i) => `<article class="item" style="grid-template-columns:1fr"><div><span class="badge">${esc(i.section)}</span><a href="${i.url}"><h3 class="hl">${esc(i.title)}</h3></a><p style="margin:0 0 4px;color:var(--muted)">${esc(i.description)}</p><span class="time">${esc(i.place)}</span></div></article>`).join('')
+            : `<div class="empty"><p>No encontramos noticias con “${esc(q)}”. Prueba con un pueblo o un tema, como “Caguas” o “béisbol”.</p></div>`;
+        })
+        .catch(() => { box.innerHTML = '<div class="empty"><p>No se pudo cargar la búsqueda. Recarga la página para intentarlo otra vez.</p></div>'; });
+    }
+  </script>
+</Base>

@@ -1,0 +1,28 @@
+---
+import Base from '../../layouts/Base.astro';
+import Player from '../../components/Player.astro';
+import VideoCard from '../../components/VideoCard.astro';
+import Sidebar from '../../components/Sidebar.astro';
+import Time from '../../components/Time.astro';
+import { VIDEOS, section, type Video } from '../../lib/site';
+
+export function getStaticPaths() {
+  return VIDEOS.map((v) => ({ params: { id: v.id }, props: { video: v } }));
+}
+const { video } = Astro.props as { video: Video };
+---
+<Base title={video.title} active="videos">
+  <main class="wrap" id="main">
+    <div class="art-grid">
+      <div class="art">
+        <Player />
+        <div style="margin-top:14px"><span class="badge">{section(video.section).name}</span></div>
+        <h1 style="font-size:32px">{video.title}</h1>
+        <div class="time"><Time date={video.date} />, duración {video.duration}</div>
+        <div class="sec-h"><h2>Más videos</h2></div>
+        <div class="autogrid">{VIDEOS.filter((v) => v.id !== video.id).map((v) => <VideoCard video={v} />)}</div>
+      </div>
+      <Sidebar newsletter={false} />
+    </div>
+  </main>
+</Base>

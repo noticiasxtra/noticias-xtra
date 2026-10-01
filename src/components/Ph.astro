@@ -1,0 +1,28 @@
+---
+// Photo block. Shows the story image if there is one, otherwise a branded placeholder.
+import { ICONS, section, url, type SectionId } from '../lib/site';
+
+interface Props {
+  sectionId: SectionId;
+  image?: string;
+  place?: string;
+  duration?: string; // when set, renders as a video thumbnail
+  alt?: string;
+}
+const { sectionId, image, place, duration, alt = '' } = Astro.props;
+const s = section(sectionId);
+const src = image ? (image.startsWith('http') ? image : url(image)) : undefined;
+---
+<div class="ph" style={`--c:${s.color}`} aria-hidden={alt ? undefined : 'true'}>
+  {!duration && !src && (
+    <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><Fragment set:html={ICONS[sectionId]} /></svg>
+  )}
+  {src && <img src={src} alt={alt} loading="lazy" decoding="async" />}
+  {duration && (
+    <>
+      <div class="play"><span><svg width="22" height="22" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg></span></div>
+      <span class="dur">{duration}</span>
+    </>
+  )}
+  {place && !duration && <span class="place">{place}</span>}
+</div>
