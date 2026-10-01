@@ -16,7 +16,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site).toString();
 // Local images ('images/x.jpg') need the base path; full URLs are used as-is
 const ogImage = new URL(image ? (image.startsWith('http') ? image : url(image)) : url('icon-512.png'), Astro.site).toString();
 const half = Math.ceil(SECTIONS.length / 2);
-// Desktop header: these sections show next to the logo; the rest go in "Más"
+// Desktop menu: these sections always show; the rest go in "Más" (phones show all, swipeable)
 const PRIMARY = ['puerto-rico', 'estados-unidos', 'mundo', 'politica', 'economia', 'deportes'];
 const primary = SECTIONS.filter((s) => PRIMARY.includes(s.id));
 const more = SECTIONS.filter((s) => !PRIMARY.includes(s.id));
@@ -24,6 +24,7 @@ const moreActive = more.some((s) => s.id === active) || active === 'videos';
 const F = SITE.features;
 const breaking = await getBreaking();
 const today = new Date().toLocaleDateString('es-PR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'America/Puerto_Rico' });
+const todayCap = today.charAt(0).toUpperCase() + today.slice(1);
 ---
 <!doctype html>
 <html lang="es">
@@ -53,25 +54,40 @@ const today = new Date().toLocaleDateString('es-PR', { weekday: 'long', day: 'nu
   </head>
   <body data-base={url()}>
     {SITE.demoMode && <div class="demo">Sitio de demostración. Las noticias que aparecen son ejemplos.</div>}
-    <div class="util">
+    <header class="masthead">
       <div class="wrap">
-        <span>{today}</span>
-        <div class="links">
+        <div class="mh-left">
+          <span class="mh-date">{todayCap}</span>
           <a href={url('contacto')}>Envía tu denuncia</a>
-          <a href={url('publicidad')}>Anúnciate</a>
-          {F.app && <a href="#" data-app>Descarga la app</a>}
         </div>
-      </div>
-    </div>
-
-    <header class="top">
-      <div class="wrap">
         <a href={url()} class="logo" aria-label={`${SITE.name}, ir a portada`}>
           <img src={url('logo.svg')} alt={SITE.name} width="155" height="58" />
         </a>
-        <nav class="nav-inline" aria-label="Secciones">
+        <div class="mh-right">
+          <form class="search" role="search" action={url('buscar')} method="get">
+            <label for="q" class="sr">Buscar noticias</label>
+            <input id="q" name="q" type="search" placeholder="Buscar noticias" />
+            <button type="submit" aria-label="Buscar">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M20 20l-4-4" /></svg>
+            </button>
+          </form>
+          <a href={url('buscar')} class="search-btn" aria-label="Buscar noticias">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M20 20l-4-4" /></svg>
+          </a>
+          {F.live && <a href={url('en-vivo')} class="live-btn"><span class="dot"></span>En vivo</a>}
+        </div>
+      </div>
+    </header>
+
+    <nav class="nav" aria-label="Secciones">
+      <div class="wrap">
+        <a href={url()} class="nav-logo" tabindex="-1" aria-hidden="true"><img src={url('logo.svg')} alt="" width="80" height="30" /></a>
+        <div class="nav-links">
           <a href={url()} aria-current={active === 'home' ? 'page' : undefined}>Portada</a>
-          {primary.map((s) => <a href={url(`seccion/${s.id}`)} aria-current={active === s.id ? 'page' : undefined}>{s.name}</a>)}
+          {SECTIONS.map((s) => (
+            <a href={url(`seccion/${s.id}`)} class={PRIMARY.includes(s.id) ? undefined : 'extra'} aria-current={active === s.id ? 'page' : undefined}>{s.name}</a>
+          ))}
+          {F.videos && <a href={url('videos')} class="extra" aria-current={active === 'videos' ? 'page' : undefined}>Videos</a>}
           <details class="more">
             <summary class={moreActive ? 'on' : undefined}>Más</summary>
             <div class="more-menu">
@@ -79,26 +95,7 @@ const today = new Date().toLocaleDateString('es-PR', { weekday: 'long', day: 'nu
               {F.videos && <a href={url('videos')} aria-current={active === 'videos' ? 'page' : undefined}>Videos</a>}
             </div>
           </details>
-        </nav>
-        <div class="spacer"></div>
-        <form class="search" role="search" action={url('buscar')} method="get">
-          <label for="q" class="sr">Buscar noticias</label>
-          <input id="q" name="q" type="search" placeholder="Buscar noticias" />
-          <button type="submit" aria-label="Buscar">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M20 20l-4-4" /></svg>
-          </button>
-        </form>
-        {F.live && <a href={url('en-vivo')} class="live-btn"><span class="dot"></span>En vivo</a>}
-      </div>
-    </header>
-
-    <nav class="nav" aria-label="Secciones">
-      <div class="wrap">
-        <a href={url()} aria-current={active === 'home' ? 'page' : undefined}>Portada</a>
-        {SECTIONS.map((s) => (
-          <a href={url(`seccion/${s.id}`)} aria-current={active === s.id ? 'page' : undefined}>{s.name}</a>
-        ))}
-        {F.videos && <a href={url('videos')} aria-current={active === 'videos' ? 'page' : undefined}>Videos</a>}
+        </div>
       </div>
     </nav>
 
@@ -137,6 +134,13 @@ const today = new Date().toLocaleDateString('es-PR', { weekday: 'long', day: 'nu
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
     <script>
+      // When the masthead scrolls away, the sticky menu shows a small logo beside the sections
+      const mast = document.querySelector('.masthead');
+      const navBar = document.querySelector('.nav');
+      if (mast && navBar && 'IntersectionObserver' in window) {
+        new IntersectionObserver(([e]) => navBar.classList.toggle('stuck', !e.isIntersecting)).observe(mast);
+      }
+
       // Close the "Más" menu when clicking elsewhere or pressing Escape
       const closeMore = (e?: Event) =>
         document.querySelectorAll('details.more[open]').forEach((d) => { if (!e || !d.contains(e.target as Node)) d.removeAttribute('open'); });
