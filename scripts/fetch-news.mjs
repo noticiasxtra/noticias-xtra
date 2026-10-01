@@ -35,6 +35,8 @@ const MAX_AI_CALLS = Number(process.env.MAX_AI_CALLS || 15);
 const MAX_AGE_HOURS = Number(process.env.MAX_AGE_HOURS || 36);
 const DRY_RUN = Boolean(process.env.DRY_RUN);
 // Same as src/content.config.ts, minus 'opinion' (opinion pieces are written by people, never by this script)
+// Same ids as src/lib/leagues.ts (sports stories get one)
+const LEAGUES = ['bsn', 'doble-a', 'invernal', 'voleibol', 'futbol', 'boxeo', 'selecciones', 'mlb', 'nba'];
 const SECTIONS = ['puerto-rico', 'politica', 'gobierno', 'estados-unidos', 'mundo', 'economia', 'deportes', 'entretenimiento', 'clima', 'salud'];
 const UA = 'NoticiasXtraBot/0.1 (+https://github.com)';
 
@@ -125,7 +127,21 @@ async function readPage(src) {
   return items.slice(0, 15);
 }
 
-const READERS = { rss: readFeed, 'nws-alerts': readNwsAlerts, page: readPage };
+// WordPress sites whose public feed is off but whose posts API is on (e.g. the BSN).
+// `linkBase` rewrites links to the public site: linkBase + post slug.
+async function readWordPress(src) {
+  const api = `${src.url.replace(/\/$/, '')}/wp-json/wp/v2/posts?per_page=10&_fields=id,date_gmt,slug,link,title,content`;
+  const posts = await (await get(api, 'application/json')).json();
+  return posts.map((p) => ({
+    key: `${src.url}#${p.id}`,
+    title: stripHtml(p.title?.rendered || ''),
+    link: src.linkBase ? `${src.linkBase}${p.slug}` : p.link,
+    text: stripHtml(p.content?.rendered || ''),
+    published: p.date_gmt ? `${p.date_gmt}Z` : '',
+  }));
+}
+
+const READERS = { rss: readFeed, 'nws-alerts': readNwsAlerts, page: readPage, wordpress: readWordPress };
 
 // Optionally load the full page text for more detail (only for official/primary sources)
 async function fullText(link) {
@@ -168,7 +184,7 @@ Revisión humana (needsHumanCheck: true):
 - Crímenes, arrestos, accidentes con víctimas, menores de edad o acusaciones contra personas.
 
 Responde SOLO con un objeto JSON válido, sin texto adicional, con esta forma:
-{"skip": false, "skipReason": "", "title": "titular de máximo 110 caracteres", "description": "resumen de 1 o 2 oraciones", "section": "una de: ${SECTIONS.join(', ')}", "place": "pueblo de Puerto Rico, ciudad y estado de EE.UU. o ciudad y país; si no se sabe, 'Puerto Rico', 'Estados Unidos' o el país", "body": "3 a 6 párrafos separados por una línea en blanco", "needsHumanCheck": false, "editorNote": "dudas o datos que el editor debe verificar"}`;
+{"skip": false, "skipReason": "", "title": "titular de máximo 110 caracteres", "description": "resumen de 1 o 2 oraciones", "section": "una de: ${SECTIONS.join(', ')}", "place": "pueblo de Puerto Rico, ciudad y estado de EE.UU. o ciudad y país; si no se sabe, 'Puerto Rico', 'Estados Unidos' o el país", "body": "3 a 6 párrafos separados por una línea en blanco", "league": "solo si la sección es deportes: una de ${LEAGUES.join(', ')}, o vacío si no aplica", "needsHumanCheck": false, "editorNote": "dudas o datos que el editor debe verificar"}`;
 
 async function draftWithClaude(item, src) {
   const prompt = `Fuente: ${src.name}
@@ -215,6 +231,7 @@ async function saveStory(story, item, src) {
     `title: ${yaml(story.title)}`,
     `description: ${yaml(story.description)}`,
     `section: ${section}`,
+    ...(section === 'deportes' && LEAGUES.includes(story.league || src.league) ? [`league: ${story.league || src.league}`] : []),
     `place: ${yaml(story.place || src.place || 'Puerto Rico')}`,
     `date: ${date.toISOString()}`,
     'aiAssisted: true',

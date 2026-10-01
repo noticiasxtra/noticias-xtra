@@ -1,0 +1,13 @@
+---
+// League tabs under the XTRA DEPORTES title (ESPN-style sub-navigation)
+import { LEAGUES } from '../../lib/leagues';
+import { url } from '../../lib/site';
+interface Props { active?: string }
+const { active } = Astro.props;
+---
+<nav class="sp-tabs" aria-label="Ligas">
+  <a href={url('seccion/deportes')} aria-current={!active ? 'page' : undefined}>Todo</a>
+  {LEAGUES.map((l) => (
+    <a href={url(`deportes/${l.id}`)} style={`--lc:${l.color}`} aria-current={active === l.id ? 'page' : undefined}>{l.name}</a>
+  ))}
+</nav>

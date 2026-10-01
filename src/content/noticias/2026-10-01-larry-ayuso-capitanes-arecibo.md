@@ -2,6 +2,7 @@
 title: "Larry Ayuso vuelve a casa: será el nuevo dirigente de los Capitanes de Arecibo"
 description: "El exjugador, que ayudó a romper una sequía de 46 años sin campeonato en 2005, firmó por dos temporadas con opción a una tercera."
 section: deportes
+league: bsn
 place: "Arecibo"
 date: 2026-10-01T14:48:00-04:00
 image: "images/canasto-baloncesto.jpg"

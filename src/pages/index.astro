@@ -24,7 +24,7 @@ const leadRelated = related.length ? related : others.slice(0, 3);
     {lead && <div class="hero">
       <div class="stack left">{left.map((s) => <StoryCard story={s} variant="mini" />)}</div>
       <article class="lead">
-        <a href={url(`noticia/${lead.id}`)} tabindex="-1" aria-hidden="true"><Ph sectionId={lead.data.section} image={lead.data.image} place={lead.data.place} /></a>
+        <a href={url(`noticia/${lead.id}`)} tabindex="-1" aria-hidden="true"><Ph sectionId={lead.data.section} image={lead.data.image} place={lead.data.place} league={lead.data.league} /></a>
         <div style="margin-top:14px"><Label story={lead} /></div>
         <a href={url(`noticia/${lead.id}`)}><h1 class="hl" style="margin-top:0">{lead.data.title}</h1></a>
         <p class="dek">{lead.data.description}</p>

@@ -6,7 +6,7 @@ import Label from '../../components/Label.astro';
 import Time from '../../components/Time.astro';
 import StoryCard from '../../components/StoryCard.astro';
 import Sidebar from '../../components/Sidebar.astro';
-import { getStories, section, url, SECTION_IMAGES, type Story } from '../../lib/site';
+import { getStories, section, url, defaultPhoto, type Story } from '../../lib/site';
 
 export async function getStaticPaths() {
   const stories = await getStories();
@@ -19,7 +19,7 @@ const d = story.data;
 const s = section(d.section);
 const { Content } = await render(story);
 // Photo caption and credit: the story's own photo, or its section's default photo
-const fallback = SECTION_IMAGES[d.section];
+const fallback = defaultPhoto(d.section, d.league);
 const caption = d.image ? d.imageCaption ?? `${d.place}. Imagen de referencia.` : `${fallback.caption} Imagen de archivo.`;
 const credit = d.image ? d.imageCredit : fallback.credit;
 const creditUrl = d.image ? d.imageCreditUrl : fallback.creditUrl;
@@ -44,7 +44,7 @@ const more = stories
             <button type="button" data-share="copy">Copiar enlace</button>
           </div>
         </div>
-        <Ph sectionId={d.section} image={d.image} place={d.place} alt={caption} />
+        <Ph sectionId={d.section} image={d.image} place={d.place} alt={caption} league={d.league} />
         <p class="caption">{caption}{credit && <> {creditUrl ? <a href={creditUrl} rel="noopener" target="_blank">{credit}</a> : credit}</>}</p>
         <div class="body"><Content /></div>
 

@@ -1,0 +1,20 @@
+---
+// Bleacher Report-style feed card: photo on the left, bold headline on the right
+import Ph from '../Ph.astro';
+import Time from '../Time.astro';
+import LeaguePill from './LeaguePill.astro';
+import { url, type Story } from '../../lib/site';
+interface Props { story: Story }
+const { story } = Astro.props;
+const d = story.data;
+const href = url(`noticia/${story.id}`);
+---
+<article class="sp-feed">
+  <a href={href} tabindex="-1" aria-hidden="true"><Ph sectionId={d.section} image={d.image} league={d.league} /></a>
+  <div>
+    <LeaguePill id={d.league} />
+    <a href={href}><h3 class="hl">{d.title}</h3></a>
+    <p>{d.description}</p>
+    <Time date={d.date} />
+  </div>
+</article>

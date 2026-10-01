@@ -25,6 +25,7 @@ npm run dev      # opens the site at http://localhost:4321/noticias-xtra/
 | News stories (one Markdown file each) | `src/content/noticias/` |
 | Site name, newsroom email, sections, section photos, on/off features, demo mode | `src/lib/site.ts` |
 | Red news bar logic | `src/lib/breaking.ts` |
+| Sports leagues and scores | `src/lib/leagues.ts`, `src/data/marcadores.json` |
 | Photos (free licenses, credited in each caption) | `public/images/` |
 | Colors, fonts, layout | `src/styles/global.css` |
 | Header, menu, footer | `src/layouts/Base.astro` |
@@ -81,6 +82,7 @@ Add entries to `scripts/sources.json`. Supported types:
 
 - `rss`: any RSS or Atom feed (agency press releases, municipalities, official blogs). Set `"fullText": true` to read the full page for more detail.
 - `nws-alerts`: National Weather Service alerts (already set up for Puerto Rico).
+- `wordpress`: a WordPress site whose feed is off but whose posts API works (the BSN uses this). Optional `linkBase` points links to the public site.
 - `page`: an agency page with no feed (e.g. Departamento de Salud). Set `linkPattern` to a regular expression that matches the press-release links. The first run only records the links already there; later runs draft new ones.
 
 Optional fields for any source:
@@ -94,6 +96,23 @@ Stick to **primary sources** (government agencies, municipalities, police, utili
 ### Opinión
 
 The `opinion` section is for signed columns and editorials. The AI script never writes there. Create the file by hand with `section: opinion` and `aiAssisted: false`; the article page labels it as opinion.
+
+### Deportes
+
+The Deportes page (`src/pages/seccion/deportes.astro`) has league tabs, a big lead story, headlines, a card for each league, and a page per league at `/deportes/bsn/`, `/deportes/doble-a/`, etc.
+
+- **Leagues** (name, color, description, official site): `src/lib/leagues.ts`. Only add an official site after checking it's real.
+- **Tag a sports story with its league** by adding `league: bsn` (or `doble-a`, `invernal`, `voleibol`, `futbol`, `boxeo`, `selecciones`, `mlb`, `nba`) to the story. The AI does this by itself.
+- **Scores strip:** type games in `src/data/marcadores.json`. It stays hidden while the file is `[]`. Example:
+
+```json
+[
+  { "league": "bsn", "date": "2027-05-10T20:00:00-04:00", "away": "Vaqueros", "home": "Santeros", "awayScore": 88, "homeScore": 92, "status": "final" },
+  { "league": "invernal", "date": "2026-11-12T19:00:00-04:00", "away": "Cangrejeros", "home": "Criollos", "status": "programado" }
+]
+```
+
+`status` is `final`, `en-vivo` or `programado`. Optional `note`, e.g. `"4to parcial"`.
 
 ### Red news bar
 

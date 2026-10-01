@@ -1,6 +1,6 @@
 ---
 // Photo block. Shows the story image if there is one, otherwise a branded placeholder.
-import { ICONS, SECTION_IMAGES, section, url, type SectionId } from '../lib/site';
+import { ICONS, defaultPhoto, section, url, type SectionId } from '../lib/site';
 
 interface Props {
   sectionId: SectionId;
@@ -8,11 +8,12 @@ interface Props {
   place?: string;
   duration?: string; // when set, renders as a video thumbnail
   alt?: string;
+  league?: string; // sports: picks a photo for that sport when there is no image
 }
-const { sectionId, image, place, duration, alt = '' } = Astro.props;
+const { sectionId, image, place, duration, alt = '', league } = Astro.props;
 const s = section(sectionId);
 // Stories without their own photo use their section's default photo (videos keep the placeholder)
-const pic = image ?? (duration ? undefined : SECTION_IMAGES[sectionId]?.src);
+const pic = image ?? (duration ? undefined : defaultPhoto(sectionId, league).src);
 const src = pic ? (pic.startsWith('http') ? pic : url(pic)) : undefined;
 ---
 <div class="ph" style={`--c:${s.color}`} aria-hidden={alt ? undefined : 'true'}>

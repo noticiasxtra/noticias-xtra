@@ -1,0 +1,98 @@
+---
+// Deportes hub: ESPN-style layout in Noticias Xtra colors
+import Base from '../../layouts/Base.astro';
+import Ph from '../../components/Ph.astro';
+import Time from '../../components/Time.astro';
+import LeagueTabs from '../../components/deportes/LeagueTabs.astro';
+import ScoreStrip from '../../components/deportes/ScoreStrip.astro';
+import LeaguePill from '../../components/deportes/LeaguePill.astro';
+import FeedCard from '../../components/deportes/FeedCard.astro';
+import { getStories, url } from '../../lib/site';
+import { LEAGUES } from '../../lib/leagues';
+
+const stories = (await getStories()).filter((s) => s.data.section === 'deportes');
+const lead = stories.find((s) => s.data.featured) ?? stories[0];
+const rest = stories.filter((s) => s !== lead);
+const latestFor = (id: string) => stories.find((s) => s.data.league === id);
+const countFor = (id: string) => stories.filter((s) => s.data.league === id).length;
+const local = LEAGUES.filter((l) => l.local);
+const world = LEAGUES.filter((l) => !l.local);
+---
+<Base title="Deportes" active="deportes" description="Deportes de Puerto Rico: BSN, Doble A, béisbol invernal, voleibol, boxeo, selecciones nacionales y los boricuas en el mundo.">
+  <section class="sp-top">
+    <div class="wrap">
+      <div class="sp-title"><h1>Xtra <span>Deportes</span></h1><p>Lo que pasa en la cancha, el parque y el cuadrilátero</p></div>
+      <LeagueTabs />
+      <ScoreStrip />
+      {lead ? (
+        <div class="sp-hero">
+          <a class="sp-lead" href={url(`noticia/${lead.id}`)}>
+            <Ph sectionId="deportes" image={lead.data.image} league={lead.data.league} />
+            <div class="sp-lead-text">
+              <LeaguePill id={lead.data.league} />
+              <h2>{lead.data.title}</h2>
+              <p>{lead.data.description}</p>
+            </div>
+          </a>
+          <aside class="sp-heads">
+            <h2>Titulares</h2>
+            {rest.length ? (
+              <ol>
+                {rest.slice(0, 6).map((s) => (
+                  <li><LeaguePill id={s.data.league} /><a href={url(`noticia/${s.id}`)}>{s.data.title}</a><Time date={s.data.date} /></li>
+                ))}
+              </ol>
+            ) : <p class="sp-empty">Pronto más titulares.</p>}
+          </aside>
+        </div>
+      ) : (
+        <p class="sp-empty">Muy pronto publicaremos las primeras noticias deportivas.</p>
+      )}
+    </div>
+  </section>
+
+  <main class="wrap" id="main">
+    <div class="sec-h"><h2>Deportes en Puerto Rico</h2></div>
+    <div class="sp-leagues">
+      {local.map((l) => {
+        const last = latestFor(l.id);
+        return (
+          <article class="sp-league" style={`--lc:${l.color}`}>
+            <a class="sp-league-name" href={url(`deportes/${l.id}`)}><strong>{l.name}</strong><span>{l.full}</span></a>
+            <p>{l.about}</p>
+            {last
+              ? <a class="sp-league-last hl" href={url(`noticia/${last.id}`)}>{last.data.title}</a>
+              : <p class="sp-league-last sp-muted">Sin noticias recientes.</p>}
+            <div class="sp-league-links">
+              <a href={url(`deportes/${l.id}`)}>{countFor(l.id) ? `Ver noticias (${countFor(l.id)})` : 'Ver sección'}</a>
+              {'url' in l && l.url && <a href={l.url} rel="noopener" target="_blank">Sitio oficial ↗</a>}
+            </div>
+          </article>
+        );
+      })}
+    </div>
+
+    {rest.length > 0 && (
+      <>
+        <div class="sec-h"><h2>Lo último</h2></div>
+        <div class="sp-feed-list">{rest.map((s) => <FeedCard story={s} />)}</div>
+      </>
+    )}
+
+    <div class="sec-h"><h2>Más allá de la isla</h2></div>
+    <div class="sp-leagues sp-leagues-2">
+      {world.map((l) => {
+        const last = latestFor(l.id);
+        return (
+          <article class="sp-league" style={`--lc:${l.color}`}>
+            <a class="sp-league-name" href={url(`deportes/${l.id}`)}><strong>{l.name}</strong><span>{l.full}</span></a>
+            <p>{l.about}</p>
+            {last
+              ? <a class="sp-league-last hl" href={url(`noticia/${last.id}`)}>{last.data.title}</a>
+              : <p class="sp-league-last sp-muted">Sin noticias recientes.</p>}
+          </article>
+        );
+      })}
+    </div>
+  </main>
+</Base>

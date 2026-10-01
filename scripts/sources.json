@@ -40,6 +40,25 @@
     "place": "Puerto Rico"
   },
   {
+    "name": "Baloncesto Superior Nacional (BSN)",
+    "type": "wordpress",
+    "url": "https://wp.bsnpr.com",
+    "linkBase": "https://www.bsnpr.com/noticias/",
+    "section": "deportes",
+    "league": "bsn",
+    "place": "Puerto Rico"
+  },
+  {
+    "name": "Federación Puertorriqueña de Fútbol",
+    "type": "rss",
+    "url": "https://fpfpuertorico.com/feed/",
+    "section": "deportes",
+    "league": "futbol",
+    "place": "Puerto Rico",
+    "fullText": true,
+    "maxPerRun": 1
+  },
+  {
     "name": "Departamento de Justicia de EE.UU. (casos de Puerto Rico)",
     "type": "rss",
     "url": "https://www.justice.gov/news/rss?type=press_release&m=1",

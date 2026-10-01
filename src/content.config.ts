@@ -1,6 +1,7 @@
 import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
+import { LEAGUE_IDS } from './lib/leagues';
 
 const SECTION_IDS = ['puerto-rico', 'politica', 'gobierno', 'estados-unidos', 'mundo', 'economia', 'deportes', 'entretenimiento', 'clima', 'salud', 'opinion'] as const;
 
@@ -26,6 +27,7 @@ const noticias = defineCollection({
     sources: z.array(z.object({ name: z.string(), url: z.string().optional() })).default([]),
     related: z.array(z.string()).default([]),
     draft: z.boolean().default(false),
+    league: z.enum(LEAGUE_IDS).optional(), // sports stories only: bsn, doble-a, invernal... (src/lib/leagues.ts)
     correction: z.string().optional(), // shown at the end of the story, e.g. "2 de octubre: se corrigió la cifra de..." 
   }),
 });

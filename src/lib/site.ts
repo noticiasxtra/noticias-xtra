@@ -1,4 +1,5 @@
 import { getCollection, type CollectionEntry } from 'astro:content';
+import { league } from './leagues';
 
 /* =========================================================
    SITE SETTINGS: edit these to change the whole site
@@ -62,6 +63,18 @@ export const SECTION_IMAGES: Record<SectionId, Photo> = {
   salud: { src: 'images/estetoscopio.jpg', caption: 'Imagen de referencia.', credit: 'Foto: Jacek Halicki, CC BY-SA 4.0, vía Wikimedia Commons', creditUrl: commons('2023 Stetoskop.jpg') },
   opinion: { src: 'images/periodicos.jpg', caption: 'Imagen de referencia.', credit: 'Foto: Babak Farrokhi, CC BY 2.0, vía Wikimedia Commons', creditUrl: commons('Newspaper Stack (8582618448).jpg') },
 };
+
+/* Sports photos by sport, so a basketball story doesn't get the baseball stadium */
+const SPORT_IMAGES: Record<'basketball' | 'baseball', Photo> = {
+  basketball: { src: 'images/canasto-baloncesto.jpg', caption: 'Imagen de referencia.', credit: 'Foto: J.smith, CC BY-SA 4.0, vía Wikimedia Commons', creditUrl: commons('Basketball net.jpg') },
+  baseball: SECTION_IMAGES.deportes,
+};
+
+/** Default photo for a story without its own: by league (sports) or by section. */
+export function defaultPhoto(sectionId: SectionId, leagueId?: string): Photo {
+  const sport = league(leagueId)?.photo;
+  return sport ? SPORT_IMAGES[sport] : SECTION_IMAGES[sectionId];
+}
 
 export const ICONS: Record<SectionId, string> = {
   'puerto-rico': '<path d="M3 15c3-1 4-4 7-4s4 2 7 1 3-2 4-2M5 19h14"/><circle cx="17" cy="6" r="2"/>',

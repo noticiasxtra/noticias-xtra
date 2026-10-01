@@ -6,7 +6,8 @@ import Sidebar from '../../components/Sidebar.astro';
 import { getStories, SECTIONS, SITE, VIDEOS, url } from '../../lib/site';
 
 export function getStaticPaths() {
-  return SECTIONS.map((s) => ({ params: { id: s.id }, props: { sec: s } }));
+  // Deportes has its own page (seccion/deportes.astro)
+  return SECTIONS.filter((s) => s.id !== 'deportes').map((s) => ({ params: { id: s.id }, props: { sec: s } }));
 }
 const { sec } = Astro.props;
 const list = (await getStories()).filter((s) => s.data.section === sec.id);
