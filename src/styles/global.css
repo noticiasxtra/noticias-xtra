@@ -1,7 +1,6 @@
 :root{
   --purple:#2B1185; --purple-dk:#1E0B5E; --blue:#1F90DA; --red:#D7263D;
   --ink:#16161D; --muted:#5C5F6E; --line:#E2E3EA; --soft:#F3F3F8; --bg:#FFFFFF;
-  --tint:#F4F1FC; /* soft lavender behind the logo */
   --head:"Poppins", "Segoe UI", system-ui, sans-serif;
   --body:"Noto Sans", "Segoe UI", system-ui, sans-serif;
   --wrap:1240px;
@@ -21,8 +20,7 @@ h1,h2,h3,h4{font-family:var(--head)}
 .demo{background:var(--soft);color:var(--muted);font-size:13px;text-align:center;padding:6px 12px;padding-top:calc(6px + env(safe-area-inset-top,0px))}
 
 /* Masthead: logo on the left | date + tip link | search */
-.masthead{background:var(--tint);border-bottom:1px solid #E6E0F7}
-.masthead .search,.masthead .search-btn{background:#fff;border-color:#DCD5F2}
+.masthead{background:#fff}
 .masthead .wrap{display:flex;align-items:center;gap:24px;padding-top:18px;padding-bottom:16px}
 .mh-left{order:1;margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:3px;font-size:13px;color:var(--muted);text-align:right}
 .mh-left a{color:var(--purple);font-weight:600}
