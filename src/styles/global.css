@@ -252,8 +252,19 @@ main.wrap.flush{padding-top:0}
 .autogrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:22px}
 @media (max-width:460px){.grid2{grid-template-columns:1fr}}
 
-/* Tablets and phones: compact masthead, all sections in a swipeable row */
-@media (max-width:1180px){
+/* Mid-size screens (small laptops, side-by-side windows): same layout, tighter menu so all sections fit */
+@media (min-width:1000px) and (max-width:1180px){
+  .logo img{height:58px}
+  .masthead .search input{width:150px}
+  .nav-links>a{font-size:12px;letter-spacing:.01em;padding-left:5px;padding-right:5px}
+  .nav-links>a:first-child{padding-left:0}
+  .nav-links>a:last-child{padding-right:0}
+  .nav.stuck .nav-logo{max-width:80px;margin-right:10px}
+  .nav-logo img{height:24px}
+}
+
+/* Phones and small tablets: compact masthead, all sections in a swipeable row */
+@media (max-width:999px){
   .masthead .wrap{gap:12px;padding-top:12px;padding-bottom:12px}
   .mh-left{display:none}
   .mh-right{margin-left:auto}
