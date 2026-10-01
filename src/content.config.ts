@@ -2,7 +2,7 @@ import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 
-const SECTION_IDS = ['puerto-rico', 'politica', 'gobierno', 'estados-unidos', 'mundo', 'economia', 'deportes', 'entretenimiento', 'clima', 'salud'] as const;
+const SECTION_IDS = ['puerto-rico', 'politica', 'gobierno', 'estados-unidos', 'mundo', 'economia', 'deportes', 'entretenimiento', 'clima', 'salud', 'opinion'] as const;
 
 // Each news story is a Markdown file in src/content/noticias/.
 // The AI script (scripts/fetch-news.mjs) writes files with this same shape.

@@ -38,6 +38,8 @@ export const SECTIONS = [
   { id: 'entretenimiento', name: 'Entretenimiento', color: '#7A2A9C' },
   { id: 'clima', name: 'Clima', color: '#0F7FA6' },
   { id: 'salud', name: 'Salud', color: '#1A6E7A' },
+  // Editorial voice. Written and signed by people, never by the AI script.
+  { id: 'opinion', name: 'Opinión', color: '#5A2A82' },
 ] as const;
 
 export type SectionId = (typeof SECTIONS)[number]['id'];
@@ -53,6 +55,7 @@ export const ICONS: Record<SectionId, string> = {
   entretenimiento: '<path d="M9 18V6l11-2v12"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>',
   clima: '<path d="M7 17h10a4 4 0 0 0 0-8 6 6 0 0 0-11.5 1.5A3.3 3.3 0 0 0 7 17zM9 20l-1 2M13 20l-1 2M17 20l-1 2"/>',
   salud: '<path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/><path d="M9 11h6M12 8v6"/>',
+  opinion: '<path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/>',
 };
 
 /* Sample videos. Later these can come from YouTube or a video host. */

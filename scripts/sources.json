@@ -4,17 +4,118 @@
     "type": "nws-alerts",
     "url": "https://api.weather.gov/alerts/active?area=PR",
     "section": "clima",
-    "place": "Puerto Rico",
-    "enabled": true
+    "place": "Puerto Rico"
   },
   {
-    "name": "EJEMPLO: comunicados de prensa de una agencia",
+    "name": "Centro Nacional de Huracanes (Atlántico)",
     "type": "rss",
-    "url": "https://ejemplo.pr.gov/comunicados/feed",
-    "section": "gobierno",
+    "url": "https://www.nhc.noaa.gov/index-at.xml",
+    "section": "clima",
+    "place": "Atlántico",
+    "maxPerRun": 1
+  },
+  {
+    "name": "Junta de Supervisión Fiscal",
+    "type": "rss",
+    "url": "https://oversightboard.pr.gov/feed/",
+    "section": "economia",
     "place": "Puerto Rico",
+    "fullText": true
+  },
+  {
+    "name": "Departamento de Justicia de EE.UU. (casos de Puerto Rico)",
+    "type": "rss",
+    "url": "https://www.justice.gov/news/rss?type=press_release&m=1",
+    "section": "puerto-rico",
+    "place": "Puerto Rico",
+    "keywords": ["Puerto Rico"],
+    "fullText": true
+  },
+  {
+    "name": "FEMA (Puerto Rico e Islas Vírgenes)",
+    "type": "rss",
+    "url": "https://www.fema.gov/feeds/news.rss",
+    "section": "puerto-rico",
+    "place": "Puerto Rico",
+    "keywords": ["Puerto Rico", "Virgin Islands"],
+    "fullText": true
+  },
+  {
+    "name": "Departamento de Asuntos del Veterano de EE.UU. (Puerto Rico)",
+    "type": "rss",
+    "url": "https://news.va.gov/feed/",
+    "section": "puerto-rico",
+    "place": "Puerto Rico",
+    "keywords": ["Puerto Rico"]
+  },
+  {
+    "name": "La Casa Blanca",
+    "type": "rss",
+    "url": "https://www.whitehouse.gov/news/feed/",
+    "section": "estados-unidos",
+    "place": "Washington D.C.",
+    "fullText": true
+  },
+  {
+    "name": "Departamento de Guerra de EE.UU.",
+    "type": "rss",
+    "url": "https://www.war.gov/DesktopModules/ArticleCS/RSS.ashx?ContentType=1&Site=945&max=10",
+    "section": "estados-unidos",
+    "place": "Washington D.C.",
+    "keywords": ["Puerto Rico", "Caribbean", "Venezuela", "Cuba", "Southern Command", "SOUTHCOM"],
     "fullText": true,
+    "maxPerRun": 1
+  },
+  {
+    "name": "FDA (comunicados)",
+    "type": "rss",
+    "url": "https://www.fda.gov/about-fda/contact-fda/stay-informed/rss-feeds/press-releases/rss.xml",
+    "section": "salud",
+    "place": "Estados Unidos",
+    "fullText": true,
+    "maxPerRun": 1
+  },
+  {
+    "name": "FDA (retiros de productos del mercado)",
+    "type": "rss",
+    "url": "https://www.fda.gov/about-fda/contact-fda/stay-informed/rss-feeds/recalls/rss.xml",
+    "section": "salud",
+    "place": "Estados Unidos",
+    "keywords": ["Puerto Rico", "nationwide"],
+    "maxPerRun": 1
+  },
+  {
+    "name": "NASA",
+    "type": "rss",
+    "url": "https://www.nasa.gov/news-release/feed/",
+    "section": "estados-unidos",
+    "place": "Estados Unidos",
+    "maxPerRun": 1
+  },
+  {
+    "name": "Comisión Europea",
+    "type": "rss",
+    "url": "https://ec.europa.eu/commission/presscorner/api/rss?language=es",
+    "section": "mundo",
+    "place": "Bruselas, Bélgica",
+    "fullText": true,
+    "maxPerRun": 1
+  },
+  {
+    "name": "Servicio Geológico de EE.UU. (terremotos importantes)",
+    "type": "rss",
+    "url": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_week.atom",
+    "section": "mundo",
+    "place": "Mundo",
+    "maxPerRun": 1
+  },
+  {
+    "name": "Noticias ONU",
+    "type": "rss",
+    "url": "https://news.un.org/feed/subscribe/es/news/all/rss.xml",
+    "section": "mundo",
+    "place": "Mundo",
     "enabled": false,
-    "_nota": "Cambia la url por el feed RSS real de la agencia o municipio y pon enabled en true."
+    "_nota": "Desactivada hasta confirmar que las condiciones de uso de la ONU permiten reescribir su contenido."
   }
 ]

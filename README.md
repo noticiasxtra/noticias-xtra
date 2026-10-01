@@ -38,10 +38,11 @@ Create a file in `src/content/noticias/`, for example `2026-10-02-nuevo-parque.m
 ---
 title: "Título de la noticia"
 description: "Resumen de una o dos oraciones."
-section: puerto-rico      # puerto-rico, politica, gobierno, economia, deportes, entretenimiento, clima, salud
+section: puerto-rico      # puerto-rico, politica, gobierno, estados-unidos, mundo, economia, deportes, entretenimiento, clima, salud, opinion
 place: "Caguas"
 date: 2026-10-02T09:00:00-04:00
 aiAssisted: false
+author: "Noticias Xtra"   # optional; this is the default
 featured: false           # true = becomes the main story on the home page
 image: "https://..."      # optional
 sources:
@@ -66,7 +67,8 @@ One-time setup on GitHub:
 
 - **Settings > Secrets and variables > Actions > New repository secret**: `ANTHROPIC_API_KEY` (get one at console.anthropic.com).
 - **Settings > Actions > General > Workflow permissions**: check *Allow GitHub Actions to create and approve pull requests*.
-- Optional variables: `ANTHROPIC_MODEL` (which Claude model to use) and `MAX_ARTICLES` (max stories per run, default 6).
+- Optional variables: `ANTHROPIC_MODEL` (which Claude model to use), `MAX_ARTICLES` (max stories per run, default 6), `MAX_AI_CALLS` (max paid AI requests per run, including discarded drafts, default 15) and `MAX_AGE_HOURS` (ignore source items older than this, default 36).
+- Until `ANTHROPIC_API_KEY` is added, the scheduled runs finish quietly without drafting anything.
 - To test it right away: **Actions > Noticias con IA > Run workflow**.
 
 Test locally without using the AI: `DRY_RUN=1 npm run news`
@@ -78,7 +80,17 @@ Add entries to `scripts/sources.json`. Supported types:
 - `rss`: any RSS or Atom feed (agency press releases, municipalities, official blogs). Set `"fullText": true` to read the full page for more detail.
 - `nws-alerts`: National Weather Service alerts (already set up for Puerto Rico).
 
+Optional fields for any source:
+
+- `"keywords": ["Puerto Rico"]`: only items that mention one of these words go to the AI (free filter for busy national feeds).
+- `"maxPerRun": 1`: max stories from this source per run (default 2), so one source can't fill every slot.
+- `"enabled": false`: keep the source in the list but skip it.
+
 Stick to **primary sources** (government agencies, municipalities, police, utilities, weather service, official press releases). Rewriting other news outlets' articles can cause copyright problems and hurts search ranking.
+
+### Opinión
+
+The `opinion` section is for signed columns and editorials. The AI script never writes there. Create the file by hand with `section: opinion` and `aiAssisted: false`; the article page labels it as opinion.
 
 ## RSS feed
 
