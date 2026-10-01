@@ -28,7 +28,7 @@ const more = stories
   .sort((a, b) => Number(b.data.section === d.section) - Number(a.data.section === d.section))
   .slice(0, 4);
 ---
-<Base title={d.title} description={d.description} active={d.section} image={d.image} article={{ published: d.date, section: s.name }}>
+<Base title={d.title} description={d.description} active={d.section} image={d.image ?? fallback.src} article={{ published: d.date, section: s.name }}>
   <main class="wrap" id="main">
     <div class="art-grid">
       <article class="art">
