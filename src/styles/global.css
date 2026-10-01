@@ -41,12 +41,13 @@ h1,h2,h3,h4{font-family:var(--head)}
 
 /* Section menu: full width under the masthead, sticks to the top when scrolling */
 .nav{background:#fff;position:sticky;top:0;z-index:20;border-top:1px solid var(--line);border-bottom:3px solid var(--purple)}
-.nav .wrap{display:flex;align-items:center;justify-content:center}
+.nav .wrap{display:flex;align-items:center;justify-content:flex-start}
 .nav-links{display:flex;align-items:center}
 .nav-links>a,.more summary{flex:none;font-family:var(--head);font-weight:600;font-size:14px;letter-spacing:.03em;text-transform:uppercase;color:var(--ink);padding:13px 13px 11px;white-space:nowrap;border-bottom:3px solid transparent;margin-bottom:-3px;cursor:pointer}
 .nav-links>a:hover,.more summary:hover,.more[open] summary{color:var(--purple)}
 .nav-links>a[aria-current="page"],.more summary.on{color:var(--purple);border-bottom-color:var(--blue)}
 .nav-links .extra{display:none}
+.nav-links>a:first-child{padding-left:0} /* "Portada" lines up under the logo */
 /* Small logo that slides in beside the menu once the big one scrolls away */
 .nav-logo{display:flex;align-items:center;overflow:hidden;max-width:0;opacity:0;transition:max-width .25s,opacity .2s,margin .25s}
 .nav-logo img{display:block;height:30px;width:auto}
@@ -264,7 +265,7 @@ main.wrap.flush{padding-top:0}
   .logo img{height:50px}
   .mh-right .search{display:none}
   .search-btn{display:grid}
-  .nav .wrap{justify-content:flex-start;overflow-x:auto;scrollbar-width:none;padding:0 6px}
+  .nav .wrap{overflow-x:auto;scrollbar-width:none}
   .nav .wrap::-webkit-scrollbar{display:none}
   .nav-links .extra{display:block}
   .more,.nav-logo{display:none}
