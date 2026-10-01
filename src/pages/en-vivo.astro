@@ -1,20 +1,24 @@
 ---
 import Base from '../layouts/Base.astro';
 import Player from '../components/Player.astro';
-import { SCHEDULE } from '../lib/site';
+import { SCHEDULE, SITE, url } from '../lib/site';
 ---
 <Base title="En vivo" description="Mira la transmisión en vivo de Noticias Xtra.">
   <main class="wrap" id="main">
-    <div class="art-grid">
-      <div class="art">
-        <Player live />
-        <h1 style="font-size:32px;margin-top:16px">Noticias al Mediodía</h1>
-        <p class="dek">Transmisión en vivo con las noticias más importantes de Puerto Rico.</p>
+    {SITE.features.live ? (
+      <div class="art-grid">
+        <div class="art">
+          <Player live />
+          <h1 style="font-size:32px;margin-top:16px">Noticias al Mediodía</h1>
+          <p class="dek">Transmisión en vivo con las noticias más importantes de Puerto Rico.</p>
+        </div>
+        <aside>
+          <h2 class="panel-h">Programación de hoy</h2>
+          <ul class="sched">{SCHEDULE.map((x) => <li class={x.now ? 'now' : ''}><b>{x.at}</b><span>{x.show}{x.now && ' (ahora)'}</span></li>)}</ul>
+        </aside>
       </div>
-      <aside>
-        <h2 class="panel-h">Programación de hoy</h2>
-        <ul class="sched">{SCHEDULE.map((x) => <li class={x.now ? 'now' : ''}><b>{x.at}</b><span>{x.show}{x.now && ' (ahora)'}</span></li>)}</ul>
-      </aside>
-    </div>
+    ) : (
+      <div class="empty"><p>Muy pronto podrás ver nuestras transmisiones en vivo.</p><a class="btn" href={url()}>Ir a la portada</a></div>
+    )}
   </main>
 </Base>

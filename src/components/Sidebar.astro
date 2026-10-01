@@ -1,18 +1,20 @@
 ---
-import { getStories, mostRead, url } from '../lib/site';
+import { getStories, mostRead, url, SITE } from '../lib/site';
 interface Props { newsletter?: boolean }
 const { newsletter = true } = Astro.props;
 const top = mostRead(await getStories());
 ---
 <aside class="right">
-  <div>
-    <h2 class="panel-h">Lo más leído</h2>
-    <ol class="ranked">
-      {top.map((s) => <li><a href={url(`noticia/${s.id}`)} class="hl">{s.data.title}</a></li>)}
-    </ol>
-  </div>
+  {top.length > 0 && (
+    <div>
+      <h2 class="panel-h">Lo más destacado</h2>
+      <ol class="ranked">
+        {top.map((s) => <li><a href={url(`noticia/${s.id}`)} class="hl">{s.data.title}</a></li>)}
+      </ol>
+    </div>
+  )}
   <div class="ad">Espacio publicitario<br />300 × 250</div>
-  {newsletter && (
+  {newsletter && SITE.features.newsletter && (
     <div class="newsletter">
       <h3>Boletín Xtra</h3>
       <p>Las noticias más importantes de Puerto Rico, cada mañana en tu correo.</p>

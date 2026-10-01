@@ -4,9 +4,10 @@ import Player from '../../components/Player.astro';
 import VideoCard from '../../components/VideoCard.astro';
 import Sidebar from '../../components/Sidebar.astro';
 import Time from '../../components/Time.astro';
-import { VIDEOS, section, type Video } from '../../lib/site';
+import { SITE, VIDEOS, section, type Video } from '../../lib/site';
 
 export function getStaticPaths() {
+  if (!SITE.features.videos) return [];
   return VIDEOS.map((v) => ({ params: { id: v.id }, props: { video: v } }));
 }
 const { video } = Astro.props as { video: Video };

@@ -30,7 +30,7 @@ const MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-5-5';
 const API_URL = process.env.ANTHROPIC_API_URL || 'https://api.anthropic.com/v1/messages';
 const MAX_ARTICLES = Number(process.env.MAX_ARTICLES || 6);
 const DRY_RUN = Boolean(process.env.DRY_RUN);
-const SECTIONS = ['puerto-rico', 'politica', 'gobierno', 'economia', 'deportes', 'entretenimiento', 'clima', 'salud'];
+const SECTIONS = ['puerto-rico', 'politica', 'gobierno', 'estados-unidos', 'mundo', 'economia', 'deportes', 'entretenimiento', 'clima', 'salud'];
 const UA = 'NoticiasXtraBot/0.1 (+https://github.com)';
 
 /* ---------------- helpers ---------------- */

@@ -9,17 +9,30 @@ export const SITE = {
   description: 'Noticias de Puerto Rico: gobierno, política, economía, deportes, entretenimiento y clima.',
   // Shows the "sitio de demostración" bar at the top. Set to false when going live.
   demoMode: true,
-  weatherLine: 'San Juan 31°',
+  // Where the "Envía tu denuncia" button sends readers' tips (opens their email app).
+  tipEmail: '',
   // Breaking news banner. Set to null to hide it. `id` is the story's file name without .md
-  breaking: { text: 'Aviso de inundaciones para la zona este hasta las 6:00 p.m.', id: 'aviso-inundaciones' } as
+  breaking: null as
     | { text: string; id: string }
     | null,
+  // Turn parts of the site on (true) or off (false). Off parts are hidden everywhere.
+  features: {
+    videos: false, // video section and pages (VIDEOS below are samples)
+    live: false, // "En vivo" button and TV schedule (SCHEDULE below is a sample)
+    weather: false, // town temperatures (TOWNS below are samples); a link to the official forecast shows instead
+    newsletter: false, // newsletter sign-up box (needs an email service first)
+    app: false, // "Descarga la app" link and banner
+  },
+  // Official National Weather Service forecast for Puerto Rico
+  forecastUrl: 'https://www.weather.gov/sju/',
 };
 
 export const SECTIONS = [
   { id: 'puerto-rico', name: 'Puerto Rico', color: '#2B1185' },
   { id: 'politica', name: 'Política', color: '#3B1FA3' },
   { id: 'gobierno', name: 'Gobierno', color: '#244C9A' },
+  { id: 'estados-unidos', name: 'Estados Unidos', color: '#1B3A7A' },
+  { id: 'mundo', name: 'Mundo', color: '#2E5E8C' },
   { id: 'economia', name: 'Economía', color: '#14708F' },
   { id: 'deportes', name: 'Deportes', color: '#1F90DA' },
   { id: 'entretenimiento', name: 'Entretenimiento', color: '#7A2A9C' },
@@ -33,6 +46,8 @@ export const ICONS: Record<SectionId, string> = {
   'puerto-rico': '<path d="M3 15c3-1 4-4 7-4s4 2 7 1 3-2 4-2M5 19h14"/><circle cx="17" cy="6" r="2"/>',
   politica: '<path d="M4 20h16M6 20v-8M10 20v-8M14 20v-8M18 20v-8M3 12l9-7 9 7z"/>',
   gobierno: '<path d="M5 21V8l7-5 7 5v13M9 21v-6h6v6M3 21h18"/>',
+  'estados-unidos': '<path d="M5 21V4M5 4h12l-2 4 2 4H5"/>',
+  mundo: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>',
   economia: '<path d="M4 19V5M4 19h16M7 15l4-4 3 3 5-6"/>',
   deportes: '<circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4c3 3 3 13 0 16M12 4c-3 3-3 13 0 16"/>',
   entretenimiento: '<path d="M9 18V6l11-2v12"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>',

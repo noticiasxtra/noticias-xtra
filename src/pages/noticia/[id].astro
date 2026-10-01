@@ -32,7 +32,7 @@ const more = stories
         <h1>{d.title}</h1>
         <p class="dek">{d.description}</p>
         <div class="byline">
-          <div><strong>{d.author}</strong><br /><Time date={d.date} />, <span class="time">{d.place}</span></div>
+          <div><strong>Por {d.author}</strong><br /><Time date={d.date} />, <span class="time">{d.place}</span></div>
           <div class="share">
             <button type="button" data-share="facebook">Facebook</button>
             <button type="button" data-share="whatsapp">WhatsApp</button>
@@ -49,7 +49,7 @@ const more = stories
           ))}</p>
         )}
         {d.aiAssisted ? (
-          <div class="ai"><strong>Cómo se preparó esta noticia</strong>Redactada con ayuda de inteligencia artificial a partir de comunicados y documentos públicos, y revisada por un editor antes de publicarse. <a href={url('ia')}>Cómo usamos la IA</a></div>
+          <div class="ai"><strong>Cómo se preparó esta noticia</strong>Redactada con ayuda de inteligencia artificial a partir de las fuentes citadas, y revisada por un editor antes de publicarse. <a href={url('ia')}>Cómo usamos la IA</a></div>
         ) : (
           <div class="ai"><strong>Reportaje original</strong>Escrito por {d.author}.</div>
         )}
