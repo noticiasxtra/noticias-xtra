@@ -3,7 +3,8 @@
   --ink:#16161D; --muted:#5C5F6E; --line:#E2E3EA; --soft:#F3F3F8; --bg:#FFFFFF;
   --head:"Poppins", "Segoe UI", system-ui, sans-serif;
   --body:"Noto Sans", "Segoe UI", system-ui, sans-serif;
-  --wrap:1240px;
+  --wrap:2560px; /* the site fills the screen, up to very large 2560px monitors */
+  --gutter:clamp(16px,2.4vw,40px); /* side margins grow with the screen */
   color-scheme:light;
 }
 *,*::before,*::after{box-sizing:border-box}
@@ -12,7 +13,7 @@ a{color:inherit;text-decoration:none}
 a:hover .hl,a:focus-visible .hl{color:var(--purple);text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px}
 :focus-visible{outline:3px solid var(--blue);outline-offset:2px}
 button{font:inherit;cursor:pointer}
-.wrap{max-width:var(--wrap);margin:0 auto;padding:0 20px}
+.wrap{max-width:var(--wrap);margin:0 auto;padding:0 var(--gutter)}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 h1,h2,h3,h4{font-family:var(--head)}
 
@@ -60,7 +61,7 @@ h1,h2,h3,h4{font-family:var(--head)}
 
 /* Breaking */
 .breaking{background:var(--red);color:#fff}
-.breaking .wrap{display:flex;align-items:stretch;gap:0;padding:0 20px}
+.breaking .wrap{display:flex;align-items:stretch;gap:0}
 .breaking b{font-family:var(--head);font-weight:800;font-size:14px;background:#A9172B;padding:10px 14px;display:flex;align-items:center;flex:none}
 .breaking a{display:flex;align-items:center;padding:10px 14px;font-weight:600;font-size:16px}
 .breaking a:hover{text-decoration:underline}
@@ -137,7 +138,7 @@ main.wrap{padding-top:24px;padding-bottom:48px}
 .store small{display:block;font-size:11px;opacity:.75}
 
 /* Article */
-.art-grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:40px}
+.art-grid{display:grid;grid-template-columns:minmax(0,1fr) clamp(300px,19vw,360px);gap:40px}
 .crumbs{font-size:14px;color:var(--muted);margin-bottom:12px}
 .crumbs a{color:var(--purple);font-weight:600}
 .art h1{font-size:clamp(30px,4vw,46px);line-height:1.1;letter-spacing:-.01em;margin:6px 0 12px;font-weight:800}
@@ -418,7 +419,7 @@ main.wrap.flush{padding-top:0}
 .ys-promo span{color:#E3DDFb;font-size:14px}
 .ys-promo .ys-promo-btn{margin-left:auto;flex:none;background:#fff;color:var(--purple);font-family:var(--head);font-weight:700;font-size:15px;padding:10px 18px;border-radius:999px}
 .ys-promo:hover .ys-promo-btn{background:var(--soft)}
-.ys-grid{display:grid;grid-template-columns:230px minmax(0,1fr) 300px;grid-template-areas:"left main right";gap:18px;align-items:start}
+.ys-grid{display:grid;grid-template-columns:clamp(230px,14vw,280px) minmax(0,1fr) clamp(300px,19vw,360px);grid-template-areas:"left main right";gap:18px;align-items:start}
 .ys-main{grid-area:main;display:grid;gap:18px}
 .ys-left{grid-area:left;display:grid;gap:18px}
 .ys-right{grid-area:right;display:grid;gap:18px}
@@ -687,7 +688,7 @@ a.sp-games-teams:hover span:first-child,a.sp-games-teams:hover span:last-child{c
 .lu-list a:hover{color:var(--purple);text-decoration:underline}
 
 /* Home page layout: main column + right column for the full height */
-.home-grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:32px;padding-top:24px;padding-bottom:48px}
+.home-grid{display:grid;grid-template-columns:minmax(0,1fr) clamp(300px,19vw,360px);gap:32px;padding-top:24px;padding-bottom:48px}
 .home-main{min-width:0}
 .home-hero{display:grid;grid-template-columns:1fr 2.2fr;gap:24px}
 .home-hero .left{order:-1}
@@ -701,7 +702,7 @@ a.sp-games-teams:hover span:first-child,a.sp-games-teams:hover span:last-child{c
 
 /* Ad placeholders (src/components/AdSlot.astro) */
 .ad-slot{display:flex;flex-direction:column;align-items:center;margin:28px auto;max-width:100%}
-.right .ad-slot{margin:0}
+.right .ad-slot{margin:0;align-self:center}
 .ad-label{font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#9A9CA8;margin-bottom:4px}
 .ad-box{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;max-width:100%;text-align:center;color:var(--muted);border:1px dashed #C4C6D3;border-radius:4px;background:repeating-linear-gradient(135deg,#F5F5F9 0 14px,#EFEFF5 14px 28px)}
 .ad-box strong{font-family:var(--head);font-size:14px;color:#6B6E7E}
