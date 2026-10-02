@@ -2,6 +2,7 @@
 // Juegos Xtra: games page. A compact banner featuring the daily crossword, then every game together.
 import Base from '../../layouts/Base.astro';
 import AdSlot from '../../components/AdSlot.astro';
+import GameBoard from '../../components/GameBoard.astro';
 import { url } from '../../lib/site';
 import { GAMES, FEATURED_GAME } from '../../lib/games';
 import { RULES, LEVELS, DAILY_BONUS } from '../../lib/points';
@@ -54,8 +55,9 @@ const rest = GAMES.filter((g) => g.id !== featured.id);
           </details>
         </div>
       </div>
-      <p class="jp-note">Tus puntos se guardan en este dispositivo. Muy pronto, con tu cuenta, habrá tabla de líderes de Puerto Rico.</p>
+      <p class="jp-note">Tus puntos se guardan en este dispositivo. Con las cuentas, la tabla de líderes será de jugadores reales de Puerto Rico.</p>
     </section>
+    <GameBoard title="Líderes de Juegos Xtra" />
 
     <div class="jh-grid jh-all">
       {rest.map((g) => (

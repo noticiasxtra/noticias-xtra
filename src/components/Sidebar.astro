@@ -1,17 +1,18 @@
 ---
-// Right column: Clima, Tendencias (numbered photos), ad, Lo último, newsletter, and a tall ad
+// Right column: optional live video box (section pages, see SECTION_LIVE), Clima, Tendencias (numbered photos), ad, Lo último, newsletter, and a tall ad
 // that stays in view while scrolling so the column never leaves an empty gap.
 import Ph from './Ph.astro';
 import Time from './Time.astro';
 import WeatherBox from './WeatherBox.astro';
 import AdSlot from './AdSlot.astro';
 import DominoBox from './DominoBox.astro';
+import LiveBox from './LiveBox.astro';
 import HomeExtras from './HomeExtras.astro';
 import { getStories, mostRead, url, SITE } from '../lib/site';
 import { getBreaking } from '../lib/breaking';
 import foro from '../data/foro.json';
-interface Props { newsletter?: boolean; foro?: boolean; extras?: boolean }
-const { newsletter = true, foro: showForo = false, extras = false } = Astro.props;
+interface Props { newsletter?: boolean; foro?: boolean; extras?: boolean; live?: string }
+const { newsletter = true, foro: showForo = false, extras = false, live } = Astro.props;
 // Small Foro Xtra teaser (home page): the three most-voted sample topics
 const foroTop = [...foro].sort((a, b) => b.votes - a.votes).slice(0, 3);
 const stories = await getStories();
@@ -24,6 +25,7 @@ const latest = stories.filter((s) => !top.includes(s)).slice(0, 5);
 const hhmm = (d: Date) => d.toLocaleTimeString('es-PR', { hour: 'numeric', minute: '2-digit', timeZone: 'America/Puerto_Rico' });
 ---
 <aside class="right">
+  {live && <LiveBox source={live} />}
   <WeatherBox />
   {top.length > 0 && (
     <section class="tr-box">

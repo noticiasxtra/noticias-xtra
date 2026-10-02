@@ -1,6 +1,7 @@
 ---
 // En vivo: live YouTube feeds on the left, the latest news on the right.
-// Priority (LIVE_SOURCES in src/lib/site.ts): NotiCel → Cámara de Representantes de PR → Casa Blanca. Each time the site
+// Priority (LIVE_SOURCES in src/lib/site.ts): NotiCel → Cámara de Representantes de PR → Casa Blanca → Gobierno de PR →
+// Senado de PR → NASA. Each time the site
 // rebuilds (every 15 minutes) every channel is checked; the first one that is live plays automatically. If none is live,
 // NotiCel's newest video plays. Readers can also switch channels with the buttons under the video.
 // Tapping a story opens it inside the right column, so the video keeps playing while the reader reads.
@@ -8,23 +9,12 @@ import Base from '../layouts/Base.astro';
 import Ph from '../components/Ph.astro';
 import Time from '../components/Time.astro';
 import { getStories, section, url, LIVE_SOURCES } from '../lib/site';
+import { checkLive, embedFor } from '../lib/live';
 
 const stories = (await getStories()).slice(0, 20);
-const params = 'autoplay=1&mute=1&rel=0&playsinline=1';
-const unescape = (t: string) => t.replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/&#39;/g, "'");
-
-// Is this channel live right now? (a running stream, not a scheduled "waiting room" or an ended stream)
-async function check(channel: string): Promise<{ id: string; title: string } | null> {
-  try {
-    const html = await (await fetch(`https://www.youtube.com/channel/${channel}/live`, { headers: { 'User-Agent': 'Mozilla/5.0', 'Accept-Language': 'es' }, signal: AbortSignal.timeout(10000) })).text();
-    const id = html.match(/<link rel="canonical" href="https:\/\/www\.youtube\.com\/watch\?v=([\w-]{11})"/)?.[1];
-    const running = /"isLive":true/.test(html) && !/"status":"LIVE_STREAM_OFFLINE"/.test(html) && !/"isUpcoming":true/.test(html);
-    return id && running ? { id, title: unescape(html.match(/<meta name="title" content="([^"]*)"/)?.[1] ?? '') } : null;
-  } catch { return null; }
-}
 const sources = await Promise.all(LIVE_SOURCES.map(async (src) => {
-  const live = await check(src.channel);
-  return { ...src, live, src: live ? `https://www.youtube-nocookie.com/embed/${live.id}?${params}` : `https://www.youtube-nocookie.com/embed/videoseries?list=UU${src.channel.slice(2)}&${params}` };
+  const live = await checkLive(src.channel);
+  return { ...src, live, src: embedFor(src.channel, live) };
 }));
 const current = sources.find((x) => x.live) ?? sources[0];
 const title = current.live ? current.live.title || `${current.name} en vivo` : `Ningún canal está transmitiendo ahora`;

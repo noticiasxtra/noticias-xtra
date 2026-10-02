@@ -5,7 +5,7 @@ import VideoCard from '../../components/VideoCard.astro';
 import Sidebar from '../../components/Sidebar.astro';
 import AdSlot from '../../components/AdSlot.astro';
 import GamesTeaser from '../../components/GamesTeaser.astro';
-import { getStories, SECTIONS, SITE, VIDEOS, url } from '../../lib/site';
+import { getStories, SECTIONS, SITE, VIDEOS, url, SECTION_LIVE } from '../../lib/site';
 
 export function getStaticPaths() {
   // Deportes, Entretenimiento, Clima, Economía and Opinión have their own pages in this folder
@@ -46,7 +46,7 @@ const vids = SITE.features.videos ? VIDEOS.filter((v) => v.section === sec.id) :
           </>
         )}
       </div>
-      <Sidebar />
+      <Sidebar live={SECTION_LIVE[sec.id]} />
     </div>
   </main>
 </Base>

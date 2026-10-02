@@ -8,6 +8,7 @@ export type PointsState = {
   log: Array<{ t: number; game: string; pts: number; why: string }>;
   once: Record<string, 1>;
   days: string[]; // YYYY-MM-DD (Puerto Rico) days with points
+  byDay: Record<string, Record<string, number>>; // day → game → points that day (last 8 days)
 };
 
 const KEY = 'nx-points';
@@ -36,9 +37,9 @@ export const today = () => new Date().toLocaleDateString('en-CA', { timeZone: 'A
 export function getPoints(): PointsState {
   try {
     const s = JSON.parse(localStorage.getItem(KEY) || 'null');
-    if (s && typeof s.total === 'number') return { total: s.total, games: s.games ?? {}, log: s.log ?? [], once: s.once ?? {}, days: s.days ?? [] };
+    if (s && typeof s.total === 'number') return { total: s.total, games: s.games ?? {}, log: s.log ?? [], once: s.once ?? {}, days: s.days ?? [], byDay: s.byDay ?? {} };
   } catch { /* storage blocked */ }
-  return { total: 0, games: {}, log: [], once: {}, days: [] };
+  return { total: 0, games: {}, log: [], once: {}, days: [], byDay: {} };
 }
 
 export function levelOf(total: number) {
@@ -67,6 +68,8 @@ export function award(game: string, pts: number, why: string, once?: string): nu
   if (!s.days.includes(d)) { s.days = [...s.days, d].slice(-60); added += DAILY_BONUS; s.log.unshift({ t: Date.now(), game: 'bono', pts: DAILY_BONUS, why: 'Bono del día' }); }
   s.total += added;
   s.games[game] = (s.games[game] ?? 0) + pts;
+  s.byDay[d] = { ...(s.byDay[d] ?? {}), [game]: (s.byDay[d]?.[game] ?? 0) + pts };
+  s.byDay = Object.fromEntries(Object.entries(s.byDay).sort(([a], [b]) => b.localeCompare(a)).slice(0, 8));
   s.log.unshift({ t: Date.now(), game, pts, why });
   s.log = s.log.slice(0, 30);
   try { localStorage.setItem(KEY, JSON.stringify(s)); } catch { return 0; }
