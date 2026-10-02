@@ -10,22 +10,29 @@ interface Props { tape?: boolean; strip?: boolean }
 const { tape: tapeOnly = false, strip = false } = Astro.props;
 const tape = tapeOnly || strip;
 
-type Info = { sym: string; name: string; group: string; about: string; coin?: string; digits?: number };
+type Info = { sym: string; name: string; group: string; about: string; coin?: string; digits?: number; suf?: string };
 type Quote = Info & { key: string; price: number; prev: number; hi?: number; lo?: number; hi52?: number; lo52?: number; t: number[]; c: number[] };
 const LIST: Info[] = [
   { sym: 'BPOP', name: 'Popular', group: 'pr', about: 'Banco Popular de Puerto Rico, el banco más grande de la isla.' },
   { sym: 'FBP', name: 'FirstBank', group: 'pr', about: 'First BanCorp, la casa matriz de FirstBank Puerto Rico.' },
   { sym: 'OFG', name: 'OFG (Oriental)', group: 'pr', about: 'OFG Bancorp, la casa matriz de Oriental Bank.' },
   { sym: 'EVTC', name: 'Evertec (ATH Móvil)', group: 'pr', about: 'Evertec, la empresa de San Juan detrás de ATH y ATH Móvil.' },
+  { sym: 'LILA', name: 'Liberty Latin America', group: 'pr', about: 'La casa matriz de Liberty Puerto Rico (cable, internet y celular).' },
   { sym: '^GSPC', name: 'S&P 500', group: 'us', digits: 0, about: 'Las 500 empresas más grandes de EE. UU. Es el índice que más se sigue.' },
   { sym: '^DJI', name: 'Dow Jones', group: 'us', digits: 0, about: '30 de las empresas más conocidas de EE. UU.' },
   { sym: '^IXIC', name: 'Nasdaq', group: 'us', digits: 0, about: 'La bolsa de las empresas de tecnología.' },
+  { sym: '^RUT', name: 'Russell 2000', group: 'us', digits: 0, about: '2,000 empresas pequeñas de EE. UU.; muestra cómo le va a los negocios más pequeños.' },
+  { sym: '^TNX', name: 'Tasa del Tesoro (10 años)', group: 'us', digits: 2, suf: '%', about: 'El interés que paga el gobierno de EE. UU. a 10 años. Cuando sube, las hipotecas y los préstamos suelen subir también.' },
   { sym: 'CL=F', name: 'Petróleo (barril)', group: 'mp', about: 'Barril de petróleo de EE. UU. (WTI). Influye en la gasolina y en el ajuste por combustible de la factura de luz.' },
   { sym: 'RB=F', name: 'Gasolina (galón, mayorista)', group: 'mp', digits: 2, about: 'Precio mayorista de la gasolina en EE. UU. por galón. En Puerto Rico se vende por litro (1 galón = 3.785 litros), con impuestos y transporte aparte.' },
   { sym: 'GC=F', name: 'Oro (onza)', group: 'mp', digits: 0, about: 'Precio de una onza de oro.' },
+  { sym: 'NG=F', name: 'Gas natural', group: 'mp', digits: 2, about: 'Precio del gas natural en EE. UU. Puerto Rico produce buena parte de su electricidad con gas natural.' },
+  { sym: 'SI=F', name: 'Plata (onza)', group: 'mp', digits: 2, about: 'Precio de una onza de plata.' },
   { sym: 'BTC-USD', name: 'Bitcoin', group: 'cr', coin: 'bitcoin', digits: 0, about: 'La criptomoneda más grande. Su precio sube y baja mucho.' },
   { sym: 'ETH-USD', name: 'Ethereum', group: 'cr', coin: 'ethereum', digits: 0, about: 'La segunda criptomoneda más grande.' },
   { sym: 'XRP-USD', name: 'XRP', group: 'cr', coin: 'ripple', digits: 2, about: 'La criptomoneda de la empresa Ripple, pensada para enviar dinero entre países.' },
+  { sym: 'SOL-USD', name: 'Solana', group: 'cr', coin: 'solana', digits: 2, about: 'Una criptomoneda rápida y popular para aplicaciones y monedas digitales.' },
+  { sym: 'DOGE-USD', name: 'Dogecoin', group: 'cr', coin: 'dogecoin', digits: 4, about: 'Empezó como un chiste con la cara de un perro; su precio sube y baja mucho.' },
 ];
 const GROUPS: Record<string, string> = { pr: 'Empresas de Puerto Rico', us: 'Bolsa de Nueva York', mp: 'Petróleo, gasolina y oro', cr: 'Criptomonedas' };
 const CHIPS: Record<string, string> = { all: 'Todos', pr: 'Puerto Rico', us: 'Bolsa', mp: 'Petróleo y oro', cr: 'Cripto' };
@@ -37,7 +44,7 @@ async function quote(q: Info): Promise<Quote | null> {
     const res = (await r.json()).chart.result[0];
     const ts: number[] = res.timestamp ?? []; const raw: Array<number | null> = res.indicators.quote[0].close ?? [];
     const t: number[] = [], c: number[] = [];
-    raw.forEach((v, i) => { if (v != null) { t.push(ts[i]); c.push(Number(v.toFixed(q.digits === 0 ? 0 : 2))); } });
+    raw.forEach((v, i) => { if (v != null) { t.push(ts[i]); c.push(Number(v.toFixed(q.digits ?? 2))); } });
     const m = res.meta;
     const price = m.regularMarketPrice ?? c.at(-1);
     if (!price) return null;
@@ -60,7 +67,7 @@ const spark = (v: number[]) => {
 const when = at.toLocaleString('es-PR', { weekday: 'long', hour: 'numeric', minute: '2-digit', timeZone: 'America/Puerto_Rico' });
 const board = url('seccion/economia');
 // Data for the detail panels (dates as seconds, closes)
-const data = Object.fromEntries(list.map((q) => [q.key, { name: q.name, about: q.about, d: q.digits ?? 2, cur: cur(q), price: q.price, prev: q.prev, hi: q.hi, lo: q.lo, hi52: q.hi52, lo52: q.lo52, t: q.t, c: q.c, gas: q.sym === 'RB=F' }]));
+const data = Object.fromEntries(list.map((q) => [q.key, { name: q.name, about: q.about, d: q.digits ?? 2, cur: cur(q), suf: q.suf ?? '', price: q.price, prev: q.prev, hi: q.hi, lo: q.lo, hi52: q.hi52, lo52: q.lo52, t: q.t, c: q.c, gas: q.sym === 'RB=F' }]));
 ---
 {list.length > 0 && (tape ? (
   <div class:list={['eco-tape', { 'eco-strip': strip }]} aria-label="Mercados" data-tape>
@@ -72,7 +79,7 @@ const data = Object.fromEntries(list.map((q) => [q.key, { name: q.name, about: q
             {list.map((q) => { const p = pct(q); return (
               <li data-coin={q.coin} data-digits={q.digits ?? 2}>
                 <a href={`${board}#m-${q.key}`} tabindex={copy ? -1 : undefined} data-open={q.key}>
-                  <b>{q.name.replace(/ \(.*/, '')}</b> <span class="eco-n" data-price>{fmt(q)}</span> <span class:list={['eco-ch', p >= 0 ? 'up' : 'down']} data-ch>{p >= 0 ? '▲' : '▼'} {Math.abs(p).toFixed(2)}%</span>
+                  <b>{q.name.replace(/ \(.*/, '')}</b> <span class="eco-n"><span data-price>{fmt(q)}</span>{q.suf}</span> <span class:list={['eco-ch', p >= 0 ? 'up' : 'down']} data-ch>{p >= 0 ? '▲' : '▼'} {Math.abs(p).toFixed(2)}%</span>
                 </a>
               </li>
             ); })}
@@ -102,7 +109,7 @@ const data = Object.fromEntries(list.map((q) => [q.key, { name: q.name, about: q
                 <button type="button" class="eco-row" data-row={q.key} aria-expanded="false">
                   <span class="eco-name"><b>{q.name}</b><small>{q.key}</small></span>
                   <svg class:list={['eco-spark', (q.c.at(-1) ?? 0) >= (q.c.at(-20) ?? q.c[0] ?? 0) ? 'up' : 'down']} viewBox="0 0 90 28" aria-hidden="true"><polyline points={spark(q.c.slice(-20))} /></svg>
-                  <span class="eco-val"><b class="eco-n">{cur(q)}<span data-price>{fmt(q)}</span></b><span class:list={['eco-ch', p >= 0 ? 'up' : 'down']} data-ch>{p >= 0 ? '▲' : '▼'} {Math.abs(p).toFixed(2)}%</span></span>
+                  <span class="eco-val"><b class="eco-n">{cur(q)}<span data-price>{fmt(q)}</span>{q.suf}</b><span class:list={['eco-ch', p >= 0 ? 'up' : 'down']} data-ch>{p >= 0 ? '▲' : '▼'} {Math.abs(p).toFixed(2)}%</span></span>
                 </button>
                 <div class="eco-detail" data-detail hidden></div>
               </li>
@@ -129,10 +136,10 @@ const data = Object.fromEntries(list.map((q) => [q.key, { name: q.name, about: q
   });
 
   // ---- Board: filters and detail panels ----
-  type D = { name: string; about: string; d: number; cur: string; price: number; prev: number; hi?: number; lo?: number; hi52?: number; lo52?: number; t: number[]; c: number[]; gas: boolean };
+  type D = { name: string; about: string; d: number; cur: string; suf: string; price: number; prev: number; hi?: number; lo?: number; hi52?: number; lo52?: number; t: number[]; c: number[]; gas: boolean };
   const board = document.querySelector<HTMLElement>('[data-board]');
   const DATA: Record<string, D> = board ? JSON.parse(board.dataset.board!) : {};
-  const money = (d: D, v: number) => `${d.cur}${v.toLocaleString('en-US', { minimumFractionDigits: d.d, maximumFractionDigits: d.d })}`;
+  const money = (d: D, v: number) => `${d.cur}${v.toLocaleString('en-US', { minimumFractionDigits: d.d, maximumFractionDigits: d.d })}${d.suf}`;
   const day = (s: number, o: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short' }) => new Date(s * 1000).toLocaleDateString('es-PR', { ...o, timeZone: 'America/New_York' });
 
   function chart(box: HTMLElement, k: string, n: number) {
