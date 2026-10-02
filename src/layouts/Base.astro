@@ -99,10 +99,19 @@ const todayCap = today.charAt(0).toUpperCase() + today.slice(1);
               <button type="button" class="mh-ico pf-btn" data-pf-btn data-pf-toggle aria-haspopup="true" aria-expanded="false" aria-controls="pf-menu" aria-label="Mi cuenta y ajustes" title="Mi cuenta y ajustes">
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></svg>
               </button>
+              <span class="pf-dot" data-nf-dot hidden></span>
               <div class="pf-menu" id="pf-menu" data-pf-menu hidden>
                 <div class="pf-menu-h">
                   <span class="pf-menu-av" data-pf-av aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></svg></span>
                   <span><b data-pf-name>Mi cuenta</b><small>Lector de Noticias Xtra</small></span>
+                </div>
+                <button type="button" class="pf-menu-i" data-nf-toggle aria-expanded="false" aria-controls="nf-panel">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z" /><path d="M10 21h4" /></svg>Notificaciones
+                  <span class="pf-badge red" data-nf-count hidden></span>
+                </button>
+                <div class="nf-panel" id="nf-panel" data-nf-panel data-story-url={url('noticias')} data-game-url={url('juegos/domino')} hidden>
+                  <ul class="nf-list" data-nf-list></ul>
+                  <div class="nf-foot"><button type="button" data-nf-readall>Marcar como leídas</button><a href={`${url('perfil')}#notificaciones`}>Ver todas ›</a></div>
                 </div>
                 <a class="pf-menu-i" href={url('perfil')}>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></svg>Mi perfil
@@ -211,6 +220,8 @@ const todayCap = today.charAt(0).toUpperCase() + today.slice(1);
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
     <script>
+      import { seedExamples, unreadCount, getNotifs, markRead, type Notif } from '../lib/notifications';
+      import { renderNotifs, sentence } from '../lib/notif-view';
       // Profile menu: every reader setting in one place, opens over the page (Escape or a tap outside closes it)
       const pfBtn = document.querySelector<HTMLButtonElement>('[data-pf-toggle]');
       const pfMenu = document.querySelector<HTMLElement>('[data-pf-menu]');
@@ -378,6 +389,28 @@ const todayCap = today.charAt(0).toUpperCase() + today.slice(1);
       showSaved();
       addEventListener('nx-saved-change', showSaved);
       addEventListener('storage', (e) => e.key === 'nx-saved' && showSaved());
+      // Notifications: count on the profile icon, latest five in the profile menu, a toast when a new one arrives
+      const nfPanel = document.querySelector<HTMLElement>('[data-nf-panel]');
+      if (nfPanel) {
+        seedExamples(nfPanel.dataset.storyUrl!, nfPanel.dataset.gameUrl!);
+        const nfBtn = document.querySelector<HTMLButtonElement>('[data-nf-toggle]')!;
+        const showNotifs = () => {
+          const n = unreadCount();
+          document.querySelectorAll<HTMLElement>('[data-nf-dot],[data-nf-count]').forEach((el) => { el.textContent = n > 9 ? '9+' : String(n); el.hidden = !n; });
+          pfBtn?.setAttribute('aria-label', n ? `Mi cuenta y ajustes: ${n} notificaciones nuevas` : 'Mi cuenta y ajustes');
+          nfPanel.querySelector('[data-nf-list]')!.innerHTML = renderNotifs(getNotifs().slice(0, 5)) || '<li class="nf-empty">No tienes notificaciones.</li>';
+        };
+        showNotifs();
+        nfBtn.addEventListener('click', () => { nfPanel.hidden = !nfPanel.hidden; nfBtn.setAttribute('aria-expanded', String(!nfPanel.hidden)); });
+        nfPanel.querySelector('[data-nf-readall]')!.addEventListener('click', () => markRead());
+        nfPanel.addEventListener('click', (e) => { const a = (e.target as HTMLElement).closest<HTMLElement>('[data-nf-id]'); if (a) markRead(a.dataset.nfId); });
+        addEventListener('nx-notifs', (e) => {
+          showNotifs();
+          const n = (e as CustomEvent).detail?.added as Notif | undefined;
+          if (n) toast(`🔔 ${sentence(n)}`);
+        });
+        addEventListener('storage', (e) => e.key === 'nx-notifs' && showNotifs());
+      }
       document.querySelectorAll<HTMLButtonElement>('[data-share]').forEach((b) =>
         b.addEventListener('click', async () => {
           const u = encodeURIComponent(location.href);

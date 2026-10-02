@@ -2,6 +2,8 @@
 // Games call award() when the reader wins or finishes; `once` stops the same daily puzzle from counting twice.
 // The first points of each day add a daily bonus and count toward a streak of days played.
 
+import { notify } from './notifications';
+
 export type PointsState = {
   total: number;
   games: Record<string, number>;
@@ -74,5 +76,7 @@ export function award(game: string, pts: number, why: string, once?: string): nu
   s.log = s.log.slice(0, 30);
   try { localStorage.setItem(KEY, JSON.stringify(s)); } catch { return 0; }
   dispatchEvent(new CustomEvent('nx-points', { detail: { added, total: s.total, why } }));
+  const lvl = levelOf(s.total);
+  if (lvl.index > levelOf(s.total - added).index) notify({ id: `pts-${lvl.index}`, kind: 'badge', text: `¡Subiste a ${lvl.name} en Juegos Xtra! Ya tienes ${s.total.toLocaleString('es-PR')} puntos.`, url: `${import.meta.env.BASE_URL.replace(/\/$/, '')}/juegos/#puntos` });
   return added;
 }
