@@ -2786,13 +2786,7 @@ html.nx-en .lang-tag{background:var(--red)}
 .live-btn{height:32px;padding:0 12px;gap:6px;border-radius:999px;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.02em;box-shadow:0 2px 0 #A9172B}
 .live-btn .dot{width:8px;height:8px;background:#fff}
 .live-btn[aria-current="page"]{outline:2px solid var(--red);outline-offset:2px}
-.nav-links > a.nav-live{display:none}
-@media (min-width:601px){ .nav-links > a.nav-live + a{padding-left:0} }
-@media (max-width:600px){
-  .live-btn{display:none}
-  .nav-links > a.nav-live{display:inline-flex;align-items:center;gap:5px;align-self:center;margin:0 10px 0 0;padding:4px 10px;border-radius:999px;background:#fff;color:var(--red);opacity:1;font-weight:800;border-bottom:0}
-  .nav-live .dot{width:7px;height:7px;background:var(--red)}
-}
+@media (max-width:600px){ .live-btn{height:30px;padding:0 10px;font-size:12px;gap:5px} .live-btn .dot{width:7px;height:7px} }
 
 /* En vivo page: video (left, stays in view) · latest news and an in-page reader (right) */
 .lv{padding-bottom:28px}
@@ -2848,3 +2842,29 @@ html.nx-en .lang-tag{background:var(--red)}
 .cm-jump-n{font-size:13px;font-weight:700}
 .cm-jump-n:empty{display:none}
 .cm{scroll-margin-top:calc(var(--mh-h,0px) + 70px)}
+
+/* Header: profile menu with every reader setting (opens over the page) */
+.pf-wrap{position:relative}
+.pf-menu{position:absolute;right:-4px;top:calc(100% + 10px);z-index:60;width:264px;padding:8px;border-radius:16px;background:var(--card);border:1px solid var(--line);box-shadow:0 16px 40px rgba(22,22,29,.22);animation:pfIn .14s ease}
+.pf-menu[hidden]{display:none}
+@keyframes pfIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.pf-menu-h{display:flex;align-items:center;gap:10px;padding:6px 8px 10px;margin-bottom:4px;border-bottom:1px solid var(--line)}
+.pf-menu-h span:last-child{display:grid;line-height:1.2}
+.pf-menu-h b{font-family:var(--head);font-size:15px}
+.pf-menu-h small{font-size:12px;color:var(--muted)}
+.pf-menu-av{flex:none;display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:var(--soft);color:var(--purple);font-family:var(--head);font-weight:800;font-size:16px}
+.pf-menu-i{display:flex;align-items:center;gap:10px;width:100%;min-height:42px;padding:8px 10px;border:0;border-radius:10px;background:transparent;color:var(--ink);font:inherit;font-size:14px;font-weight:600;text-align:left;cursor:pointer}
+.pf-menu-i svg{flex:none;color:var(--muted)}
+.pf-menu-i:hover,.pf-menu-i:focus-visible{background:var(--soft);color:var(--purple);outline:none}
+.pf-menu-i:hover svg{color:var(--purple)}
+.pf-menu hr{border:0;border-top:1px solid var(--line);margin:6px 0}
+.pf-badge{margin-left:auto;min-width:22px;padding:2px 7px;border-radius:999px;background:var(--purple);color:#fff;font-size:12px;font-weight:800;text-align:center}
+.pf-badge[hidden]{display:none}
+.pf-menu .lang-tag{position:static;margin-left:auto;padding:3px 7px;border-radius:6px;font-family:var(--head);font-weight:800;font-size:11px;background:var(--blue);color:#fff}
+html.nx-en .pf-menu .lang-tag{background:var(--red)}
+.pf-switch{position:relative;margin-left:auto;width:38px;height:22px;border-radius:999px;background:var(--line);transition:background .15s}
+.pf-switch::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .15s}
+[aria-pressed="true"] > .pf-switch{background:var(--purple)}
+[aria-pressed="true"] > .pf-switch::after{transform:translateX(16px)}
+.pf-menu-i[hidden]{display:none}
+@media (max-width:420px){ .pf-menu{width:min(264px,calc(100vw - 24px))} }
