@@ -1471,7 +1471,9 @@ main.wrap,.home-grid,.ys-page,.tb-page{padding-top:var(--gap)}
   .ys-grid{grid-template-columns:clamp(260px,22vw,400px) minmax(0,1fr) clamp(300px,24vw,440px)}
   .lg-grid{grid-template-columns:clamp(260px,21vw,380px) minmax(0,1fr) clamp(300px,24vw,440px)}
 }
-.ys-hero .ph,.lg-top .ph{max-height:min(48vh,440px)}
+/* Main story photo: fixed height that follows the column width, so the card never spills into the side column */
+.ys-main > *,.lg-main > *,.lg-left > *,.lg-right > *{min-width:0}
+.ys-hero .ph,.lg-top .ph{aspect-ratio:auto;width:100%;height:clamp(200px,26vw,420px)}
 .ys-list li,.lg-heads li,.lg-teams li{font-size:15px}
 
 /* Home sidebar: small Foro Xtra teaser */
