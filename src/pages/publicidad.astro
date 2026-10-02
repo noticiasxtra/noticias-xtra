@@ -1,88 +1,263 @@
 ---
-// Anúnciate: advertising page. Every "Anúnciate aquí" link on an ad placeholder lands here, and so does
-// the red "Anúnciate" button in the header. No audience numbers or prices are invented: packages say
-// "Cotización a la medida" until the sales team sets them.
-// The contact form opens the reader's email app addressed to SITE.email (src/lib/site.ts).
+// Anúnciate: advertising page. Every "Anúnciate aquí" link and the red header button land here.
+// Two ways to start: 1) contact us, 2) build a campaign yourself (format, map of regions, dates, budget) with a
+// live price and the discounts applied. Prices, discounts and rewards come from src/lib/ads.ts.
+// Requests open the visitor's email app addressed to SITE.email (src/lib/site.ts).
 import Base from '../layouts/Base.astro';
 import { SITE, url } from '../lib/site';
-const FORMATS = [
-  { id: 'leaderboard', name: 'Banner horizontal', size: '728 × 90', mobile: '320 × 100 en celular', where: 'Arriba del pie de página en todo el sitio y entre secciones de la portada.', w: 728, h: 90 },
-  { id: 'rectangle', name: 'Rectángulo', size: '300 × 250', mobile: 'Igual en celular', where: 'Columna derecha de la portada, las noticias, Deportes y cada juego.', w: 300, h: 250 },
-  { id: 'halfpage', name: 'Media página', size: '300 × 600', mobile: 'Solo en computadora', where: 'Columna derecha; se queda a la vista mientras el lector baja por la página.', w: 300, h: 600 },
-  { id: 'infeed', name: 'Entre noticias', size: '728 × 90', mobile: '320 × 100 en celular', where: 'Dentro de la portada, al final de cada noticia y en las páginas de sección.', w: 728, h: 90 },
+import { FORMATS, REGIONS, AUDIENCE, LAUNCH_DISCOUNT, DURATION_DISCOUNTS, OTHER_DISCOUNTS, MAX_DISCOUNT, REWARDS, VOLUME_TIERS, AGENCY_COMMISSION, DESIGN_FEE, ROTATE_SECONDS } from '../lib/ads';
+
+const money = (n: number) => `$${n.toLocaleString('en-US')}`;
+// Simplified map of Puerto Rico (viewBox 0 0 690 215): the island outline, cut into regions
+const ISLAND = 'M46 13L132 20L231 20L330 23L396 26L462 36L554 56L554 99L512 142L485 175L413 191L330 201L231 191L149 198L99 191L33 198L36 149L26 116L10 59Z';
+const CUTS: Record<string, string> = {
+  oeste: 'M0 0H120V215H0Z', norte: 'M120 0H370V88L120 92Z', metro: 'M370 0H470V100L370 88Z',
+  centro: 'M120 92L370 88L470 100V140L120 145Z', sur: 'M120 145L470 140V215H120Z', este: 'M470 0H562V215H470Z',
+};
+const LABELS: Record<string, [number, number]> = { oeste: [64, 108], norte: [245, 58], metro: [420, 62], centro: [292, 120], sur: [292, 176], este: [514, 112], islas: [622, 172] };
+const DEMO_ADS = [
+  { t: 'Tu negocio aquí', s: 'Llega a lectores de toda la isla', bg: 'linear-gradient(90deg,#2B1185,#1F90DA)' },
+  { t: 'Oferta de la semana', s: 'Tu anuncio rota con otras marcas', bg: 'linear-gradient(90deg,#D7263D,#F28C28)' },
+  { t: 'Gran apertura', s: 'Cambia cada ocho segundos', bg: 'linear-gradient(90deg,#14663F,#1B8A5A)' },
 ];
-const SPONSOR = [
-  { icon: '🎮', name: 'Juegos Xtra', text: 'Tu marca en el dominó, el sudoku y la trivia del día, donde los lectores pasan más tiempo.' },
-  { icon: '⚾', name: 'Deportes', text: 'Presenta los marcadores, la Doble A, La Pro, el BSN o el voleibol.' },
-  { icon: '🌦️', name: 'Clima', text: 'El pronóstico del día “presentado por” tu negocio.' },
-  { icon: '★', name: 'Entretenimiento', text: 'Eventos, conciertos y la farándula boricua.' },
-];
-const PACKAGES = [
-  { name: 'Local', tag: 'Para empezar', items: ['Rectángulo 300 × 250 en las noticias', 'Rotación en todas las secciones', 'Informe mensual de impresiones y clics'] },
-  { name: 'Destacado', tag: 'El más pedido', items: ['Todo lo del paquete Local', 'Banner en la portada', 'Media página en la columna derecha', 'Presencia en Deportes y Juegos Xtra'], featured: true },
-  { name: 'Patrocinio', tag: 'Tu marca, dueña de una sección', items: ['Patrocinio exclusivo de una sección (Juegos, Deportes, Clima…)', 'Todos los formatos en esa sección', 'Mención “presentado por”'] },
-];
-const INTERESTS = ['Banner horizontal', 'Rectángulo', 'Media página', 'Patrocinio de sección', 'Contenido patrocinado'];
+const builderData = { formats: FORMATS.map(({ id, name, price, per }) => ({ id, name, price, per })), audience: AUDIENCE, launch: LAUNCH_DISCOUNT, duration: DURATION_DISCOUNTS,
+  other: OTHER_DISCOUNTS, max: MAX_DISCOUNT, rewards: REWARDS, volume: VOLUME_TIERS, design: DESIGN_FEE, regions: REGIONS.map(({ id, name }) => ({ id, name })) };
 ---
-<Base title="Anúnciate" description="Anúnciate en Noticias Xtra: formatos, ubicaciones y patrocinios para llegar a lectores de Puerto Rico.">
+<Base title="Anúnciate" description="Anúnciate en Noticias Xtra: precios de lanzamiento, descuentos, valla digital, anuncios por región y un panel con las estadísticas de tu campaña.">
   <main class="wrap ad-page" id="main">
     <section class="adp-hero">
       <div>
-        <p class="adp-kicker">Publicidad en Noticias Xtra</p>
+        <p class="adp-kicker">Publicidad en Noticias Xtra · Precios de lanzamiento</p>
         <h1>Lleva tu negocio a los lectores de Puerto Rico</h1>
-        <p class="adp-lead">Noticias locales, deportes boricuas y juegos diarios: un lugar al que la gente vuelve todos los días. Tu anuncio, junto a lo que más les importa.</p>
+        <p class="adp-lead">Noticias locales, deportes boricuas y juegos diarios: un lugar al que la gente vuelve todos los días. Desde <b>{money(Math.min(...FORMATS.map((f) => f.price)))} al mes</b>.</p>
         <div class="adp-ctas">
-          <a class="adp-btn red" href="#contacto">Solicitar información</a>
-          <a class="adp-btn ghost" href="#formatos">Ver formatos</a>
+          <a class="adp-btn red" href="#contacto">Contáctanos</a>
+          <a class="adp-btn ghost" href="#campana">Crea tu campaña</a>
         </div>
       </div>
       <ul class="adp-why">
-        <li><b>100% boricua</b><span>Noticias de Puerto Rico, en español, para lectores de la isla y la diáspora.</span></li>
-        <li><b>Lectores que se quedan</b><span>Deportes, clima y juegos diarios hacen que la visita dure más.</span></li>
-        <li><b>Formatos estándar</b><span>Tamaños de la industria (IAB): usa los mismos artes que ya tienes.</span></li>
-        <li><b>Celular y computadora</b><span>Cada espacio se adapta a la pantalla del lector.</span></li>
+        <li><b>Tus anuncios primero</b><span>Los clientes directos siempre salen antes que Google.</span></li>
+        <li><b>Por región</b><span>Escoge en el mapa dónde quieres que te vean.</span></li>
+        <li><b>Valla digital</b><span>Anuncios que rotan y cambian, como en la carretera.</span></li>
+        <li><b>Tu panel</b><span>Impresiones, clics e informes automáticos por correo.</span></li>
       </ul>
     </section>
 
-    <section class="adp-sec" id="formatos" aria-labelledby="adp-f">
-      <h2 id="adp-f">Formatos</h2>
-      <div class="adp-formats">
-        {FORMATS.map((f) => (
-          <article class="adp-fmt">
-            <div class="adp-preview" style={`--w:${f.w};--h:${f.h}`}><span>{f.size}</span></div>
-            <h3>{f.name} <small>{f.size}</small></h3>
-            <p class="adp-mob">{f.mobile}</p>
-            <p>{f.where}</p>
-          </article>
-        ))}
+    <section class="adp-sec" aria-labelledby="adp-start">
+      <h2 id="adp-start">Dos formas de empezar</h2>
+      <div class="adp-two">
+        <a class="adp-opt" href="#contacto">
+          <span class="adp-num">1</span>
+          <b>Contáctanos</b>
+          <span>Cuéntanos de tu negocio y armamos la campaña contigo: formatos, fechas, arte y presupuesto.</span>
+          <span class="adp-go">Escribirnos ›</span>
+        </a>
+        <a class="adp-opt" href="#campana">
+          <span class="adp-num">2</span>
+          <b>Crea tu campaña</b>
+          <span>Como en Facebook o Instagram: escoge el formato, marca en el mapa dónde quieres salir, las fechas, y ve el precio al instante.</span>
+          <span class="adp-go">Empezar ›</span>
+        </a>
       </div>
     </section>
 
-    <section class="adp-sec" aria-labelledby="adp-s">
-      <h2 id="adp-s">Patrocina una sección</h2>
-      <div class="adp-sponsor">
-        {SPONSOR.map((s) => <div><span aria-hidden="true">{s.icon}</span><b>{s.name}</b><p>{s.text}</p></div>)}
+    <section class="adp-sec" aria-labelledby="adp-who">
+      <h2 id="adp-who">¿Para quién es?</h2>
+      <div class="adp-tabs" role="tablist">
+        <button type="button" role="tab" aria-selected="true" data-who="retail">Negocios locales</button>
+        <button type="button" role="tab" aria-selected="false" data-who="agency">Agencias y marcas grandes</button>
+      </div>
+      <div class="adp-who" data-who-panel="retail">
+        <ul class="adp-list">
+          <li><b>Precios para empezar.</b> Desde {money(FORMATS[0].price)} al mes, sin contratos largos.</li>
+          <li><b>{LAUNCH_DISCOUNT.text}</b></li>
+          <li><b>Te diseñamos el anuncio</b> por {money(DESIGN_FEE)} si no tienes arte.</li>
+          <li><b>Solo tu zona.</b> Paga menos anunciándote solo en tu región.</li>
+          <li><b>Anuncios gratis</b> a medida que inviertes (mira “Premios” abajo).</li>
+        </ul>
+      </div>
+      <div class="adp-who" data-who-panel="agency" hidden>
+        <ul class="adp-list">
+          <li><b>Toma de portada:</b> todos los espacios y el fondo de la portada con tu marca por {money(FORMATS.find((f) => f.id === 'takeover')!.price)} al día.</li>
+          <li><b>Descuento por volumen anual</b> (abajo), más {AGENCY_COMMISSION}% de comisión de agencia.</li>
+          <li><b>Impresiones extra</b> sin costo en campañas de 3 meses o más.</li>
+          <li><b>Orden de inserción y factura mensual</b> (pago a 30 días).</li>
+          <li><b>Informes por campaña</b> y acceso al panel para tu equipo y tu cliente.</li>
+        </ul>
+        <table class="adp-table">
+          <caption>Descuento por volumen (inversión anual)</caption>
+          <thead><tr><th scope="col">Inversión</th><th scope="col">Descuento</th></tr></thead>
+          <tbody>{VOLUME_TIERS.map((t) => <tr><td>Desde {money(t.from)}</td><td><b>{t.pct}%</b></td></tr>)}</tbody>
+        </table>
       </div>
     </section>
 
-    <section class="adp-sec" aria-labelledby="adp-p">
-      <h2 id="adp-p">Paquetes</h2>
-      <div class="adp-packs">
-        {PACKAGES.map((p) => (
-          <article class:list={['adp-pack', { featured: p.featured }]}>
-            <span class="adp-tag">{p.tag}</span>
-            <h3>{p.name}</h3>
-            <ul>{p.items.map((i) => <li>{i}</li>)}</ul>
-            <p class="adp-price">Cotización a la medida</p>
-            <a class="adp-btn" href="#contacto">Pedir cotización</a>
-          </article>
-        ))}
+    <section class="adp-sec adp-build" id="campana" aria-labelledby="adp-b">
+      <h2 id="adp-b">Crea tu campaña</h2>
+      <form class="adb" data-builder data-cfg={JSON.stringify(builderData)} data-email={SITE.email} novalidate>
+        <div class="adb-steps">
+          <fieldset class="adb-step">
+            <legend><span>1</span> Escoge los formatos</legend>
+            <div class="adb-formats">
+              {FORMATS.map((f) => (
+                <label class="adb-fmt">
+                  <input type="checkbox" name="fmt" value={f.id} checked={f.id === 'rectangle'} />
+                  <span class="adb-fmt-body"><b>{f.name}</b><small>{f.size}</small><span>{f.about}</span></span>
+                  <span class="adb-fmt-price">{money(f.price)}<small>/{f.per}</small></span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+
+          <fieldset class="adb-step">
+            <legend><span>2</span> ¿Dónde quieres que te vean?</legend>
+            <div class="adb-aud" role="radiogroup">
+              <label><input type="radio" name="aud" value="all" checked /> Puerto Rico y la diáspora</label>
+              <label><input type="radio" name="aud" value="island" /> Solo Puerto Rico</label>
+              <label><input type="radio" name="aud" value="regions" /> Regiones de la isla</label>
+              <label><input type="radio" name="aud" value="diaspora" /> Solo la diáspora (EE. UU.)</label>
+            </div>
+            <svg class="adb-map" viewBox="0 0 690 215" role="group" aria-label="Mapa de regiones de Puerto Rico">
+              <defs><clipPath id="adb-isla"><path d={ISLAND} /></clipPath></defs>
+              <g clip-path="url(#adb-isla)">
+                {Object.entries(CUTS).map(([id, d]) => <path class="adb-reg" data-reg={id} d={d}><title>{REGIONS.find((r) => r.id === id)!.name}</title></path>)}
+              </g>
+              <g class="adb-reg" data-reg="islas"><title>Vieques y Culebra</title><ellipse cx="618" cy="143" rx="50" ry="9" /><ellipse cx="660" cy="80" rx="13" ry="6" /></g>
+              <path class="adb-outline" d={ISLAND} />
+              {Object.entries(LABELS).map(([id, [x, y]]) => <text x={x} y={y} class="adb-lbl" data-lbl={id}>{id === 'islas' ? 'Islas' : REGIONS.find((r) => r.id === id)!.name}</text>)}
+            </svg>
+            <div class="adb-regs">
+              {REGIONS.map((r) => <button type="button" data-reg-btn={r.id} aria-pressed="false" title={r.towns}>{r.name}</button>)}
+            </div>
+            <p class="adb-hint" data-aud-hint>Toca las regiones en el mapa para anunciarte solo ahí.</p>
+          </fieldset>
+
+          <fieldset class="adb-step">
+            <legend><span>3</span> Fechas</legend>
+            <div class="adb-row">
+              <label>Empieza<input type="date" name="start" data-start /></label>
+              <label>Duración
+                <select name="months">
+                  <option value="0.25">1 semana</option>
+                  <option value="1" selected>1 mes</option>
+                  <option value="3">3 meses (−{DURATION_DISCOUNTS[0].pct}%)</option>
+                  <option value="6">6 meses (−{DURATION_DISCOUNTS[1].pct}%)</option>
+                  <option value="12">12 meses (−{DURATION_DISCOUNTS[2].pct}%)</option>
+                </select>
+              </label>
+              <label data-days-wrap hidden>Días de toma de portada<input type="number" name="days" min="1" max="14" value="1" /></label>
+            </div>
+          </fieldset>
+
+          <fieldset class="adb-step">
+            <legend><span>4</span> Detalles</legend>
+            <div class="adb-row">
+              <label>Tipo de cliente
+                <select name="who"><option value="retail">Negocio local</option><option value="agency">Agencia o marca grande</option><option value="nonprofit">Sin fines de lucro</option></select>
+              </label>
+              <label>Arte del anuncio
+                <select name="art"><option value="mine">Tengo el arte listo</option><option value="design">Diséñenlo ustedes (+{money(DESIGN_FEE)})</option></select>
+              </label>
+            </div>
+            <label class="adb-check"><input type="checkbox" name="prepay" /> Pago completo por adelantado (−{OTHER_DISCOUNTS.find((d) => d.id === 'prepago')!.pct}%)</label>
+            <label class="adb-check"><input type="checkbox" name="founder" checked /> Soy anunciante nuevo (precio de fundador)</label>
+          </fieldset>
+        </div>
+
+        <aside class="adb-sum" id="adb-sum" aria-live="polite">
+          <h3>Tu campaña</h3>
+          <ul class="adb-lines" data-lines></ul>
+          <p class="adb-total"><span>Total</span><b data-total>$0</b></p>
+          <p class="adb-month" data-month></p>
+          <p class="adb-gift" data-gift hidden></p>
+          <div class="adb-contact">
+            <label>Nombre<input name="nombre" autocomplete="name" /></label>
+            <label>Negocio<input name="negocio" autocomplete="organization" /></label>
+            <label>Correo<input name="correo" type="email" autocomplete="email" /></label>
+            <label>Teléfono<input name="telefono" type="tel" autocomplete="tel" /></label>
+          </div>
+          <p class="cm-err" data-err hidden></p>
+          <button type="submit" class="adp-btn red">Solicitar esta campaña</button>
+          <p class="adp-note" data-note hidden></p>
+          <p class="adb-fine">Precio estimado. Te confirmamos disponibilidad y fechas antes de cobrar.</p>
+        </aside>
+        <a class="adb-bar" href="#adb-sum" data-bar><span>Total estimado</span><b data-bar-total>$0</b><span class="adb-bar-go">Ver resumen ›</span></a>
+      </form>
+    </section>
+
+    <section class="adp-sec" aria-labelledby="adp-v">
+      <h2 id="adp-v">Valla digital: anuncios que se mueven</h2>
+      <div class="adp-valla">
+        <div class="adp-billboard" data-billboard aria-hidden="true">
+          {DEMO_ADS.map((a, i) => <div class:list={['adp-bb-ad', { on: i === 0 }]} style={`background:${a.bg}`}><b>{a.t}</b><span>{a.s}</span></div>)}
+          <span class="adp-bb-dots">{DEMO_ADS.map((_, i) => <i class:list={{ on: i === 0 }}></i>)}</span>
+        </div>
+        <ul class="adp-list">
+          <li><b>Como una valla en la carretera:</b> tu anuncio comparte el espacio con hasta 3 marcas y cambia cada {ROTATE_SECONDS} segundos.</li>
+          <li><b>Varios artes:</b> sube 2 o 3 versiones y rotan solas (oferta, producto, logo).</li>
+          <li><b>Solo cuenta cuando se ve:</b> la rotación se detiene cuando el lector no está mirando el anuncio.</li>
+          <li>Cualquier espacio puede rotar; la valla del banner superior es la forma más económica de empezar.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="adp-sec" aria-labelledby="adp-pr">
+      <h2 id="adp-pr">Tus anuncios van primero</h2>
+      <ol class="adp-flow">
+        <li><b>Clientes directos</b><span>Si compraste un espacio, tu anuncio sale ahí antes que nadie. Una toma de portada ocupa todos los espacios.</span></li>
+        <li><b>Google</b><span>Solo llena los espacios que ningún cliente directo compró.</span></li>
+        <li><b>“Anúnciate aquí”</b><span>Si no hay nada más, el espacio invita a otros negocios a anunciarse.</span></li>
+      </ol>
+    </section>
+
+    <section class="adp-sec" aria-labelledby="adp-t">
+      <h2 id="adp-t">Precios y descuentos</h2>
+      <div class="adp-prices">
+        <table class="adp-table">
+          <caption>Precios de lanzamiento</caption>
+          <thead><tr><th scope="col">Formato</th><th scope="col">Precio</th></tr></thead>
+          <tbody>{FORMATS.map((f) => <tr><td>{f.name}<small>{f.size}</small></td><td><b>{money(f.price)}</b>/{f.per}</td></tr>)}</tbody>
+        </table>
+        <div>
+          <h3>Descuentos <small>(se suman hasta {MAX_DISCOUNT}%)</small></h3>
+          <ul class="adp-disc">
+            <li><b>{LAUNCH_DISCOUNT.pct}%</b><span>{LAUNCH_DISCOUNT.text.replace(/^[^:]+: /, '')}</span></li>
+            {DURATION_DISCOUNTS.map((d) => <li><b>{d.pct}%</b><span>Campañas de {d.months} meses</span></li>)}
+            {OTHER_DISCOUNTS.map((d) => <li><b>{d.pct}%</b><span>{d.text}</span></li>)}
+          </ul>
+          <p class="adb-fine">Además, si te anuncias solo en tu región pagas {Math.round(AUDIENCE.perRegion * 100)}% del precio por cada región; solo en Puerto Rico, {Math.round(AUDIENCE.island * 100)}%; solo en la diáspora, {Math.round(AUDIENCE.diaspora * 100)}%.</p>
+          <h3>Premios: anuncios gratis</h3>
+          <ol class="adp-rewards">
+            {REWARDS.map((r) => <li><b>{money(r.at)}</b><span>{r.gift}</span></li>)}
+          </ol>
+          <p class="adb-fine">Según lo que inviertas en total con nosotros.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="adp-sec adp-panel" aria-labelledby="adp-a">
+      <div>
+        <h2 id="adp-a">Tu panel de anunciante</h2>
+        <ul class="adp-list">
+          <li><b>Estadísticas al día:</b> impresiones, clics, porcentaje de clics y en qué secciones y regiones te vieron.</li>
+          <li><b>Informe automático por correo</b> cada lunes (o cada mes), con los números de tu campaña.</li>
+          <li><b>Tus anuncios anteriores</b>, facturas y los premios que te faltan para tu próximo anuncio gratis.</li>
+          <li><b>Pide una campaña nueva</b> o cambia el arte desde el panel.</li>
+        </ul>
+        <a class="adp-btn" href={url('publicidad/panel')}>Ver un panel de ejemplo</a>
+      </div>
+      <div class="adp-mail" aria-hidden="true">
+        <p class="adp-mail-h"><b>Noticias Xtra</b><span>Tu informe semanal</span></p>
+        <p class="adp-mail-t">Hola, Panadería La Esquina 👋</p>
+        <div class="adp-mail-k"><span><b>5,840</b>impresiones</span><span><b>73</b>clics</span><span><b>1.25%</b>de clics</span></div>
+        <p class="adp-mail-s">Tu mejor día fue el sábado. La región que más te vio: Metro.</p>
+        <span class="adp-mail-b">Ver mi panel</span>
       </div>
     </section>
 
     <section class="adp-sec adp-contact" id="contacto" aria-labelledby="adp-c">
       <div>
-        <h2 id="adp-c">Solicita información</h2>
+        <h2 id="adp-c">Contáctanos</h2>
         <p>Cuéntanos de tu negocio y te enviamos opciones y precios.</p>
         {SITE.email && <p>También puedes escribirnos a <a href={`mailto:${SITE.email}?subject=${encodeURIComponent('Publicidad en Noticias Xtra')}`}>{SITE.email}</a>.</p>}
       </div>
@@ -91,41 +266,156 @@ const INTERESTS = ['Banner horizontal', 'Rectángulo', 'Media página', 'Patroci
         <label>Negocio<input name="negocio" autocomplete="organization" required /></label>
         <label>Correo electrónico<input name="correo" type="email" autocomplete="email" required /></label>
         <label>Teléfono<input name="telefono" type="tel" autocomplete="tel" /></label>
-        <fieldset><legend>Me interesa</legend>
-          {INTERESTS.map((i) => <label class="adp-check"><input type="checkbox" name="interes" value={i} />{i}</label>)}
-        </fieldset>
-        <label>Presupuesto mensual
-          <select name="presupuesto"><option value="">Prefiero no decir</option><option>Menos de $500</option><option>$500 a $1,500</option><option>$1,500 a $5,000</option><option>Más de $5,000</option></select>
+        <label>Soy
+          <select name="tipo"><option>Negocio local</option><option>Agencia</option><option>Marca grande</option><option>Sin fines de lucro</option></select>
         </label>
-        <label class="adp-wide">Mensaje<textarea name="mensaje" rows="3" placeholder="¿Qué quieres anunciar y cuándo?"></textarea></label>
+        <label>Presupuesto mensual
+          <select name="presupuesto"><option value="">Prefiero no decir</option><option>Menos de $250</option><option>$250 a $750</option><option>$750 a $2,500</option><option>Más de $2,500</option></select>
+        </label>
+        <label class="adp-wide">Mensaje<textarea name="mensaje" rows="3" placeholder="¿Qué quieres anunciar, dónde y cuándo?"></textarea></label>
         <p class="cm-err adp-wide" data-err hidden></p>
-        <button type="submit" class="adp-btn red adp-wide">Enviar solicitud</button>
+        <button type="submit" class="adp-btn red adp-wide">Enviar</button>
         <p class="adp-note adp-wide" data-note hidden></p>
       </form>
     </section>
   </main>
   <script>
-    const form = document.querySelector<HTMLFormElement>('[data-ad-form]')!;
-    const err = form.querySelector<HTMLElement>('[data-err]')!;
-    const note = form.querySelector<HTMLElement>('[data-note]')!;
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const d = new FormData(form);
-      const v = (k: string) => String(d.get(k) || '').trim();
-      if (!v('nombre') || !v('negocio')) { err.textContent = 'Escribe tu nombre y el de tu negocio.'; err.hidden = false; return; }
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v('correo'))) { err.textContent = 'Escribe un correo válido, por ejemplo nombre@negocio.com.'; err.hidden = false; return; }
-      err.hidden = true;
+    const money = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
+    const emailOk = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+    // Opens the visitor's email app with the request already written (or explains it's coming soon)
+    function send(form: HTMLFormElement, subject: string, body: string) {
+      const note = form.querySelector<HTMLElement>('[data-note]')!;
       const to = form.dataset.email;
-      if (!to) {
-        note.textContent = 'Gracias. El envío de solicitudes se activará muy pronto, cuando publiquemos el correo de ventas.';
-        note.hidden = false; return;
-      }
-      // Opens the reader's email app with the request already written
-      const body = [`Nombre: ${v('nombre')}`, `Negocio: ${v('negocio')}`, `Correo: ${v('correo')}`, `Teléfono: ${v('telefono')}`,
-        `Me interesa: ${d.getAll('interes').join(', ') || '—'}`, `Presupuesto: ${v('presupuesto') || 'Prefiero no decir'}`, '', v('mensaje')].join('\n');
-      location.href = `mailto:${to}?subject=${encodeURIComponent(`Publicidad: ${v('negocio')}`)}&body=${encodeURIComponent(body)}`;
-      note.textContent = 'Se abrió tu correo con la solicitud lista. Solo tienes que enviarla.';
-      note.hidden = false;
+      if (!to) { note.textContent = 'Gracias. El envío de solicitudes se activará muy pronto, cuando publiquemos el correo de ventas.'; note.hidden = false; return; }
+      location.href = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      note.textContent = 'Se abrió tu correo con la solicitud lista. Solo tienes que enviarla.'; note.hidden = false;
+    }
+    function check(form: HTMLFormElement) {
+      const d = new FormData(form); const v = (k: string) => String(d.get(k) || '').trim();
+      const err = form.querySelector<HTMLElement>('[data-err]')!;
+      const msg = !v('nombre') || !v('negocio') ? 'Escribe tu nombre y el de tu negocio.' : !emailOk(v('correo')) ? 'Escribe un correo válido, por ejemplo nombre@negocio.com.' : '';
+      err.textContent = msg; err.hidden = !msg;
+      return msg ? null : v;
+    }
+
+    // Retail / agency tabs
+    document.querySelectorAll<HTMLButtonElement>('[data-who]').forEach((b) => b.addEventListener('click', () => {
+      document.querySelectorAll('[data-who]').forEach((x) => x.setAttribute('aria-selected', String(x === b)));
+      document.querySelectorAll<HTMLElement>('[data-who-panel]').forEach((p) => (p.hidden = p.dataset.whoPanel !== b.dataset.who));
+    }));
+
+    // Contact form
+    const cf = document.querySelector<HTMLFormElement>('[data-ad-form]')!;
+    cf.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const v = check(cf); if (!v) return;
+      send(cf, `Publicidad: ${v('negocio')}`, [`Nombre: ${v('nombre')}`, `Negocio: ${v('negocio')}`, `Correo: ${v('correo')}`, `Teléfono: ${v('telefono')}`,
+        `Soy: ${v('tipo')}`, `Presupuesto: ${v('presupuesto') || 'Prefiero no decir'}`, '', v('mensaje')].join('\n'));
     });
+
+    // ---- Campaign builder ----
+    type Cfg = { formats: Array<{ id: string; name: string; price: number; per: string }>; audience: { all: number; island: number; diaspora: number; perRegion: number };
+      launch: { pct: number; months: number }; duration: Array<{ months: number; pct: number }>; other: Array<{ id: string; pct: number; text: string }>;
+      max: number; rewards: Array<{ at: number; gift: string }>; volume: Array<{ from: number; pct: number }>; design: number; regions: Array<{ id: string; name: string }> };
+    const bf = document.querySelector<HTMLFormElement>('[data-builder]')!;
+    const cfg: Cfg = JSON.parse(bf.dataset.cfg!);
+    const regs = new Set<string>();
+    const start = bf.querySelector<HTMLInputElement>('[data-start]')!;
+    start.valueAsDate = new Date(Date.now() + 3 * 864e5);
+    start.min = new Date().toISOString().slice(0, 10);
+
+    function setRegion(id: string) {
+      regs.has(id) ? regs.delete(id) : regs.add(id);
+      bf.querySelector<HTMLInputElement>(`[name="aud"][value="${regs.size ? 'regions' : 'all'}"]`)!.checked = true;
+      calc();
+    }
+    bf.querySelectorAll<SVGElement>('.adb-reg').forEach((el) => el.addEventListener('click', () => setRegion(el.dataset.reg!)));
+    bf.querySelectorAll<HTMLButtonElement>('[data-reg-btn]').forEach((b) => b.addEventListener('click', () => setRegion(b.dataset.regBtn!)));
+    bf.addEventListener('change', (e) => {
+      const t = e.target as HTMLInputElement;
+      if (t.name === 'aud' && t.value !== 'regions') regs.clear();
+      if (t.name === 'aud' && t.value === 'regions' && !regs.size) regs.add('metro');
+      calc();
+    });
+    bf.addEventListener('input', calc);
+
+    let summary = '';
+    function calc() {
+      const d = new FormData(bf);
+      const months = Number(d.get('months')); const days = Math.max(1, Math.min(14, Number(d.get('days')) || 1));
+      const picked = cfg.formats.filter((f) => d.getAll('fmt').includes(f.id));
+      const aud = String(d.get('aud'));
+      bf.querySelector<HTMLElement>('[data-days-wrap]')!.hidden = !picked.some((f) => f.per === 'día');
+      // Map + region buttons
+      bf.querySelectorAll<SVGElement>('.adb-reg').forEach((el) => el.classList.toggle('on', aud === 'all' || aud === 'island' || regs.has(el.dataset.reg!)));
+      bf.querySelectorAll<SVGElement>('[data-lbl]').forEach((el) => el.classList.toggle('on', aud === 'all' || aud === 'island' || regs.has(el.dataset.lbl!)));
+      bf.querySelectorAll<HTMLButtonElement>('[data-reg-btn]').forEach((b) => b.setAttribute('aria-pressed', String(regs.has(b.dataset.regBtn!))));
+      bf.querySelector('.adb-map')!.classList.toggle('off', aud === 'diaspora');
+      const factor = aud === 'all' ? cfg.audience.all : aud === 'island' ? cfg.audience.island : aud === 'diaspora' ? cfg.audience.diaspora : Math.min(cfg.audience.island, regs.size * cfg.audience.perRegion);
+      const where = aud === 'all' ? 'Puerto Rico y la diáspora' : aud === 'island' ? 'Solo Puerto Rico' : aud === 'diaspora' ? 'Solo la diáspora' : cfg.regions.filter((r) => regs.has(r.id)).map((r) => r.name).join(', ');
+      bf.querySelector<HTMLElement>('[data-aud-hint]')!.textContent = aud === 'regions' ? `Pagas ${Math.round(factor * 100)}% del precio: ${where}.` : aud === 'diaspora' ? 'Lectores fuera de Puerto Rico, a mitad de precio.' : 'Toca las regiones en el mapa para anunciarte solo ahí.';
+
+      const lines: Array<[string, number]> = [];
+      let monthly = 0, subtotal = 0;
+      for (const f of picked) {
+        const wide = f.per === 'día' || f.id === 'patrocinio'; // site-wide formats are not split by region
+        const cost = f.per === 'día' ? f.price * days : f.price * months * (wide ? 1 : factor);
+        if (f.per !== 'día') monthly += f.price * (wide ? 1 : factor);
+        lines.push([`${f.name}${f.per === 'día' ? ` · ${days} día${days > 1 ? 's' : ''}` : ''}`, cost]); subtotal += cost;
+      }
+      const who = String(d.get('who'));
+      const pcts: Array<[string, number]> = [];
+      const dur = [...cfg.duration].reverse().find((x) => months >= x.months); if (dur) pcts.push([`${dur.months} meses`, dur.pct]);
+      if (picked.length >= 2) pcts.push(['2 formatos o más', cfg.other.find((x) => x.id === 'combo')!.pct]);
+      if (d.get('prepay')) pcts.push(['Pago por adelantado', cfg.other.find((x) => x.id === 'prepago')!.pct]);
+      if (who === 'nonprofit') pcts.push(['Sin fines de lucro', cfg.other.find((x) => x.id === 'nonprofit')!.pct]);
+      if (who === 'agency') { const v = [...cfg.volume].reverse().find((x) => subtotal >= x.from); if (v) pcts.push([`Volumen (${money(v.from)}+)`, v.pct]); }
+      const launch = d.get('founder') ? monthly * Math.min(months, cfg.launch.months) * cfg.launch.pct / 100 : 0;
+      const pctOff = subtotal * Math.min(cfg.max, pcts.reduce((a, [, p]) => a + p, 0)) / 100;
+      const off = Math.min(subtotal * cfg.max / 100, pctOff + launch);
+      const fee = d.get('art') === 'design' && picked.length ? cfg.design : 0;
+      const total = subtotal - off + fee;
+
+      const rows = lines.map(([n, c]) => `<li><span>${n}</span><b>${money(c)}</b></li>`);
+      if (!picked.length) rows.push('<li class="adb-empty">Escoge al menos un formato.</li>');
+      if (launch) rows.push(`<li class="adb-off"><span>Precio de fundador (${cfg.launch.pct}%, ${Math.min(months, cfg.launch.months) >= 1 ? `${Math.min(months, cfg.launch.months)} ${Math.min(months, cfg.launch.months) === 1 ? 'mes' : 'meses'}` : '1 semana'})</span><b>−${money(launch)}</b></li>`);
+      pcts.forEach(([n, p]) => rows.push(`<li class="adb-off"><span>${n} (${p}%)</span><b>−${money(subtotal * p / 100)}</b></li>`));
+      if (off < pctOff + launch) rows.push(`<li class="adb-off"><span>Tope de descuento (${cfg.max}%)</span><b>+${money(pctOff + launch - off)}</b></li>`);
+      if (fee) rows.push(`<li><span>Diseño del anuncio</span><b>${money(fee)}</b></li>`);
+      rows.push(`<li class="adb-where"><span>Dónde: ${where || '—'}</span></li>`);
+      bf.querySelector('[data-lines]')!.innerHTML = rows.join('');
+      bf.querySelector('[data-total]')!.textContent = money(total);
+      bf.querySelector('[data-bar-total]')!.textContent = money(total);
+      bf.querySelector('[data-month]')!.textContent = months >= 1 && monthly ? `Unos ${money(total / months)} al mes · ahorras ${money(off)}` : off ? `Ahorras ${money(off)}` : '';
+      const gift = [...cfg.rewards].reverse().find((r) => total >= r.at);
+      const next = cfg.rewards.find((r) => total < r.at);
+      const g = bf.querySelector<HTMLElement>('[data-gift]')!;
+      g.hidden = !picked.length;
+      g.innerHTML = gift ? `🎁 Con esta campaña te ganas: <b>${gift.gift}</b>` : next ? `🎁 Te faltan ${money(next.at - total)} para ganarte ${next.gift.toLowerCase()}.` : '';
+      summary = [...lines.map(([n, c]) => `- ${n}: ${money(c)}`), `Dónde: ${where}`, `Empieza: ${d.get('start')}`, `Duración: ${bf.querySelector<HTMLSelectElement>('[name="months"]')!.selectedOptions[0].text}`,
+        `Tipo de cliente: ${bf.querySelector<HTMLSelectElement>('[name="who"]')!.selectedOptions[0].text}`, `Arte: ${bf.querySelector<HTMLSelectElement>('[name="art"]')!.selectedOptions[0].text}`,
+        `Descuentos: ${money(off)}`, `Total estimado: ${money(total)}`].join('\n');
+    }
+    bf.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const v = check(bf); if (!v) return;
+      send(bf, `Campaña: ${v('negocio')}`, [`Nombre: ${v('nombre')}`, `Negocio: ${v('negocio')}`, `Correo: ${v('correo')}`, `Teléfono: ${v('telefono')}`, '', summary].join('\n'));
+    });
+    calc();
+    // Phones: a small total bar while the builder is on screen and the summary is not
+    const bar = bf.querySelector<HTMLElement>('[data-bar]')!;
+    let inForm = false, sumSeen = false;
+    const paintBar = () => bar.classList.toggle('show', inForm && !sumSeen);
+    new IntersectionObserver(([e]) => { inForm = e.isIntersecting; paintBar(); }).observe(bf.querySelector('.adb-steps')!);
+    new IntersectionObserver(([e]) => { sumSeen = e.isIntersecting; paintBar(); }, { threshold: 0.2 }).observe(bf.querySelector('.adb-sum')!);
+
+    // Billboard demo
+    const bb = document.querySelector<HTMLElement>('[data-billboard]')!;
+    const ads = [...bb.querySelectorAll('.adp-bb-ad')]; const dots = [...bb.querySelectorAll('.adp-bb-dots i')];
+    let k = 0;
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) setInterval(() => {
+      ads[k].classList.remove('on'); dots[k].classList.remove('on');
+      k = (k + 1) % ads.length; ads[k].classList.add('on'); dots[k].classList.add('on');
+    }, 3000);
   </script>
 </Base>

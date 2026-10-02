@@ -1,0 +1,183 @@
+---
+// DEMO: advertiser panel with made-up numbers for a fictional client, to show clients what they'll get.
+// The real version needs advertiser accounts and ad statistics from an outside service (see src/lib/ads.ts);
+// it should replace this page's data, not its look. Email-report settings are saved only on this device.
+import Base from '../../layouts/Base.astro';
+import { url } from '../../lib/site';
+import { REWARDS } from '../../lib/ads';
+---
+<Base title="Panel de anunciante" description="Ejemplo del panel de anunciante de Noticias Xtra: impresiones, clics, regiones, anuncios anteriores, facturas e informes por correo.">
+  <main class="wrap apn" id="main" data-apn data-rewards={JSON.stringify(REWARDS)}>
+    <p class="pf-demo"><span class="sp-demo">DEMO</span> Panel de ejemplo con datos ficticios. Así verán sus estadísticas nuestros anunciantes.</p>
+    <header class="apn-head">
+      <div>
+        <p class="apn-kicker">Panel de anunciante</p>
+        <h1>Panadería La Esquina</h1>
+        <p class="apn-sub">Negocio local · Cliente desde agosto 2026</p>
+      </div>
+      <div class="apn-actions">
+        <a class="adp-btn red" href={`${url('publicidad')}#campana`}>Nueva campaña</a>
+        <button type="button" class="adp-btn ghost-dark" data-csv>Descargar CSV</button>
+      </div>
+    </header>
+
+    <div class="cx-tabs apn-range" role="tablist" aria-label="Período">
+      <button type="button" role="tab" aria-selected="false" data-range="7">7 días</button>
+      <button type="button" role="tab" aria-selected="true" data-range="30">30 días</button>
+      <button type="button" role="tab" aria-selected="false" data-range="90">90 días</button>
+    </div>
+
+    <section class="apn-kpis" data-kpis aria-live="polite"></section>
+
+    <div class="apn-grid">
+      <section class="apn-card apn-wide">
+        <h2>Impresiones por día</h2>
+        <div class="apn-chart" data-chart></div>
+        <p class="apn-read" data-read>Pasa el dedo o el ratón sobre la gráfica para ver cada día.</p>
+      </section>
+      <section class="apn-card"><h2>Por región</h2><ul class="apn-bars" data-regions></ul></section>
+      <section class="apn-card"><h2>Por sección</h2><ul class="apn-bars" data-sections></ul></section>
+      <section class="apn-card"><h2>Por pantalla</h2><ul class="apn-bars" data-devices></ul></section>
+      <section class="apn-card">
+        <h2>Premios</h2>
+        <p class="apn-spent">Has invertido <b data-spent></b></p>
+        <div class="cx-bar apn-prog"><span data-prog></span></div>
+        <p class="apn-small" data-next></p>
+        <ul class="apn-gifts" data-gifts></ul>
+      </section>
+    </div>
+
+    <section class="apn-card apn-sec">
+      <h2>Tus campañas</h2>
+      <div class="apn-scroll">
+        <table class="apn-table">
+          <thead><tr><th scope="col">Anuncio</th><th scope="col">Formato</th><th scope="col">Fechas</th><th scope="col">Impresiones</th><th scope="col">Clics</th><th scope="col">% clics</th><th scope="col">Estado</th></tr></thead>
+          <tbody data-camps></tbody>
+        </table>
+      </div>
+    </section>
+
+    <div class="apn-grid apn-sec">
+      <section class="apn-card">
+        <h2>Informe por correo</h2>
+        <p class="apn-small">Te enviamos tus números automáticamente.</p>
+        <form class="apn-mail" data-mail>
+          <label>Frecuencia
+            <select name="freq"><option value="weekly">Cada lunes</option><option value="monthly">El día 1 de cada mes</option><option value="off">No enviar</option></select>
+          </label>
+          <label>Correo<input name="to" type="email" value="ventas@panaderialaesquina.com" /></label>
+          <button type="submit" class="adp-btn">Guardar</button>
+          <p class="adp-note" data-mail-note hidden></p>
+        </form>
+      </section>
+      <section class="apn-card">
+        <h2>Facturas</h2>
+        <ul class="apn-inv" data-invoices></ul>
+      </section>
+    </div>
+  </main>
+  <script>
+    const page = document.querySelector<HTMLElement>('[data-apn]')!;
+    const $ = (s: string) => page.querySelector<HTMLElement>(s)!;
+    const n = (v: number) => Math.round(v).toLocaleString('es-PR');
+    const money = (v: number) => `$${Math.round(v).toLocaleString('en-US')}`;
+    // Made-up but steady numbers (same every visit)
+    let seed = 7; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+    const DAYS = 90;
+    const today = new Date(); today.setHours(12, 0, 0, 0);
+    const daily = Array.from({ length: DAYS }, (_, i) => {
+      const d = new Date(today.valueOf() - (DAYS - 1 - i) * 864e5);
+      const weekend = d.getDay() === 0 || d.getDay() === 6 ? 1.25 : 1;
+      const imp = Math.round((420 + i * 3.2 + rnd() * 160) * weekend);
+      return { d, imp, clk: Math.round(imp * (0.009 + rnd() * 0.007)) };
+    });
+    const REG = [['Metro', 0.34], ['Norte', 0.16], ['Este', 0.13], ['Centro', 0.12], ['Sur', 0.11], ['Oeste', 0.09], ['Diáspora', 0.05]] as const;
+    const SEC = [['Portada', 0.31], ['Deportes', 0.22], ['Puerto Rico', 0.17], ['Juegos Xtra', 0.14], ['Clima', 0.09], ['Entretenimiento', 0.07]] as const;
+    const DEV = [['Celular', 0.71], ['Computadora', 0.26], ['Tableta', 0.03]] as const;
+    const CAMPS = [
+      { name: 'Pan sobao de otoño', fmt: 'Rectángulo', from: '15 sep', to: '15 oct', imp: 9210, clk: 116, st: 'Activa', bg: 'linear-gradient(135deg,#B45309,#F59E0B)' },
+      { name: 'Quesitos 2×1', fmt: 'Valla digital', from: '20 sep', to: '20 oct', imp: 12480, clk: 141, st: 'Activa', bg: 'linear-gradient(135deg,#D7263D,#F28C28)' },
+      { name: 'Café y desayuno', fmt: 'Entre noticias', from: '1 sep', to: '30 sep', imp: 21950, clk: 241, st: 'Terminó', bg: 'linear-gradient(135deg,#5B3A1E,#A16207)' },
+      { name: 'Gran apertura Caguas', fmt: 'Rectángulo · Centro', from: '10 ago', to: '31 ago', imp: 9840, clk: 157, st: 'Terminó', bg: 'linear-gradient(135deg,#2B1185,#1F90DA)' },
+    ];
+    const INV = [['Octubre 2026', 118, 'Pagada'], ['Septiembre 2026', 132, 'Pagada'], ['Agosto 2026', 97, 'Pagada']] as const;
+    const SPENT = INV.reduce((t, [, a]) => t + a, 0); // lifetime spend = all invoices
+
+    function bars(sel: string, rows: ReadonlyArray<readonly [string, number]>, total: number) {
+      const max = Math.max(...rows.map((r) => r[1]));
+      $(sel).innerHTML = rows.map(([name, s]) => `<li><span class="apn-b-name">${name}</span><span class="apn-b-track"><i style="width:${(s / max) * 100}%"></i></span><b>${n(total * s)}</b></li>`).join('');
+    }
+    function render(range: number) {
+      const cur = daily.slice(-range), prev = daily.slice(-range * 2, -range);
+      const sum = (a: typeof daily, k: 'imp' | 'clk') => a.reduce((t, x) => t + x[k], 0);
+      const imp = sum(cur, 'imp'), clk = sum(cur, 'clk'), pImp = sum(prev, 'imp'), pClk = sum(prev, 'clk');
+      const ctr = (clk / imp) * 100, pCtr = pImp ? (pClk / pImp) * 100 : 0;
+      const spend = (SPENT / 90) * range;
+      const delta = (a: number, b: number) => (b ? `<small class="${a >= b ? 'up' : 'down'}">${a >= b ? '▲' : '▼'} ${Math.abs(((a - b) / b) * 100).toFixed(0)}%</small>` : '');
+      $('[data-kpis]').innerHTML = [
+        ['Impresiones', n(imp), delta(imp, pImp)], ['Clics', n(clk), delta(clk, pClk)], ['% de clics', `${ctr.toFixed(2)}%`, delta(ctr, pCtr)], ['Inversión', money(spend), `<small>${money(spend / clk)} por clic</small>`],
+      ].map(([k, v, d]) => `<div><span>${k}</span><b>${v}</b>${d}</div>`).join('');
+      // Line chart with hover crosshair
+      const W = Math.max(600, Math.min(1100, $('[data-chart]').clientWidth)), H = 240, L = 64, R = 14, T = 14, B = 30;
+      const max = Math.ceil(Math.max(...cur.map((x) => x.imp)) / 200) * 200;
+      const x = (i: number) => L + (i * (W - L - R)) / Math.max(1, cur.length - 1);
+      const y = (v: number) => T + (H - T - B) * (1 - v / max);
+      const grid = [0, 0.5, 1].map((f) => `<line x1="${L}" x2="${W - R}" y1="${y(max * f)}" y2="${y(max * f)}" class="apn-grid-l"/><text x="${L - 8}" y="${y(max * f) + 4}" class="apn-ax" text-anchor="end">${n(max * f)}</text>`).join('');
+      const step = Math.ceil(cur.length / 6);
+      const xl = cur.map((p, i) => (i % step === 0 ? `<text x="${x(i)}" y="${H - 8}" class="apn-ax" text-anchor="middle">${p.d.toLocaleDateString('es-PR', { day: 'numeric', month: 'short' })}</text>` : '')).join('');
+      const pts = cur.map((p, i) => `${x(i)},${y(p.imp)}`).join(' ');
+      $('[data-chart]').innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Impresiones por día">${grid}${xl}<polygon points="${L},${y(0)} ${pts} ${x(cur.length - 1)},${y(0)}" class="apn-area"/><polyline points="${pts}" class="apn-line"/><line class="apn-cur" data-cur y1="${T}" y2="${y(0)}" hidden/><circle r="5" class="apn-dot" data-dot hidden/><rect x="${L}" y="0" width="${W - L - R}" height="${H}" fill="transparent" data-hit/></svg>`;
+      const svg = $('[data-chart]').querySelector('svg')!;
+      const read = (i: number) => {
+        const p = cur[i];
+        $('[data-read]').innerHTML = `<b>${p.d.toLocaleDateString('es-PR', { weekday: 'long', day: 'numeric', month: 'long' })}:</b> ${n(p.imp)} impresiones · ${n(p.clk)} clics`;
+        const c = svg.querySelector('[data-cur]')!, dot = svg.querySelector('[data-dot]')!;
+        c.removeAttribute('hidden'); dot.removeAttribute('hidden');
+        c.setAttribute('x1', String(x(i))); c.setAttribute('x2', String(x(i))); dot.setAttribute('cx', String(x(i))); dot.setAttribute('cy', String(y(p.imp)));
+      };
+      svg.querySelector('[data-hit]')!.addEventListener('pointermove', (e) => {
+        const r = svg.getBoundingClientRect(); const vx = ((e as PointerEvent).clientX - r.left) * (W / r.width);
+        read(Math.max(0, Math.min(cur.length - 1, Math.round(((vx - L) / (W - L - R)) * (cur.length - 1)))));
+      });
+      read(cur.length - 1);
+      bars('[data-regions]', REG, imp); bars('[data-sections]', SEC, imp); bars('[data-devices]', DEV, imp);
+    }
+
+    page.querySelectorAll<HTMLButtonElement>('[data-range]').forEach((b) => b.addEventListener('click', () => {
+      page.querySelectorAll('[data-range]').forEach((x) => x.setAttribute('aria-selected', String(x === b)));
+      render(Number(b.dataset.range));
+    }));
+    render(30);
+
+    $('[data-camps]').innerHTML = CAMPS.map((c) => `<tr><td><span class="apn-thumb" style="background:${c.bg}"></span>${c.name}</td><td>${c.fmt}</td><td>${c.from} – ${c.to}</td><td>${n(c.imp)}</td><td>${n(c.clk)}</td><td>${((c.clk / c.imp) * 100).toFixed(2)}%</td><td><span class="apn-st ${c.st === 'Activa' ? 'on' : ''}">${c.st}</span></td></tr>`).join('');
+    $('[data-invoices]').innerHTML = INV.map(([m, a, s]) => `<li><span>${m}</span><b>${money(a)}</b><span class="apn-st">${s}</span></li>`).join('');
+
+    // Rewards progress
+    const rewards: Array<{ at: number; gift: string }> = JSON.parse(page.dataset.rewards!);
+    const next = rewards.find((r) => SPENT < r.at);
+    $('[data-spent]').textContent = money(SPENT);
+    $('[data-prog]').style.width = `${next ? (SPENT / next.at) * 100 : 100}%`;
+    $('[data-next]').textContent = next ? `Te faltan ${money(next.at - SPENT)} para: ${next.gift.toLowerCase()}.` : '¡Ganaste todos los premios!';
+    $('[data-gifts]').innerHTML = rewards.map((r) => `<li class="${SPENT >= r.at ? 'won' : ''}"><b>${money(r.at)}</b> ${r.gift}${SPENT >= r.at ? ' ✓' : ''}</li>`).join('');
+
+    // CSV of the daily numbers
+    $('[data-csv]').addEventListener('click', () => {
+      const csv = ['fecha,impresiones,clics', ...daily.map((p) => `${p.d.toISOString().slice(0, 10)},${p.imp},${p.clk}`)].join('\n');
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); a.download = 'noticias-xtra-estadisticas.csv'; a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    });
+
+    // Email report settings (demo: saved on this device only)
+    const mf = document.querySelector<HTMLFormElement>('[data-mail]')!;
+    try { const s = JSON.parse(localStorage.getItem('nx-adpanel') || 'null'); if (s) { (mf.elements.namedItem('freq') as HTMLSelectElement).value = s.freq; (mf.elements.namedItem('to') as HTMLInputElement).value = s.to; } } catch { /* storage blocked */ }
+    mf.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const d = new FormData(mf);
+      try { localStorage.setItem('nx-adpanel', JSON.stringify({ freq: d.get('freq'), to: d.get('to') })); } catch { /* storage blocked */ }
+      const note = $('[data-mail-note]');
+      note.textContent = d.get('freq') === 'off' ? 'Listo: no te enviaremos informes.' : `Listo: recibirás tu informe ${d.get('freq') === 'weekly' ? 'cada lunes' : 'el día 1 de cada mes'}. (Ejemplo: no se envía nada todavía.)`;
+      note.hidden = false;
+    });
+  </script>
+</Base>
