@@ -2618,3 +2618,17 @@ body.ad-skin{background:var(--ad-skin) center top/cover fixed}
   .ys-mini h3{margin:0 0 4px;font-size:15px}
   .ys-mini .ys-by{align-self:start}
 }
+/* Entretenimiento on phones: stories one after another, small picture on the left */
+@media (max-width:760px){
+  .tb-side{gap:10px}
+  .tb-side-card{display:grid;grid-template-columns:112px minmax(0,1fr);align-items:stretch}
+  .tb-side-card .ph{aspect-ratio:auto;height:100%;min-height:84px}
+  .tb-side-card h3{display:flex;align-items:center;font-size:15px;padding:10px 12px}
+  .tb-mosaic{grid-template-columns:minmax(0,1fr);gap:0}
+  .tb-tile,.tb-tile.big{grid-column:auto;flex-direction:row;align-items:flex-start;gap:12px;padding:12px 0;border:0;border-top:1px solid var(--line);border-radius:0;box-shadow:none;background:transparent}
+  .tb-tile:first-child{border-top:0}
+  .tb-tile:hover{transform:none;box-shadow:none}
+  .tb-tile .ph{flex:none;width:112px;aspect-ratio:4/3;border-radius:8px}
+  .tb-tile div{padding:0}
+  .tb-tile h3,.tb-tile.big h3{font-size:15px;margin:2px 0 4px}
+}

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="160" height="160">
+<defs><linearGradient id="b" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#BBF7D0"/><stop offset="1" stop-color="#4ADE80"/></linearGradient>
+<clipPath id="c"><circle cx="80" cy="80" r="80"/></clipPath></defs>
+<g clip-path="url(#c)">
+<rect width="160" height="160" fill="url(#b)"/>
+
+<path d="M30 160c4-30 24-44 50-44s46 14 50 44z" fill="#0E5A37"/>
+<path d="M68 104h24v16c0 7-24 7-24 0z" fill="#A86B47"/>
+<path d="M66 116q14 10 28 0" fill="none" stroke="rgba(0,0,0,.12)" stroke-width="3"/>
+<ellipse cx="80" cy="80" rx="27" ry="31" fill="#A86B47"/>
+<ellipse cx="53" cy="84" rx="5" ry="7" fill="#A86B47"/><ellipse cx="107" cy="84" rx="5" ry="7" fill="#A86B47"/>
+<path d="M50 70c2-20 14-30 30-30s28 10 30 30z" fill="#D7263D"/><path d="M50 70h68c6 0 6 6 0 6H50z" fill="#B3122A"/><path d="M76 42h8" stroke="#fff" stroke-width="3"/><text x="80" y="64" text-anchor="middle" font-family="Arial Black,Arial" font-weight="900" font-size="15" fill="#fff">PR</text>
+<path d="M64 72q6-4 12 0M84 72q6-4 12 0" fill="none" stroke="#2b1a12" stroke-width="2.6" stroke-linecap="round"/>
+<circle cx="70" cy="81" r="3.2" fill="#2b1a12"/><circle cx="90" cy="81" r="3.2" fill="#2b1a12"/>
+<circle cx="71" cy="80" r="1" fill="#fff"/><circle cx="91" cy="80" r="1" fill="#fff"/>
+<path d="M80 84v9q-3 2-5 0" fill="none" stroke="rgba(0,0,0,.25)" stroke-width="2" stroke-linecap="round"/>
+<path d="M68 104q12 9 24 0" fill="none" stroke="#7a2e2e" stroke-width="3" stroke-linecap="round"/>
+<circle cx="62" cy="94" r="5" fill="#e88" opacity=".25"/><circle cx="98" cy="94" r="5" fill="#e88" opacity=".25"/>
+<path d="M64 128h32M80 128v24" stroke="#fff" stroke-width="3"/><text x="96" y="150" font-family="Arial Black,Arial" font-weight="900" font-size="14" fill="#fff">21</text>
+</g></svg>

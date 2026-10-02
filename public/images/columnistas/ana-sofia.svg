@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="160" height="160">
+<defs><linearGradient id="b" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#E9D5FF"/><stop offset="1" stop-color="#C4B5FD"/></linearGradient>
+<clipPath id="c"><circle cx="80" cy="80" r="80"/></clipPath></defs>
+<g clip-path="url(#c)">
+<rect width="160" height="160" fill="url(#b)"/>
+<path d="M46 86c-4-30 12-48 34-48s38 18 34 48c-2-10-8-18-14-22z" fill="#cfd2d8"/>
+<path d="M30 160c4-30 24-44 50-44s46 14 50 44z" fill="#7C3AED"/>
+<path d="M68 104h24v16c0 7-24 7-24 0z" fill="#F1C9A5"/>
+<path d="M66 116q14 10 28 0" fill="none" stroke="rgba(0,0,0,.12)" stroke-width="3"/>
+<ellipse cx="80" cy="80" rx="27" ry="31" fill="#F1C9A5"/>
+<ellipse cx="53" cy="84" rx="5" ry="7" fill="#F1C9A5"/><ellipse cx="107" cy="84" rx="5" ry="7" fill="#F1C9A5"/>
+<path d="M50 76c4-20 16-30 30-30s28 10 30 30c-10-12-20-16-30-12-8-4-20 0-30 12z" fill="#e5e7eb"/>
+<path d="M64 72q6-4 12 0M84 72q6-4 12 0" fill="none" stroke="#9ca3af" stroke-width="2.6" stroke-linecap="round"/>
+<circle cx="70" cy="81" r="3.2" fill="#2b1a12"/><circle cx="90" cy="81" r="3.2" fill="#2b1a12"/>
+<circle cx="71" cy="80" r="1" fill="#fff"/><circle cx="91" cy="80" r="1" fill="#fff"/>
+<path d="M80 84v9q-3 2-5 0" fill="none" stroke="rgba(0,0,0,.25)" stroke-width="2" stroke-linecap="round"/>
+<path d="M68 104q12 9 24 0" fill="none" stroke="#7a2e2e" stroke-width="3" stroke-linecap="round"/>
+<circle cx="62" cy="94" r="5" fill="#e88" opacity=".25"/><circle cx="98" cy="94" r="5" fill="#e88" opacity=".25"/>
+<g fill="none" stroke="#7c2d12" stroke-width="2.2"><rect x="61" y="76" width="16" height="11" rx="4"/><rect x="83" y="76" width="16" height="11" rx="4"/><path d="M77 81h6"/></g><g fill="#fff"><circle cx="66" cy="121.4" r="2.2"/><circle cx="70" cy="122.6" r="2.2"/><circle cx="74" cy="123.8" r="2.2"/><circle cx="78" cy="125.0" r="2.2"/><circle cx="82" cy="123.8" r="2.2"/><circle cx="86" cy="122.6" r="2.2"/><circle cx="90" cy="121.4" r="2.2"/><circle cx="94" cy="120.2" r="2.2"/></g>
+</g></svg>
