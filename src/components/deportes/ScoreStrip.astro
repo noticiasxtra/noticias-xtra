@@ -17,7 +17,7 @@ function status(g: Game): { text: string; live?: boolean } {
   if (g.status === 'en-vivo') return { text: g.note ?? 'En vivo', live: true };
   if (g.status === 'final') {
     const extra = g.note?.match(/^(\d+)\s*entradas?$/i); // "10 entradas" -> "Final/10"
-    return { text: extra ? `Final/${extra[1]}` : g.note ? `Final · ${g.note}` : 'Final' };
+    return { text: extra ? `Final/${extra[1]}` : g.note ? (/^final/i.test(g.note) ? g.note : `Final · ${g.note}`) : 'Final' };
   }
   const d = new Date(g.date);
   const time = d.toLocaleTimeString('es-PR', { hour: 'numeric', minute: '2-digit', timeZone: 'America/Puerto_Rico' });

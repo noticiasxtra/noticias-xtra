@@ -10,7 +10,7 @@ import Ph from '../components/Ph.astro';
 import Label from '../components/Label.astro';
 import HomeStrip from '../components/HomeStrip.astro';
 import AdSlot from '../components/AdSlot.astro';
-import BracketView from '../components/deportes/BracketView.astro';
+import LocalScores from '../components/deportes/LocalScores.astro';
 import GamesTeaser from '../components/GamesTeaser.astro';
 import { getStories, url, SITE, SECTIONS, VIDEOS } from '../lib/site';
 
@@ -75,8 +75,8 @@ while (queue.length) {
 
       <AdSlot size="infeed" />
 
-      {/* MLB postseason bracket (shows only while src/data/llaves.json has one) */}
-      <BracketView league="mlb" home />
+      {/* BSN, Doble A and La Pro scores: live first, then recent results */}
+      <LocalScores />
 
       {F.videos && (
         <section>
