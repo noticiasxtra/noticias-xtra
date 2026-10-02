@@ -26,7 +26,7 @@ export const LEAGUES = [
   // Beyond the island
   { id: 'mlb', youtube: 'UCoLrcjPV5PbUrUyXq5mjc_A', name: 'Grandes Ligas', abbr: 'MLB', full: 'Grandes Ligas (MLB)', local: false, color: '#13274F', photo: 'baseball',
     about: 'Los peloteros boricuas en las Grandes Ligas.' },
-  { id: 'nba', youtube: 'UCWJ2lWNubArHWmf3FIHbfcQ', name: 'NBA', abbr: 'NBA', full: 'NBA', local: false, color: '#C8102E', logoBg: '#FFFFFF', photo: 'basketball',
+  { id: 'nba', youtube: 'UCWJ2lWNubArHWmf3FIHbfcQ', name: 'NBA', abbr: 'NBA', full: 'NBA', local: false, color: '#C8102E', logoBg: '#FFFFFF', logoShape: 'tall', photo: 'basketball',
     about: 'La NBA y los boricuas en el mejor baloncesto del mundo.' },
 
   { id: 'lvsm', name: 'Voleibol M', abbr: 'LVSM', full: 'Liga de Voleibol Superior Masculino', local: true, color: '#0F8C8C', logoBg: '#FFFFFF', photo: 'volleyball',

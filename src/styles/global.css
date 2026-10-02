@@ -1908,3 +1908,49 @@ main.wrap,.home-grid,.ys-page,.tb-page{padding-top:var(--gap)}
 .ls-grid{grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
 .ls-meta > span:first-child{flex:1;min-width:0}
 .ls-meta > span:last-child{flex:none}
+
+/* Videos: NotiCel's latest upload player + video cards */
+.vx-latest{max-width:900px;margin:0 0 var(--gap)}
+.vx-home{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:var(--gap);align-items:start}
+.vx-list{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.vx-list .vcard h3{font-size:14px}
+@media (max-width:860px){ .vx-home{grid-template-columns:1fr} }
+
+/* Games page: compact banner (about half the old height) and one grid with every game */
+.jh-hero{grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:18px;padding:16px 20px;border-radius:18px}
+.jh-hero h1{font-size:clamp(24px,2.8vw,34px);margin:4px 0}
+.jh-lead{font-size:15px}
+.jh-feat{grid-template-columns:auto 1fr;align-items:center;gap:14px;padding:12px;border-radius:14px}
+.jh-feat-img{width:150px;max-width:none;border-radius:10px}
+.jh-feat-body{display:grid;gap:3px;justify-items:start}
+.jh-feat strong{font-size:20px}
+.jh-feat-btn{margin-top:2px;padding:6px 14px;font-size:14px}
+.jh-all{margin-top:var(--gap)}
+@media (max-width:760px){
+  .jh-hero{grid-template-columns:1fr;padding:14px}
+  .jh-feat-img{width:110px}
+}
+
+/* Crucigrama */
+.cw-clue{min-height:2.6em;margin:0 auto 10px;max-width:560px;padding:8px 12px;border-radius:10px;background:#E8F2FC;color:#0E2A5C;font-size:15px}
+.cw-board{display:grid;gap:3px;max-width:min(100%,520px);margin:0 auto;padding:8px;border-radius:12px;background:#0E2A5C}
+.cw-block{aspect-ratio:1;border-radius:4px;background:transparent}
+.cw-cell{position:relative;aspect-ratio:1;border:0;border-radius:4px;background:#fff;color:#0E2A5C;font-family:var(--head);font-weight:800;font-size:clamp(14px,3.6vw,22px);padding:0;cursor:pointer;display:grid;place-items:center;text-transform:uppercase}
+.cw-cell small{position:absolute;top:2px;left:3px;font-size:9px;font-weight:700;color:#5C6B8A;line-height:1}
+.cw-cell.word{background:#CFE3FA}
+.cw-cell.sel{background:#FFE27A}
+.cw-cell.bad{background:#FDECEE;color:var(--red)}
+.cw-actions{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin:12px 0 0}
+.cw-clues{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:16px;text-align:left}
+.cw-clues h2{margin:0 0 6px;font-size:16px;color:var(--gc)}
+.cw-clues ol{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.cw-clues li{padding:6px 8px;border-radius:8px;font-size:14px;cursor:pointer}
+.cw-clues li:hover{background:var(--soft)}
+.cw-clues li.on{background:#E8F2FC}
+.cw-clues li.solved{color:var(--muted);text-decoration:line-through}
+.cw-clues li b{color:var(--gc);margin-right:4px}
+.cw-clues li small{color:var(--muted)}
+.cw-input{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+[data-theme="dark"] .cw-clue,[data-theme="dark"] .cw-clues li.on{background:#1C2A44;color:#E3ECFA}
+@media (max-width:560px){ .cw-clues{grid-template-columns:1fr} }
+.jg-game.cw{position:relative}

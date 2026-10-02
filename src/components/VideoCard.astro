@@ -1,6 +1,6 @@
 ---
-// Video card: YouTube thumbnail with duration, title, and the source (BSN)
-import { url, VIDEO_SOURCE, type Video } from '../lib/site';
+// Video card: YouTube thumbnail with duration, title, and the source (NotiCel or BSN)
+import { url, VIDEO_SOURCES, type Video } from '../lib/site';
 interface Props { video: Video }
 const { video } = Astro.props;
 ---
@@ -13,5 +13,5 @@ const { video } = Astro.props;
     </div>
     <h3 class="hl">{video.title}</h3>
   </a>
-  <div class="time">Video: {VIDEO_SOURCE.name.match(/\((.+)\)/)?.[1] ?? VIDEO_SOURCE.name}</div>
+  <div class="time">Video: {VIDEO_SOURCES[video.src].short}</div>
 </article>

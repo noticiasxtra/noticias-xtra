@@ -22,7 +22,7 @@ export const SITE = {
   sportsDemo: true,
   // Turn parts of the site on (true) or off (false). Off parts are hidden everywhere.
   features: {
-    videos: true, // video section and pages (VIDEOS below: the BSN's YouTube channel)
+    videos: true, // video section and pages (VIDEOS below: NotiCel and BSN YouTube channels)
     live: false, // "En vivo" button and TV schedule (SCHEDULE below is a sample)
     weather: false, // town temperatures (TOWNS below are samples); a link to the official forecast shows instead
     newsletter: true, // newsletter sign-up box (demo: nothing is sent until an email service is connected)
@@ -98,22 +98,35 @@ export const ICONS: Record<SectionId, string> = {
 };
 
 /* Sample videos. Later these can come from YouTube or a video host. */
-/* Videos: the official YouTube channel of the BSN (Baloncesto Superior Nacional), shown with
-   YouTube's own embedded player (allowed by YouTube; nothing is downloaded). Each page credits
-   the BSN and links to the video on YouTube. Titles are our Spanish summaries of the BSN's titles.
-   To add one: copy the 11-character code after "watch?v=" into `yt`. */
-export const VIDEO_SOURCE = { name: 'Baloncesto Superior Nacional (BSN)', url: 'https://www.youtube.com/@BaloncestoSuperiorNacionalPR' };
+/* Videos: the official YouTube channels of NotiCel and of the BSN (Baloncesto Superior Nacional),
+   shown with YouTube's own embedded player (allowed by YouTube; nothing is downloaded). Each video page
+   credits its source and links to the video on YouTube. Titles are our Spanish summaries.
+   To add one: copy the 11-character code after "watch?v=" into `yt` and pick its `src`. */
+export const VIDEO_SOURCES = {
+  noticel: { name: 'NotiCel', short: 'NotiCel', url: 'https://www.youtube.com/noticeloficial', channel: 'UC7rGX_tpwX0S4rCgWTXBeIQ' },
+  bsn: { name: 'Baloncesto Superior Nacional (BSN)', short: 'BSN', url: 'https://www.youtube.com/@BaloncestoSuperiorNacionalPR', channel: 'UCZOFf3DbBqAMSwmzYl8RPnA' },
+} as const;
 export const VIDEOS = [
-  { id: 'bsn-celebracion-bayamon-2026', yt: '7vcPJaj3vGA', section: 'deportes', league: 'bsn', title: 'Desde la cancha en Bayamón: así celebraron los Vaqueros el campeonato 2026', duration: '11:43' },
-  { id: 'bsn-bayamon-repite-campeon', yt: 'elqiQDkvjVk', section: 'deportes', league: 'bsn', title: 'Bayamón repite como campeón del BSN', duration: '2:12' },
-  { id: 'bsn-vaqueros-santeros-resumen-final', yt: 'KHbE8xipLcI', section: 'deportes', league: 'bsn', title: 'Vaqueros vs. Santeros: resumen del juego que coronó a Bayamón', duration: '14:11' },
-  { id: 'bsn-vaqueros-santeros-mejores-jugadas', yt: 'wLYomIbSvqk', section: 'deportes', league: 'bsn', title: 'Vaqueros vs. Santeros: las mejores jugadas', duration: '3:29' },
-  { id: 'bsn-final-juego-5', yt: 'mBpcnM4pnLE', section: 'deportes', league: 'bsn', title: 'Santeros vs. Vaqueros: resumen del Juego 5 de la Final', duration: '14:51' },
-  { id: 'bsn-final-juego-3', yt: 'zhSGVmdknZI', section: 'deportes', league: 'bsn', title: 'Santeros vs. Vaqueros: resumen del Juego 3 de la Final', duration: '16:13' },
-  { id: 'bsn-bayamon-gana-juego-1', yt: 'ze3yvdAUW4k', section: 'deportes', league: 'bsn', title: '¡Bayamón se lleva el primero de La Final Brava!', duration: '1:22' },
-  { id: 'bsn-final-juego-1', yt: '2VMwFuhnQWk', section: 'deportes', league: 'bsn', title: 'Santeros vs. Vaqueros: resumen del Juego 1 de la Final', duration: '13:26' },
-  { id: 'bsn-capitulo-final-2026', yt: 'kqHEowKdtIs', section: 'deportes', league: 'bsn', title: 'Llega el capítulo final de la temporada 2026', duration: '1:49' },
-] as const satisfies ReadonlyArray<{ id: string; yt: string; section: SectionId; league: string; title: string; duration: string }>;
+  // NotiCel (latest first)
+  { id: 'noticel-gobernadora-ramon-luis-rivera', yt: '8KITO1HogJ4', src: 'noticel', section: 'gobierno', title: 'La gobernadora recuerda el legado de Ramón Luis Rivera', duration: '6:56' },
+  { id: 'noticel-pj-sin-suela-10-anos', yt: 'Ps_OE5Q-G80', src: 'noticel', section: 'entretenimiento', title: 'Rapero y médico: PJ Sin Suela repasa 10 años de trayectoria', duration: '8:43' },
+  { id: 'noticel-dalvin-seis-sold-outs', yt: '29f4hmLJgBI', src: 'noticel', section: 'entretenimiento', title: 'Dalvin “La Melodía” en concierto: seis llenos en Puerto Rico', duration: '15:00' },
+  { id: 'noticel-montaner-ultimo-regreso', yt: 'm6Tyg16Fg24', src: 'noticel', section: 'entretenimiento', title: 'Ricardo Montaner en su “Último Regreso” a San Juan', duration: '9:04' },
+  { id: 'noticel-torres-montalvo-tribunal', yt: 'CJ5RRB4SLG8', src: 'noticel', section: 'politica', title: 'Hiram Torres Montalvo defiende su candidatura a Cataño en el tribunal', duration: '4:43' },
+  { id: 'noticel-trauma-severo', yt: 'X3-0incEkUY', src: 'noticel', section: 'salud', title: '¿Está Puerto Rico preparado para atender un trauma severo?', duration: '25:00' },
+  { id: 'noticel-beto-cuevas-la-ley', yt: 'dYSaZ6MuBvc', src: 'noticel', section: 'entretenimiento', title: 'Beto Cuevas rinde homenaje a La Ley en el Music Hall', duration: '4:43' },
+  { id: 'noticel-centro-tecnologico-comunidades', yt: '7qXhgcxWu7U', src: 'noticel', section: 'puerto-rico', title: 'Inauguran un centro tecnológico para dar voz a comunidades vulnerables', duration: '3:45' },
+  // BSN
+  { id: 'bsn-celebracion-bayamon-2026', yt: '7vcPJaj3vGA', src: 'bsn', section: 'deportes', title: 'Desde la cancha en Bayamón: así celebraron los Vaqueros el campeonato 2026', duration: '11:43' },
+  { id: 'bsn-bayamon-repite-campeon', yt: 'elqiQDkvjVk', src: 'bsn', section: 'deportes', title: 'Bayamón repite como campeón del BSN', duration: '2:12' },
+  { id: 'bsn-vaqueros-santeros-resumen-final', yt: 'KHbE8xipLcI', src: 'bsn', section: 'deportes', title: 'Vaqueros vs. Santeros: resumen del juego que coronó a Bayamón', duration: '14:11' },
+  { id: 'bsn-vaqueros-santeros-mejores-jugadas', yt: 'wLYomIbSvqk', src: 'bsn', section: 'deportes', title: 'Vaqueros vs. Santeros: las mejores jugadas', duration: '3:29' },
+  { id: 'bsn-final-juego-5', yt: 'mBpcnM4pnLE', src: 'bsn', section: 'deportes', title: 'Santeros vs. Vaqueros: resumen del Juego 5 de la Final', duration: '14:51' },
+  { id: 'bsn-final-juego-3', yt: 'zhSGVmdknZI', src: 'bsn', section: 'deportes', title: 'Santeros vs. Vaqueros: resumen del Juego 3 de la Final', duration: '16:13' },
+  { id: 'bsn-bayamon-gana-juego-1', yt: 'ze3yvdAUW4k', src: 'bsn', section: 'deportes', title: '¡Bayamón se lleva el primero de La Final Brava!', duration: '1:22' },
+  { id: 'bsn-final-juego-1', yt: '2VMwFuhnQWk', src: 'bsn', section: 'deportes', title: 'Santeros vs. Vaqueros: resumen del Juego 1 de la Final', duration: '13:26' },
+  { id: 'bsn-capitulo-final-2026', yt: 'kqHEowKdtIs', src: 'bsn', section: 'deportes', title: 'Llega el capítulo final de la temporada 2026', duration: '1:49' },
+] as const satisfies ReadonlyArray<{ id: string; yt: string; src: keyof typeof VIDEO_SOURCES; section: SectionId; title: string; duration: string }>;
 
 export type Video = (typeof VIDEOS)[number];
 
