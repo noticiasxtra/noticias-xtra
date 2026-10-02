@@ -20,7 +20,7 @@ const pct = (w: number, l: number) => (w + l ? (w / (w + l)).toFixed(3).replace(
             <thead><tr><th scope="col">Equipo</th><th scope="col">G</th><th scope="col">P</th><th scope="col">PCT</th><th scope="col">DIF</th>{(g.columns ?? []).map((c) => <th scope="col">{c}</th>)}</tr></thead>
             <tbody>
               {g.rows.map((r, i) => (
-                <tr><th scope="row"><span class="sp-rank">{i + 1}</span><TeamLogo league={Astro.props.league} name={r.team} size={24} />{r.team}</th><td>{r.w}</td><td>{r.l}</td><td>{pct(r.w, r.l)}</td><td>{r.gb ?? (i === 0 ? '—' : '')}</td>{(r.extra ?? []).map((x) => <td>{x}</td>)}</tr>
+                <tr><th scope="row" class="notranslate" translate="no"><span class="sp-rank">{i + 1}</span><TeamLogo league={Astro.props.league} name={r.team} size={24} />{r.team}</th><td>{r.w}</td><td>{r.l}</td><td>{pct(r.w, r.l)}</td><td>{r.gb ?? (i === 0 ? '—' : '')}</td>{(r.extra ?? []).map((x) => <td>{x}</td>)}</tr>
               ))}
             </tbody>
           </table>

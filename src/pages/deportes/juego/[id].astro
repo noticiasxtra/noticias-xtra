@@ -30,7 +30,7 @@ const title = `${g.awayFull ?? g.away} vs. ${g.homeFull ?? g.home}`;
 
       <section class="ys-card gm-board" style={`--lc:${l.color}`}>
         <div class="gm-league"><LeagueBadge id={l.id} size="sm" />{l.full}</div>
-        <div class="gm-teams">
+        <div class="gm-teams notranslate" translate="no">
           <div class:list={['gm-team', { win: awayWin }]}>
             <TeamLogo league={g.league} name={g.awayFull ?? g.away} size={64} />
             <strong>{g.awayFull ?? g.away}</strong>

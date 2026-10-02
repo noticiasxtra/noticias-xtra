@@ -65,7 +65,7 @@ function status(g: Game): { text: string; live?: boolean } {
                 {done ? <b class:list={['sc-score', { lose: awayWin }]}>{g.homeScore}</b> : <span class="sc-rec">{g.homeRecord}</span>}
                 <TeamLogo league={g.league} name={g.home} />
               </div>
-              <div class="sc-abbr"><span>{a.abbr}</span><span>{h.abbr}</span></div>
+              <div class="sc-abbr notranslate" translate="no"><span>{a.abbr}</span><span>{h.abbr}</span></div>
             </a>
           );
         })}

@@ -12,7 +12,7 @@ const demo = !!st && isDemoTable('stats', Astro.props.league);
     <div class="sp-table-wrap">
       <table class="sp-table">
         <thead><tr><th scope="col">Equipo</th>{st.columns.map((c) => <th scope="col">{c}</th>)}</tr></thead>
-        <tbody>{st.rows.map((r) => <tr><th scope="row"><TeamLogo league={Astro.props.league} name={r.team} size={24} />{r.team}</th>{r.values.map((v) => <td>{v}</td>)}</tr>)}</tbody>
+        <tbody>{st.rows.map((r) => <tr><th scope="row" class="notranslate" translate="no"><TeamLogo league={Astro.props.league} name={r.team} size={24} />{r.team}</th>{r.values.map((v) => <td>{v}</td>)}</tr>)}</tbody>
       </table>
     </div>
   </section>
