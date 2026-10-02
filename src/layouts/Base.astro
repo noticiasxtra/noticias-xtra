@@ -26,7 +26,7 @@ const today = new Date().toLocaleDateString('es-PR', { weekday: 'long', day: 'nu
 const todayCap = today.charAt(0).toUpperCase() + today.slice(1);
 ---
 <!doctype html>
-<html lang="es">
+<html lang="es" data-theme={active === 'deportes' ? 'dark' : undefined} data-force-dark={active === 'deportes' ? '' : undefined}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -52,7 +52,8 @@ const todayCap = today.charAt(0).toUpperCase() + today.slice(1);
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Noto+Sans:wght@400;600&display=swap" rel="stylesheet" />
     <script is:inline>
       // Apply the reader's saved theme before the page paints (no white flash in dark mode)
-      try { var t = localStorage.getItem('nx-theme'); if (t === 'dark' || t === 'light') document.documentElement.dataset.theme = t; } catch (e) {}
+      // Sports pages are always dark (data-force-dark); elsewhere, the reader's saved choice
+      try { var t = localStorage.getItem('nx-theme'); if (!document.documentElement.hasAttribute('data-force-dark') && (t === 'dark' || t === 'light')) document.documentElement.dataset.theme = t; } catch (e) {}
       // Reader's text size for stories (set on the story page), applied before paint
       try { var f = [0.9, 1, 1.12, 1.25, 1.4][JSON.parse(localStorage.getItem('nx-font') || '1')]; if (f) document.documentElement.style.setProperty('--read-scale', f); } catch (e) {}
     </script>
@@ -152,7 +153,9 @@ const todayCap = today.charAt(0).toUpperCase() + today.slice(1);
     <script>
       // Dark mode switch (remembered in this browser)
       const themeBtn = document.querySelector<HTMLButtonElement>('[data-theme-toggle]');
-      if (themeBtn) {
+      // Sports pages are always dark, so the switch is hidden there
+      if (themeBtn && document.documentElement.hasAttribute('data-force-dark')) themeBtn.hidden = true;
+      else if (themeBtn) {
         const sync = () => {
           const dark = document.documentElement.dataset.theme === 'dark';
           themeBtn.setAttribute('aria-pressed', String(dark));

@@ -1488,3 +1488,4 @@ main.wrap,.home-grid,.ys-page,.tb-page{padding-top:var(--gap)}
 .wx-top > *,.wx-grid > *,.wx-week{min-width:0}
 .wx-now-main{flex-wrap:wrap}
 .wx-now-main > div{min-width:0}
+.theme-btn[hidden]{display:none}
