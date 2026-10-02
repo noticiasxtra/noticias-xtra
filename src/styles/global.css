@@ -1641,7 +1641,7 @@ main.wrap,.home-grid,.ys-page,.tb-page{padding-top:var(--gap)}
 .jg-more ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
 .jg-more a{display:flex;align-items:center;gap:10px;padding:6px;border-radius:10px;color:var(--ink)}
 .jg-more a:hover{background:var(--soft)}
-.jg-more span{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:var(--gc);color:#fff;font-family:var(--head);font-weight:800;font-size:15px}
+.jg-more img{flex:none;width:52px;height:36px;object-fit:cover;border-radius:8px;background:var(--gc);box-shadow:0 1px 3px rgba(0,0,0,.15)}
 .jg-more b{font-family:var(--head);font-size:14px}
 [data-theme="dark"] .jg-more{border-color:#34364D}
 [data-theme="dark"] .jg-stage{box-shadow:0 10px 30px rgba(0,0,0,.4)}
@@ -2726,9 +2726,10 @@ html.nx-en body{top:0 !important;position:static !important}
 .goog-text-highlight,.VIpgJd-yAWNEb-VIpgJd-fmcmS-sn54Q{background:transparent !important;box-shadow:none !important}
 html.nx-en .lang-tag{background:var(--red)}
 /* Home strip: Mercados card (rotating prices) and Juegos Xtra panel with game covers */
-.hs-mkt .hs-slides{position:relative;flex:1;min-width:120px;height:100%}
-.hs-mkt .hs-slide{position:absolute;inset:0;display:flex;align-items:center;opacity:0;transition:opacity .4s}
+.hs-mkt .hs-slides{position:static;display:grid;flex:1;min-width:0;align-self:center}
+.hs-mkt .hs-slide{position:static;inset:auto;grid-area:1/1;display:flex;align-items:center;opacity:0;transform:none;transition:opacity .5s ease;pointer-events:none}
 .hs-mkt .hs-slide.on{opacity:1}
+.hs-mkt .hs-text{min-width:0}
 .hs-mkt-n{display:flex;gap:6px;align-items:baseline;white-space:nowrap}
 .hs-mkt-n b{font-family:var(--head);font-size:13px;color:var(--ink);font-variant-numeric:tabular-nums}
 .hs-mkt-n em,.hs-mkt-list em{font-style:normal;font-weight:800;font-size:12px;font-variant-numeric:tabular-nums}

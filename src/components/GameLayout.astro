@@ -25,7 +25,7 @@ const others = GAMES.filter((x) => x.id !== g.id);
     <section class="jg-more">
       <h2>Más juegos</h2>
       <ul>{others.map((x) => (
-        <li><a href={url(`juegos/${x.id}`)} style={`--gc:${x.color}`}><span aria-hidden="true">{x.icon}</span><b>{x.name}</b></a></li>
+        <li><a href={url(`juegos/${x.id}`)} style={`--gc:${x.color}`}><img src={url(`images/juegos/${x.id}.svg`)} alt="" loading="lazy" /><b>{x.name}</b></a></li>
       ))}</ul>
     </section>
     <AdSlot size="halfpage" sticky class="jg-ad-tall" />
