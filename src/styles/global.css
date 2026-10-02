@@ -2485,11 +2485,16 @@ body.ad-skin{background:var(--ad-skin) center top/cover fixed}
 .eco-hero-t{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px;padding:20px 22px 14px}
 .eco-hero h1{margin:0;font-size:34px;color:#fff}
 .eco-hero p{margin:0;font-size:15px;opacity:.85}
-.eco-tape{overflow:hidden;background:rgba(3,12,26,.55);border-top:1px solid rgba(255,255,255,.12)}
+.eco-tape{display:flex;align-items:stretch;background:rgba(3,12,26,.55);border-top:1px solid rgba(255,255,255,.12)}
+.eco-tape-view{flex:1;min-width:0;overflow:hidden}
 .eco-tape-track{display:flex;width:max-content;animation:ecoTape 60s linear infinite}
-.eco-tape:hover .eco-tape-track{animation-play-state:paused}
+.eco-tape:hover .eco-tape-track,.eco-tape.paused .eco-tape-track,.eco-tape:focus-within .eco-tape-track{animation-play-state:paused}
 .eco-tape ul{display:flex;list-style:none;margin:0;padding:0}
-.eco-tape li{display:flex;align-items:center;gap:8px;padding:12px 20px;font-size:15px;white-space:nowrap;border-right:1px solid rgba(255,255,255,.1)}
+.eco-tape li{white-space:nowrap;border-right:1px solid rgba(255,255,255,.1)}
+.eco-tape li a{display:flex;align-items:center;gap:8px;padding:12px 20px;font-size:15px;color:#fff;text-decoration:none;transition:background .15s}
+.eco-tape li a:hover,.eco-tape li a:focus-visible{background:rgba(255,255,255,.12)}
+.eco-tape-btn{flex:none;width:40px;border:0;border-left:1px solid rgba(255,255,255,.15);background:rgba(3,12,26,.35);color:#fff;font-size:12px;cursor:pointer}
+.eco-tape-btn:hover{background:rgba(255,255,255,.15)}
 .eco-tape b{font-weight:700;opacity:.9}
 .eco-n{font-variant-numeric:tabular-nums;font-family:var(--head);font-weight:700}
 .eco-ch{font-size:14px;font-weight:800;font-variant-numeric:tabular-nums}
@@ -2504,7 +2509,9 @@ body.ad-skin{background:var(--ad-skin) center top/cover fixed}
 .eco-groups{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 22px}
 .eco-group h3{margin:0 0 4px;font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--eco)}
 .eco-group ul{list-style:none;margin:0;padding:0}
-.eco-group li{display:grid;grid-template-columns:minmax(0,1fr) 72px auto;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+.eco-group li{border-bottom:1px solid var(--line)}
+.eco-row{display:grid;grid-template-columns:minmax(0,1fr) 72px auto;align-items:center;gap:10px;width:100%;padding:8px 6px;border:0;border-radius:10px;background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer;transition:background .15s}
+.eco-row:hover,.eco-row[aria-expanded="true"]{background:var(--soft)}
 .eco-group li:last-child{border-bottom:0}
 .eco-name{display:grid;min-width:0}
 .eco-name b{font-size:14px;line-height:1.25}
@@ -2525,9 +2532,41 @@ body.ad-skin{background:var(--ad-skin) center top/cover fixed}
 }
 
 /* Home: market strip on its own, with a "Mercados" label linking to Economía */
-.eco-tape.eco-strip{position:relative;display:flex;align-items:stretch;margin:var(--gap) 0;border-radius:14px;color:#fff;background:linear-gradient(120deg,#0B1F3A,#123B5C 60%,#14708F);border:0}
+.eco-tape.eco-strip{position:relative;overflow:hidden;margin:var(--gap) 0;border-radius:14px;color:#fff;background:linear-gradient(120deg,#0B1F3A,#123B5C 60%,#14708F);border:0}
 .eco-strip-l{position:relative;z-index:1;flex:none;display:flex;align-items:center;gap:4px;padding:0 16px;background:#14708F;color:#fff;font-family:var(--head);font-weight:800;font-size:15px;text-decoration:none;box-shadow:8px 0 16px rgba(11,31,58,.6)}
 .eco-strip-l:hover{background:#1A86AA}
-.eco-strip .eco-tape-track{flex:none}
 .eco-strip .eco-ch.up{color:#4ADE80}
 .eco-strip .eco-ch.down{color:#FF7A8A}
+
+/* Markets: filter chips, detail panels with a chart and ranges, live flash */
+.eco-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.eco-chips button,.eco-tabs button{font:inherit;font-weight:700;font-size:13px;padding:6px 14px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.eco-chips button[aria-pressed="true"],.eco-tabs button[aria-pressed="true"]{background:var(--eco);border-color:var(--eco);color:#fff}
+.eco-hint{margin:0 0 8px;font-size:12px;color:var(--muted)}
+.eco-board.one .eco-groups{grid-template-columns:minmax(0,1fr)}
+.eco-group[hidden]{display:none}
+.eco-detail{padding:6px 6px 14px;display:grid;gap:8px;animation:ecoOpen .2s ease}
+.eco-detail[hidden]{display:none}
+@keyframes ecoOpen{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.eco-about{margin:0;font-size:14px}
+.eco-diff,.eco-period{margin:0;font-size:13px;color:var(--muted)}
+.eco-diff b.up,.eco-period b.up{color:var(--eco-up)}
+.eco-diff b.down,.eco-period b.down{color:var(--eco-down)}
+.eco-tabs{display:flex;gap:6px}
+.eco-big{display:block;width:100%;height:auto;touch-action:pan-y;cursor:crosshair}
+.eco-big .eco-line{fill:none;stroke-width:2.5;stroke-linejoin:round}
+.eco-big.up .eco-line{stroke:var(--eco-up)} .eco-big.down .eco-line{stroke:var(--eco-down)}
+.eco-big .eco-area{opacity:.12} .eco-big.up .eco-area{fill:var(--eco-up)} .eco-big.down .eco-area{fill:var(--eco-down)}
+.eco-ax{font-size:13px;fill:var(--muted)}
+@media (max-width:760px){ .eco-ax{font-size:24px} }
+.eco-cur{stroke:var(--eco-d);stroke-width:1;stroke-dasharray:4 4}
+.eco-dot{fill:var(--eco);stroke:var(--card);stroke-width:2}
+.eco-read{margin:0;padding:6px 10px;border-radius:8px;background:var(--soft);font-size:13px}
+.eco-ranges{display:grid;gap:10px}
+.eco-range{display:grid;gap:4px;font-size:12px;color:var(--muted)}
+.eco-range-bar{position:relative;height:6px;border-radius:999px;background:linear-gradient(90deg,var(--eco-down),#E5C33B,var(--eco-up))}
+.eco-range-bar i{position:absolute;top:50%;width:14px;height:14px;border-radius:50%;background:var(--card);border:3px solid var(--eco-d);transform:translate(-50%,-50%)}
+.eco-range small{display:flex;justify-content:space-between;font-variant-numeric:tabular-nums}
+.flash-up{animation:ecoUp 1.2s ease} .flash-down{animation:ecoDown 1.2s ease}
+@keyframes ecoUp{0%,30%{background:rgba(34,197,94,.35);border-radius:4px}100%{background:transparent}}
+@keyframes ecoDown{0%,30%{background:rgba(239,68,68,.35);border-radius:4px}100%{background:transparent}}
