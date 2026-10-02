@@ -3,6 +3,7 @@
 // and a side column with an ad and "Más juegos" (below the game on phones).
 import AdSlot from './AdSlot.astro';
 import GameBoard from './GameBoard.astro';
+import Comments from './Comments.astro';
 import { url } from '../lib/site';
 import { GAMES } from '../lib/games';
 interface Props { id: (typeof GAMES)[number]['id'] }
@@ -23,6 +24,7 @@ const others = GAMES.filter((x) => x.id !== g.id);
     </header>
     <slot />
     <AdSlot size="infeed" class="jg-ad-below" />
+    <div class="jg-comments"><Comments storyId={`juego-${g.id}`} kind="game" /></div>
   </div>
   <aside class="jg-aside">
     <GameBoard game={g.id} title={`Líderes de ${g.name}`} />

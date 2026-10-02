@@ -2993,3 +2993,7 @@ html.nx-en .pf-menu .lang-tag{background:var(--red)}
   .gt-head a,.ls-more,.fx-go,.ys-card-h > a,.lg-season > a,.cm-meta button,.by-who strong a,.apr-reject,.lvbox-f a,.op-box a{display:inline-block;padding:10px 4px;margin:-10px -4px}
   .ys-news-item{padding-top:6px;padding-bottom:6px}
 }
+/* Comments under each game */
+.jg-comments{padding:4px 22px 22px;border-top:1px solid var(--line)}
+.jg-comments .cm{margin-top:14px}
+@media (max-width:600px){ .jg-comments{padding:4px 14px 16px} }
