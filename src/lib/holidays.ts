@@ -4,7 +4,7 @@
 // ÚLTIMA HORA alert is active. Preview of every design: /logos-festivos/ (internal).
 
 export type Spot = 'top' | 'side' | 'sky';
-export type Deco = { spot: Spot; svg: string; vb?: string };
+export type Deco = { spot: Spot; svg: string; vb?: string; wide?: boolean }; // wide: long shapes (the island) get more room
 export type Holiday = {
   id: string; name: string; tone: 'festivo' | 'solemne'; when: string;
   dates: (y: number) => [string, string]; // first and last day (YYYY-MM-DD), inclusive
@@ -39,6 +39,34 @@ const HALF_STAFF = `<rect x="14" y="4" width="4" height="92" rx="2" fill="#6B5B3
   ${[0, 2, 4, 6, 8, 10, 12].map((i) => `<rect y="${(i * 52) / 13}" width="84" height="${52 / 13}" fill="#B22234"/>`).join('')}
   <rect width="38" height="28" fill="#3C3B6E"/>
   ${[0, 1, 2, 3].flatMap((r) => [0, 1, 2, 3, 4].map((c) => `<circle cx="${5 + c * 7 + (r % 2) * 3.5}" cy="${5 + r * 6.5}" r="1.6" fill="#fff"/>`)).join('')}</g>`;
+// Roberto Clemente: the back of a black jersey with a gold 21 (Pittsburgh colors, no team logo)
+const JERSEY_21 = `<path d="M30 10l12-5c3 6 13 6 16 0l12 5 22 18-10 15-10-7v58H28V36l-10 7L8 28z" fill="#16161D" stroke="#FDB827" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M42 5c3 6 13 6 16 0" stroke="#FDB827" stroke-width="4" fill="none"/>
+  <text x="50" y="76" text-anchor="middle" font-family="Poppins,Arial,sans-serif" font-weight="800" font-size="40" fill="#FDB827">21</text>`;
+// Puerto Rico's outline (with Vieques and Culebra), filled with the flag
+const ISLAND = 'M4 40 L12 39.5 L22 39 L30 38.6 L40 38.8 L50 38.4 L60 38.8 L70 39 L78 39.6 L84 40.6 L88 42.5 L89.5 45 L88.6 48 L89 51 L87.5 54.5 L85 57 L80 58 L74 58.6 L68 59.2 L62 60.4 L56 60.8 L50 61.6 L45 61 L40 61.6 L34 61.2 L28 61.8 L24 62.8 L20 62.2 L14 63 L9 63.6 L7.5 61.5 L8 58.5 L6 56 L4.5 53 L5.5 50 L4 47 L2.5 44 L2 41.5Z';
+const ISLA_VB = '1 35 99 31';
+const ISLA_BANDERA = `<defs><clipPath id="hl-isla"><path d="${ISLAND}"/></clipPath></defs>
+  <g clip-path="url(#hl-isla)"><rect x="0" y="36" width="100" height="27" fill="#fff"/>
+  <rect x="0" y="36" width="100" height="5.4" fill="#D7263D"/><rect x="0" y="46.8" width="100" height="5.4" fill="#D7263D"/><rect x="0" y="57.6" width="100" height="5.4" fill="#D7263D"/>
+  <path d="M0 34L42 49.5 0 65z" fill="#0050F0"/><path d="M15 45.5l1.6 3.3 3.6.5-2.6 2.5.6 3.6-3.2-1.7-3.2 1.7.6-3.6-2.6-2.5 3.6-.5z" fill="#fff"/></g>
+  <path d="${ISLAND}" fill="none" stroke="#16161D" stroke-width="1.6" stroke-linejoin="round"/>
+  <ellipse cx="94" cy="60" rx="4.5" ry="1.8" fill="#0050F0" stroke="#16161D" stroke-width="1"/><ellipse cx="96" cy="50" rx="2.4" ry="1.5" fill="#D7263D" stroke="#16161D" stroke-width="1"/>`;
+const CARABELA = `<path d="M10 66h80l-10 16H22z" fill="#7A4A21" stroke="#4A2C12" stroke-width="2.5" stroke-linejoin="round"/>
+  <path d="M50 14v52M30 26v40M70 26v40" stroke="#4A2C12" stroke-width="3"/>
+  <path d="M38 20h24c2 10 2 22 0 34H38c-2-12-2-24 0-34z" fill="#FBF7EE" stroke="#C9C2B1" stroke-width="1.5"/><path d="M50 28v18M43 37h14" stroke="#D7263D" stroke-width="4"/>
+  <path d="M22 32h16c1.5 7 1.5 15 0 22H22c-1.5-7-1.5-15 0-22zM62 32h16c1.5 7 1.5 15 0 22H62c-1.5-7-1.5-15 0-22z" fill="#FBF7EE" stroke="#C9C2B1" stroke-width="1.5"/>
+  <path d="M2 86c8-5 16-5 24 0s16 5 24 0 16-5 24 0 16 5 24 0" stroke="#1F90DA" stroke-width="4" fill="none" stroke-linecap="round"/>`;
+const COQUI = `<ellipse cx="50" cy="62" rx="26" ry="20" fill="#8B6B3E"/><ellipse cx="50" cy="40" rx="22" ry="17" fill="#9C7A48"/>
+  <circle cx="38" cy="30" r="9" fill="#9C7A48"/><circle cx="62" cy="30" r="9" fill="#9C7A48"/><circle cx="38" cy="29" r="5.5" fill="#16161D"/><circle cx="62" cy="29" r="5.5" fill="#16161D"/>
+  <circle cx="39.5" cy="27.5" r="1.8" fill="#fff"/><circle cx="63.5" cy="27.5" r="1.8" fill="#fff"/><path d="M40 46c6 4 14 4 20 0" stroke="#4A2C12" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M26 70c-10 4-14 12-12 16M74 70c10 4 14 12 12 16" stroke="#8B6B3E" stroke-width="7" fill="none" stroke-linecap="round"/>
+  <g fill="#C9A26A"><circle cx="13" cy="87" r="4"/><circle cx="87" cy="87" r="4"/></g>
+  <path d="M74 14q6-6 12 0M78 8q8-7 16 0" stroke="#1F90DA" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+/** Options shown on the preview page for Descubrimiento de Puerto Rico (the first one is in use). */
+export const DESCUBRIMIENTO_OPTIONS: Array<{ name: string; svg: string; vb?: string; wide?: boolean }> = [
+  { name: 'A · La isla con la bandera', svg: ISLA_BANDERA, vb: ISLA_VB, wide: true }, { name: 'B · Carabela', svg: CARABELA }, { name: 'C · Coquí cantando', svg: COQUI },
+];
 const RIBBON = (fill = '#16161D') => `<path stroke="#fff" stroke-width="4" paint-order="stroke" stroke-linejoin="round" d="M50 8c-12 0-20 9-20 21 0 11 7 22 14 32L22 92l12 4 16-24 16 24 12-4-22-31c7-10 14-21 14-32 0-12-8-21-20-21zm0 12c5 0 8 4 8 9 0 6-4 13-8 19-4-6-8-13-8-19 0-5 3-9 8-9z" fill="${fill}"/>`;
 const BURST = (cx: number, cy: number, r: number, c: string) => `<g stroke="${c}" stroke-width="3" stroke-linecap="round">${Array.from({ length: 10 }, (_, i) => {
   const a = (i / 10) * Math.PI * 2; const x1 = cx + Math.cos(a) * r * 0.35, y1 = cy + Math.sin(a) * r * 0.35, x2 = cx + Math.cos(a) * r, y2 = cy + Math.sin(a) * r;
@@ -85,10 +113,7 @@ export const HOLIDAYS: Holiday[] = [
     dates: (y) => day(y, 7, 25), decos: [{ spot: 'side', svg: PR_FLAG }] },
   { id: 'clemente', name: 'Día de Roberto Clemente', tone: 'festivo', when: '18 de agosto (su natalicio)', title: 'Día de Roberto Clemente: ¡el orgullo de Carolina, el 21!',
     dates: (y) => day(y, 8, 18),
-    decos: [{ spot: 'side', svg: `<circle cx="46" cy="50" r="38" fill="#fff" stroke="#D9D4C8" stroke-width="3"/>
-      <path d="M22 20c10 12 10 48 0 60M70 20c-10 12-10 48 0 60" stroke="#D7263D" stroke-width="3" fill="none"/>
-      <g stroke="#D7263D" stroke-width="2.5">${[28, 38, 48, 58, 68].map((y2) => `<path d="M25 ${y2}l5 2M67 ${y2}l-5 2"/>`).join('')}</g>
-      <rect x="56" y="66" width="40" height="28" rx="8" fill="#0E1F5B"/><text x="76" y="87" text-anchor="middle" font-family="Poppins,Arial,sans-serif" font-weight="800" font-size="21" fill="#fff">21</text>` }] },
+    decos: [{ spot: 'side', svg: JERSEY_21 }] },
   { id: '911', name: '11 de septiembre', tone: 'solemne', when: '11 de septiembre', title: '11 de septiembre: recordamos a las víctimas',
     dates: (y) => day(y, 9, 11), decos: [{ spot: 'side', svg: RIBBON() }] },
   { id: 'maria', name: 'Aniversario del huracán María', tone: 'solemne', when: '20 de septiembre', title: 'Huracán María (2017): recordamos a las víctimas',
@@ -104,11 +129,9 @@ export const HOLIDAYS: Holiday[] = [
     dates: (y) => day(y, 11, 11),
     decos: [{ spot: 'side', svg: `<path d="M34 6h32L58 40H42z" fill="#1F4E9E"/><path d="M42 6h4L44 40h-2zM54 6h4l-2 34h-2z" fill="#fff"/><path d="M48 6h4v34h-4z" fill="#D7263D"/>
       <circle cx="50" cy="66" r="26" fill="#F2B705" stroke="#B8860B" stroke-width="3"/><path d="M50 50l4.7 9.5 10.5 1.5-7.6 7.4 1.8 10.5L50 74l-9.4 5 1.8-10.5-7.6-7.4 10.5-1.5z" fill="#B8860B"/>` }] },
-  { id: 'descubrimiento', name: 'Descubrimiento de Puerto Rico', tone: 'festivo', when: '19 de noviembre', title: 'Día del Descubrimiento de Puerto Rico · Sol taíno',
+  { id: 'descubrimiento', name: 'Descubrimiento de Puerto Rico', tone: 'festivo', when: '19 de noviembre', title: 'Día del Descubrimiento de Puerto Rico',
     dates: (y) => day(y, 11, 19),
-    decos: [{ spot: 'side', svg: `<g stroke="#B5651D" stroke-width="5" stroke-linecap="round">${Array.from({ length: 12 }, (_, i) => { const a = (i / 12) * Math.PI * 2; return `<line x1="${(50 + Math.cos(a) * 30).toFixed(1)}" y1="${(50 + Math.sin(a) * 30).toFixed(1)}" x2="${(50 + Math.cos(a) * 44).toFixed(1)}" y2="${(50 + Math.sin(a) * 44).toFixed(1)}"/>`; }).join('')}</g>
-      <circle cx="50" cy="50" r="25" fill="#F2B705" stroke="#B5651D" stroke-width="4"/>
-      <g fill="none" stroke="#7A3E0E" stroke-width="3.5" stroke-linecap="round"><path d="M39 44a4 4 0 1 1 6 3M61 44a4 4 0 1 0-6 3"/><path d="M41 60c6 5 12 5 18 0"/></g>` }] },
+    decos: [{ spot: 'side', svg: ISLA_BANDERA, vb: ISLA_VB, wide: true }] },
   { id: 'accion-gracias', name: 'Acción de Gracias', tone: 'festivo', when: 'Cuarto jueves de noviembre', title: '¡Feliz Día de Acción de Gracias! Que no falte el pavochón',
     dates: (y) => nthDay(y, 11, 4, 4),
     decos: [{ spot: 'side', svg: `${['#C2410C', '#E0A100', '#D7263D', '#E0A100', '#C2410C'].map((c, i) => `<ellipse cx="50" cy="24" rx="11" ry="24" fill="${c}" transform="rotate(${-60 + i * 30} 50 56)"/>`).join('')}
