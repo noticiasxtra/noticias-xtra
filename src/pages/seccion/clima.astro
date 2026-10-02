@@ -1,7 +1,8 @@
 ---
 // Clima: weather page, designed for phones first. Live data from the National Weather Service (NWS/SNM),
 // read in the reader's browser: pick a town → current conditions, 24-hour chart, 7-day forecast.
-// Maps (radar, satellite, tropics), alerts, and "En la isla hoy" (every town at a glance, in the right column on desktop).
+// Maps (radar, satellite, tropics), alerts, and "En la isla hoy" (every town at a glance).
+// Layout: phones show the radar first; computers show forecast + temperature | radar | towns.
 import Base from '../../layouts/Base.astro';
 import StoryCard from '../../components/StoryCard.astro';
 import { getStories, url } from '../../lib/site';
@@ -18,17 +19,50 @@ const TOWNS: Array<[string, number, number]> = [
 <Base title="Clima" active="clima" description="El tiempo en Puerto Rico: condiciones por pueblo, pronóstico por hora y de 7 días, radar, satélite, el trópico y alertas.">
   <main class="wrap cx" id="main" data-cx data-towns={JSON.stringify(TOWNS)}>
     <header class="cx-head">
-      <h1>Clima</h1>
+      <div class="cx-head-row">
+        <h1>Clima</h1>
+        <label class="cx-pick">
+          <span class="sr">Escoge tu pueblo</span>
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="10" r="2.5" fill="currentColor"/></svg>
+          <select data-town-select class="notranslate" translate="no">
+            {TOWNS.map(([n], i) => <option value={i}>{n}</option>)}
+          </select>
+        </label>
+      </div>
       <p>Datos en vivo del <a href="https://www.weather.gov/sju/" rel="noopener" target="_blank">Servicio Nacional de Meteorología</a> y del <a href="https://www.nhc.noaa.gov/" rel="noopener" target="_blank">Centro Nacional de Huracanes</a>.</p>
     </header>
 
-    <div class="cx-towns" role="group" aria-label="Escoge tu pueblo">
-      {TOWNS.map(([n], i) => <button type="button" data-town={i} aria-pressed={String(i === 0)} class="notranslate" translate="no">{n}</button>)}
-    </div>
-
     <div class="cx-alerts" data-alerts hidden></div>
 
-    <div class="cx-main">
+    <!-- Phones: radar first. Computers: forecast and temperature on the left, radar in the middle, towns on the right. -->
+    <section class="cx-card cx-maps cx-mid">
+      <h2>Mapas</h2>
+      <div class="cx-tabs" role="tablist">
+        <button type="button" role="tab" aria-selected="true" data-map="radar">Radar</button>
+        <button type="button" role="tab" aria-selected="false" data-map="sat">Satélite</button>
+        <button type="button" role="tab" aria-selected="false" data-map="t2">Trópico 2 días</button>
+        <button type="button" role="tab" aria-selected="false" data-map="t7">Trópico 7 días</button>
+      </div>
+      <figure class="cx-map">
+        <img data-map-img src="https://radar.weather.gov/ridge/standard/TJUA_loop.gif" alt="Radar Doppler de Puerto Rico, última hora" />
+        <figcaption data-map-cap>Radar Doppler de Cayey (TJUA), animación de la última hora. Fuente: NWS.</figcaption>
+      </figure>
+    </section>
+
+
+    <div class="cx-left">
+    <section class="cx-card">
+      <div class="cx-tabs" role="tablist">
+        <button type="button" role="tab" aria-selected="true" data-tab="hours">Próximas 24 horas</button>
+        <button type="button" role="tab" aria-selected="false" data-tab="days">7 días</button>
+      </div>
+      <div data-panel="hours">
+        <div class="cx-chart" data-chart><p class="cx-loading">Cargando…</p></div>
+        <p class="cx-chart-read" data-chart-read>Toca la gráfica para ver cada hora.</p>
+      </div>
+      <div data-panel="days" hidden><ol class="cx-days" data-days><li class="cx-loading">Cargando…</li></ol></div>
+    </section>
+
     <section class="cx-now" aria-live="polite">
       <div class="cx-now-top">
         <span class="cx-now-icon" data-now-icon aria-hidden="true"></span>
@@ -48,32 +82,6 @@ const TOWNS: Array<[string, number, number]> = [
         <div><dt>Puesta del sol</dt><dd data-f="set">—</dd></div>
       </dl>
       <p class="cx-src" data-now-src></p>
-    </section>
-
-    <section class="cx-card">
-      <div class="cx-tabs" role="tablist">
-        <button type="button" role="tab" aria-selected="true" data-tab="hours">Próximas 24 horas</button>
-        <button type="button" role="tab" aria-selected="false" data-tab="days">7 días</button>
-      </div>
-      <div data-panel="hours">
-        <div class="cx-chart" data-chart><p class="cx-loading">Cargando…</p></div>
-        <p class="cx-chart-read" data-chart-read>Toca la gráfica para ver cada hora.</p>
-      </div>
-      <div data-panel="days" hidden><ol class="cx-days" data-days><li class="cx-loading">Cargando…</li></ol></div>
-    </section>
-
-    <section class="cx-card cx-maps">
-      <h2>Mapas</h2>
-      <div class="cx-tabs" role="tablist">
-        <button type="button" role="tab" aria-selected="true" data-map="radar">Radar</button>
-        <button type="button" role="tab" aria-selected="false" data-map="sat">Satélite</button>
-        <button type="button" role="tab" aria-selected="false" data-map="t2">Trópico 2 días</button>
-        <button type="button" role="tab" aria-selected="false" data-map="t7">Trópico 7 días</button>
-      </div>
-      <figure class="cx-map">
-        <img data-map-img src="https://radar.weather.gov/ridge/standard/TJUA_loop.gif" alt="Radar Doppler de Puerto Rico, última hora" />
-        <figcaption data-map-cap>Radar Doppler de Cayey (TJUA), animación de la última hora. Fuente: NWS.</figcaption>
-      </figure>
     </section>
 
     </div>
@@ -161,7 +169,7 @@ const TOWNS: Array<[string, number, number]> = [
     async function showTown(i: number) {
       current = i;
       store.set('nx-clima-town', String(i));
-      page.querySelectorAll<HTMLButtonElement>('[data-town]').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.town) === i)));
+      page.querySelector<HTMLSelectElement>('[data-town-select]')!.value = String(i);
       const [name, lat, lon] = TOWNS[i];
       $('[data-place]').textContent = name;
       $('[data-now-sky]').textContent = 'Cargando…';
@@ -246,7 +254,8 @@ const TOWNS: Array<[string, number, number]> = [
     }).catch(() => {});
 
     // Town buttons (top row and "En la isla hoy")
-    page.querySelectorAll<HTMLButtonElement>('[data-town],[data-pick]').forEach((b) => b.addEventListener('click', () => { showTown(Number(b.dataset.town ?? b.dataset.pick)); if (b.dataset.pick) page.scrollIntoView({ behavior: 'smooth' }); }));
+    page.querySelector<HTMLSelectElement>('[data-town-select]')!.addEventListener('change', (e) => showTown(Number((e.target as HTMLSelectElement).value)));
+    page.querySelectorAll<HTMLButtonElement>('[data-pick]').forEach((b) => b.addEventListener('click', () => { showTown(Number(b.dataset.pick)); page.querySelector('.cx-now')!.scrollIntoView({ behavior: 'smooth', block: 'center' }); }));
     // Hours / days tabs
     page.querySelectorAll<HTMLButtonElement>('[data-tab]').forEach((b) => b.addEventListener('click', () => {
       page.querySelectorAll('[data-tab]').forEach((x) => x.setAttribute('aria-selected', String(x === b)));

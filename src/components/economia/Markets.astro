@@ -1,0 +1,104 @@
+---
+// Market numbers that matter in Puerto Rico: local companies on Wall Street, the big indexes, oil, gasoline, gold and crypto.
+// Prices come from Yahoo Finance when the site is built (it rebuilds every hour), so they can be up to an hour late.
+// Bitcoin and Ethereum also refresh live in the reader's browser (CoinGecko). If a source fails, that item is left out.
+// `tape`: the scrolling strip under the section header · otherwise: the full "Mercados" board.
+interface Props { tape?: boolean }
+const { tape = false } = Astro.props;
+
+type Quote = { sym: string; name: string; group: string; price: number; prev: number; spark: number[]; unit?: string; coin?: string; digits?: number };
+const LIST: Array<Omit<Quote, 'price' | 'prev' | 'spark'>> = [
+  { sym: 'BPOP', name: 'Popular', group: 'pr' },
+  { sym: 'FBP', name: 'FirstBank', group: 'pr' },
+  { sym: 'OFG', name: 'OFG (Oriental)', group: 'pr' },
+  { sym: 'EVTC', name: 'Evertec (ATH Móvil)', group: 'pr' },
+  { sym: '^GSPC', name: 'S&P 500', group: 'us', digits: 0 },
+  { sym: '^DJI', name: 'Dow Jones', group: 'us', digits: 0 },
+  { sym: '^IXIC', name: 'Nasdaq', group: 'us', digits: 0 },
+  { sym: 'CL=F', name: 'Petróleo (barril)', group: 'mp' },
+  { sym: 'RB=F', name: 'Gasolina (galón, mayorista)', group: 'mp', digits: 2 },
+  { sym: 'GC=F', name: 'Oro (onza)', group: 'mp', digits: 0 },
+  { sym: 'BTC-USD', name: 'Bitcoin', group: 'cr', coin: 'bitcoin', digits: 0 },
+  { sym: 'ETH-USD', name: 'Ethereum', group: 'cr', coin: 'ethereum', digits: 0 },
+];
+const GROUPS: Record<string, string> = { pr: 'Empresas de Puerto Rico', us: 'Bolsa de Nueva York', mp: 'Petróleo, gasolina y oro', cr: 'Criptomonedas' };
+
+async function quote(q: (typeof LIST)[number]): Promise<Quote | null> {
+  try {
+    const r = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(q.sym)}?range=1mo&interval=1d`, { headers: { 'User-Agent': 'Mozilla/5.0' }, signal: AbortSignal.timeout(8000) });
+    const res = (await r.json()).chart.result[0];
+    const closes: number[] = res.indicators.quote[0].close.filter((v: number | null) => v != null);
+    const price = res.meta.regularMarketPrice ?? closes.at(-1);
+    const prev = closes.length > 1 ? closes.at(-2)! : price;
+    return price ? { ...q, price, prev, spark: closes.slice(-20) } : null;
+  } catch { return null; }
+}
+// Fetched once per build and shared by every place this component appears
+const g = globalThis as any;
+g.__nxMarkets ??= Promise.all(LIST.map(quote)).then((l) => ({ at: new Date(), list: l.filter(Boolean) as Quote[] }));
+const { at, list } = await g.__nxMarkets as { at: Date; list: Quote[] };
+
+const fmt = (q: Quote, v = q.price) => v.toLocaleString('en-US', { minimumFractionDigits: q.digits ?? 2, maximumFractionDigits: q.digits ?? 2 });
+const pct = (q: Quote) => ((q.price - q.prev) / q.prev) * 100;
+const spark = (v: number[]) => {
+  if (v.length < 2) return '';
+  const lo = Math.min(...v), hi = Math.max(...v), w = 90, h = 28;
+  return v.map((x, i) => `${((i / (v.length - 1)) * w).toFixed(1)},${(h - 2 - ((x - lo) / (hi - lo || 1)) * (h - 4)).toFixed(1)}`).join(' ');
+};
+const when = at.toLocaleString('es-PR', { weekday: 'long', hour: 'numeric', minute: '2-digit', timeZone: 'America/Puerto_Rico' });
+---
+{list.length > 0 && (tape ? (
+  <div class="eco-tape" aria-label="Mercados">
+    <div class="eco-tape-track">
+      {[0, 1].map((copy) => (
+        <ul aria-hidden={copy ? 'true' : undefined}>
+          {list.map((q) => { const p = pct(q); return (
+            <li data-coin={q.coin}><b>{q.name.replace(/ \(.*/, '')}</b> <span class="eco-n" data-price>{fmt(q)}</span> <span class:list={['eco-ch', p >= 0 ? 'up' : 'down']} data-ch>{p >= 0 ? '▲' : '▼'} {Math.abs(p).toFixed(2)}%</span></li>
+          ); })}
+        </ul>
+      ))}
+    </div>
+  </div>
+) : (
+  <section class="eco-board" aria-labelledby="eco-m">
+    <div class="eco-board-h">
+      <h2 id="eco-m">Mercados</h2>
+      <p>Actualizado el {when} · los precios pueden tener una hora de atraso</p>
+    </div>
+    <div class="eco-groups">
+      {Object.entries(GROUPS).map(([id, title]) => { const qs = list.filter((q) => q.group === id); return qs.length > 0 && (
+        <div class="eco-group">
+          <h3>{title}</h3>
+          <ul>
+            {qs.map((q) => { const p = pct(q); return (
+              <li data-coin={q.coin}>
+                <span class="eco-name"><b>{q.name}</b><small>{q.sym.replace(/^\^|=F$|-USD$/g, '')}</small></span>
+                <svg class:list={['eco-spark', p >= 0 ? 'up' : 'down']} viewBox="0 0 90 28" aria-hidden="true"><polyline points={spark(q.spark)} /></svg>
+                <span class="eco-val"><b class="eco-n">{q.group === 'us' ? '' : '$'}<span data-price>{fmt(q)}</span></b><span class:list={['eco-ch', p >= 0 ? 'up' : 'down']} data-ch>{p >= 0 ? '▲' : '▼'} {Math.abs(p).toFixed(2)}%</span></span>
+              </li>
+            ); })}
+          </ul>
+        </div>
+      ); })}
+    </div>
+    <p class="eco-note">Fuente: Yahoo Finance y CoinGecko. Información, no consejo de inversión.</p>
+  </section>
+))}
+<script>
+  // Bitcoin and Ethereum: live price and 24-hour change from CoinGecko (allowed from the browser)
+  const els = document.querySelectorAll<HTMLElement>('[data-coin]');
+  if (els.length) {
+    const ids = [...new Set([...els].map((e) => e.dataset.coin))].join(',');
+    fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`)
+      .then((r) => r.json())
+      .then((d) => els.forEach((el) => {
+        const c = d[el.dataset.coin!]; if (!c?.usd) return;
+        const price = el.querySelector('[data-price]')!, ch = el.querySelector('[data-ch]')!;
+        price.textContent = Math.round(c.usd).toLocaleString('en-US');
+        const p = c.usd_24h_change ?? 0;
+        ch.textContent = `${p >= 0 ? '▲' : '▼'} ${Math.abs(p).toFixed(2)}%`;
+        ch.classList.toggle('up', p >= 0); ch.classList.toggle('down', p < 0);
+      }))
+      .catch(() => { /* keep the build-time numbers */ });
+  }
+</script>

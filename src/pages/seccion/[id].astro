@@ -9,8 +9,8 @@ import Columnists from '../../components/Columnists.astro';
 import { getStories, SECTIONS, SITE, VIDEOS, url } from '../../lib/site';
 
 export function getStaticPaths() {
-  // Deportes, Entretenimiento and Clima have their own pages (seccion/deportes.astro, entretenimiento.astro, clima.astro)
-  return SECTIONS.filter((s) => !['deportes', 'entretenimiento', 'clima'].includes(s.id)).map((s) => ({ params: { id: s.id }, props: { sec: s } }));
+  // Deportes, Entretenimiento, Clima and Economía have their own pages (seccion/deportes.astro, entretenimiento.astro, clima.astro, economia.astro)
+  return SECTIONS.filter((s) => !['deportes', 'entretenimiento', 'clima', 'economia'].includes(s.id)).map((s) => ({ params: { id: s.id }, props: { sec: s } }));
 }
 const { sec } = Astro.props;
 const all = await getStories();
