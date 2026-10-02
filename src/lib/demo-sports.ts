@@ -106,6 +106,52 @@ export const DEMO_GAMES: Game[] = [
     date: at(1, '20:00'), away: 'Mets', home: 'Atléticos', awayFull: 'Mets de Guaynabo', homeFull: 'Atléticos de San Germán',
     venue: 'Coliseo Arquelio Torres Ramírez, San Germán', awayRecord: '14-18', homeRecord: '16-16',
   },
+  // NBA: real teams, invented results
+  {
+    id: 'demo-nba-1', demo: true, league: 'nba', status: 'en-vivo', note: '3er cuarto · 5:12',
+    date: at(0, '19:30'), away: 'New York Knicks', home: 'Boston Celtics', awayScore: 71, homeScore: 76,
+    venue: 'TD Garden, Boston', awayRecord: '3-1', homeRecord: '4-0',
+    linescore: { labels: ['1', '2', '3', '4'], away: [26, 24, 21, ''], home: [22, 30, 24, ''], totals: ['T'], awayTotals: [71], homeTotals: [76] },
+    stats: [
+      { label: '% tiros de campo', away: '45.2', home: '48.9' }, { label: 'Triples', away: '9', home: '11' },
+      { label: 'Rebotes', away: '31', home: '34' }, { label: 'Asistencias', away: '15', home: '19' }, { label: 'Pérdidas', away: '8', home: '6' },
+    ],
+  },
+  {
+    id: 'demo-nba-2', demo: true, league: 'nba', status: 'final',
+    date: at(-1, '20:00'), away: 'Miami Heat', home: 'Orlando Magic', awayScore: 108, homeScore: 112,
+    venue: 'Kia Center, Orlando', awayRecord: '2-2', homeRecord: '3-1',
+    linescore: { labels: ['1', '2', '3', '4'], away: [28, 25, 27, 28], home: [24, 31, 29, 28], totals: ['T'], awayTotals: [108], homeTotals: [112] },
+  },
+  {
+    id: 'demo-nba-3', demo: true, league: 'nba', status: 'programado',
+    date: at(1, '22:30'), away: 'Golden State Warriors', home: 'Los Angeles Lakers', awayRecord: '2-1', homeRecord: '2-2',
+    venue: 'Crypto.com Arena, Los Ángeles',
+  },
+  // Voleibol: real teams, invented results (the score is sets won)
+  {
+    id: 'demo-lvsm-1', demo: true, league: 'lvsm', status: 'en-vivo', note: '4to set',
+    date: at(0, '20:00'), away: 'Patriotas', home: 'Cafeteros', awayScore: 1, homeScore: 2,
+    awayFull: 'Patriotas de Lares', homeFull: 'Cafeteros de Yauco', awayRecord: '3-1', homeRecord: '4-0',
+    linescore: { labels: ['1', '2', '3', '4', '5'], away: [25, 21, 22, 14, ''], home: [22, 25, 25, 12, ''], totals: ['Sets'], awayTotals: [1], homeTotals: [2] },
+  },
+  {
+    id: 'demo-lvsm-2', demo: true, league: 'lvsm', status: 'final',
+    date: at(-1, '20:00'), away: 'Changos', home: 'Plataneros', awayScore: 3, homeScore: 1,
+    awayFull: 'Changos de Naranjito', homeFull: 'Plataneros de Corozal', awayRecord: '3-1', homeRecord: '1-3',
+    linescore: { labels: ['1', '2', '3', '4', '5'], away: [25, 23, 25, 25, ''], home: [20, 25, 19, 22, ''], totals: ['Sets'], awayTotals: [3], homeTotals: [1] },
+  },
+  {
+    id: 'demo-lvsf-1', demo: true, league: 'lvsf', status: 'final',
+    date: at(-1, '19:00'), away: 'Criollas', home: 'Cangrejeras', awayScore: 1, homeScore: 3,
+    awayFull: 'Criollas de Caguas', homeFull: 'Cangrejeras de Santurce', awayRecord: '2-2', homeRecord: '4-0',
+    linescore: { labels: ['1', '2', '3', '4', '5'], away: [25, 18, 21, 22, ''], home: [23, 25, 25, 25, ''], totals: ['Sets'], awayTotals: [1], homeTotals: [3] },
+  },
+  {
+    id: 'demo-lvsf-2', demo: true, league: 'lvsf', status: 'programado',
+    date: at(2, '19:30'), away: 'Leonas', home: 'Valencianas', awayFull: 'Leonas de Ponce', homeFull: 'Valencianas de Juncos',
+    awayRecord: '3-1', homeRecord: '1-3',
+  },
 ];
 
 const s = (team: string, w: number, l: number, gb: string, l10: string, streak: string) => ({ team, w, l, gb, extra: [l10, streak] });
@@ -132,6 +178,25 @@ export const DEMO_STANDINGS: Record<string, Standings> = {
       ] },
     ],
   },
+  nba: {
+    groups: [
+      { name: 'Conferencia Este', columns: ['ÚLT. 10', 'RACHA'], rows: [s('Boston Celtics', 4, 0, '—', '4-0', 'G1'), s('New York Knicks', 3, 1, '1.0', '3-1', 'G1'), s('Orlando Magic', 3, 1, '1.0', '3-1', 'G1'), s('Cleveland Cavaliers', 3, 1, '1.0', '3-1', 'G1'), s('Milwaukee Bucks', 2, 2, '2.0', '2-2', 'G1'), s('Indiana Pacers', 2, 2, '2.0', '2-2', 'G1'), s('Philadelphia 76ers', 2, 2, '2.0', '2-2', 'G1'), s('Miami Heat', 2, 2, '2.0', '2-2', 'G1'), s('Atlanta Hawks', 2, 2, '2.0', '2-2', 'G1'), s('Chicago Bulls', 1, 3, '3.0', '1-3', 'P1'), s('Detroit Pistons', 1, 3, '3.0', '1-3', 'P1'), s('Toronto Raptors', 1, 3, '3.0', '1-3', 'P1'), s('Brooklyn Nets', 1, 3, '3.0', '1-3', 'P1'), s('Charlotte Hornets', 0, 4, '4.0', '0-4', 'P1'), s('Washington Wizards', 0, 4, '4.0', '0-4', 'P1')] },
+      { name: 'Conferencia Oeste', columns: ['ÚLT. 10', 'RACHA'], rows: [s('Oklahoma City Thunder', 4, 0, '—', '4-0', 'G1'), s('Denver Nuggets', 3, 1, '1.0', '3-1', 'G1'), s('Minnesota Timberwolves', 3, 1, '1.0', '3-1', 'G1'), s('Los Angeles Lakers', 2, 2, '2.0', '2-2', 'G1'), s('Golden State Warriors', 2, 1, '1.5', '2-1', 'G1'), s('Houston Rockets', 2, 2, '2.0', '2-2', 'G1'), s('Dallas Mavericks', 2, 2, '2.0', '2-2', 'G1'), s('LA Clippers', 2, 2, '2.0', '2-2', 'G1'), s('Memphis Grizzlies', 2, 2, '2.0', '2-2', 'G1'), s('Phoenix Suns', 1, 3, '3.0', '1-3', 'P1'), s('Sacramento Kings', 1, 3, '3.0', '1-3', 'P1'), s('San Antonio Spurs', 1, 3, '3.0', '1-3', 'P1'), s('New Orleans Pelicans', 1, 3, '3.0', '1-3', 'P1'), s('Portland Trail Blazers', 0, 4, '4.0', '0-4', 'P1'), s('Utah Jazz', 0, 3, '3.5', '0-3', 'P1')] },
+    ],
+  },
+  lvsm: {
+    groups: [{ columns: ['ÚLT. 10', 'RACHA'], rows: [
+      s('Cafeteros de Yauco', 4, 0, '—', '4-0', 'G4'), s('Patriotas de Lares', 3, 1, '1.0', '3-1', 'G2'),
+      s('Changos de Naranjito', 3, 1, '1.0', '3-1', 'G1'), s('Gigantes de Carolina', 2, 2, '2.0', '2-2', 'P1'),
+      s('Plataneros de Corozal', 1, 3, '3.0', '1-3', 'P2'), s('Gigantes de Adjuntas', 0, 4, '4.0', '0-4', 'P4'),
+    ] }],
+  },
+  lvsf: {
+    groups: [{ columns: ['ÚLT. 10', 'RACHA'], rows: [
+      s('Cangrejeras de Santurce', 4, 0, '—', '4-0', 'G4'), s('Leonas de Ponce', 3, 1, '1.0', '3-1', 'G1'),
+      s('Criollas de Caguas', 2, 2, '2.0', '2-2', 'P1'), s('Valencianas de Juncos', 1, 3, '3.0', '1-3', 'P2'),
+    ] }],
+  },
 };
 
 export const DEMO_STATS: Record<string, TeamStats> = {
@@ -145,6 +210,25 @@ export const DEMO_STATS: Record<string, TeamStats> = {
     { team: 'Capitanes de Arecibo', values: ['89.7', '38.4', '18.8', '47.0'] }, { team: 'Piratas de Quebradillas', values: ['88.2', '36.9', '19.7', '46.4'] },
     { team: 'Atléticos de San Germán', values: ['86.5', '36.2', '17.9', '45.8'] }, { team: 'Cangrejeros de Santurce', values: ['86.1', '35.8', '18.2', '45.1'] },
   ] },
+  nba: { columns: ['PPJ', 'REB', 'AST', '% TC'], rows: [
+    { team: 'Boston Celtics', values: ['118.5', '46.2', '27.1', '48.8'] }, { team: 'Oklahoma City Thunder', values: ['117.9', '44.8', '26.4', '49.2'] },
+    { team: 'Denver Nuggets', values: ['116.2', '45.5', '29.0', '50.1'] }, { team: 'New York Knicks', values: ['114.0', '47.1', '24.3', '47.4'] },
+    { team: 'Orlando Magic', values: ['110.8', '45.9', '23.8', '46.2'] }, { team: 'Miami Heat', values: ['108.3', '42.7', '25.6', '45.9'] },
+  ] },
+  lvsm: { columns: ['ATAQUE %', 'BLOQUEOS', 'ACES', 'SETS G-P'], rows: [
+    { team: 'Cafeteros de Yauco', values: ['48.1', '38', '22', '12-3'] }, { team: 'Patriotas de Lares', values: ['45.6', '33', '19', '10-6'] },
+    { team: 'Changos de Naranjito', values: ['44.9', '35', '17', '10-6'] }, { team: 'Gigantes de Carolina', values: ['42.3', '29', '15', '8-8'] },
+    { team: 'Plataneros de Corozal', values: ['40.7', '27', '14', '5-10'] }, { team: 'Gigantes de Adjuntas', values: ['38.2', '24', '11', '2-12'] },
+  ] },
+  lvsf: { columns: ['ATAQUE %', 'BLOQUEOS', 'ACES', 'SETS G-P'], rows: [
+    { team: 'Cangrejeras de Santurce', values: ['46.4', '36', '24', '12-2'] }, { team: 'Leonas de Ponce', values: ['43.8', '31', '18', '10-5'] },
+    { team: 'Criollas de Caguas', values: ['41.2', '28', '16', '8-8'] }, { team: 'Valencianas de Juncos', values: ['39.5', '25', '13', '4-11'] },
+  ] },
+  'doble-a': { columns: ['PRO', 'HR', 'CA', 'EFE'], rows: [
+    { team: 'Patrulleros de San Sebastián', values: ['.318', '24', '169', '1.92'] }, { team: 'Artesanos de Las Piedras', values: ['.305', '19', '154', '2.31'] },
+    { team: 'Poetas de Juana Díaz', values: ['.311', '21', '156', '4.48'] }, { team: 'Toritos de Cayey', values: ['.302', '18', '151', '3.12'] },
+    { team: 'Pescadores del Plata de Comerío', values: ['.287', '14', '111', '2.04'] }, { team: 'Arenosos de Camuy', values: ['.296', '20', '138', '4.25'] },
+  ] },
 };
 
 export const DEMO_BRACKETS: Record<string, Bracket> = {
@@ -152,5 +236,26 @@ export const DEMO_BRACKETS: Record<string, Bracket> = {
     { name: 'Semifinal A', series: [{ a: 'Vaqueros de Bayamón', b: 'Capitanes de Arecibo', aWins: 3, bWins: 1 }] },
     { name: 'Semifinal B', series: [{ a: 'Santeros de Aguada', b: 'Piratas de Quebradillas', aWins: 2, bWins: 2, note: 'Juego 5 el sábado' }] },
     { name: 'Final', series: [{ a: 'Vaqueros de Bayamón', b: 'Por definir' }] },
+  ] },
+  invernal: { name: 'Postemporada 2026-27', rounds: [
+    { name: 'Semifinal', series: [
+      { a: 'Cangrejeros de Santurce', b: 'Leones de Ponce', aWins: 2, bWins: 1 },
+      { a: 'Criollos de Caguas', b: 'Senadores de San Juan', aWins: 1, bWins: 2 },
+    ] },
+    { name: 'Serie Final', series: [{ a: 'Por definir', b: 'Por definir', note: 'Al mejor de 7' }] },
+  ] },
+  lvsm: { name: 'Postemporada', rounds: [
+    { name: 'Semifinal', series: [
+      { a: 'Cafeteros de Yauco', b: 'Gigantes de Carolina', aWins: 3, bWins: 1 },
+      { a: 'Patriotas de Lares', b: 'Changos de Naranjito', aWins: 2, bWins: 3 },
+    ] },
+    { name: 'Final', series: [{ a: 'Cafeteros de Yauco', b: 'Changos de Naranjito', aWins: 1, bWins: 1, note: 'Juego 3 el viernes' }] },
+  ] },
+  lvsf: { name: 'Postemporada', rounds: [
+    { name: 'Semifinal', series: [
+      { a: 'Cangrejeras de Santurce', b: 'Valencianas de Juncos', aWins: 2, bWins: 0 },
+      { a: 'Leonas de Ponce', b: 'Criollas de Caguas', aWins: 1, bWins: 1, note: 'Juego 3 el domingo' },
+    ] },
+    { name: 'Final', series: [{ a: 'Cangrejeras de Santurce', b: 'Por definir' }] },
   ] },
 };

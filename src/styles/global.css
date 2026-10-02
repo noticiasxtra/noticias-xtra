@@ -1260,3 +1260,10 @@ main.wrap,.home-grid,.ys-page,.tb-page{padding-top:var(--gap)}
 .mm-face i{font-style:normal;font-size:32px;line-height:1;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif}
 .mm-face small{font-family:var(--head);font-weight:700;font-size:11px;color:var(--ink)}
 .mm-card.done .mm-face small{color:#14663F}
+
+/* Score cards: wider and shorter */
+.sc-card{width:236px;padding:10px 12px 8px}
+.sc-row{margin:6px 0 0;gap:6px}
+.sc-ab{font-family:var(--head);font-weight:800;font-size:12px;letter-spacing:.01em}
+.sc-score{font-size:19px}
+.sc-rec{font-size:11px}

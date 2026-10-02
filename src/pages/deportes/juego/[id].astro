@@ -55,7 +55,7 @@ const title = `${g.awayFull ?? g.away} vs. ${g.homeFull ?? g.home}`;
         <div class="sp-data">
           {g.linescore && (
             <section class="sp-panel">
-              <h2>Marcador por {l.photo === 'basketball' ? 'parcial' : 'entrada'}</h2>
+              <h2>Marcador por {l.photo === 'basketball' ? 'parcial' : l.photo === 'volleyball' ? 'set' : 'entrada'}</h2>
               <div class="sp-table-wrap">
                 <table class="sp-table gm-line">
                   <thead><tr><th scope="col">Equipo</th>{g.linescore.labels.map((x) => <th scope="col">{x}</th>)}{g.linescore.totals.map((x) => <th scope="col" class="tot">{x}</th>)}</tr></thead>

@@ -47,14 +47,16 @@ function status(g: Game): { text: string; live?: boolean } {
                 <span class:list={['sc-status', { live: st.live }]}>{st.live && <i class="sc-dot" />}{st.text}</span>
                 <span class="sc-lg">{league(g.league)?.name}{g.demo && <i class="sp-demo">DEMO</i>}</span>
               </div>
-              <div class="sc-row">
-                <TeamLogo league={g.league} name={g.away} />
+              {/* One line: logo + abbreviation + score on each side (wide and short card) */}
+              <div class="sc-row notranslate" translate="no">
+                <TeamLogo league={g.league} name={g.away} size={26} />
+                <span class="sc-ab">{a.abbr}</span>
                 {done ? <b class:list={['sc-score', { lose: homeWin }]}>{g.awayScore}</b> : <span class="sc-rec">{g.awayRecord}</span>}
                 <span class="sc-gap" />
                 {done ? <b class:list={['sc-score', { lose: awayWin }]}>{g.homeScore}</b> : <span class="sc-rec">{g.homeRecord}</span>}
-                <TeamLogo league={g.league} name={g.home} />
+                <span class="sc-ab">{h.abbr}</span>
+                <TeamLogo league={g.league} name={g.home} size={26} />
               </div>
-              <div class="sc-abbr notranslate" translate="no"><span>{a.abbr}</span><span>{h.abbr}</span></div>
             </a>
           );
         })}
