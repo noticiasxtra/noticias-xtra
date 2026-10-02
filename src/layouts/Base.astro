@@ -106,7 +106,6 @@ const todayCap = today.charAt(0).toUpperCase() + today.slice(1);
           {SECTIONS.map((s) => (
             <a href={url(`seccion/${s.id}`)} aria-current={active === s.id ? 'page' : undefined}>{s.name}</a>
           ))}
-          {F.videos && <a href={url('videos')} aria-current={active === 'videos' ? 'page' : undefined}>Videos</a>}
         </div>
       </div>
     </nav>

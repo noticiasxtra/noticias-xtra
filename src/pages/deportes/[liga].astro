@@ -27,6 +27,8 @@ const top = news[0];
 const more = news.slice(1);
 const season = 'season' in l ? l.season : undefined;
 const official = 'url' in l ? l.url : undefined;
+// Official YouTube channel: its "uploads" list ("UU" + channel id without "UC") always starts with the newest video
+const yt = 'youtube' in l ? l.youtube : undefined;
 // equipos.json: a plain list, or teams grouped by section ({ "Sección Este": [...] })
 const teamsEntry = (teamsData as Record<string, string[] | Record<string, string[]>>)[l.id] ?? [];
 const teamGroups: Array<[string, string[]]> = Array.isArray(teamsEntry) ? [['', teamsEntry]] : Object.entries(teamsEntry);
@@ -139,6 +141,17 @@ const tabs: Array<[keyof typeof ICON, string]> = individual ? [['noticias', 'Not
 
         <!-- Right: compact standings, season facts, ad -->
         <aside class="lg-right">
+          {yt && (
+            <section class="ys-card lg-video" id="videos">
+              <div class="ys-card-h"><h2>Videos</h2><a href={`https://www.youtube.com/channel/${yt}`} rel="noopener" target="_blank">Canal oficial ↗</a></div>
+              <div class="lg-video-frame">
+                <iframe src={`https://www.youtube-nocookie.com/embed/videoseries?list=UU${yt.slice(2)}&autoplay=1&mute=1&rel=0&playsinline=1`}
+                  title={`Último video de ${l.name} en YouTube`} loading="lazy" referrerpolicy="strict-origin-when-cross-origin"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+              </div>
+              <p class="vsrc">El video más reciente del canal oficial de {l.name} en YouTube.</p>
+            </section>
+          )}
           {!individual && <section class="ys-card" id="posiciones">
             <div class="ys-card-h"><h2>Posiciones{stDemo && <span class="sp-demo">DEMO</span>}</h2></div>
             {st?.groups?.length ? st.groups.map((g) => (

@@ -12,11 +12,11 @@
 
 export const LEAGUES = [
   // Puerto Rico
-  { id: 'bsn', name: 'BSN', abbr: 'BSN', full: 'Baloncesto Superior Nacional', local: true, color: '#F26B1D', photo: 'basketball',
+  { id: 'bsn', youtube: 'UCZOFf3DbBqAMSwmzYl8RPnA', name: 'BSN', abbr: 'BSN', full: 'Baloncesto Superior Nacional', local: true, color: '#F26B1D', photo: 'basketball',
     about: 'La liga de baloncesto profesional de Puerto Rico.', url: 'https://www.bsnpr.com' },
   { id: 'doble-a', name: 'Doble A', abbr: 'LBSDA', full: 'Liga de Béisbol Superior Doble A', local: true, color: '#1B3A8C', photo: 'baseball',
     about: 'El béisbol de los pueblos, organizado por la Federación de Béisbol de Puerto Rico.', season: 'Campeón 2026: Comerío.', url: 'https://beisboldobleapr.com' },
-  { id: 'invernal', name: 'La Pro', abbr: 'LBPRC', full: 'Liga de Béisbol Profesional Roberto Clemente', local: true, color: '#C8202F', logoBg: '#14213D', photo: 'baseball',
+  { id: 'invernal', youtube: 'UCyX4hGEy4iXVW5q8H_jf2jg', name: 'La Pro', abbr: 'LBPRC', full: 'Liga de Béisbol Profesional Roberto Clemente', local: true, color: '#C8202F', logoBg: '#14213D', photo: 'baseball',
     about: 'La Pro: el béisbol profesional de invierno de Puerto Rico, con seis equipos.', url: 'https://www.ligapr.com',
     season: 'Temporada 2026-27: arranca el 4 de noviembre; la fase regular termina el 28 de diciembre y las semifinales empiezan el 2 de enero de 2027.', starts: '2026-11-04T00:00:00-04:00' },
   { id: 'lvsm', name: 'Voleibol M', abbr: 'LVSM', full: 'Liga de Voleibol Superior Masculino', local: true, color: '#0F8C8C', logoBg: '#FFFFFF', photo: 'volleyball',
@@ -30,12 +30,12 @@ export const LEAGUES = [
   { id: 'tenis', name: 'Tenis', abbr: 'TEN', full: 'Tenis', local: true, color: '#2E7D32', photo: 'tennis', logoShape: 'full',
     about: 'Los tenistas boricuas en Puerto Rico y en los torneos del mundo.' },
   // Beyond the island
-  { id: 'mlb', name: 'Grandes Ligas', abbr: 'MLB', full: 'Grandes Ligas (MLB)', local: false, color: '#13274F', photo: 'baseball',
+  { id: 'mlb', youtube: 'UCoLrcjPV5PbUrUyXq5mjc_A', name: 'Grandes Ligas', abbr: 'MLB', full: 'Grandes Ligas (MLB)', local: false, color: '#13274F', photo: 'baseball',
     about: 'Los peloteros boricuas en las Grandes Ligas.' },
-  { id: 'nba', name: 'NBA', abbr: 'NBA', full: 'NBA', local: false, color: '#C8102E', logoBg: '#FFFFFF', logoShape: 'tall', photo: 'basketball',
+  { id: 'nba', youtube: 'UCWJ2lWNubArHWmf3FIHbfcQ', name: 'NBA', abbr: 'NBA', full: 'NBA', local: false, color: '#C8102E', logoBg: '#FFFFFF', logoShape: 'tall', photo: 'basketball',
     about: 'La NBA y los boricuas en el mejor baloncesto del mundo.' },
 ] as const satisfies ReadonlyArray<{
-  id: string; name: string; abbr: string; full: string; local: boolean; color: string; about: string; url?: string; season?: string; starts?: string; logoBg?: string; logoShape?: 'tall' | 'full'; photo?: 'basketball' | 'baseball' | 'volleyball' | 'boxing' | 'tennis';
+  id: string; name: string; abbr: string; full: string; local: boolean; color: string; about: string; url?: string; season?: string; starts?: string; logoBg?: string; logoShape?: 'tall' | 'full'; youtube?: string; photo?: 'basketball' | 'baseball' | 'volleyball' | 'boxing' | 'tennis';
 }>;
 
 export const LEAGUE_IDS = LEAGUES.map((l) => l.id) as unknown as readonly [(typeof LEAGUES)[number]['id'], ...(typeof LEAGUES)[number]['id'][]];

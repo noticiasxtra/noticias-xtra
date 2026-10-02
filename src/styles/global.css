@@ -1386,3 +1386,21 @@ main.wrap,.home-grid,.ys-page,.tb-page{padding-top:var(--gap)}
 .pf-links{display:flex;gap:16px;flex-wrap:wrap}
 .pf-links a{font-weight:700;color:var(--purple)}
 .pf-login[hidden],.pf-card[hidden],.cm-err[hidden]{display:none}
+
+/* Team logos always fit their circle (some MLB logos are taller than wide) */
+.tm-logo.has-img{overflow:hidden}
+.tm-logo img{width:var(--s);height:var(--s);max-width:100%;max-height:100%;object-fit:contain;display:block}
+
+/* Deportes page: the purple banner is one slim line everywhere */
+.ys-promo{flex-wrap:nowrap;gap:10px;padding:6px 8px 6px 10px;border-radius:999px;margin-bottom:10px}
+.ys-promo .sp-badge{width:26px;height:26px;flex:none}
+.ys-promo > div{min-width:0;flex:1;display:flex;align-items:baseline;gap:10px}
+.ys-promo .pr-long{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ys-promo .pr-sub{font-size:13px;white-space:nowrap}
+.ys-promo .ys-promo-btn{margin-left:0;padding:4px 12px;font-size:13px}
+@media (max-width:1100px){ .ys-promo .pr-sub{display:none} }
+
+/* League pages: latest YouTube video in the right column */
+.lg-video-frame{position:relative;aspect-ratio:16/9;border-radius:8px;overflow:hidden;background:#000}
+.lg-video-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.lg-video .vsrc{font-size:12px}
