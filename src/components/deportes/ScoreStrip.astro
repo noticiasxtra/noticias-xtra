@@ -29,7 +29,8 @@ function status(g: Game): { text: string; live?: boolean } {
 ---
 {games.length > 0 && (
   <div class="sc" data-sc>
-    <div class="sc-h">
+    {/* League pages (only=...) skip the title: the cards sit right under the page tabs */}
+    {!only && <div class="sc-h">
       <h2>Marcadores{anyDemo && <span class="sp-demo">DEMO</span>}</h2>
       {!only && leaguesHere.length > 1 && (
         <div class="sc-filters" role="group" aria-label="Filtrar por liga">
@@ -37,8 +38,8 @@ function status(g: Game): { text: string; live?: boolean } {
           {leaguesHere.map((l) => <button type="button" data-f={l.id} aria-pressed="false">{l.name}</button>)}
         </div>
       )}
-      {!only && <a class="sc-more" href={url('seccion/deportes')}>Xtra Deportes ›</a>}
-    </div>
+      <a class="sc-more" href={url('seccion/deportes')}>Xtra Deportes ›</a>
+    </div>}
     <div class="sc-rail">
       <button type="button" class="sc-arrow prev" aria-label="Ver juegos anteriores" hidden>
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>

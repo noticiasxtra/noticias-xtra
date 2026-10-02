@@ -1101,3 +1101,5 @@ main.wrap,.home-grid,.ys-page,.tb-page{padding-top:var(--gap)}
 }
 .sp-round{justify-content:flex-start}
 .sp-round-s{flex:1;display:flex;flex-direction:column;justify-content:space-around;gap:12px}
+/* League pages: scores sit close under the tabs */
+.lg .ys-page{padding-top:12px}
