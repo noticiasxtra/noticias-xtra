@@ -22,8 +22,12 @@ const row = others.slice(3, 6);
 const more = others.slice(6, 11);
 const related = (lead?.data.related ?? []).map((id) => stories.find((s) => s.id === id)).filter((s) => s !== undefined);
 const leadRelated = related.length ? related : others.slice(0, 3);
-// Section blocks, in menu order, only for sections with stories (Puerto Rico is already up top)
-const sectionIds = SECTIONS.map((s) => s.id).filter((id) => id !== 'puerto-rico' && stories.some((s) => s.data.section === id));
+// Section blocks in the order a Puerto Rico reader cares about: island news first (government,
+// politics, sports, the economy and bills, entertainment, health, weather), then the United States,
+// the world and opinion. Only sections with stories appear (Puerto Rico news is already up top).
+const HOME_ORDER = ['gobierno', 'politica', 'deportes', 'economia', 'entretenimiento', 'salud', 'clima', 'estados-unidos', 'mundo', 'opinion'] as const;
+const sectionIds = [...HOME_ORDER, ...SECTIONS.map((s) => s.id).filter((id) => id !== 'puerto-rico' && !(HOME_ORDER as readonly string[]).includes(id))]
+  .filter((id) => stories.some((s) => s.data.section === id)) as Array<(typeof SECTIONS)[number]['id']>;
 ---
 <Base active="home">
   <HomeStrip />

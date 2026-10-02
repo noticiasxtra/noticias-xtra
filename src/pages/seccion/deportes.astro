@@ -27,11 +27,11 @@ const rails = LEAGUES.filter((l) => fresh(byLeague(l.id)).length > 0);
 const headlines = fresh(stories).slice(0, 7);
 const href = (s: Story) => url(`noticia/${s.id}`);
 
-// Promo banner: the next league whose season start we know and that hasn't started yet
-const upcoming = LEAGUES.map((l) => ({ l, start: 'starts' in l ? new Date(l.starts as string) : undefined }))
-  .filter((x) => x.start && x.start.valueOf() > Date.now())
-  .sort((a, b) => a.start!.valueOf() - b.start!.valueOf())[0];
-const fmt = (d: Date) => d.toLocaleDateString('es-PR', { day: 'numeric', month: 'long', timeZone: 'America/Puerto_Rico' });
+// Purple news bar: the 5 newest sports stories; a sports story marked "breaking" in the last 12 hours goes first
+const HOUR = 36e5;
+const urgent = stories.find((s) => s.data.breaking && Date.now() - s.data.date.valueOf() < 12 * HOUR);
+const ticker = [urgent, ...stories].filter((s, i, all) => s && all.indexOf(s) === i).slice(0, 5) as Story[];
+const ago = (d: Date) => { const m = Math.round((Date.now() - d.valueOf()) / 60000); return m < 60 ? `hace ${Math.max(1, m)} min` : m < 1440 ? `hace ${Math.round(m / 60)} h` : d.toLocaleDateString('es-PR', { day: 'numeric', month: 'short', timeZone: 'America/Puerto_Rico' }); };
 ---
 <Base title="Deportes" active="deportes" description="Deportes de Puerto Rico: BSN, Doble A, La Pro (Liga Roberto Clemente), voleibol masculino y femenino, boxeo, tenis y los boricuas en el mundo.">
   <div class="ys">
@@ -47,17 +47,18 @@ const fmt = (d: Date) => d.toLocaleDateString('es-PR', { day: 'numeric', month: 
     <div class="wrap ys-page" id="main">
       <ScoreStrip theme="light" />
 
-      {upcoming && (
-        <a class="ys-promo" href={url(`deportes/${upcoming.l.id}`)}>
-          <LeagueBadge id={upcoming.l.id} size="md" />
-          <div>
-            <strong class="pr-long">{upcoming.l.full}: la temporada arranca el {fmt(upcoming.start!)}</strong>
-            {/* Phones: one short line */}
-            <strong class="pr-short">{upcoming.l.name} · {fmt(upcoming.start!)}</strong>
-            <span class="pr-sub">Calendario, posiciones y noticias de la liga.</span>
+      {ticker.length > 0 && (
+        <div class="ys-promo ys-news" data-ticker>
+          <span class:list={['ys-news-tag', { hot: !!urgent }]}>{urgent ? 'Última hora' : 'Lo último'}</span>
+          <div class="ys-news-slides">
+            {ticker.map((s, i) => (
+              <a class:list={['ys-news-item', { on: i === 0 }]} href={href(s)} aria-hidden={i === 0 ? undefined : 'true'} tabindex={i === 0 ? undefined : -1}>
+                <strong>{s.data.title}</strong><span>{league(s.data.league)?.name ?? 'Deportes'} · {ago(s.data.date)}</span>
+              </a>
+            ))}
           </div>
-          <span class="ys-promo-btn">Ver la liga</span>
-        </a>
+          {ticker.length > 1 && <span class="ys-news-dots" aria-hidden="true">{ticker.map((_, i) => <i class:list={{ on: i === 0 }} />)}</span>}
+        </div>
       )}
 
       <div class="ys-grid">
@@ -166,4 +167,21 @@ const fmt = (d: Date) => d.toLocaleDateString('es-PR', { day: 'numeric', month: 
       </div>
     </div>
   </div>
+  <script>
+    // Purple news bar: show each headline in turn (pauses on hover/focus; off for reduced motion)
+    document.querySelectorAll<HTMLElement>('[data-ticker]').forEach((bar) => {
+      const items = [...bar.querySelectorAll<HTMLAnchorElement>('.ys-news-item')];
+      const dots = [...bar.querySelectorAll<HTMLElement>('.ys-news-dots i')];
+      if (items.length < 2 || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      let i = 0, paused = false;
+      bar.addEventListener('mouseenter', () => (paused = true)); bar.addEventListener('mouseleave', () => (paused = false));
+      bar.addEventListener('focusin', () => (paused = true)); bar.addEventListener('focusout', () => (paused = false));
+      setInterval(() => {
+        if (paused || document.hidden) return;
+        items[i].classList.remove('on'); items[i].setAttribute('aria-hidden', 'true'); items[i].tabIndex = -1; dots[i]?.classList.remove('on');
+        i = (i + 1) % items.length;
+        items[i].classList.add('on'); items[i].removeAttribute('aria-hidden'); items[i].removeAttribute('tabindex'); dots[i]?.classList.add('on');
+      }, 5000);
+    });
+  </script>
 </Base>

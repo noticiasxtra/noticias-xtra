@@ -52,7 +52,7 @@ h1,h2,h3,h4{font-family:var(--head)}
 .nav-links>a:hover{opacity:1}
 .nav-links>a[aria-current="page"]{opacity:1;border-bottom-color:#fff}
 /* Small logo that slides in beside the menu once the big one scrolls away */
-.nav-logo{display:flex;align-items:center;overflow:hidden;max-width:0;opacity:0;transition:max-width .25s,opacity .2s,margin .25s}
+.nav-logo{display:flex;flex-shrink:0;align-items:center;overflow:hidden;max-width:0;opacity:0;transition:max-width .25s,opacity .2s,margin .25s}
 .nav-logo img{display:block;height:30px;width:auto;filter:brightness(0) invert(1)} /* white logo on the purple bar */
 .nav.stuck .nav-logo{max-width:110px;opacity:1;margin-right:14px}
 .nav.stuck{box-shadow:0 4px 14px rgba(22,22,29,.08)}
@@ -1566,3 +1566,26 @@ main.wrap,.home-grid,.ys-page,.tb-page{padding-top:var(--gap)}
 .cc-pick[hidden],.dm-ends[hidden]{display:none}
 @media (max-width:420px){ .cc-card{width:48px;height:72px;font-size:20px} .cc-card b{width:34px;height:48px} }
 .dm-actions [hidden]{display:none}
+
+/* Deportes: purple bar with the latest sports headlines (rotates) */
+.ys-news{display:flex;align-items:center;gap:12px;padding:6px 14px 6px 6px;color:#fff;min-height:40px}
+.ys-news-tag{flex:none;background:rgba(255,255,255,.18);color:#fff;font-family:var(--head);font-weight:800;font-size:11px;text-transform:uppercase;letter-spacing:.05em;padding:5px 10px;border-radius:999px}
+.ys-news-tag.hot{background:var(--red)}
+.ys-news-slides{position:relative;flex:1;min-width:0;height:22px;overflow:hidden}
+.ys-news-item{position:absolute;inset:0;display:flex;align-items:baseline;gap:10px;color:#fff;opacity:0;transform:translateY(8px);transition:opacity .35s,transform .35s;pointer-events:none}
+.ys-news-item.on{opacity:1;transform:none;pointer-events:auto}
+.ys-news-item strong{font-family:var(--head);font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.ys-news-item span{flex:none;font-size:12px;color:#E3DDFB}
+.ys-news-item:hover strong{text-decoration:underline}
+.ys-news-dots{flex:none;display:flex;gap:4px}
+.ys-news-dots i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.35)}
+.ys-news-dots i.on{background:#fff}
+@media (max-width:760px){
+  .ys-news{border-radius:12px;padding:6px 10px}
+  .ys-news-item span,.ys-news-dots{display:none}
+  .ys-news-item strong{font-size:14px}
+}
+@media (prefers-reduced-motion:reduce){ .ys-news-item{transition:none} }
+/* Phones: scrolling rows stay inside the screen; game page columns can shrink */
+.ys-leagues{min-width:0;max-width:100%}
+.sp-league-page > *,.sp-data > *{min-width:0}

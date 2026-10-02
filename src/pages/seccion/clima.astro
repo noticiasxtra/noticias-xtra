@@ -5,7 +5,6 @@
 // San Juan, temperatures in other towns, radar, the tropical outlook and our Clima stories.
 import Base from '../../layouts/Base.astro';
 import StoryCard from '../../components/StoryCard.astro';
-import AdSlot from '../../components/AdSlot.astro';
 import { getStories, url } from '../../lib/site';
 const news = (await getStories()).filter((s) => s.data.section === 'clima');
 // Town forecasts (latitude, longitude). The NWS grid for each is looked up in the browser.
@@ -77,7 +76,6 @@ const TOWNS: Array<[string, number, number]> = [
         <div class="grid2">{news.slice(0, 4).map((s) => <StoryCard story={s} />)}</div>
       </section>
     )}
-    <AdSlot size="infeed" />
   </main>
 
   <script>
