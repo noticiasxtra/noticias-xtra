@@ -2592,3 +2592,20 @@ body.ad-skin{background:var(--ad-skin) center top/cover fixed}
   .eco .block .big h3{font-size:19px;margin:8px 0 4px}
   .eco .block .big p{font-size:14px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 }
+/* Phones: the logo bar and the section menu stay locked at the top while scrolling */
+@media (max-width:760px){
+  .masthead{position:sticky;top:0;z-index:22;box-shadow:0 1px 0 var(--line)}
+  .masthead .wrap{padding-top:8px;padding-bottom:8px}
+  .logo img{height:38px}
+  .nav{top:var(--mh-h,56px)}
+  .apn-tabs{top:calc(var(--mh-h,56px) + 47px);border-radius:0 0 14px 14px;box-shadow:0 6px 14px rgba(0,0,0,.08)}
+  html{scroll-padding-top:calc(var(--mh-h,56px) + 56px)}
+}
+/* Phones: bigger tap areas for small text links (the layout doesn't move: padding is offset by negative margin) */
+@media (max-width:760px){
+  .topbar .tb-tip,.lang-sw a,.lang-sw .on{display:inline-block;padding:8px 6px;margin:-8px -2px}
+  .sec-h a,.jg-back,.crumbs a,.hs-pop-btn,.vsrc a,.lg-site,.sp-games-meta a{display:inline-block;padding:10px 4px;margin:-10px -4px}
+  footer li{margin:0}
+  footer li a{display:inline-block;padding:9px 0}
+  .fo-vote button{min-width:36px;min-height:32px}
+}
