@@ -7,10 +7,12 @@ import { url } from '../../lib/site';
 interface Props { only?: string; theme?: 'dark' | 'light'; title?: boolean }
 const { only, theme = 'dark', title = false } = Astro.props;
 const games = scores(only);
+const anyDemo = games.some((g) => g.demo);
+const link = (g: (typeof games)[number]) => url(g.id ? `deportes/juego/${g.id}` : `deportes/${g.league}`);
 ---
 {games.length > 0 && (
   <div class:list={['sp-scores-wrap', theme]}>
-    {title && <div class="sp-scores-h"><h2>Marcadores</h2><a href={url('seccion/deportes')}>Xtra Deportes</a></div>}
+    {title && <div class="sp-scores-h"><h2>Marcadores{anyDemo && <span class="sp-demo">DEMO</span>}</h2><a href={url('seccion/deportes')}>Xtra Deportes</a></div>}
     <div class="sp-scores" role="region" aria-label="Marcadores">
       {games.map((g) => {
         const l = league(g.league);
@@ -18,9 +20,9 @@ const games = scores(only);
         const awayWin = g.status === 'final' && (g.awayScore ?? 0) > (g.homeScore ?? 0);
         const homeWin = g.status === 'final' && (g.homeScore ?? 0) > (g.awayScore ?? 0);
         return (
-          <a class="sp-game" href={url(`deportes/${g.league}`)} style={`--lc:${l?.color}`}>
+          <a class="sp-game" href={link(g)} style={`--lc:${l?.color}`}>
             <div class="sp-game-h">
-              <span>{l?.name}</span>
+              <span>{l?.name}{g.demo && <i class="sp-demo">DEMO</i>}</span>
               {g.status === 'en-vivo' ? <b class="live">● EN VIVO{g.note && ` · ${g.note}`}</b> : g.status === 'final' ? <b>Final{g.note && ` · ${g.note}`}</b> : <b>{gameTime(g.date)}</b>}
             </div>
             <div class:list={['sp-team', { win: awayWin }]}><span>{g.away}</span>{done && <strong>{g.awayScore}</strong>}</div>

@@ -1,11 +1,12 @@
 ---
 // League page: playoff bracket (rounds left to right)
-import { bracket } from '../../lib/scores';
+import { bracket, isDemoTable } from '../../lib/scores';
 interface Props { league: string }
 const b = bracket(Astro.props.league);
+const demo = !!b && isDemoTable('brackets', Astro.props.league);
 ---
 <section class="sp-panel">
-  <h2>{b?.name ?? 'Postemporada'}</h2>
+  <h2>{b?.name ?? 'Postemporada'}{demo && <span class="sp-demo">DEMO</span>}</h2>
   {!b?.rounds?.length ? (
     <p class="sp-note">Las llaves se publicarán cuando comience la postemporada.</p>
   ) : (

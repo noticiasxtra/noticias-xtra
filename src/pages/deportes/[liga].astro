@@ -9,6 +9,7 @@ import ScoreStrip from '../../components/deportes/ScoreStrip.astro';
 import GamesList from '../../components/deportes/GamesList.astro';
 import StandingsTable from '../../components/deportes/StandingsTable.astro';
 import BracketView from '../../components/deportes/BracketView.astro';
+import TeamStatsTable from '../../components/deportes/TeamStatsTable.astro';
 import { getStories, url } from '../../lib/site';
 import { LEAGUES, type League } from '../../lib/leagues';
 
@@ -45,6 +46,7 @@ const official = 'url' in l ? l.url : undefined;
         <div class="sp-data">
           <GamesList league={l.id} season={season} />
           <StandingsTable league={l.id} />
+          <TeamStatsTable league={l.id} />
           <BracketView league={l.id} />
         </div>
         <aside class="ys-card sp-news">

@@ -1,6 +1,7 @@
 ---
 // League page: live, upcoming and recent games in a list
 import { scores, gameTime, type Game } from '../../lib/scores';
+import { url } from '../../lib/site';
 interface Props { league: string; season?: string }
 const { league, season } = Astro.props;
 const all = scores(league, 60);
@@ -11,7 +12,7 @@ const groups: Array<[string, Game[]]> = [
 ];
 ---
 <section class="sp-panel">
-  <h2>Juegos</h2>
+  <h2>Juegos{all.some((g) => g.demo) && <span class="sp-demo">DEMO</span>}</h2>
   {all.length === 0 ? (
     <p class="sp-note">No hay juegos publicados todavía.{season && <> {season}</>}</p>
   ) : groups.filter(([, gs]) => gs.length).map(([name, gs]) => (
@@ -20,14 +21,14 @@ const groups: Array<[string, Game[]]> = [
       <ul class="sp-games">
         {gs.map((g) => (
           <li>
-            <div class="sp-games-teams">
+            <a class="sp-games-teams" href={g.id ? url(`deportes/juego/${g.id}`) : undefined}>
               <span class:list={{ win: g.status === 'final' && (g.awayScore ?? 0) > (g.homeScore ?? 0) }}>{g.away}{g.status !== 'programado' && <strong>{g.awayScore}</strong>}</span>
               <span class:list={{ win: g.status === 'final' && (g.homeScore ?? 0) > (g.awayScore ?? 0) }}>{g.home}{g.status !== 'programado' && <strong>{g.homeScore}</strong>}</span>
-            </div>
+            </a>
             <div class="sp-games-meta">
               {g.status === 'en-vivo' ? <b class="live">● EN VIVO</b> : g.status === 'final' ? <b>Final</b> : <b>{gameTime(g.date)}</b>}
               {g.note && <span>{g.note}</span>}
-              {g.venue && <span>{g.venue}</span>}
+              {g.id && <a href={url(`deportes/juego/${g.id}`)}>{g.status === 'programado' ? 'Previa ›' : 'Ver juego ›'}</a>}
             </div>
           </li>
         ))}

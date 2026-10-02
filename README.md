@@ -132,6 +132,9 @@ The Deportes page (`src/pages/seccion/deportes.astro`) has league tabs, a big le
 ] } }
 ```
 
+- **Team statistics:** `src/data/estadisticas.json`, by league: `{ "bsn": { "columns": ["PPJ", "REB"], "rows": [ { "team": "Vaqueros", "values": ["92.4", "39.1"] } ] } }`
+- **Game pages:** give a game an `id` in `marcadores.json` and it gets its own page at `/deportes/juego/<id>/`. Optional: `awayFull`, `homeFull`, `awayRecord`, `homeRecord`, `linescore`, `stats`, `plays` (see `src/lib/scores.ts`).
+- **Demo data:** while `sportsDemo` is `true` in `src/lib/site.ts`, sample scores, standings, stats, a bracket and game pages (from `src/lib/demo-sports.ts`) fill the empty spots, each labeled DEMO. Real data always replaces the demo for that league. Set it to `false` to remove all of it.
 - **League logos:** put the official file from each league's press office in `public/logos/` named by league id (`bsn.png`, `invernal.svg`...). Until then the site shows a colored badge with the league's initials.
 - **Automatic scores:** not connected yet. Free feeds that work technically (MLB, ESPN, the BSN site) don't allow use by a news site, and the BSN's terms forbid automated collection. A licensed provider can later fill these same three files from a script.
 
