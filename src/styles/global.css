@@ -2754,3 +2754,31 @@ html.nx-en .lang-tag{background:var(--red)}
 .hs-glist a:hover{background:var(--soft);color:var(--purple)}
 .hs-glist img{flex:none;width:34px;height:34px;object-fit:cover;border-radius:7px}
 @media (max-width:999px){ .hs-item .hs-mkt-ico{display:none} }
+/* Side and main columns never stretch their boxes to fill leftover height (that made the video box tall and empty) */
+.stack,.right,.sp-side,.sp-data,.ys-main,.ys-left,.ys-right,.lg-left,.lg-right,.lg-main,.tb-right{align-content:start}
+
+/* Xtra Deportes: "Últimas noticias" (10 newest, in order) and the all-stories page */
+.ys-latest-list,.dn-list{list-style:none;margin:0;padding:0}
+.ys-latest-list .ys-mini,.dn-list .ys-mini{display:grid;grid-template-columns:132px minmax(0,1fr);grid-template-rows:auto 1fr;column-gap:14px;padding:12px 0;border-top:1px solid var(--line)}
+.ys-latest-list li:first-child .ys-mini,.dn-list li:first-child .ys-mini{border-top:0}
+.ys-latest-list .ys-mini .ph,.dn-list .ys-mini .ph{grid-row:1/3;width:132px;aspect-ratio:16/10;height:auto}
+.ys-latest-list .ys-mini h3,.dn-list .ys-mini h3{margin:0 0 4px;font-size:16px}
+.ys-latest-list .ys-mini:hover h3,.dn-list .ys-mini:hover h3{color:var(--blue)}
+.ys-more{display:block;margin-top:8px;padding:12px;border-radius:10px;text-align:center;font-family:var(--head);font-weight:700;font-size:14px;color:#fff;background:var(--purple)}
+.ys-more:hover{background:var(--blue)}
+.dn{padding-bottom:30px;max-width:860px}
+.dn-h{margin:6px 0 12px;font-size:30px;display:flex;align-items:center;gap:10px}
+.dn-h span{font-size:14px;padding:3px 10px;border-radius:999px;background:var(--soft);color:var(--muted)}
+.dn-chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-bottom:12px;padding-bottom:4px}
+.dn-chips button{flex:none;display:flex;align-items:center;gap:6px;font:inherit;font-weight:700;font-size:13px;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.dn-chips button[aria-pressed="true"]{background:var(--purple);border-color:var(--purple);color:#fff}
+.dn-list{padding:6px 16px}
+.dn-list li[hidden]{display:none}
+.dn-ad .ad-slot{margin:12px auto}
+.dn-empty{color:var(--muted)}
+@media (max-width:600px){
+  .ys-latest-list .ys-mini,.dn-list .ys-mini{grid-template-columns:112px minmax(0,1fr)}
+  .ys-latest-list .ys-mini .ph,.dn-list .ys-mini .ph{width:112px;aspect-ratio:4/3}
+  .ys-latest-list .ys-mini h3,.dn-list .ys-mini h3{font-size:15px}
+  .dn-h{font-size:24px}
+}

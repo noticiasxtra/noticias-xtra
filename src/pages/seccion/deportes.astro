@@ -23,15 +23,15 @@ const row = rest.slice(0, 3);
 const byLeague = (id: string) => stories.filter((s) => s.data.league === id);
 const local = LEAGUES.filter((l) => l.local);
 const world = LEAGUES.filter((l) => !l.local);
-// Stories already in the lead block are not repeated in the rails or Titulares
+// Stories already in the lead block are not repeated in "Últimas noticias" or Titulares
 const shown = new Set([lead, ...related, ...row].filter(Boolean));
 const fresh = (list: Story[]) => list.filter((s) => !shown.has(s));
-const rails = LEAGUES.filter((l) => fresh(byLeague(l.id)).length > 0);
-const headlines = fresh(stories).slice(0, 7);
+const latest = fresh(stories).slice(0, 10); // the newest 10, in order; the rest are on /deportes/noticias/
+const headlines = fresh(stories).slice(10, 16); // the next ones after "Últimas noticias" (no repeats)
 // Side columns: recent results and next games (real and DEMO), so the columns stay full while scrolling
 const all = scores(undefined, 60);
-const results = all.filter((g) => g.status === 'final').slice(0, 6);
-const nextGames = all.filter((g) => g.status === 'programado').slice(0, 6);
+const results = all.filter((g) => g.status === 'final').slice(0, 4);
+const nextGames = all.filter((g) => g.status === 'programado').slice(0, 4);
 const gameHref = (g: (typeof all)[number]) => url(g.id ? `deportes/juego/${g.id}` : `deportes/${g.league}`);
 const bsnYT = LEAGUES.find((l) => l.id === 'bsn' && 'youtube' in l) as { youtube?: string } | undefined;
 const href = (s: Story) => url(`noticia/${s.id}`);
@@ -96,20 +96,24 @@ const ago = (d: Date) => { const m = Math.round((Date.now() - d.valueOf()) / 600
             <div class="ys-card"><p class="sp-note">Muy pronto publicaremos las primeras noticias deportivas.</p></div>
           )}
 
-          {rails.map((l) => (
-            <section class="ys-card ys-rail" style={`--lc:${l.color}`}>
-              <div class="ys-card-h"><LeagueBadge id={l.id} size="sm" /><h2><span class="nm-full">{l.full}</span><span class="nm-short">{l.name}</span></h2><a href={url(`deportes/${l.id}`)}>Ver todo ›</a></div>
-              <div class="ys-rail-list">
-                {fresh(byLeague(l.id)).slice(0, 4).map((s) => (
-                  <a class="ys-mini" href={href(s)}>
-                    <Ph sectionId="deportes" image={s.data.image} league={s.data.league} />
-                    <h3 class="hl">{s.data.title}</h3>
-                    <span class="ys-by"><Time date={s.data.date} /></span>
-                  </a>
+          {latest.length > 0 && (
+            <section class="ys-card ys-latest" aria-labelledby="ys-latest-h">
+              <div class="ys-card-h"><h2 id="ys-latest-h">Últimas noticias</h2><a href={url('deportes/noticias')}>Ver todas ›</a></div>
+              <ol class="ys-latest-list">
+                {latest.map((s) => (
+                  <li>
+                    <a class="ys-mini" href={href(s)}>
+                      <Ph sectionId="deportes" image={s.data.image} league={s.data.league} />
+                      <h3 class="hl">{s.data.title}</h3>
+                      <span class="ys-by">{league(s.data.league)?.name ?? 'Deportes'} · <Time date={s.data.date} /></span>
+                    </a>
+                  </li>
                 ))}
-              </div>
+              </ol>
+              <a class="ys-more" href={url('deportes/noticias')}>Ver todas las noticias de deportes ({stories.length}) ›</a>
             </section>
-          ))}
+          )}
+          <AdSlot size="infeed" />
         </div>
 
         <!-- Left -->
@@ -117,7 +121,7 @@ const ago = (d: Date) => { const m = Math.round((Date.now() - d.valueOf()) / 600
           <section class="ys-card">
             <div class="ys-card-h"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8M15 7h6v6" /></svg><h2>Tendencias</h2></div>
             <ul class="ys-list">
-              {stories.slice(0, 8).map((s) => (
+              {stories.slice(0, 5).map((s) => (
                 <li>{s.data.league ? <LeagueBadge id={s.data.league} size="sm" /> : <span class="ys-dot" />}<a href={href(s)} class="hl">{s.data.title}</a></li>
               ))}
             </ul>
@@ -126,7 +130,7 @@ const ago = (d: Date) => { const m = Math.round((Date.now() - d.valueOf()) / 600
             <div class="ys-card-h"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z" /><circle cx="12" cy="9.5" r="2.5" /></svg><h2>Ligas de Puerto Rico</h2></div>
             <ul class="ys-tree">
               {local.map((l) => {
-                const last = byLeague(l.id).slice(0, 2);
+                const last = byLeague(l.id).slice(0, 1);
                 return (
                   <li>
                     <a class="ys-tree-name" href={url(`deportes/${l.id}`)}><LeagueBadge id={l.id} size="sm" />{l.name}</a>
@@ -160,7 +164,6 @@ const ago = (d: Date) => { const m = Math.round((Date.now() - d.valueOf()) / 600
               ))}</ul>
             </section>
           )}
-          <GamesTeaser compact />
           <AdSlot size="rectangle" sticky />
         </aside>
 
@@ -206,6 +209,7 @@ const ago = (d: Date) => { const m = Math.round((Date.now() - d.valueOf()) / 600
               ))}
             </ul>
           </section>
+          <GamesTeaser compact />
           <AdSlot size="halfpage" sticky />
         </aside>
       </div>
