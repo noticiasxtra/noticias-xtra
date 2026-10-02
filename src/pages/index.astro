@@ -24,9 +24,8 @@ const leadRelated = related.length ? related : others.slice(0, 3);
 // Section blocks, in menu order, only for sections with stories (Puerto Rico is already up top)
 const sectionIds = SECTIONS.map((s) => s.id).filter((id) => id !== 'puerto-rico' && stories.some((s) => s.data.section === id));
 ---
-<Base active="home" noTopAd>
+<Base active="home">
   <HomeStrip />
-  <div class="wrap"><AdSlot size="leaderboard" class="ad-top" /></div>
   <div class="wrap home-grid" id="main">
     <main class="home-main">
       {!lead && <div class="empty"><p>Muy pronto publicaremos las primeras noticias.</p></div>}

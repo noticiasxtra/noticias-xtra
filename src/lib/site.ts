@@ -9,7 +9,7 @@ export const SITE = {
   tagline: 'Actualidad de Puerto Rico',
   description: 'Noticias de Puerto Rico: gobierno, política, economía, deportes, entretenimiento y clima.',
   // Shows the "sitio de demostración" bar at the top. Set to false when going live.
-  demoMode: true,
+  demoMode: false,
   // Newsroom email: tips, corrections and privacy questions go here. Empty = pages say "muy pronto".
   email: '',
   // Red bar: chosen automatically (see src/lib/breaking.ts). Set this only to force a story by hand.

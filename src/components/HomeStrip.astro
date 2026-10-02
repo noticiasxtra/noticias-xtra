@@ -6,6 +6,7 @@
 import Ph from './Ph.astro';
 import Time from './Time.astro';
 import LeagueBadge from './deportes/LeagueBadge.astro';
+import TeamLogo from './deportes/TeamLogo.astro';
 import { getStories, mostRead, section, url } from '../lib/site';
 import { getBreaking } from '../lib/breaking';
 import { scores } from '../lib/scores';
@@ -111,7 +112,7 @@ const chev = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke
             <div class="hs-text">
               <span class="hs-label"><em class:list={{ live: g.status === 'en-vivo' }}>{gStatus(g)}</em>{g.demo && <i class="sp-demo">DEMO</i>}</span>
               {[[g.away, g.awayScore], [g.home, g.homeScore]].map(([name, score]) => (
-                <span class="hs-team"><i style={`background:${team(g.league, name as string).color}`} />{name}{g.status !== 'programado' && <b>{score}</b>}</span>
+                <span class="hs-team"><TeamLogo league={g.league} name={name as string} size={18} />{name}{g.status !== 'programado' && <b>{score}</b>}</span>
               ))}
             </div>
           </a>

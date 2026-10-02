@@ -4,6 +4,7 @@ import Base from '../../../layouts/Base.astro';
 import Time from '../../../components/Time.astro';
 import LeagueBadge from '../../../components/deportes/LeagueBadge.astro';
 import AdSlot from '../../../components/AdSlot.astro';
+import TeamLogo from '../../../components/deportes/TeamLogo.astro';
 import { games, gameTime, type Game } from '../../../lib/scores';
 import { league } from '../../../lib/leagues';
 import { getStories, url } from '../../../lib/site';
@@ -31,6 +32,7 @@ const title = `${g.awayFull ?? g.away} vs. ${g.homeFull ?? g.home}`;
         <div class="gm-league"><LeagueBadge id={l.id} size="sm" />{l.full}</div>
         <div class="gm-teams">
           <div class:list={['gm-team', { win: awayWin }]}>
+            <TeamLogo league={g.league} name={g.awayFull ?? g.away} size={64} />
             <strong>{g.awayFull ?? g.away}</strong>
             {g.awayRecord && <span>{g.awayRecord}</span>}
             <small>Visitante</small>
@@ -40,6 +42,7 @@ const title = `${g.awayFull ?? g.away} vs. ${g.homeFull ?? g.home}`;
             <span class:list={['gm-status', { live }]}>{live && <i class="gm-dot" />}{status}</span>
           </div>
           <div class:list={['gm-team', 'home', { win: homeWin }]}>
+            <TeamLogo league={g.league} name={g.homeFull ?? g.home} size={64} />
             <strong>{g.homeFull ?? g.home}</strong>
             {g.homeRecord && <span>{g.homeRecord}</span>}
             <small>Local</small>

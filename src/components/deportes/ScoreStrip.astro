@@ -2,12 +2,11 @@
 // Score carousel (home, Deportes, league pages). Renders only when there are games.
 // Cards: two-color team bar on top, status + league, team badges with scores, abbreviations.
 // Faded edges with arrow buttons; league filter buttons when showing several leagues.
-import fs from 'node:fs';
-import path from 'node:path';
 import { scores, type Game } from '../../lib/scores';
 import { league } from '../../lib/leagues';
 import { team } from '../../lib/teams';
 import { url } from '../../lib/site';
+import TeamLogo from './TeamLogo.astro';
 interface Props { only?: string; title?: boolean; theme?: string }
 const { only } = Astro.props;
 const games = scores(only);
@@ -27,9 +26,6 @@ function status(g: Game): { text: string; live?: boolean } {
   const day = d.toLocaleDateString('en-CA', { timeZone: 'America/Puerto_Rico' }) === today ? 'Hoy' : d.toLocaleDateString('es-PR', { weekday: 'short', timeZone: 'America/Puerto_Rico' });
   return { text: `${day} ${time}` };
 }
-// Official team logo if present at public/logos/teams/<league>-<abbr>.png|svg|webp
-const logoFor = (lg: string, abbr: string) =>
-  ['svg', 'png', 'webp'].map((e) => `logos/teams/${lg}-${abbr.toLowerCase()}.${e}`).find((f) => fs.existsSync(path.join(process.cwd(), 'public', f)));
 ---
 {games.length > 0 && (
   <div class="sc" data-sc>
@@ -55,8 +51,6 @@ const logoFor = (lg: string, abbr: string) =>
           const done = g.status !== 'programado';
           const awayWin = g.status === 'final' && (g.awayScore ?? 0) > (g.homeScore ?? 0);
           const homeWin = g.status === 'final' && (g.homeScore ?? 0) > (g.awayScore ?? 0);
-          const aLogo = logoFor(g.league, a.abbr);
-          const hLogo = logoFor(g.league, h.abbr);
           return (
             <a class="sc-card" href={link(g)} data-league={g.league} style={`--a:${a.color};--h:${h.color}`}
                aria-label={`${g.awayFull ?? g.away} ${done ? g.awayScore : ''}, ${g.homeFull ?? g.home} ${done ? g.homeScore : ''}. ${st.text}`}>
@@ -65,11 +59,11 @@ const logoFor = (lg: string, abbr: string) =>
                 <span class="sc-lg">{league(g.league)?.name}{g.demo && <i class="sp-demo">DEMO</i>}</span>
               </div>
               <div class="sc-row">
-                <span class="sc-logo" style={`--c:${a.color}`}>{aLogo ? <img src={url(aLogo)} alt="" /> : <b>{a.abbr}</b>}</span>
+                <TeamLogo league={g.league} name={g.away} />
                 {done ? <b class:list={['sc-score', { lose: homeWin }]}>{g.awayScore}</b> : <span class="sc-rec">{g.awayRecord}</span>}
                 <span class="sc-gap" />
                 {done ? <b class:list={['sc-score', { lose: awayWin }]}>{g.homeScore}</b> : <span class="sc-rec">{g.homeRecord}</span>}
-                <span class="sc-logo" style={`--c:${h.color}`}>{hLogo ? <img src={url(hLogo)} alt="" /> : <b>{h.abbr}</b>}</span>
+                <TeamLogo league={g.league} name={g.home} />
               </div>
               <div class="sc-abbr"><span>{a.abbr}</span><span>{h.abbr}</span></div>
             </a>
