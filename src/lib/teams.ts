@@ -30,6 +30,18 @@ export const TEAMS: Record<string, Team> = {
   'bsn:Criollos': { abbr: 'CAG', color: '#E3A21A' },
   'bsn:Cangrejeros': { abbr: 'SAN', color: '#C8102E' },
   'bsn:Osos': { abbr: 'MAN', color: '#5D4037' },
+  // LVSM (voleibol masculino, temporada 2026)
+  'lvsm:Cafeteros': { abbr: 'YAU', color: '#6D4C41' },
+  'lvsm:Patriotas': { abbr: 'LAR', color: '#C62828' },
+  'lvsm:Plataneros': { abbr: 'COR', color: '#F9A825' },
+  'lvsm:Changos': { abbr: 'NAR', color: '#2E7D32' },
+  'lvsm:Gigantes de Adjuntas': { abbr: 'ADJ', color: '#1565C0' },
+  'lvsm:Gigantes de Carolina': { abbr: 'CAR', color: '#1A1A1A' },
+  // LVSF (voleibol femenino; equipos confirmados en comunicados de la FPV)
+  'lvsf:Cangrejeras': { abbr: 'SAN', color: '#1B3F8B' },
+  'lvsf:Leonas': { abbr: 'PON', color: '#D52B1E' },
+  'lvsf:Criollas': { abbr: 'CAG', color: '#C8202F' },
+  'lvsf:Valencianas': { abbr: 'JUN', color: '#00897B' },
   // Doble A
   'doble-a:Toritos': { abbr: 'CAY', color: '#C62828' },
   'doble-a:Grises': { abbr: 'HUM', color: '#616161' },

@@ -150,6 +150,10 @@ The header has a dark-mode button (remembered per browser) and an **ES | EN** sw
 
 Team logos go in `public/logos/teams/<league>-<abbr>.png` (abbreviations in `src/lib/teams.ts`). La Pro's six logos come from the league's official site. They show on score cards, game pages, standings and team stats.
 
+### League pages
+
+Each league page (`/deportes/<id>/`) has tabs, a score strip, Titulares, an Equipos list with logos, the top story, games, standings, team stats and playoffs. Team lists live in `src/data/equipos.json` (full names, by league). Leagues: `bsn`, `doble-a`, `invernal` (La Pro), `lvsm` and `lvsf` (voleibol masculino y femenino), `boxeo`, `tenis`, `mlb`, `nba`.
+
 ### Columnists
 
 The Opinión page lists columnists from `src/data/columnistas.json`. A column with `section: opinion` and `author` matching a columnist's name appears under that columnist.

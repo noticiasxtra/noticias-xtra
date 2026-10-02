@@ -36,7 +36,7 @@ const MAX_AGE_HOURS = Number(process.env.MAX_AGE_HOURS || 36);
 const DRY_RUN = Boolean(process.env.DRY_RUN);
 // Same as src/content.config.ts, minus 'opinion' (opinion pieces are written by people, never by this script)
 // Same ids as src/lib/leagues.ts (sports stories get one)
-const LEAGUES = ['bsn', 'doble-a', 'invernal', 'voleibol', 'futbol', 'boxeo', 'selecciones', 'mlb', 'nba'];
+const LEAGUES = ['bsn', 'doble-a', 'invernal', 'lvsm', 'lvsf', 'boxeo', 'tenis', 'mlb', 'nba'];
 const SECTIONS = ['puerto-rico', 'politica', 'gobierno', 'estados-unidos', 'mundo', 'economia', 'deportes', 'entretenimiento', 'clima', 'salud'];
 const UA = 'NoticiasXtraBot/0.1 (+https://github.com)';
 

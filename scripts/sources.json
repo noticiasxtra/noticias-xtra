@@ -70,14 +70,14 @@
     "maxPerRun": 1
   },
   {
-    "name": "Federación Puertorriqueña de Fútbol",
+    "name": "Federación Puertorriqueña de Voleibol (LVSM y LVSF)",
     "type": "rss",
-    "url": "https://fpfpuertorico.com/feed/",
+    "url": "https://fedpurvoli.com/feed/",
     "section": "deportes",
-    "league": "futbol",
     "place": "Puerto Rico",
     "fullText": true,
-    "maxPerRun": 1
+    "maxPerRun": 2,
+    "_nota": "La IA asigna la liga: lvsm (masculino) o lvsf (femenino)."
   },
   {
     "name": "Departamento de Justicia de EE.UU. (casos de Puerto Rico)",

@@ -11,5 +11,5 @@ const l = league(id);
 const file = ['svg', 'png', 'webp'].map((ext) => `logos/${id}.${ext}`).find((f) => fs.existsSync(path.join(process.cwd(), 'public', f)));
 ---
 {l && (file
-  ? <span class={`sp-badge sp-badge-${size} has-logo`} style={'logoBg' in l && l.logoBg ? `background:${l.logoBg}` : undefined}><img src={url(file)} alt={l.full} /></span>
+  ? <span class={`sp-badge sp-badge-${size} has-logo${'logoShape' in l && l.logoShape === 'tall' ? ' logo-tall' : ''}`} style={'logoBg' in l && l.logoBg ? `background:${l.logoBg}` : undefined}><img src={url(file)} alt={l.full} /></span>
   : <span class={`sp-badge sp-badge-${size}`} style={`--lc:${l.color}`} aria-hidden="true"><b data-len={l.abbr.length}>{l.abbr}</b></span>)}

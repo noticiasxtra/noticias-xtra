@@ -1,1 +1,8 @@
-[]
+[
+  { "id": "lvsm-2026-10-23-lares-yauco", "league": "lvsm", "date": "2026-10-23T20:00:00-04:00", "away": "Patriotas", "home": "Cafeteros", "awayFull": "Patriotas de Lares", "homeFull": "Cafeteros de Yauco", "status": "programado" },
+  { "id": "lvsm-2026-10-23-corozal-naranjito", "league": "lvsm", "date": "2026-10-23T20:00:00-04:00", "away": "Plataneros", "home": "Changos", "awayFull": "Plataneros de Corozal", "homeFull": "Changos de Naranjito", "status": "programado" },
+  { "id": "lvsm-2026-10-23-adjuntas-carolina", "league": "lvsm", "date": "2026-10-23T20:00:00-04:00", "away": "Gigantes de Adjuntas", "home": "Gigantes de Carolina", "status": "programado" },
+  { "id": "lvsm-2026-10-25-naranjito-adjuntas", "league": "lvsm", "date": "2026-10-25T20:00:00-04:00", "away": "Changos", "home": "Gigantes de Adjuntas", "awayFull": "Changos de Naranjito", "status": "programado" },
+  { "id": "lvsm-2026-10-25-yauco-corozal", "league": "lvsm", "date": "2026-10-25T19:00:00-04:00", "away": "Cafeteros", "home": "Plataneros", "awayFull": "Cafeteros de Yauco", "homeFull": "Plataneros de Corozal", "status": "programado" },
+  { "id": "lvsm-2026-10-25-carolina-lares", "league": "lvsm", "date": "2026-10-25T18:00:00-04:00", "away": "Gigantes de Carolina", "home": "Patriotas", "homeFull": "Patriotas de Lares", "status": "programado" }
+]

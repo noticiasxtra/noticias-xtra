@@ -33,7 +33,7 @@ const upcoming = LEAGUES.map((l) => ({ l, start: 'starts' in l ? new Date(l.star
   .sort((a, b) => a.start!.valueOf() - b.start!.valueOf())[0];
 const fmt = (d: Date) => d.toLocaleDateString('es-PR', { day: 'numeric', month: 'long', timeZone: 'America/Puerto_Rico' });
 ---
-<Base title="Deportes" active="deportes" description="Deportes de Puerto Rico: BSN, Doble A, La Pro (Liga Roberto Clemente), voleibol, boxeo, selecciones nacionales y los boricuas en el mundo.">
+<Base title="Deportes" active="deportes" description="Deportes de Puerto Rico: BSN, Doble A, La Pro (Liga Roberto Clemente), voleibol masculino y femenino, boxeo, tenis y los boricuas en el mundo.">
   <div class="ys">
     <div class="ys-bar">
       <div class="wrap">
