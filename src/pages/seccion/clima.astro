@@ -1,9 +1,7 @@
 ---
 // Clima: weather page, designed for phones first. Live data from the National Weather Service (NWS/SNM),
 // read in the reader's browser: pick a town → current conditions, 24-hour chart, 7-day forecast.
-// Maps (radar, satellite, tropics), alerts, and a hurricane-season section: active Atlantic storms come from
-// the National Hurricane Center when the site is built (the site rebuilds every hour), with each storm's
-// cone map, distance to Puerto Rico and links. Plus an interactive preparation checklist.
+// Maps (radar, satellite, tropics), alerts, and "En la isla hoy" (every town at a glance, in the right column on desktop).
 import Base from '../../layouts/Base.astro';
 import StoryCard from '../../components/StoryCard.astro';
 import { getStories, url } from '../../lib/site';
@@ -16,59 +14,8 @@ const TOWNS: Array<[string, number, number]> = [
   ['Utuado', 18.2655, -66.7005], ['Vieques', 18.1263, -65.4401], ['Culebra', 18.3030, -65.3010],
 ];
 
-// ---- Hurricane season (built every hour) ----
-const now = new Date();
-const year = now.getFullYear();
-const seasonStart = new Date(`${year}-06-01T00:00:00-04:00`);
-const seasonEnd = new Date(`${year}-11-30T23:59:59-04:00`);
-const inSeason = now >= seasonStart && now <= seasonEnd;
-const DAY = 864e5;
-const daysTo = (d: Date) => Math.ceil((d.valueOf() - now.valueOf()) / DAY);
-const nextStart = now > seasonEnd ? new Date(`${year + 1}-06-01T00:00:00-04:00`) : seasonStart;
-
-type Storm = { id: string; name: string; kind: string; cat?: number; mph: number; pressure: string; lat: number; lon: number; miles: number; dir: string; speedMph: number; updated: string; cone?: string; advisory?: string; graphics?: string };
-const KIND: Record<string, string> = { HU: 'Huracán', TS: 'Tormenta tropical', TD: 'Depresión tropical', STS: 'Tormenta subtropical', SD: 'Depresión subtropical', PTC: 'Posible ciclón tropical', PC: 'Ciclón postropical' };
-const compass = (deg: number) => ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSO', 'SO', 'OSO', 'O', 'ONO', 'NO', 'NNO'][Math.round(deg / 22.5) % 16];
-const milesTo = (lat: number, lon: number) => { // distance to the center of Puerto Rico
-  const R = 3959, r = Math.PI / 180, a = 18.22, b = -66.59;
-  const h = Math.sin(((lat - a) * r) / 2) ** 2 + Math.cos(a * r) * Math.cos(lat * r) * Math.sin(((lon - b) * r) / 2) ** 2;
-  return Math.round(2 * R * Math.asin(Math.sqrt(h)));
-};
-const category = (mph: number) => (mph >= 157 ? 5 : mph >= 130 ? 4 : mph >= 111 ? 3 : mph >= 96 ? 2 : mph >= 74 ? 1 : undefined);
-let storms: Storm[] = [];
-let stormsOk = true;
-try {
-  const res = await fetch('https://www.nhc.noaa.gov/CurrentStorms.json', { signal: AbortSignal.timeout(8000), headers: { 'User-Agent': 'NoticiasXtra/1.0' } });
-  const data = await res.json();
-  for (const s of (data.activeStorms ?? []).filter((x: any) => String(x.id).startsWith('al'))) {
-    const mph = Math.round(Number(s.intensity) * 1.15078);
-    const st: Storm = { id: s.id, name: s.name, kind: KIND[s.classification] ?? s.classification, cat: s.classification === 'HU' ? category(mph) : undefined, mph, pressure: s.pressure,
-      lat: s.latitudeNumeric, lon: s.longitudeNumeric, miles: milesTo(s.latitudeNumeric, s.longitudeNumeric), dir: compass(Number(s.movementDir)), speedMph: Math.round(Number(s.movementSpeed) * 1.15078),
-      updated: new Date(s.lastUpdate).toLocaleString('es-PR', { weekday: 'short', hour: 'numeric', minute: '2-digit', timeZone: 'America/Puerto_Rico' }),
-      advisory: s.publicAdvisory?.url, graphics: s.forecastGraphics?.url };
-    // The 5-day cone image has a changing file name; read it from the storm's graphics page
-    try {
-      if (st.graphics) {
-        const html = await (await fetch(st.graphics, { signal: AbortSignal.timeout(6000) })).text();
-        const m = html.match(/storm_graphics\/[^"']+_5day_cone_sm\.png/);
-        if (m) st.cone = `https://www.nhc.noaa.gov/${m[0]}`;
-      }
-    } catch { /* no cone image */ }
-    storms.push(st);
-  }
-  storms.sort((a, b) => a.miles - b.miles);
-} catch { stormsOk = false; }
-
-const PREP = [
-  ['agua', 'Agua: un galón por persona por día, para al menos 7 días'], ['comida', 'Comida enlatada y abrelatas manual'],
-  ['medicinas', 'Medicamentos para dos semanas y botiquín'], ['linterna', 'Linternas, baterías y radio de baterías'],
-  ['documentos', 'Documentos importantes en bolsa plástica sellada'], ['efectivo', 'Efectivo (los cajeros pueden no funcionar)'],
-  ['celular', 'Cargadores portátiles para el celular'], ['tanque', 'Tanque de gasolina lleno'],
-  ['ventanas', 'Tormenteras o protección para ventanas'], ['refugio', 'Saber dónde está el refugio más cercano'],
-  ['mascotas', 'Plan y comida para las mascotas'], ['generador', 'Generador fuera de la casa, nunca adentro'],
-];
 ---
-<Base title="Clima" active="clima" description="El tiempo en Puerto Rico: condiciones por pueblo, pronóstico por hora y de 7 días, radar, satélite, alertas y la temporada de huracanes.">
+<Base title="Clima" active="clima" description="El tiempo en Puerto Rico: condiciones por pueblo, pronóstico por hora y de 7 días, radar, satélite, el trópico y alertas.">
   <main class="wrap cx" id="main" data-cx data-towns={JSON.stringify(TOWNS)}>
     <header class="cx-head">
       <h1>Clima</h1>
@@ -81,6 +28,7 @@ const PREP = [
 
     <div class="cx-alerts" data-alerts hidden></div>
 
+    <div class="cx-main">
     <section class="cx-now" aria-live="polite">
       <div class="cx-now-top">
         <span class="cx-now-icon" data-now-icon aria-hidden="true"></span>
@@ -128,58 +76,14 @@ const PREP = [
       </figure>
     </section>
 
-    <section class="cx-card cx-hurr" id="huracanes" aria-labelledby="cx-hu">
-      <div class="cx-hurr-head">
-        <h2 id="cx-hu">Temporada de huracanes {inSeason ? year : nextStart.getFullYear()}</h2>
-        <span class:list={['cx-season', { on: inSeason }]}>{inSeason ? `Activa · quedan ${daysTo(seasonEnd)} días` : `Comienza en ${daysTo(nextStart)} días`}</span>
-      </div>
-      <p class="cx-small">La temporada del Atlántico va del 1 de junio al 30 de noviembre. Los sistemas activos se actualizan cada hora con datos del Centro Nacional de Huracanes.</p>
-      {storms.length > 0 ? (
-        <div class="cx-storms">
-          {storms.map((s) => (
-            <article class:list={['cx-storm', { near: s.miles < 500 }]}>
-              <div class="cx-storm-head">
-                <span class="cx-storm-badge" aria-hidden="true">{s.cat ? s.cat : s.kind === 'Tormenta tropical' ? 'TT' : 'DT'}</span>
-                <div><h3>{s.kind} {s.name}</h3><p>{s.cat ? `Categoría ${s.cat} · ` : ''}Vientos de {s.mph} mph · Presión {s.pressure} mb</p></div>
-              </div>
-              <p class="cx-storm-where">A unas <b>{s.miles.toLocaleString('es-PR')} millas</b> de Puerto Rico · se mueve al {s.dir} a {s.speedMph} mph · Actualizado: {s.updated}</p>
-              {s.cone && <img class="cx-cone" src={s.cone} alt={`Cono de pronóstico de 5 días de ${s.name}`} loading="lazy" />}
-              <p class="cx-links">{s.advisory && <a href={s.advisory} rel="noopener" target="_blank">Boletín oficial ↗</a>}{s.graphics && <a href={s.graphics} rel="noopener" target="_blank">Todos los mapas ↗</a>}</p>
-            </article>
-          ))}
-        </div>
-      ) : (
-        <p class="cx-calm">{stormsOk ? 'No hay ciclones tropicales activos en el Atlántico en este momento.' : 'No pudimos consultar el Centro Nacional de Huracanes; revisa el mapa del trópico arriba.'}</p>
-      )}
-      <details class="cx-scale">
-        <summary>Escala Saffir-Simpson: ¿qué significa cada categoría?</summary>
-        <ul>
-          <li><b>Tormenta tropical:</b> vientos de 39 a 73 mph.</li>
-          <li><b>Categoría 1:</b> 74 a 95 mph. Daños a techos, árboles y tendido eléctrico.</li>
-          <li><b>Categoría 2:</b> 96 a 110 mph. Daños extensos; cortes de luz por días o semanas.</li>
-          <li><b>Categoría 3:</b> 111 a 129 mph. Huracán mayor: daños devastadores.</li>
-          <li><b>Categoría 4:</b> 130 a 156 mph. Daños catastróficos; áreas inhabitables por semanas.</li>
-          <li><b>Categoría 5:</b> 157 mph o más. Destrucción de muchas viviendas.</li>
-        </ul>
-      </details>
-    </section>
+    </div>
 
-    <section class="cx-card" aria-labelledby="cx-prep">
-      <div class="cx-prep-head">
-        <h2 id="cx-prep">Prepárate</h2>
-        <span data-prep-count>0/{PREP.length}</span>
-      </div>
-      <div class="cx-bar"><span data-prep-bar></span></div>
-      <p class="cx-small">Marca lo que ya tienes listo. Se guarda en este dispositivo.</p>
-      <ul class="cx-prep">
-        {PREP.map(([id, text]) => <li><label><input type="checkbox" data-prep={id} /><span>{text}</span></label></li>)}
-      </ul>
-    </section>
-
+    <aside class="cx-side">
     <section class="cx-card">
       <h2>En la isla hoy</h2>
       <ul class="cx-island" data-island>{TOWNS.map(([n], i) => <li data-i={i}><button type="button" data-pick={i}><b class="notranslate" translate="no">{n}</b><span class="cx-i-sky">…</span><span class="cx-i-t">—</span></button></li>)}</ul>
     </section>
+    </aside>
 
     {news.length > 0 && (
       <section>
@@ -282,7 +186,7 @@ const PREP = [
         const t = F(obs.temperature.value)!;
         const isDay = Date.now() > sun.rise.valueOf() && Date.now() < sun.set.valueOf();
         $('[data-now-temp]').textContent = `${t}°`;
-        $('[data-now-sky]').textContent = es(obs.textDescription) || '—';
+        $('[data-now-sky]').textContent = es(obs.textDescription);
         $('[data-now-feels]').textContent = `Sensación de ${F(obs.heatIndex?.value) ?? t}°`;
         $('[data-now-icon]').innerHTML = icon(obs.textDescription, isDay, 72);
         const set = (k: string, v: string) => (page.querySelector(`[data-f="${k}"]`)!.textContent = v);
@@ -361,17 +265,6 @@ const PREP = [
       const img = page.querySelector<HTMLImageElement>('[data-map-img]')!; img.src = src; img.alt = alt;
       $('[data-map-cap]').textContent = cap;
     }));
-
-    // Preparation checklist (saved on this device)
-    const prep: Record<string, boolean> = JSON.parse(store.get('nx-prep') || '{}');
-    const boxes = [...page.querySelectorAll<HTMLInputElement>('[data-prep]')];
-    const paintPrep = () => {
-      const done = boxes.filter((b) => b.checked).length;
-      $('[data-prep-count]').textContent = `${done}/${boxes.length}`;
-      $('[data-prep-bar]').style.width = `${(done / boxes.length) * 100}%`;
-    };
-    boxes.forEach((b) => { b.checked = !!prep[b.dataset.prep!]; b.addEventListener('change', () => { prep[b.dataset.prep!] = b.checked; store.set('nx-prep', JSON.stringify(prep)); paintPrep(); }); });
-    paintPrep();
 
     // "En la isla hoy": today's high and sky for every town
     TOWNS.forEach(async (_, i) => {
