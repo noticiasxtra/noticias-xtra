@@ -17,10 +17,10 @@ function at(days: number, time: string): string {
 const inningLabels = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
 export const DEMO_GAMES: Game[] = [
-  // Liga de Béisbol Profesional Roberto Clemente
+  // La Pro (Liga de Béisbol Profesional Roberto Clemente): six real teams and stadiums, invented results
   {
     id: 'demo-lbprc-1', demo: true, league: 'invernal', status: 'en-vivo', note: 'Alta 7ma',
-    date: at(0, '19:00'), away: 'Cangrejeros', home: 'Criollos', awayScore: 3, homeScore: 2,
+    date: at(0, '19:21'), away: 'Cangrejeros', home: 'Criollos', awayScore: 3, homeScore: 2,
     awayFull: 'Cangrejeros de Santurce', homeFull: 'Criollos de Caguas', venue: 'Estadio Yldefonso Solá Morales, Caguas',
     awayRecord: '12-6', homeRecord: '11-7',
     linescore: { labels: inningLabels, away: [0, 1, 0, 0, 2, 0, 0, '', ''], home: [1, 0, 0, 1, 0, 0, '', '', ''], totals: ['C', 'H', 'E'], awayTotals: [3, 7, 0], homeTotals: [2, 6, 1] },
@@ -40,7 +40,7 @@ export const DEMO_GAMES: Game[] = [
   },
   {
     id: 'demo-lbprc-2', demo: true, league: 'invernal', status: 'final', note: '10 entradas',
-    date: at(0, '13:00'), away: 'Indios', home: 'Leones', awayScore: 5, homeScore: 4,
+    date: at(0, '16:21'), away: 'Indios', home: 'Leones', awayScore: 5, homeScore: 4,
     awayFull: 'Indios de Mayagüez', homeFull: 'Leones de Ponce', venue: 'Estadio Francisco "Paquito" Montaner, Ponce',
     awayRecord: '9-9', homeRecord: '8-10',
     linescore: { labels: [...inningLabels, '10'], away: [0, 0, 2, 0, 0, 1, 0, 1, 0, 1], home: [1, 0, 0, 0, 2, 0, 0, 0, 1, 0], totals: ['C', 'H', 'E'], awayTotals: [5, 11, 1], homeTotals: [4, 9, 0] },
@@ -58,13 +58,13 @@ export const DEMO_GAMES: Game[] = [
   },
   {
     id: 'demo-lbprc-3', demo: true, league: 'invernal', status: 'programado',
-    date: at(1, '19:30'), away: 'Gigantes', home: 'Leones', awayFull: 'Gigantes de Carolina', homeFull: 'Leones de Ponce',
-    venue: 'Estadio Francisco "Paquito" Montaner, Ponce', awayRecord: '5-13', homeRecord: '8-10',
+    date: at(1, '19:21'), away: 'Senadores', home: 'Gigantes', awayFull: 'Senadores de San Juan', homeFull: 'Gigantes de Carolina',
+    venue: 'Estadio Roberto Clemente Walker, Carolina', awayRecord: '10-8', homeRecord: '4-14',
   },
   {
     id: 'demo-lbprc-4', demo: true, league: 'invernal', status: 'programado',
-    date: at(2, '19:00'), away: 'Criollos', home: 'Indios', awayFull: 'Criollos de Caguas', homeFull: 'Indios de Mayagüez',
-    venue: 'Estadio Isidoro García, Mayagüez', awayRecord: '11-7', homeRecord: '9-9',
+    date: at(2, '19:21'), away: 'Criollos', home: 'Indios', awayFull: 'Criollos de Caguas', homeFull: 'Indios de Mayagüez',
+    venue: 'Estadio Isidoro "Cholo" García, Mayagüez', awayRecord: '11-7', homeRecord: '9-9',
   },
   // BSN
   {
@@ -125,8 +125,8 @@ export const DEMO_STANDINGS: Record<string, Standings> = {
   invernal: {
     groups: [{ columns: ['ÚLT. 10', 'RACHA'], rows: [
       s('Cangrejeros de Santurce', 12, 6, '—', '7-3', 'G3'), s('Criollos de Caguas', 11, 7, '1.0', '6-4', 'P1'),
-      s('Indios de Mayagüez', 9, 9, '3.0', '5-5', 'G2'), s('Leones de Ponce', 8, 10, '4.0', '4-6', 'P2'),
-      s('Gigantes de Carolina', 5, 13, '7.0', '3-7', 'P4'),
+      s('Senadores de San Juan', 10, 8, '2.0', '6-4', 'G1'), s('Indios de Mayagüez', 9, 9, '3.0', '5-5', 'G2'),
+      s('Leones de Ponce', 8, 10, '4.0', '4-6', 'P2'), s('Gigantes de Carolina', 4, 14, '8.0', '2-8', 'P4'),
     ] }],
   },
   bsn: {
@@ -154,8 +154,8 @@ export const DEMO_STANDINGS: Record<string, Standings> = {
 export const DEMO_STATS: Record<string, TeamStats> = {
   invernal: { columns: ['PRO', 'HR', 'CA', 'EFE'], rows: [
     { team: 'Cangrejeros de Santurce', values: ['.271', '18', '96', '3.21'] }, { team: 'Criollos de Caguas', values: ['.265', '15', '88', '3.45'] },
-    { team: 'Indios de Mayagüez', values: ['.258', '12', '81', '3.88'] }, { team: 'Leones de Ponce', values: ['.249', '14', '77', '4.02'] },
-    { team: 'Gigantes de Carolina', values: ['.237', '9', '61', '4.66'] },
+    { team: 'Senadores de San Juan', values: ['.261', '13', '84', '3.70'] }, { team: 'Indios de Mayagüez', values: ['.258', '12', '81', '3.88'] },
+    { team: 'Leones de Ponce', values: ['.249', '14', '77', '4.02'] }, { team: 'Gigantes de Carolina', values: ['.237', '9', '61', '4.66'] },
   ] },
   bsn: { columns: ['PPJ', 'REB', 'AST', '% TC'], rows: [
     { team: 'Vaqueros de Bayamón', values: ['92.4', '39.1', '20.3', '48.9'] }, { team: 'Santeros de Aguada', values: ['90.8', '37.6', '19.1', '47.5'] },

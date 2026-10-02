@@ -3,6 +3,7 @@
    and the league pages (src/pages/deportes/[liga].astro).
    No Astro imports here: src/content.config.ts reads LEAGUE_IDS too.
    Only add an `url` after checking it is the league's real official site.
+   `logoBg` is the badge background behind a logo made for dark backgrounds.
    `abbr` is shown in the league badge until an official logo is added as
    public/logos/<id>.png or .svg (see src/components/deportes/LeagueBadge.astro).
    `season` is a short note shown on the league page (only facts we have checked);
@@ -13,10 +14,11 @@ export const LEAGUES = [
   // Puerto Rico
   { id: 'bsn', name: 'BSN', abbr: 'BSN', full: 'Baloncesto Superior Nacional', local: true, color: '#F26B1D', photo: 'basketball',
     about: 'La liga de baloncesto profesional de Puerto Rico.', url: 'https://www.bsnpr.com' },
-  { id: 'doble-a', name: 'Doble A', abbr: 'AA', full: 'Béisbol Doble A', local: true, color: '#1B8A5A', photo: 'baseball',
-    about: 'El béisbol aficionado de Puerto Rico, con equipos que representan a los pueblos.' },
-  { id: 'invernal', name: 'Roberto Clemente', abbr: 'LBPRC', full: 'Liga de Béisbol Profesional Roberto Clemente', local: true, color: '#1F3A93', photo: 'baseball',
-    about: 'La invernal: el béisbol profesional de Puerto Rico.', season: 'Temporada 2026-27: del 4 de noviembre de 2026 al 23 de enero de 2027.', starts: '2026-11-04T00:00:00-04:00' },
+  { id: 'doble-a', name: 'Doble A', abbr: 'LBSDA', full: 'Liga de Béisbol Superior Doble A', local: true, color: '#1B3A8C', photo: 'baseball',
+    about: 'El béisbol de los pueblos, organizado por la Federación de Béisbol de Puerto Rico.', season: 'Campeón 2026: Comerío.', url: 'https://beisboldobleapr.com' },
+  { id: 'invernal', name: 'La Pro', abbr: 'LBPRC', full: 'Liga de Béisbol Profesional Roberto Clemente', local: true, color: '#C8202F', logoBg: '#14213D', photo: 'baseball',
+    about: 'La Pro: el béisbol profesional de invierno de Puerto Rico, con seis equipos.', url: 'https://www.ligapr.com',
+    season: 'Temporada 2026-27: arranca el 4 de noviembre; la fase regular termina el 28 de diciembre y las semifinales empiezan el 2 de enero de 2027.', starts: '2026-11-04T00:00:00-04:00' },
   { id: 'voleibol', name: 'Voleibol', abbr: 'LVS', full: 'Voleibol Superior', local: true, color: '#0F8C8C',
     about: 'El voleibol superior masculino y femenino de Puerto Rico.' },
   { id: 'futbol', name: 'Fútbol', abbr: 'FPF', full: 'Fútbol en Puerto Rico', local: true, color: '#3C9D3C',
@@ -31,7 +33,7 @@ export const LEAGUES = [
   { id: 'nba', name: 'NBA', abbr: 'NBA', full: 'NBA', local: false, color: '#C8102E', photo: 'basketball',
     about: 'La NBA y los boricuas en el mejor baloncesto del mundo.' },
 ] as const satisfies ReadonlyArray<{
-  id: string; name: string; abbr: string; full: string; local: boolean; color: string; about: string; url?: string; season?: string; starts?: string; photo?: 'basketball' | 'baseball';
+  id: string; name: string; abbr: string; full: string; local: boolean; color: string; about: string; url?: string; season?: string; starts?: string; logoBg?: string; photo?: 'basketball' | 'baseball';
 }>;
 
 export const LEAGUE_IDS = LEAGUES.map((l) => l.id) as unknown as readonly [(typeof LEAGUES)[number]['id'], ...(typeof LEAGUES)[number]['id'][]];

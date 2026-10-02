@@ -4,6 +4,7 @@ badge with their initials.
 
 Sources (October 2026):
 - bsn.svg: official BSN website (bsnpr.com)
-- invernal.png: TheSportsDB league badge; replace with the file from the league's press office
+- invernal.png: official La Pro / LBPRC website (ligapr.com); made for dark backgrounds (logoBg in leagues.ts)
+- doble-a.png: official Liga de Béisbol Superior Doble A website (beisboldobleapr.com, Federación de Béisbol de Puerto Rico)
 - futbol.svg, mlb.svg, nba.svg: Wikimedia Commons (marked public domain)
 Logos are the leagues' trademarks, used here only to identify each league in news coverage.

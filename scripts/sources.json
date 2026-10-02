@@ -51,6 +51,25 @@
     "_nota": "Desactivada: los términos del BSN prohíben extraer su contenido de forma automatizada sin autorización escrita. Activar solo con permiso del BSN."
   },
   {
+    "name": "Liga de Béisbol Profesional Roberto Clemente (La Pro)",
+    "type": "page",
+    "url": "https://www.ligapr.com/noticias",
+    "linkPattern": "^https://www\\.ligapr\\.com/noticias/[a-z0-9-]+$",
+    "section": "deportes",
+    "league": "invernal",
+    "place": "Puerto Rico"
+  },
+  {
+    "name": "Federación de Béisbol de Puerto Rico (Doble A)",
+    "type": "rss",
+    "url": "https://beisboldobleapr.com/feed/",
+    "section": "deportes",
+    "league": "doble-a",
+    "place": "Puerto Rico",
+    "fullText": true,
+    "maxPerRun": 1
+  },
+  {
     "name": "Federación Puertorriqueña de Fútbol",
     "type": "rss",
     "url": "https://fpfpuertorico.com/feed/",
