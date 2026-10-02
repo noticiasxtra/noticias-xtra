@@ -10,7 +10,6 @@ import TeamLogo from './TeamLogo.astro';
 interface Props { only?: string; title?: boolean; theme?: string }
 const { only } = Astro.props;
 const games = scores(only);
-const anyDemo = games.some((g) => g.demo);
 const leaguesHere = [...new Set(games.map((g) => g.league))].map((id) => league(id)!).filter(Boolean);
 const link = (g: Game) => url(g.id ? `deportes/juego/${g.id}` : `deportes/${g.league}`);
 
@@ -29,10 +28,9 @@ function status(g: Game): { text: string; live?: boolean } {
 ---
 {games.length > 0 && (
   <div class="sc" data-sc>
-    {/* League pages (only=...) skip the title: the cards sit right under the page tabs */}
+    {/* No title: league filters only (each card shows its own DEMO tag). League pages skip this row. */}
     {!only && <div class="sc-h">
-      <h2>Marcadores{anyDemo && <span class="sp-demo">DEMO</span>}</h2>
-      {!only && leaguesHere.length > 1 && (
+      {leaguesHere.length > 1 && (
         <div class="sc-filters" role="group" aria-label="Filtrar por liga">
           <button type="button" data-f="" aria-pressed="true">Todos</button>
           {leaguesHere.map((l) => <button type="button" data-f={l.id} aria-pressed="false">{l.name}</button>)}
