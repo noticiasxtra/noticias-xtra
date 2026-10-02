@@ -95,7 +95,7 @@ const GIF_IMGS = [['gif-wepa', '¡Wepa! animado'], ['gif-coqui', 'Coquí saltand
       <ul class="cm-rep-rules">
         <li>+{RULES.comment} por comentario de {RULES.minChars} caracteres o más (+{RULES.reply} si es respuesta); cuentan hasta {RULES.perDay} al día.</li>
         <li>+{RULES.like} por cada Me gusta de otro lector · +{RULES.featured} si la redacción destaca tu comentario.</li>
-        <li>{RULES.report} si un comentario tuyo es reportado y ocultado. Top comentarista y Diamante se pierden con un reporte.</li>
+        <li>{RULES.report} si un comentario tuyo es reportado y ocultado. Los comentarios con insultos, amenazas, odio, datos personales o spam se ocultan solos; los dudosos los revisa la redacción. Top comentarista y Diamante se pierden con un reporte.</li>
         <li>Si borras un comentario, se restan sus puntos. Stickers y respuestas cortas no suman.</li>
       </ul>
       <p class="cm-rep-demo">Vista previa: tu reputación se guarda en este dispositivo. Los Me gusta de otros y los destacados llegarán con las cuentas.</p>
@@ -107,9 +107,9 @@ const GIF_IMGS = [['gif-wepa', '¡Wepa! animado'], ['gif-coqui', 'Coquí saltand
       <li class="cm-item" data-id={c.id} data-likes={c.likes}>
         <span class="cm-av" aria-hidden="true">{c.name[0].toUpperCase()}</span>
         <div class="cm-body">
-          <p><b>{c.name}</b> <span class={`cm-badge cm-b-${c.level}`} title={levelName(c.level)}><Fragment set:html={BADGE[c.level]} /> {levelName(c.level)}</span> <span class="sp-demo">EJEMPLO</span> {c.text}</p>
+          <p><b>{c.name}</b> <span class={`cm-badge cm-b-${c.level}`} title={levelName(c.level)}><Fragment set:html={BADGE[c.level]} /> {levelName(c.level)}</span> <span class="sp-demo">EJEMPLO</span> <span class="cm-text">{c.text}</span></p>
           {'media' in c && c.media && <img class="cm-media" src={url(`stickers/${c.media}.svg`)} alt="Sticker" loading="lazy" />}
-          <div class="cm-meta"><span>{c.ago}</span><span data-likes-label>{c.likes} Me gusta</span><button type="button" data-reply>Responder</button></div>
+          <div class="cm-meta"><span>{c.ago}</span><span data-likes-label>{c.likes} Me gusta</span><button type="button" data-reply>Responder</button><button type="button" data-report>Reportar</button></div>
         </div>
         <button type="button" class="cm-like" data-like aria-pressed="false" aria-label="Me gusta">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.5-9.2C1 8.3 3.2 4.5 7 4.5c2 0 3.4 1.1 5 3 1.6-1.9 3-3 5-3 3.8 0 6 3.8 4.5 7.3C19.5 16.4 12 21 12 21z" /></svg>
@@ -121,9 +121,9 @@ const GIF_IMGS = [['gif-wepa', '¡Wepa! animado'], ['gif-coqui', 'Coquí saltand
 </section>
 
 <script>
-  import { addComment, removeComment, getRep, levelOf, needs, specialsOf } from '../lib/reputation';
+  import { addComment, removeComment, getRep, levelOf, needs, specialsOf, RULES } from '../lib/reputation';
+  import { assess, judgeReport, getReports, saveReports, upsertReport, isHidden, myReports, saveMyReports, isWeakReporter, REPORT_REASONS, type Report } from '../lib/moderation';
   type Mine = { id: string; name: string; text: string; at: number; replyTo?: string; media?: { kind: string; src: string } };
-  const BAD = /\b(pendej\w*|cabr[oó]n\w*|puñet\w*|carajo|mierd\w*|idiota)\b/i; // basic word filter
   const store = {
     get: <T,>(k: string, d: T): T => { try { return JSON.parse(localStorage.getItem(k) || '') ?? d; } catch { return d; } },
     set: (k: string, v: unknown) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* storage blocked */ } },
@@ -142,6 +142,7 @@ const GIF_IMGS = [['gif-wepa', '¡Wepa! animado'], ['gif-coqui', 'Coquí saltand
     const count = root.querySelector<HTMLElement>('[data-cm-count]')!;
     root.querySelector<HTMLElement>('[data-cm-me]')!.textContent = myName[0].toUpperCase();
     let replyTo: string | undefined;
+    let warned = ''; // text that already got the "doubtful" warning once
 
     const liked = new Set(store.get<string[]>(likesKey, []));
     const wireLike = (li: HTMLElement) => {
@@ -182,13 +183,67 @@ const GIF_IMGS = [['gif-wepa', '¡Wepa! animado'], ['gif-coqui', 'Coquí saltand
         if (lv.index > 0) { const bd = document.createElement('span'); bd.className = `cm-badge cm-b-${lv.id}`; bd.innerHTML = `${JSON.parse(root.dataset.badges || '{}')[lv.id] ?? ''} `; bd.append(lv.name); li.querySelector('b')!.after(' ', bd); }
         li.querySelector('.cm-text')!.textContent = c.text;
         li.querySelector('.cm-meta span')!.textContent = ago(c.at);
-        li.querySelector('[data-del]')!.addEventListener('click', () => { store.set(key, store.get<Mine[]>(key, []).filter((x) => x.id !== c.id)); removeComment(c.id); render(); });
+        li.querySelector('[data-del]')!.addEventListener('click', () => { store.set(key, store.get<Mine[]>(key, []).filter((x) => x.id !== c.id)); removeComment(c.id); saveReports(getReports().filter((x) => x.id !== `${sid}:${c.id}`)); render(); });
         const parent = c.replyTo ? list.querySelector(`[data-id="${c.replyTo}"]`) : null;
         if (parent) parent.after(li); else list.prepend(li);
         wireLike(li);
       });
       count.textContent = `(${list.querySelectorAll('.cm-item').length})`;
+      applyMod();
     };
+
+    // Moderation: hide comments that were hidden automatically, removed by the newsroom, or reported by 3+ readers
+    const sid = root.dataset.comments!;
+    const applyMod = () => {
+      const reps = getReports().filter((r) => r.storyId === sid);
+      const done = myReports().ids;
+      list.querySelectorAll<HTMLElement>('.cm-item').forEach((li) => {
+        const r = reps.find((x) => x.commentId === li.dataset.id);
+        const hid = !!r && isHidden(r);
+        li.classList.toggle('cm-hidden', hid);
+        li.querySelector('.cm-hid-note')?.remove();
+        if (hid) {
+          const n = document.createElement('p'); n.className = 'cm-hid-note';
+          n.textContent = r!.status === 'review' ? 'Comentario oculto mientras la redacción lo revisa.' : r!.mine ? `Tu comentario fue ocultado por incumplir las reglas (${RULES.report} de reputación).` : 'Comentario oculto por incumplir las reglas de la comunidad.';
+          li.querySelector('.cm-body')!.prepend(n);
+        }
+        const rb = li.querySelector<HTMLButtonElement>('[data-report]');
+        if (rb && done.includes(`${sid}:${li.dataset.id}`)) { rb.textContent = 'Reportado'; rb.disabled = true; }
+      });
+    };
+    const textOf = (li: HTMLElement) => li.querySelector('.cm-text')?.textContent?.trim() ?? '';
+    // Report: pick a reason → the automatic check decides (hide now / keep / send to the newsroom's queue)
+    list.addEventListener('click', (e) => {
+      const b = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-report]');
+      if (!b || b.disabled) return;
+      const li = b.closest<HTMLElement>('.cm-item')!;
+      const open = li.querySelector('.cm-rp'); if (open) { open.remove(); return; }
+      const f = document.createElement('form'); f.className = 'cm-rp';
+      f.innerHTML = `<fieldset><legend>¿Por qué reportas este comentario?</legend>${REPORT_REASONS.map((r, i) => `<label><input type="radio" name="rp-${li.dataset.id}" value="${r.id}"${i ? '' : ' required'} /> ${r.name}</label>`).join('')}</fieldset><div class="cm-rp-acts"><button type="submit" class="cm-rp-send">Enviar reporte</button><button type="button" data-rp-cancel>Cancelar</button></div><p class="cm-rp-note">Lo revisa nuestro sistema al instante. Los reportes falsos le restan peso a tus próximos reportes.</p>`;
+      li.querySelector('.cm-body')!.append(f);
+      f.querySelector('[data-rp-cancel]')!.addEventListener('click', () => f.remove());
+      f.addEventListener('submit', (ev) => {
+        ev.preventDefault();
+        const reason = (f.querySelector('input:checked') as HTMLInputElement | null)?.value; if (!reason) return;
+        const cid = li.dataset.id!; const rid = `${sid}:${cid}`;
+        const prev = getReports().find((x) => x.id === rid);
+        const reasons = [...new Set([...(prev?.reasons ?? []), reason])];
+        const cnt = (prev?.count ?? 0) + 1;
+        const my = myReports();
+        const { action, a } = judgeReport(textOf(li), reasons, cnt, isWeakReporter(my));
+        const status: Report['status'] = action === 'hide' ? 'auto' : action === 'review' || prev?.status === 'review' ? 'review' : 'kept';
+        upsertReport({ id: rid, at: Date.now(), storyId: sid, storyUrl: `${location.pathname}#comentarios`, title: document.querySelector('h1')?.textContent?.trim() || document.title,
+          commentId: cid, author: li.querySelector('b')?.textContent || '', text: textOf(li), media: li.querySelector<HTMLImageElement>('.cm-media')?.getAttribute('src') || undefined,
+          mine: li.classList.contains('mine'), source: 'report', reasons, count: cnt, score: a.score, flags: a.reasons, status });
+        my.ids = [...my.ids, rid].slice(-200); if (status === 'kept') my.wrong++; saveMyReports(my);
+        const msg = document.createElement('p'); msg.className = `cm-rp-done ${status}`; msg.setAttribute('role', 'status');
+        msg.textContent = status === 'auto' ? 'Gracias. Lo ocultamos de inmediato: incumple las reglas.'
+          : status === 'review' ? 'Gracias. La redacción lo revisará pronto.'
+          : 'Gracias. Lo revisamos y no parece incumplir las reglas, así que se queda publicado.';
+        f.replaceWith(msg); setTimeout(() => msg.remove(), 6000);
+        applyMod();
+      });
+    });
 
     // "Tu nivel" panel: level, points and what's missing for the next badge
     const paintRep = () => {
@@ -246,14 +301,22 @@ const GIF_IMGS = [['gif-wepa', '¡Wepa! animado'], ['gif-coqui', 'Coquí saltand
       e.preventDefault();
       const text = ta.value.trim();
       if (!text && !media) { err.textContent = 'Escribe algo o escoge un sticker o GIF.'; err.hidden = false; return; }
-      if (BAD.test(text)) { err.textContent = 'Tu comentario tiene palabras no permitidas.'; err.hidden = false; return; }
+      // Automatic check before posting: clear violations are blocked; doubtful ones get one warning, then go to the queue
+      const chk = assess(text);
+      const why = chk.reasons.join(', ').toLowerCase();
+      if (chk.verdict === 'block') { err.textContent = `No se puede publicar: ${why}. Revisa el texto.`; err.hidden = false; return; }
+      if (chk.verdict === 'review' && warned !== text) { warned = text; err.textContent = `Ojo: ${why}. Edítalo, o pulsa Publicar otra vez y la redacción lo revisará.`; err.hidden = false; return; }
       const mine = store.get<Mine[]>(key, []);
       const id = `m${Date.now()}`;
       mine.push({ id, name: myName, text, at: Date.now(), replyTo, media });
       store.set(key, mine);
       const res = addComment(id, text, !!replyTo);
+      if (chk.verdict === 'review') upsertReport({ id: `${sid}:${id}`, at: Date.now(), storyId: sid, storyUrl: `${location.pathname}#comentarios`, title: document.querySelector('h1')?.textContent?.trim() || document.title,
+        commentId: id, author: myName, text, media: media?.src, mine: true, source: 'post', reasons: [], count: 0, score: chk.score, flags: chk.reasons, status: 'review' });
+      warned = '';
       const note = root.querySelector<HTMLElement>('[data-cm-repnote]')!;
       note.textContent = res.pts ? `⭐ ${res.why}` : res.why; note.className = `cm-repnote ${res.pts ? 'ok' : ''}`; note.hidden = false;
+      if (chk.verdict === 'review') note.textContent += ' · La redacción revisará este comentario.';
       ta.value = ''; ta.style.height = 'auto'; replyTo = undefined; setMedia(undefined); closePicker();
       render();
     });

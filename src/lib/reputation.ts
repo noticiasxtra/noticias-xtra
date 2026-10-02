@@ -66,6 +66,14 @@ export function removeComment(id: string) {
   save(r);
 }
 
+/** A comment of yours was hidden for breaking the rules: −30 and a report on record (Top/Diamante need none). */
+export function penalize(id: string) {
+  const r = getRep();
+  r.points = Math.max(0, r.points + RULES.report - (r.awarded[id] ?? 0)); delete r.awarded[id];
+  r.reports = [...r.reports, Date.now()];
+  save(r);
+}
+
 const cleanFor = (r: Rep, days: number) => !r.reports.some((t) => Date.now() - t < days * 864e5);
 /** The highest level whose requirements are all met. */
 export function levelOf(r: Rep) {
