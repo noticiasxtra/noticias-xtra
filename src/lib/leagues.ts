@@ -19,12 +19,6 @@ export const LEAGUES = [
   { id: 'invernal', youtube: 'UCyX4hGEy4iXVW5q8H_jf2jg', name: 'La Pro', abbr: 'LBPRC', full: 'Liga de Béisbol Profesional Roberto Clemente', local: true, color: '#C8202F', logoBg: '#14213D', photo: 'baseball',
     about: 'La Pro: el béisbol profesional de invierno de Puerto Rico, con seis equipos.', url: 'https://www.ligapr.com',
     season: 'Temporada 2026-27: arranca el 4 de noviembre; la fase regular termina el 28 de diciembre y las semifinales empiezan el 2 de enero de 2027.', starts: '2026-11-04T00:00:00-04:00' },
-  { id: 'lvsm', name: 'Voleibol M', abbr: 'LVSM', full: 'Liga de Voleibol Superior Masculino', local: true, color: '#0F8C8C', logoBg: '#FFFFFF', photo: 'volleyball',
-    about: 'El voleibol superior masculino de Puerto Rico, organizado por la Federación Puertorriqueña de Voleibol.', url: 'https://fedpurvoli.com/lvsm/',
-    season: 'Temporada 2026: arranca el 23 de octubre con seis equipos; cada uno juega 15 partidos en la fase regular. Campeones defensores: Cafeteros de Yauco.', starts: '2026-10-23T00:00:00-04:00' },
-  { id: 'lvsf', name: 'Voleibol F', abbr: 'LVSF', full: 'Liga de Voleibol Superior Femenino', local: true, color: '#B0306A', logoBg: '#FFFFFF', photo: 'volleyball',
-    about: 'El voleibol superior femenino de Puerto Rico, organizado por la Federación Puertorriqueña de Voleibol.', url: 'https://fedpurvoli.com/lvsf/',
-    season: 'Campeonas 2026: Cangrejeras de Santurce. La temporada 2027 arranca el 8 de enero de 2027.', starts: '2027-01-08T00:00:00-04:00' },
   { id: 'boxeo', name: 'Boxeo', abbr: 'BOX', full: 'Boxeo', local: true, color: '#9C1F2E', photo: 'boxing', logoShape: 'full',
     about: 'Los boxeadores boricuas en Puerto Rico y en el mundo.' },
   { id: 'tenis', name: 'Tenis', abbr: 'TEN', full: 'Tenis', local: true, color: '#2E7D32', photo: 'tennis', logoShape: 'full',
@@ -34,7 +28,13 @@ export const LEAGUES = [
     about: 'Los peloteros boricuas en las Grandes Ligas.' },
   { id: 'nba', youtube: 'UCWJ2lWNubArHWmf3FIHbfcQ', name: 'NBA', abbr: 'NBA', full: 'NBA', local: false, color: '#C8102E', logoBg: '#FFFFFF', logoShape: 'tall', photo: 'basketball',
     about: 'La NBA y los boricuas en el mejor baloncesto del mundo.' },
-] as const satisfies ReadonlyArray<{
+
+  { id: 'lvsm', name: 'Voleibol M', abbr: 'LVSM', full: 'Liga de Voleibol Superior Masculino', local: true, color: '#0F8C8C', logoBg: '#FFFFFF', photo: 'volleyball',
+    about: 'El voleibol superior masculino de Puerto Rico, organizado por la Federación Puertorriqueña de Voleibol.', url: 'https://fedpurvoli.com/lvsm/',
+    season: 'Temporada 2026: arranca el 23 de octubre con seis equipos; cada uno juega 15 partidos en la fase regular. Campeones defensores: Cafeteros de Yauco.', starts: '2026-10-23T00:00:00-04:00' },
+  { id: 'lvsf', name: 'Voleibol F', abbr: 'LVSF', full: 'Liga de Voleibol Superior Femenino', local: true, color: '#B0306A', logoBg: '#FFFFFF', photo: 'volleyball',
+    about: 'El voleibol superior femenino de Puerto Rico, organizado por la Federación Puertorriqueña de Voleibol.', url: 'https://fedpurvoli.com/lvsf/',
+    season: 'Campeonas 2026: Cangrejeras de Santurce. La temporada 2027 arranca el 8 de enero de 2027.', starts: '2027-01-08T00:00:00-04:00' },] as const satisfies ReadonlyArray<{
   id: string; name: string; abbr: string; full: string; local: boolean; color: string; about: string; url?: string; season?: string; starts?: string; logoBg?: string; logoShape?: 'tall' | 'full'; youtube?: string; photo?: 'basketball' | 'baseball' | 'volleyball' | 'boxing' | 'tennis';
 }>;
 
