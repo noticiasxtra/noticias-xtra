@@ -54,7 +54,7 @@ const CTAS = ['Llama hoy', 'Visítanos', 'Ordena ya', 'Escríbenos por WhatsApp'
         <li><button type="button" data-goto="4">Pago</button></li>
       </ol>
 
-      <form class="wiz-form" data-wiz data-cfg={JSON.stringify(cfg)} novalidate>
+      <form class="wiz-form" data-wiz data-cfg={JSON.stringify(cfg)} data-email={SITE.email} novalidate>
         <!-- 1 · Format -->
         <fieldset class="wiz-step" data-step="1">
           <legend>¿Qué anuncio quieres?</legend>
@@ -176,15 +176,45 @@ const CTAS = ['Llama hoy', 'Visítanos', 'Ordena ya', 'Escríbenos por WhatsApp'
               <p class="adb-total"><span>Total</span><b data-total>$0</b></p>
               <p class="adb-month" data-month></p>
               <p class="adb-gift" data-gift hidden></p>
-              <p class="wiz-safe">🔒 Pago seguro con tarjeta o ATH Móvil. Si no aprobamos tu anuncio, te devolvemos todo tu dinero.</p>
+              <p class="wiz-safe">🔒 Pagas en el próximo paso con tarjeta o ATH Móvil. Si no aprobamos tu anuncio, te devolvemos todo tu dinero.</p>
             </div>
           </div>
         </fieldset>
 
+        <!-- Pay (shown after step 4 when Stripe or ATH Móvil is set up in src/lib/ads.ts) -->
+        <div class="wiz-paybox" data-paybox hidden>
+          <h3>Paga tu anuncio</h3>
+          <p class="wiz-paytotal">Total a pagar <b data-pay-total></b></p>
+          <div class="wiz-paymethods">
+            {PAYMENTS.athMovilToken && (
+              <div class="wiz-method">
+                <p class="wiz-q">ATH Móvil</p>
+                <div id="ATHMovil_Checkout_Button_payment"></div>
+                <small data-ath-note>Se abre ATH Móvil para confirmar el pago.</small>
+              </div>
+            )}
+            {PAYMENTS.stripeLink && (
+              <div class="wiz-method">
+                <p class="wiz-q">Tarjeta, Apple Pay o Google Pay</p>
+                <a class="adp-btn" data-stripe href={PAYMENTS.stripeLink}>Pagar con tarjeta</a>
+                <small>En la página de pago escribe <b data-pay-total2></b> como cantidad (ya está copiado).</small>
+              </div>
+            )}
+          </div>
+          <p class="cm-err" data-pay-err hidden></p>
+          <p class="wiz-safe">🔒 Pago seguro. Si no aprobamos tu anuncio, te devolvemos todo tu dinero.</p>
+          <button type="button" class="wiz-backlink" data-pay-back>‹ Volver a editar</button>
+        </div>
+
         <!-- Done -->
         <div class="wiz-done" data-done hidden>
           <span class="wiz-check" aria-hidden="true">✓</span>
-          <h3 data-done-h>¡Listo! Recibimos tu anuncio</h3>
+          <h3 data-done-h>¡Pago recibido! Gracias</h3>
+          <p class="wiz-help" data-done-ref></p>
+          <div class="wiz-send" data-send hidden>
+            <p><b>Último paso:</b> <span data-send-text></span></p>
+            <a class="adp-btn red" data-send-link>Enviar mi anuncio por correo</a>
+          </div>
           <ol>
             <li>Lo revisamos en menos de {APPROVAL_HOURS} horas<span data-done-design hidden> y lo diseñamos con lo que escribiste</span>.</li>
             <li>Te escribimos a <b data-done-email></b> cuando esté aprobado.</li>
@@ -272,7 +302,7 @@ const CTAS = ['Llama hoy', 'Visítanos', 'Ordena ya', 'Escríbenos por WhatsApp'
   </main>
   <script>
     import { drawAd, loadImage, THEMES } from '../lib/adcreative';
-    import { saveRequest, shrink, isPreview, type ArtFile } from '../lib/adrequests';
+    import { saveRequest, updateRequest, shrink, type ArtFile } from '../lib/adrequests';
 
     const money = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
     const emailOk = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
@@ -454,6 +484,62 @@ const CTAS = ['Llama hoy', 'Visítanos', 'Ordena ya', 'Escríbenos por WhatsApp'
     wf.addEventListener('input', (e) => { if ((e.target as HTMLElement).closest('.wiz-design')) drawPreviews(); else calc(); });
 
     // ---- Pay ----
+    // Stripe: a Payment Link where the client types the amount (static sites can't set it); it should send the
+    // client back to this page with ?pagado=1. ATH Móvil: the official web button, confirmed right here.
+    // Until the request database is connected, the client emails us the artwork as a last step.
+    const canPay = !!(cfg.pay.stripeLink || cfg.pay.athMovilToken);
+    const salesEmail = wf.dataset.email || '';
+    type Pending = { id: string; email: string; business: string; mode: string; amount: number; body: string };
+    let pending: Pending | null = null;
+    const amountOf = (n: number) => Math.round(n * 100) / 100;
+    const show = (part: 'steps' | 'pay' | 'done') => {
+      wf.querySelectorAll<HTMLElement>('[data-step]').forEach((s) => (s.hidden = part !== 'steps' || Number(s.dataset.step) !== step));
+      $('[data-bar]').hidden = part !== 'steps'; document.querySelector<HTMLElement>('.wiz-prog')!.hidden = part !== 'steps';
+      $('[data-paybox]').hidden = part !== 'pay'; $('[data-done]').hidden = part !== 'done';
+      top();
+    };
+    function done(p: Pending, how: string) {
+      updateRequest(p.id, { paid: true });
+      try { localStorage.removeItem('nx-ad-pending'); } catch { /* storage blocked */ }
+      $('[data-done-ref]').textContent = `${how} · Solicitud ${p.id}`;
+      $('[data-done-email]').textContent = p.email;
+      $('[data-done-design]').hidden = p.mode !== 'design';
+      if (salesEmail) {
+        $('[data-send]').hidden = false;
+        $('[data-send-text]').textContent = p.mode === 'design' ? 'envíanos tu logo por correo (si tienes uno). Ya incluimos lo que escribiste.' : 'envíanos por correo las imágenes de tu anuncio.';
+        $<HTMLAnchorElement>('[data-send-link]').href = `mailto:${salesEmail}?subject=${encodeURIComponent(`Mi anuncio ${p.id}: ${p.business}`)}&body=${encodeURIComponent(p.body)}`;
+      } else {
+        $('[data-send]').hidden = false;
+        $('[data-send-text]').textContent = 'te escribiremos a tu correo para recibir tu anuncio.';
+        $('[data-send-link]').hidden = true;
+      }
+      show('done');
+    }
+    function payErr(m: string) { const e = $('[data-pay-err]'); e.textContent = m; e.hidden = !m; }
+
+    // ATH Móvil web button (loaded once, only when set up)
+    let athLoaded = false;
+    function setupATH(p: Pending) {
+      if (!cfg.pay.athMovilToken) return;
+      const w = window as any;
+      const ok = p.amount >= 1 && p.amount <= 1500;
+      wf.querySelector<HTMLElement>('#ATHMovil_Checkout_Button_payment')!.hidden = !ok;
+      $('[data-ath-note]').textContent = ok ? 'Se abre ATH Móvil para confirmar el pago.' : 'ATH Móvil acepta pagos de $1 a $1,500. Usa tarjeta para esta cantidad.';
+      w.ATHM_Checkout = { env: 'production', publicToken: cfg.pay.athMovilToken, timeout: 600, theme: 'btn', lang: 'es',
+        total: p.amount, subtotal: p.amount, tax: 0, metadata1: p.id.slice(0, 40), metadata2: p.business.slice(0, 40),
+        items: [{ name: 'Anuncio en Noticias Xtra', description: p.id, quantity: '1', price: String(p.amount), tax: '0', metadata: p.business.slice(0, 40) }], phoneNumber: '' };
+      w.authorizationATHM = async () => {
+        try {
+          const r = await w.authorization(); const d = r?.data ?? r;
+          if (d?.ecommerceStatus === 'COMPLETED') done(p, `Pagado con ATH Móvil${d.referenceNumber ? ` · referencia ${d.referenceNumber}` : ''}`);
+          else payErr('No pudimos confirmar el pago de ATH Móvil. Si se cobró, escríbenos y lo resolvemos.');
+        } catch { payErr('No pudimos confirmar el pago de ATH Móvil. Si se cobró, escríbenos y lo resolvemos.'); }
+      };
+      w.cancelATHM = async () => payErr('Cancelaste el pago de ATH Móvil. Puedes intentarlo otra vez.');
+      w.expiredATHM = async () => payErr('Se acabó el tiempo para pagar con ATH Móvil. Intenta otra vez.');
+      if (!athLoaded) { athLoaded = true; const sc = document.createElement('script'); sc.src = 'https://payments.athmovil.com/api/modal/js/athmovil_base.js'; document.body.append(sc); }
+    }
+
     wf.addEventListener('submit', async (e) => {
       e.preventDefault();
       for (let i = 1; i <= 4; i++) if (check(i)) { go(i); err(check(i)); return; }
@@ -468,28 +554,45 @@ const CTAS = ['Llama hoy', 'Visítanos', 'Ordena ya', 'Escríbenos por WhatsApp'
         art: mode === 'upload' ? { mode, files } : { mode, files: designFiles, logo: logoData, title: val('title'), msg: val('msg'), cta: val('cta'), theme: val('theme'), notes: val('notes') },
         link: val('link'),
       });
-      // Real payment: a Stripe Payment Link (the client pays the total shown) with the request id attached
-      if (!isPreview() && cfg.pay.stripeLink) {
-        location.href = `${cfg.pay.stripeLink}?prefilled_email=${encodeURIComponent(val('correo'))}&client_reference_id=${id}`;
-        return;
-      }
-      wf.querySelectorAll<HTMLElement>('[data-step]').forEach((s) => (s.hidden = true));
-      $('[data-bar]').hidden = true; document.querySelector<HTMLElement>('.wiz-prog')!.hidden = true;
-      $('[data-done]').hidden = false;
-      $('[data-done-email]').textContent = val('correo');
-      $('[data-done-design]').hidden = mode !== 'design';
-      if (isPreview()) {
+      const amount = amountOf(total);
+      const body = [`Solicitud: ${id}`, `Nombre: ${val('nombre')}`, `Negocio: ${val('negocio')}`, `Correo: ${val('correo')}`, `Teléfono: ${val('telefono')}`, '',
+        ...summary, `Dónde: ${where}`, `Empieza: ${val('start')} · ${durLabel()}`, `Total pagado: $${amount.toFixed(2)}`, `Enlace: ${val('link') || '—'}`, '',
+        mode === 'design' ? `Créenlo por mí:
+Título: ${val('title')}
+Mensaje: ${val('msg')}
+Botón: ${val('cta')}
+Colores: ${val('theme')}
+Notas: ${val('notes')}
+
+(Adjunto mi logo si tengo uno.)` : '(Adjunto las imágenes de mi anuncio.)'].join('\n');
+      pending = { id, email: val('correo'), business: val('negocio'), mode, amount, body };
+      if (!canPay) {
+        // Preview: nothing is charged or sent
+        show('done');
         $('[data-done-h]').textContent = 'Así funcionará (vista previa)';
+        $('[data-done-ref]').textContent = ''; $('[data-done-email]').textContent = val('correo'); $('[data-done-design]').hidden = mode !== 'design';
         const n = $('[data-done-note]'); n.hidden = false;
         n.textContent = 'Los pagos en línea se activan muy pronto: no se cobró nada ni se envió tu anuncio. Para anunciarte hoy, usa “Prefiero hablar con alguien” más abajo.';
+        return;
       }
-      top();
+      try { localStorage.setItem('nx-ad-pending', JSON.stringify(pending)); } catch { /* storage blocked */ }
+      $('[data-pay-total]').textContent = `$${amount.toFixed(2)}`;
+      const t2 = wf.querySelector('[data-pay-total2]'); if (t2) t2.textContent = `$${amount.toFixed(2)}`;
+      const sl = wf.querySelector<HTMLAnchorElement>('[data-stripe]');
+      if (sl) sl.href = `${cfg.pay.stripeLink}?prefilled_email=${encodeURIComponent(val('correo'))}&client_reference_id=${id}`;
+      payErr(''); setupATH(pending); show('pay');
     });
-    $('[data-again]').addEventListener('click', () => {
-      $('[data-done]').hidden = true; $('[data-bar]').hidden = false; document.querySelector<HTMLElement>('.wiz-prog')!.hidden = false;
-      files = []; paintThumbs(); go(1); top();
-    });
+    wf.querySelector('[data-stripe]')?.addEventListener('click', () => { navigator.clipboard?.writeText(pending ? pending.amount.toFixed(2) : '').catch(() => {}); });
+    $('[data-pay-back]').addEventListener('click', () => { go(4); show('steps'); });
+    $('[data-again]').addEventListener('click', () => { files = []; paintThumbs(); go(1); show('steps'); });
 
     go(1);
+    // Back from Stripe's payment page (the Payment Link redirects to ?pagado=1)
+    if (new URLSearchParams(location.search).has('pagado')) {
+      let p: Pending | null = null;
+      try { p = JSON.parse(localStorage.getItem('nx-ad-pending') || 'null'); } catch { /* storage blocked */ }
+      if (p) { pending = p; done(p, 'Pagado con tarjeta'); }
+    }
+
   </script>
 </Base>

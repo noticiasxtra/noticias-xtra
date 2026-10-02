@@ -2392,7 +2392,7 @@ body.ad-skin{background:var(--ad-skin) center top/cover fixed}
 .wiz-bar-total span{font-size:12px;color:var(--muted)}
 .wiz-bar-total b{font-family:var(--head);font-size:24px}
 .wiz-form > .cm-err{margin:12px 0 0}
-.wiz-done{display:grid;justify-items:center;gap:10px;text-align:center;padding:20px 0}
+.wiz-done{display:grid;grid-template-columns:minmax(0,1fr);justify-items:center;gap:10px;text-align:center;padding:20px 0}
 .wiz-check{display:grid;place-items:center;width:64px;height:64px;border-radius:50%;background:#1B8A5A;color:#fff;font-size:32px;font-weight:800}
 .wiz-done h3{margin:0;font-size:24px;color:var(--purple)}
 .wiz-done ol{margin:0;padding-left:20px;text-align:left;display:grid;gap:6px;max-width:480px}
@@ -2422,6 +2422,18 @@ body.ad-skin{background:var(--ad-skin) center top/cover fixed}
   .wiz-step legend{font-size:21px}
 }
 
+/* Anúnciate: payment step */
+.wiz-paybox{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;justify-items:center;text-align:center;padding:10px 0}
+.wiz-paybox h3{margin:0;font-size:24px;color:var(--purple)}
+.wiz-paytotal{margin:0;display:grid;font-size:14px;color:var(--muted)}
+.wiz-paytotal b{font-family:var(--head);font-size:40px;color:var(--ink)}
+.wiz-paymethods{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr));gap:12px;width:100%;max-width:620px}
+.wiz-method{display:grid;gap:8px;justify-items:center;align-content:start;padding:16px;border-radius:16px;border:1px solid var(--line);background:var(--soft)}
+.wiz-method .wiz-q{margin:0}
+.wiz-method small{font-size:12px;color:var(--muted)}
+.wiz-backlink{font:inherit;font-size:14px;font-weight:700;border:0;background:transparent;color:var(--purple);cursor:pointer}
+.wiz-send{display:grid;gap:8px;justify-items:center;padding:14px;border-radius:14px;background:#FFF5DB;color:#5C3A00;max-width:520px}
+.wiz-send p{margin:0}
 /* Approval page (one employee) */
 .apr{padding-bottom:30px}
 .apr-head h1{margin:0;font-size:30px;color:var(--purple)}
