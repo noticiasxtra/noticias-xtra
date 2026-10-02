@@ -9,11 +9,11 @@ const { storyId, kind = 'story' } = Astro.props;
 const SAMPLES = kind === 'game' ? [
   { id: 's1', name: 'tito_domino', text: '¡Hoy llegué a 100 primero! Este juego me tiene enganchao. 🔥', likes: 18, ago: 'hace 1 h', level: 'diamante' },
   { id: 's2', name: 'la_nena_de_caguas', text: '¿Alguien más se tranca siempre en el nivel difícil? Denme un truco.', likes: 9, ago: 'hace 3 h', level: 'top' },
-  { id: 's3', name: 'abuela_sudoku', text: 'Lo juego todas las mañanas con el café. ☕', likes: 6, ago: 'hace 6 h', level: 'voz' },
+  { id: 's3', name: 'abuela_sudoku', text: 'Lo juego todas las mañanas con el café. ☕', likes: 6, ago: 'hace 6 h', level: 'voz', media: 'gif-cafe' },
 ] : [
   { id: 's1', name: 'lectora_bayamon', text: 'Muy buena información, gracias por explicarlo claro. 👏', likes: 24, ago: 'hace 2 h', level: 'diamante' },
   { id: 's2', name: 'jose.boricua', text: 'Esto hay que seguirlo de cerca. ¿Habrá vistas públicas?', likes: 11, ago: 'hace 3 h', level: 'top' },
-  { id: 's3', name: 'abuela_de_ponce', text: '🇵🇷🙏', likes: 7, ago: 'hace 5 h', level: 'comentarista' },
+  { id: 's3', name: 'abuela_de_ponce', text: '🇵🇷🙏', likes: 7, ago: 'hace 5 h', level: 'comentarista', media: 'te-quiero-pr' },
 ];
 // Commenter levels (src/lib/reputation.ts): badge shown next to the name
 import { LEVELS, RULES, LEVEL_INFO, SPECIALS } from '../lib/reputation';
@@ -30,6 +30,12 @@ const BADGE: Record<string, string> = {
 };
 const levelName = (id: string) => LEVELS.find((l) => l.id === id)?.name ?? '';
 const STICKERS = ['👏', '🔥', '❤️', '😂', '😮', '😢', '🙏', '🇵🇷', '💯', '⚾', '🏀', '🎶'];
+// Our own drawn stickers and animated "GIFs Xtra" (public/stickers/); GIPHY search shows too when SITE.giphyKey is set
+import { SITE, url } from '../lib/site';
+const STICKER_IMGS = [['wepa', '¡Wepa!'], ['coqui', 'Coquí'], ['bandera', 'Bandera de Puerto Rico'], ['te-quiero-pr', 'Te quiero PR'], ['jajaja', 'Jajaja'], ['fuego', 'Fuego'],
+  ['palante', "¡Pa'lante!"], ['que-bueno', '¡Qué bueno!'], ['bravo', '¡Bravo!'], ['cafe', 'Buenos días'], ['capicu', '¡Capicú!']];
+const GIF_IMGS = [['gif-wepa', '¡Wepa! animado'], ['gif-coqui', 'Coquí saltando'], ['gif-bandera', 'Bandera ondeando'], ['gif-corazon', 'Corazón latiendo'],
+  ['gif-jajaja', 'Jajaja animado'], ['gif-fuego', 'Fuego animado'], ['gif-bravo', '¡Bravo! con destellos'], ['gif-cafe', 'Café humeante']];
 ---
 <section class="cm" id="comentarios" data-comments={storyId} data-badges={JSON.stringify(BADGE)} aria-labelledby="cm-h">
   <div class="cm-head">
@@ -43,11 +49,22 @@ const STICKERS = ['👏', '🔥', '❤️', '😂', '😮', '😢', '🙏', '�
     <div class="cm-box">
       <label for={`cm-text-${storyId}`} class="sr">Escribe un comentario</label>
       <textarea id={`cm-text-${storyId}`} rows="1" maxlength="500" placeholder="Añade un comentario…"></textarea>
+      <div class="cm-media-prev" data-media-prev hidden><img alt="" /><button type="button" data-media-rm aria-label="Quitar">✕</button></div>
+      <div class="cm-picker" data-picker hidden>
+        <div class="cm-pk-grid emoji" data-pane="emoji">{STICKERS.map((s) => <button type="button" data-stk={s} aria-label={`Emoji ${s}`}>{s}</button>)}</div>
+        <div class="cm-pk-grid" data-pane="sticker" hidden>{STICKER_IMGS.map(([id, alt]) => <button type="button" data-media="sticker" data-src={url(`stickers/${id}.svg`)} aria-label={alt} title={alt}><img src={url(`stickers/${id}.svg`)} alt="" /></button>)}</div>
+        <div data-pane="gif" hidden data-giphy={SITE.giphyKey}>
+          {SITE.giphyKey && <input type="search" class="cm-gif-q" data-gif-q placeholder="Buscar GIF…" />}
+          <div class="cm-pk-grid" data-gif-grid>{GIF_IMGS.map(([id, alt]) => <button type="button" data-media="gif" data-src={url(`stickers/${id}.svg`)} aria-label={alt} title={alt}><img src={url(`stickers/${id}.svg`)} alt="" /></button>)}</div>
+          <p class="cm-pk-note">{SITE.giphyKey ? 'Busca en GIPHY o usa los GIFs Xtra.' : 'GIFs Xtra animados. Muy pronto podrás buscar más GIFs.'}</p>
+        </div>
+      </div>
       <div class="cm-tools">
-        <details class="cm-stk">
-          <summary aria-label="Stickers">😊</summary>
-          <div class="cm-stk-grid">{STICKERS.map((s) => <button type="button" data-stk={s} aria-label={`Sticker ${s}`}>{s}</button>)}</div>
-        </details>
+        <div class="cm-pick-btns" role="group" aria-label="Agregar">
+          <button type="button" data-pick-tab="emoji" aria-label="Emojis" aria-pressed="false">😊</button>
+          <button type="button" data-pick-tab="sticker" aria-pressed="false">Sticker</button>
+          <button type="button" data-pick-tab="gif" aria-pressed="false">GIF</button>
+        </div>
         <span class="cm-err" data-cm-err hidden></span>
         <button type="submit" class="cm-send">Publicar</button>
       </div>
@@ -91,10 +108,12 @@ const STICKERS = ['👏', '🔥', '❤️', '😂', '😮', '😢', '🙏', '�
         <span class="cm-av" aria-hidden="true">{c.name[0].toUpperCase()}</span>
         <div class="cm-body">
           <p><b>{c.name}</b> <span class={`cm-badge cm-b-${c.level}`} title={levelName(c.level)}><Fragment set:html={BADGE[c.level]} /> {levelName(c.level)}</span> <span class="sp-demo">EJEMPLO</span> {c.text}</p>
+          {'media' in c && c.media && <img class="cm-media" src={url(`stickers/${c.media}.svg`)} alt="Sticker" loading="lazy" />}
           <div class="cm-meta"><span>{c.ago}</span><span data-likes-label>{c.likes} Me gusta</span><button type="button" data-reply>Responder</button></div>
         </div>
         <button type="button" class="cm-like" data-like aria-pressed="false" aria-label="Me gusta">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.5-9.2C1 8.3 3.2 4.5 7 4.5c2 0 3.4 1.1 5 3 1.6-1.9 3-3 5-3 3.8 0 6 3.8 4.5 7.3C19.5 16.4 12 21 12 21z" /></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.5-9.2C1 8.3 3.2 4.5 7 4.5c2 0 3.4 1.1 5 3 1.6-1.9 3-3 5-3 3.8 0 6 3.8 4.5 7.3C19.5 16.4 12 21 12 21z" /></svg>
+          <span class="cm-like-n" data-like-n>{c.likes}</span>
         </button>
       </li>
     ))}
@@ -103,7 +122,7 @@ const STICKERS = ['👏', '🔥', '❤️', '😂', '😮', '😢', '🙏', '�
 
 <script>
   import { addComment, removeComment, getRep, levelOf, needs, specialsOf } from '../lib/reputation';
-  type Mine = { id: string; name: string; text: string; at: number; replyTo?: string };
+  type Mine = { id: string; name: string; text: string; at: number; replyTo?: string; media?: { kind: string; src: string } };
   const BAD = /\b(pendej\w*|cabr[oó]n\w*|puñet\w*|carajo|mierd\w*|idiota)\b/i; // basic word filter
   const store = {
     get: <T,>(k: string, d: T): T => { try { return JSON.parse(localStorage.getItem(k) || '') ?? d; } catch { return d; } },
@@ -134,8 +153,12 @@ const STICKERS = ['👏', '🔥', '❤️', '😂', '😮', '😢', '🙏', '�
         btn.setAttribute('aria-pressed', String(on));
         const n = base + (on ? 1 : 0);
         label.textContent = n ? `${n} Me gusta` : '';
+        const cnt = btn.querySelector<HTMLElement>('[data-like-n]'); if (cnt) cnt.textContent = n ? String(n) : '';
       };
-      btn.addEventListener('click', () => { liked.has(li.dataset.id!) ? liked.delete(li.dataset.id!) : liked.add(li.dataset.id!); store.set(likesKey, [...liked]); paint(); });
+      btn.addEventListener('click', () => {
+        liked.has(li.dataset.id!) ? liked.delete(li.dataset.id!) : liked.add(li.dataset.id!); store.set(likesKey, [...liked]); paint();
+        if (liked.has(li.dataset.id!)) { btn.classList.remove('pop'); void btn.offsetWidth; btn.classList.add('pop'); }
+      });
       li.querySelector('[data-reply]')?.addEventListener('click', () => {
         replyTo = li.dataset.id;
         const who = li.querySelector('b')?.textContent || '';
@@ -151,7 +174,8 @@ const STICKERS = ['👏', '🔥', '❤️', '😂', '😮', '😢', '🙏', '�
         const li = document.createElement('li');
         li.className = `cm-item mine${c.replyTo ? ' reply' : ''}`;
         li.dataset.id = c.id; li.dataset.likes = '0';
-        li.innerHTML = `<span class="cm-av me" aria-hidden="true"></span><div class="cm-body"><p><b></b> <span class="cm-text"></span></p><div class="cm-meta"><span></span><span data-likes-label></span><button type="button" data-reply>Responder</button><button type="button" data-del>Borrar</button></div></div><button type="button" class="cm-like" data-like aria-pressed="false" aria-label="Me gusta"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.5-9.2C1 8.3 3.2 4.5 7 4.5c2 0 3.4 1.1 5 3 1.6-1.9 3-3 5-3 3.8 0 6 3.8 4.5 7.3C19.5 16.4 12 21 12 21z" /></svg></button>`;
+        li.innerHTML = `<span class="cm-av me" aria-hidden="true"></span><div class="cm-body"><p><b></b> <span class="cm-text"></span></p><div class="cm-meta"><span></span><span data-likes-label></span><button type="button" data-reply>Responder</button><button type="button" data-del>Borrar</button></div></div><button type="button" class="cm-like" data-like aria-pressed="false" aria-label="Me gusta"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.5-9.2C1 8.3 3.2 4.5 7 4.5c2 0 3.4 1.1 5 3 1.6-1.9 3-3 5-3 3.8 0 6 3.8 4.5 7.3C19.5 16.4 12 21 12 21z" /></svg><span class="cm-like-n" data-like-n></span></button>`;
+        if (c.media) { const im = document.createElement('img'); im.className = 'cm-media'; im.src = c.media.src; im.alt = c.media.kind === 'gif' ? 'GIF' : 'Sticker'; im.loading = 'lazy'; li.querySelector('.cm-body p')!.after(im); }
         li.querySelector('.cm-av')!.textContent = c.name[0].toUpperCase();
         li.querySelector('b')!.textContent = c.name;
         const lv = levelOf(getRep());
@@ -179,23 +203,58 @@ const STICKERS = ['👏', '🔥', '❤️', '😂', '😮', '😢', '🙏', '�
     paintRep(); addEventListener('nx-rep', paintRep);
 
     list.querySelectorAll<HTMLElement>('.cm-item').forEach(wireLike);
-    root.querySelectorAll<HTMLButtonElement>('[data-stk]').forEach((b) => b.addEventListener('click', () => {
-      ta.value += b.dataset.stk; ta.focus(); b.closest('details')!.open = false;
+    // Picker: emojis go into the text; a sticker or GIF is attached to the comment (one per comment)
+    const picker = root.querySelector<HTMLElement>('[data-picker]')!;
+    const prev = root.querySelector<HTMLElement>('[data-media-prev]')!;
+    let media: Mine['media'];
+    const tabs = [...root.querySelectorAll<HTMLButtonElement>('[data-pick-tab]')];
+    tabs.forEach((b) => b.addEventListener('click', () => {
+      const open = b.getAttribute('aria-pressed') !== 'true';
+      tabs.forEach((x) => x.setAttribute('aria-pressed', String(open && x === b)));
+      picker.hidden = !open;
+      picker.querySelectorAll<HTMLElement>('[data-pane]').forEach((p) => (p.hidden = p.dataset.pane !== b.dataset.pickTab));
     }));
+    const closePicker = () => { picker.hidden = true; tabs.forEach((x) => x.setAttribute('aria-pressed', 'false')); };
+    root.querySelectorAll<HTMLButtonElement>('[data-stk]').forEach((b) => b.addEventListener('click', () => { ta.value += b.dataset.stk; ta.focus(); closePicker(); }));
+    const setMedia = (m: Mine['media']) => {
+      media = m; prev.hidden = !m;
+      if (m) prev.querySelector('img')!.src = m.src;
+    };
+    picker.addEventListener('click', (e) => {
+      const b = (e.target as HTMLElement).closest<HTMLElement>('[data-media]');
+      if (b) { setMedia({ kind: b.dataset.media!, src: b.dataset.src! }); closePicker(); err.hidden = true; }
+    });
+    prev.querySelector('[data-media-rm]')!.addEventListener('click', () => setMedia(undefined));
+    // GIPHY search (only when a key is set in SITE.giphyKey); G-rated results only
+    const gifPane = picker.querySelector<HTMLElement>('[data-giphy]');
+    const gifQ = picker.querySelector<HTMLInputElement>('[data-gif-q]');
+    if (gifPane?.dataset.giphy && gifQ) {
+      const grid = gifPane.querySelector<HTMLElement>('[data-gif-grid]')!; const own = grid.innerHTML; let t = 0;
+      gifQ.addEventListener('input', () => {
+        clearTimeout(t);
+        t = window.setTimeout(async () => {
+          const q = gifQ.value.trim(); if (!q) { grid.innerHTML = own; return; }
+          try {
+            const d = await (await fetch(`https://api.giphy.com/v1/gifs/search?api_key=${gifPane.dataset.giphy}&q=${encodeURIComponent(q)}&limit=18&rating=g&lang=es`)).json();
+            grid.innerHTML = d.data.map((g: any) => `<button type="button" data-media="gif" data-src="${g.images.fixed_width.url}" aria-label="${(g.title || 'GIF').replace(/"/g, '')}"><img src="${g.images.fixed_width_small.url}" alt="" loading="lazy" /></button>`).join('') || '<p class="cm-pk-note">Sin resultados.</p>';
+          } catch { grid.innerHTML = own; }
+        }, 400);
+      });
+    }
     ta.addEventListener('input', () => { err.hidden = true; ta.style.height = 'auto'; ta.style.height = `${ta.scrollHeight}px`; });
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       const text = ta.value.trim();
-      if (!text) { err.textContent = 'Escribe algo primero.'; err.hidden = false; return; }
+      if (!text && !media) { err.textContent = 'Escribe algo o escoge un sticker o GIF.'; err.hidden = false; return; }
       if (BAD.test(text)) { err.textContent = 'Tu comentario tiene palabras no permitidas.'; err.hidden = false; return; }
       const mine = store.get<Mine[]>(key, []);
       const id = `m${Date.now()}`;
-      mine.push({ id, name: myName, text, at: Date.now(), replyTo });
+      mine.push({ id, name: myName, text, at: Date.now(), replyTo, media });
       store.set(key, mine);
       const res = addComment(id, text, !!replyTo);
       const note = root.querySelector<HTMLElement>('[data-cm-repnote]')!;
       note.textContent = res.pts ? `⭐ ${res.why}` : res.why; note.className = `cm-repnote ${res.pts ? 'ok' : ''}`; note.hidden = false;
-      ta.value = ''; ta.style.height = 'auto'; replyTo = undefined;
+      ta.value = ''; ta.style.height = 'auto'; replyTo = undefined; setMedia(undefined); closePicker();
       render();
     });
     render();

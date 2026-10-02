@@ -29,6 +29,8 @@ export const SITE = {
     app: true, // "Descarga la app" link and banner (buttons say the app is coming soon)
     ads: true, // ad placeholders ("Espacio publicitario") across the site; see src/components/AdSlot.astro
   },
+  // GIPHY key for GIF search in comments (free account at developers.giphy.com). Empty = only our own animated GIFs Xtra.
+  giphyKey: '',
   // Official National Weather Service forecast for Puerto Rico
   forecastUrl: 'https://www.weather.gov/sju/',
 };
