@@ -1118,3 +1118,49 @@ main.wrap,.home-grid,.ys-page,.tb-page{padding-top:var(--gap)}
   .ys-promo .pr-short{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .ys-promo .ys-promo-btn{margin-left:0;padding:5px 12px;font-size:13px}
 }
+
+/* =========================================================
+   Tighter spacing everywhere, and a cleaner phone layout
+   ========================================================= */
+:root{--gap:16px;--gap-lg:20px}
+.home-hero{gap:var(--gap)}
+.ys-bar + .ys-page,.ys-page{padding-top:8px}
+.ys-page .sc{margin-bottom:8px}
+.ys-promo{margin-bottom:var(--gap)}
+.nm-short{display:none}
+/* Lead headline label stays readable on the photo */
+.lead-over .badge{color:#fff;background:var(--purple);padding:2px 8px;border-radius:3px}
+.lead-over .badge.live{background:var(--red)}
+
+@media (max-width:760px){
+  :root{--gap:12px;--gap-lg:14px;--gutter:12px}
+  /* Red bar: one line */
+  .breaking b{font-size:11px;padding:7px 10px}
+  .breaking a{display:block;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:14px;padding:7px 10px}
+  /* Outlined blocks: less inner padding so stories use the width */
+  .home-main > .home-hero,.home-main > .home-row,.home-main > section,.home-main > .sp-panel,.home-sections .sec-block{padding:12px;border-radius:10px}
+  .home-grid{padding-top:var(--gap)}
+  .lead-over{padding:40px 12px 10px}
+  .lead p.dek{font-size:16px;margin:10px 0}
+  .related li{padding:8px 0 8px 18px;font-size:15px}
+  /* Small stories: photo on the left, headline on the right */
+  .mini,.home-row .card{display:grid;grid-template-columns:112px 1fr;column-gap:12px;align-items:start}
+  .mini > a{display:contents}
+  .mini .ph{grid-row:1 / span 2}
+  .mini h3{margin:0 0 4px;font-size:15px}
+  .home-row .card > a:first-child{grid-row:1 / span 3}
+  .home-row .card > div{margin-top:0 !important}
+  .home-row .card h3{font-size:15px;margin:0 0 4px}
+  .mini .ph,.home-row .card .ph{border-radius:6px}
+  .mini .ph .place,.home-row .card .ph .place,.item .ph .place{display:none}
+  .home-row{gap:var(--gap)}
+  .stack{gap:var(--gap)}
+  .item{grid-template-columns:112px 1fr;gap:12px;padding:10px 0}
+  .item h3{font-size:15px}
+  .sec-h h2{font-size:20px}
+  /* Deportes page */
+  .ys-card{padding:12px}
+  .nm-full{display:none}
+  .nm-short{display:inline}
+  .ys-grid,.ys-main{gap:var(--gap)}
+}

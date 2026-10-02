@@ -88,7 +88,7 @@ const fmt = (d: Date) => d.toLocaleDateString('es-PR', { day: 'numeric', month: 
 
           {rails.map((l) => (
             <section class="ys-card ys-rail" style={`--lc:${l.color}`}>
-              <div class="ys-card-h"><LeagueBadge id={l.id} size="sm" /><h2>{l.full}</h2><a href={url(`deportes/${l.id}`)}>Ver todo ›</a></div>
+              <div class="ys-card-h"><LeagueBadge id={l.id} size="sm" /><h2><span class="nm-full">{l.full}</span><span class="nm-short">{l.name}</span></h2><a href={url(`deportes/${l.id}`)}>Ver todo ›</a></div>
               <div class="ys-rail-list">
                 {fresh(byLeague(l.id)).slice(0, 4).map((s) => (
                   <a class="ys-mini" href={href(s)}>
