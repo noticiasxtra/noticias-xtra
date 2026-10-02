@@ -102,8 +102,8 @@ import { GAMES } from '../lib/games';
                 <li>
                   <a href={url(x.id ? `deportes/juego/${x.id}` : `deportes/${x.league}`)}>
                     <span class="hs-sc-lg">{league(x.league)?.name}</span>
-                    <span class="hs-sc-t">{x.away}{x.status !== 'programado' && <b>{x.awayScore}</b>}</span>
-                    <span class="hs-sc-t">{x.home}{x.status !== 'programado' && <b>{x.homeScore}</b>}</span>
+                    <span class="hs-sc-t notranslate" translate="no"><TeamLogo league={x.league} name={x.away} size={18} /><span>{x.away}</span>{x.status !== 'programado' && <b>{x.awayScore}</b>}</span>
+                    <span class="hs-sc-t notranslate" translate="no"><TeamLogo league={x.league} name={x.home} size={18} /><span>{x.home}</span>{x.status !== 'programado' && <b>{x.homeScore}</b>}</span>
                     <span class:list={['hs-sc-st', { live: x.status === 'en-vivo' }]}>{gStatus(x)}</span>
                   </a>
                 </li>

@@ -1489,3 +1489,6 @@ main.wrap,.home-grid,.ys-page,.tb-page{padding-top:var(--gap)}
 .wx-now-main{flex-wrap:wrap}
 .wx-now-main > div{min-width:0}
 .theme-btn[hidden]{display:none}
+/* Home scores pop-out: logo, team name, score on one line */
+.hs-sc-t{align-items:center;gap:6px}
+.hs-sc-t > span:not(.tm-logo){flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
