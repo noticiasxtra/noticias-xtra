@@ -25,9 +25,9 @@ export const LEAGUES = [
   { id: 'lvsf', name: 'Voleibol F', abbr: 'LVSF', full: 'Liga de Voleibol Superior Femenino', local: true, color: '#B0306A', logoBg: '#FFFFFF', photo: 'volleyball',
     about: 'El voleibol superior femenino de Puerto Rico, organizado por la Federación Puertorriqueña de Voleibol.', url: 'https://fedpurvoli.com/lvsf/',
     season: 'Campeonas 2026: Cangrejeras de Santurce. La temporada 2027 arranca el 8 de enero de 2027.', starts: '2027-01-08T00:00:00-04:00' },
-  { id: 'boxeo', name: 'Boxeo', abbr: 'BOX', full: 'Boxeo', local: true, color: '#9C1F2E', photo: 'boxing',
+  { id: 'boxeo', name: 'Boxeo', abbr: 'BOX', full: 'Boxeo', local: true, color: '#9C1F2E', photo: 'boxing', logoShape: 'full',
     about: 'Los boxeadores boricuas en Puerto Rico y en el mundo.' },
-  { id: 'tenis', name: 'Tenis', abbr: 'TEN', full: 'Tenis', local: true, color: '#2E7D32', photo: 'tennis',
+  { id: 'tenis', name: 'Tenis', abbr: 'TEN', full: 'Tenis', local: true, color: '#2E7D32', photo: 'tennis', logoShape: 'full',
     about: 'Los tenistas boricuas en Puerto Rico y en los torneos del mundo.' },
   // Beyond the island
   { id: 'mlb', name: 'Grandes Ligas', abbr: 'MLB', full: 'Grandes Ligas (MLB)', local: false, color: '#13274F', photo: 'baseball',
@@ -35,7 +35,7 @@ export const LEAGUES = [
   { id: 'nba', name: 'NBA', abbr: 'NBA', full: 'NBA', local: false, color: '#C8102E', logoBg: '#FFFFFF', logoShape: 'tall', photo: 'basketball',
     about: 'La NBA y los boricuas en el mejor baloncesto del mundo.' },
 ] as const satisfies ReadonlyArray<{
-  id: string; name: string; abbr: string; full: string; local: boolean; color: string; about: string; url?: string; season?: string; starts?: string; logoBg?: string; logoShape?: 'tall'; photo?: 'basketball' | 'baseball' | 'volleyball' | 'boxing' | 'tennis';
+  id: string; name: string; abbr: string; full: string; local: boolean; color: string; about: string; url?: string; season?: string; starts?: string; logoBg?: string; logoShape?: 'tall' | 'full'; photo?: 'basketball' | 'baseball' | 'volleyball' | 'boxing' | 'tennis';
 }>;
 
 export const LEAGUE_IDS = LEAGUES.map((l) => l.id) as unknown as readonly [(typeof LEAGUES)[number]['id'], ...(typeof LEAGUES)[number]['id'][]];

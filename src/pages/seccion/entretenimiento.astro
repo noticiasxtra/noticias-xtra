@@ -1,0 +1,113 @@
+---
+// Entretenimiento: tabloid feel (hot pink + yellow, big uppercase headlines, mosaic),
+// same site header, fonts and colors underneath. Horóscopo and Trivia live here too.
+import Base from '../../layouts/Base.astro';
+import Ph from '../../components/Ph.astro';
+import Time from '../../components/Time.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import { getStories, url } from '../../lib/site';
+import { SIGNS, horoscope, signOfTheDay, triviaOfTheDay, todayLong } from '../../lib/daily';
+
+const stories = (await getStories()).filter((s) => s.data.section === 'entretenimiento');
+const [lead, ...rest] = stories;
+const side = rest.slice(0, 2);
+const mosaic = rest.slice(2);
+const buzz = stories.slice(0, 5);
+const todaySign = signOfTheDay();
+const trivia = triviaOfTheDay();
+const href = (s: (typeof stories)[number]) => url(`noticia/${s.id}`);
+// Column span of each mosaic tile (3 columns): every fifth tile is wide, and the last
+// tile stretches to fill its row so there is no empty gap at the end.
+let col = 0;
+const spans = mosaic.map((_, i) => {
+  let w = i % 5 === 0 ? 2 : 1;
+  if (col + w > 3) col = 0;
+  if (i === mosaic.length - 1) w = 3 - col;
+  col = (col + w) % 3;
+  return w;
+});
+---
+<Base title="Entretenimiento" active="entretenimiento" description="Farándula, música, cine, televisión y cultura de Puerto Rico. Horóscopo y Trivia Xtra.">
+  <div class="tb">
+    <section class="tb-band">
+      <div class="wrap">
+        <div class="tb-title">
+          <span class="tb-star" aria-hidden="true">★</span>
+          <h1>Xtra <span>Entretenimiento</span></h1>
+          <p>Farándula, música, cine, televisión y cultura boricua</p>
+        </div>
+        <nav class="tb-chips" aria-label="Entretenimiento">
+          <a href="#lo-ultimo">Lo último</a>
+          <a href="#comentan">Lo que todos comentan</a>
+          <a href={url('horoscopo')}>Horóscopo</a>
+          <a href={url('juegos/trivia')}>Trivia Xtra</a>
+        </nav>
+      </div>
+    </section>
+
+    <div class="wrap tb-page" id="main">
+      {lead ? (
+        <div class="tb-top">
+          <a class="tb-lead" href={href(lead)}>
+            <Ph sectionId="entretenimiento" image={lead.data.image} />
+            <span class="tb-flag">Exclusiva Xtra</span>
+            <div class="tb-lead-text"><h2>{lead.data.title}</h2><p>{lead.data.description}</p></div>
+          </a>
+          <div class="tb-side">
+            {side.map((s, i) => (
+              <a class:list={['tb-side-card', i === 0 ? 'pink' : 'yellow']} href={href(s)}>
+                <Ph sectionId="entretenimiento" image={s.data.image} />
+                <h3>{s.data.title}</h3>
+              </a>
+            ))}
+          </div>
+          <aside class="tb-buzz" id="comentan">
+            <h2>Lo que todos comentan</h2>
+            <ol>{buzz.map((s) => <li><a href={href(s)}>{s.data.title}</a></li>)}</ol>
+          </aside>
+        </div>
+      ) : (
+        <div class="tb-empty"><span aria-hidden="true">★</span><h2>¡Muy pronto!</h2><p>Farándula, música, cine y televisión de Puerto Rico.</p></div>
+      )}
+
+      <div class="tb-grid">
+        <div class="tb-main" id="lo-ultimo">
+          {mosaic.length > 0 && (
+            <>
+              <h2 class="tb-h">Lo último</h2>
+              <div class="tb-mosaic">
+                {mosaic.map((s, i) => (
+                  <a class:list={['tb-tile', { big: spans[i] > 1 }]} style={`--span:${spans[i]}`} href={href(s)}>
+                    <Ph sectionId="entretenimiento" image={s.data.image} />
+                    <div><span class="tb-place notranslate" translate="no">{s.data.place}</span><h3>{s.data.title}</h3><Time date={s.data.date} /></div>
+                  </a>
+                ))}
+              </div>
+            </>
+          )}
+          <AdSlot size="infeed" />
+        </div>
+
+        <aside class="tb-right">
+          <section class="tb-box tb-horo">
+            <h2><span class="hs-zodiac" aria-hidden="true">{todaySign.symbol}{'︎'}</span> Horóscopo de hoy</h2>
+            <p class="tb-date">{todayLong()}</p>
+            <ul>
+              {SIGNS.map((s, i) => (
+                <li class:list={{ today: s.id === todaySign.id }}>
+                  <a href={url(`horoscopo#${s.id}`)}><span class="hs-zodiac">{s.symbol}{'︎'}</span><b>{s.name}</b><em>{horoscope(i)}</em></a>
+                </li>
+              ))}
+            </ul>
+          </section>
+          <section class="tb-box tb-trivia">
+            <h2>Trivia Xtra</h2>
+            <p>{trivia.q}</p>
+            <a class="tb-btn" href={url('juegos/trivia')}>¡Juega ahora!</a>
+          </section>
+          <AdSlot size="rectangle" />
+        </aside>
+      </div>
+    </div>
+  </div>
+</Base>

@@ -39,11 +39,13 @@ const forYouMore = forYou ? stories.filter((s) => s.data.section === forYou.data
 const trivia = triviaOfTheDay();
 const today = new Date().toLocaleDateString('es-PR', { day: 'numeric', month: 'long', timeZone: 'America/Puerto_Rico' });
 
-const next = LEAGUES.map((l) => ({ l, start: 'starts' in l ? new Date(l.starts as string) : undefined }))
+// Every upcoming season opener (soonest first); the card rotates through them
+const upcoming = LEAGUES.map((l) => ({ l, start: 'starts' in l ? new Date(l.starts as string) : undefined }))
   .filter((x) => x.start && x.start.valueOf() > Date.now())
-  .sort((a, b) => a.start!.valueOf() - b.start!.valueOf())[0];
-const daysLeft = next ? Math.ceil((next.start!.valueOf() - Date.now()) / 864e5) : 0;
-const nextStory = next ? stories.find((s) => s.data.league === next.l.id) : undefined;
+  .sort((a, b) => a.start!.valueOf() - b.start!.valueOf())
+  .map((x) => ({ ...x, days: Math.ceil((x.start!.valueOf() - Date.now()) / 864e5) }));
+const daysText = (n: number) => (n === 1 ? 'Falta 1 día' : `Faltan ${n} días`);
+const startText = (d: Date) => d.toLocaleDateString('es-PR', { day: 'numeric', month: 'long', timeZone: 'America/Puerto_Rico' });
 const chev = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>';
 ---
 <div class="hs-band"><div class="wrap"><div class="sc hs" data-sc>
@@ -55,8 +57,8 @@ const chev = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke
 
       <div class="hs-item">
         <a class="hs-card" href={url('horoscopo')}>
-          <div class="hs-text"><span class="hs-label">Horóscopo · {sign.name}</span><strong>{signText}</strong></div>
           <span class="hs-sign hs-zodiac" aria-hidden="true">{sign.symbol}{'︎'}</span>
+          <div class="hs-text"><span class="hs-label">Horóscopo · {sign.name}</span><strong>{signText}</strong></div>
         </a>
         <div class="hs-pop">
           <p class="hs-pop-h"><span class="hs-zodiac">{sign.symbol}{'︎'}</span> {sign.name} · {sign.dates}</p>
@@ -135,17 +137,24 @@ const chev = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke
         </div>
       )}
 
-      {next && (
+      {upcoming.length > 0 && (
         <div class="hs-item">
-          <a class="hs-card" href={url(`deportes/${next.l.id}`)}>
-            <div class="hs-text"><span class="hs-label">Cuenta regresiva</span><strong>{daysLeft === 1 ? 'Falta 1 día' : `Faltan ${daysLeft} días`}</strong><small>para {next.l.name}</small></div>
-            <LeagueBadge id={next.l.id} size="md" />
+          <a class="hs-card hs-count" href={url(`deportes/${upcoming[0].l.id}`)} data-rotate>
+            <div class="hs-slides">
+              {upcoming.map((u, k) => (
+                <div class:list={['hs-slide', { on: k === 0 }]} data-href={url(`deportes/${u.l.id}`)} aria-hidden={k === 0 ? undefined : 'true'}>
+                  <div class="hs-text"><span class="hs-label">Cuenta regresiva</span><strong>{daysText(u.days)}</strong><small>para {u.l.name}</small></div>
+                  <LeagueBadge id={u.l.id} size="md" />
+                </div>
+              ))}
+            </div>
+            {upcoming.length > 1 && <span class="hs-dots" aria-hidden="true">{upcoming.map((_, k) => <i class:list={{ on: k === 0 }} />)}</span>}
           </a>
           <div class="hs-pop">
-            <p class="hs-pop-h">{next.l.full}</p>
-            {'season' in next.l && next.l.season && <p class="hs-quote">{next.l.season}</p>}
-            {nextStory && <p class="hs-pop-story"><a href={url(`noticia/${nextStory.id}`)}>{nextStory.data.title}</a> <Time date={nextStory.data.date} /></p>}
-            <a class="hs-pop-more" href={url(`deportes/${next.l.id}`)}>Calendario y noticias <Fragment set:html={chev} /></a>
+            <p class="hs-pop-h">Próximas temporadas</p>
+            <ul class="hs-pop-list plain">
+              {upcoming.map((u) => <li><a href={url(`deportes/${u.l.id}`)}><b>{daysText(u.days)}</b> · {u.l.full} arranca el {startText(u.start!)}</a></li>)}
+            </ul>
           </div>
         </div>
       )}
@@ -157,6 +166,27 @@ const chev = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke
 </div></div></div>
 
 <script>
+  // Cuenta regresiva: show each upcoming season in turn (pauses while hovered or focused)
+  document.querySelectorAll<HTMLAnchorElement>('[data-rotate]').forEach((card) => {
+    const slides = [...card.querySelectorAll<HTMLElement>('.hs-slide')];
+    const dots = [...card.querySelectorAll<HTMLElement>('.hs-dots i')];
+    if (slides.length < 2 || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    let i = 0;
+    let paused = false;
+    const item = card.closest('.hs-item')!;
+    item.addEventListener('mouseenter', () => (paused = true));
+    item.addEventListener('mouseleave', () => (paused = false));
+    card.addEventListener('focus', () => (paused = true));
+    card.addEventListener('blur', () => (paused = false));
+    setInterval(() => {
+      if (paused || document.hidden) return;
+      slides[i].classList.remove('on'); slides[i].setAttribute('aria-hidden', 'true'); dots[i]?.classList.remove('on');
+      i = (i + 1) % slides.length;
+      slides[i].classList.add('on'); slides[i].removeAttribute('aria-hidden'); dots[i]?.classList.add('on');
+      card.href = slides[i].dataset.href!;
+    }, 4000);
+  });
+
   // Phones/tablets: arrows + faded edges (on computers all cards fit, so these stay hidden)
   document.querySelectorAll<HTMLElement>('.hs[data-sc]').forEach((sc) => {
     const track = sc.querySelector<HTMLElement>('.sc-track')!;

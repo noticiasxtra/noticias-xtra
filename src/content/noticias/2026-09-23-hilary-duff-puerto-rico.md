@@ -1,0 +1,18 @@
+---
+title: "Hilary Duff vuelve a Puerto Rico: cantará en el Coliseo el 10 de agosto de 2027"
+description: "Será su segunda presentación en la isla, 22 años después de la primera. La parada forma parte de la extensión de su “Lucky Me Tour”."
+section: entretenimiento
+place: "San Juan"
+date: 2026-09-23T15:01:00-04:00
+sources:
+  - name: "NotiCel"
+    url: "https://noticel.com/entretenimiento/20260923/hilary-duff-se-presentara-en-la-isla-en-agosto-del-ano-que-viene/"
+---
+
+Hilary Duff regresa a Puerto Rico. La cantante y actriz se presentará el 10 de agosto de 2027 en el Coliseo de Puerto Rico José Miguel Agrelot, como parte de las nuevas fechas de su “Lucky Me Tour”.
+
+Será su segunda presentación en la isla. La primera fue en 2005.
+
+La extensión de la gira comenzará el 7 de mayo de 2027 y pasará por Berlín, París, Ámsterdam, Copenhague, Estocolmo, San Juan, São Paulo, Buenos Aires y Santiago, antes de cerrar el 20 de noviembre de 2027 en Anaheim, California.
+
+Duff se dio a conocer en Disney Channel a principios de los 2000, con “Lizzie McGuire” y la canción “What Dreams Are Made Of”. Su carrera musical despegó en 2003 con el álbum “Metamorphosis”, que incluyó éxitos como “So Yesterday” y “Come Clean”.
