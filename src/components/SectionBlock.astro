@@ -7,7 +7,7 @@ const list = stories.filter((s) => s.data.section === sectionId && !exclude.incl
 const s = section(sectionId);
 ---
 {list.length > 0 && (
-  <section>
+  <section class={`sec-block sec-${sectionId}`}>
     <div class="sec-h"><h2>{s.name}</h2><a href={url(`seccion/${sectionId}`)}>Ver todo</a></div>
     <div class="block">
       <StoryCard story={list[0]} variant="big" />

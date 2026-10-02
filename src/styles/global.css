@@ -1031,8 +1031,6 @@ main.wrap,.home-grid,.ys-page,.tb-page{padding-top:var(--gap)}
 /* Story page: reading tools, text size, progress bar */
 .body{font-size:calc(19px * var(--read-scale,1))}
 .art .dek{font-size:calc(20px * var(--read-scale,1))}
-.tools{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:-8px 0 16px}
-.tools-time{font-size:13px;font-weight:600;color:var(--muted);margin-right:auto}
 .tool{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:6px 12px;font-family:var(--head);font-size:13px;font-weight:700;cursor:pointer}
 .tool:hover:not(:disabled){border-color:var(--purple);color:var(--purple)}
 .tool:disabled{opacity:.4;cursor:default}
@@ -1046,7 +1044,7 @@ main.wrap,.home-grid,.ys-page,.tb-page{padding-top:var(--gap)}
 /* Header: saved stories button */
 .saved-btn{position:relative}
 .saved-count{position:absolute;top:-5px;right:-6px;min-width:16px;height:16px;padding:0 4px;border-radius:999px;background:var(--red);color:#fff;font-size:10px;font-weight:800;line-height:16px;text-align:center}
-@media print{.tools,.read-progress{display:none}}
+@media print{.by-actions,.read-progress{display:none}}
 /* Guardadas page */
 .sv-note{color:var(--muted);font-size:14px;margin:0 0 var(--gap)}
 .sv-list{list-style:none;margin:0;padding:0;display:grid;gap:var(--gap);grid-template-columns:repeat(auto-fill,minmax(min(100%,520px),1fr))}
@@ -1062,3 +1060,44 @@ main.wrap,.home-grid,.ys-page,.tb-page{padding-top:var(--gap)}
 @media (max-width:520px){.sv-item img{width:84px}.sv-item h2{font-size:15px}}
 /* Jump links (#eventos etc.) stop below the sticky menu */
 [id]{scroll-margin-top:72px}
+/* Bracket: team logos, placeholders, home version */
+.br-team{display:flex;align-items:center;gap:7px;min-width:0}
+.br-team > span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sp-series .tbd{color:var(--muted);font-style:italic}
+.sp-series .win .br-team > span{color:var(--ink)}
+.sp-series div:not(.win) strong{color:var(--muted)}
+.br-upd{margin:10px 0 0;font-size:12px}
+.sp-panel h2 .br-more{float:right;font-size:14px;font-weight:600;color:var(--purple)}
+.br-home .sp-round{min-width:210px}
+
+/* Home: Deportes heading in red (requested by the publisher) */
+.sec-deportes .sec-h{border-bottom-color:var(--red)}
+.sec-deportes .sec-h h2,.sec-deportes .sec-h a{color:var(--red)}
+
+/* Home: every block is an outlined card, same border as the top strip cards */
+.home-main > .home-hero,.home-main > .home-row,.home-main > section,.home-main > .sp-panel,.home-sections > div:not(.ad-slot) > .sec-block{
+  background:var(--card);border:1px solid #D7D3CA;border-radius:12px;padding:var(--gap);box-shadow:none}
+.home-main > .home-row{border-top:1px solid #D7D3CA}
+.home-sections > div:not(.ad-slot){display:flex}
+.home-sections .sec-block{flex:1;min-width:0}
+.wx-box,.tr-box,.lu-box{border-color:#D7D3CA;border-radius:12px}
+[data-theme="dark"] .home-main > .home-hero,[data-theme="dark"] .home-main > .home-row,[data-theme="dark"] .home-main > section,
+[data-theme="dark"] .home-main > .sp-panel,[data-theme="dark"] .home-sections .sec-block,
+[data-theme="dark"] .wx-box,[data-theme="dark"] .tr-box,[data-theme="dark"] .lu-box{border-color:#34364D}
+
+/* Story byline: author/time left, tools + share right, all on one line */
+.byline{flex-wrap:nowrap;gap:16px;padding:12px 0}
+.by-who{display:grid;gap:2px;min-width:0;font-size:14px;color:var(--muted)}
+.by-who strong{font-size:15px}
+.by-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.by-sep{width:1px;height:24px;background:var(--line);margin:0 2px}
+.by-actions .share{display:flex;gap:6px}
+.tool.icon{width:34px;height:34px;padding:0;justify-content:center}
+.by-actions .tool{height:34px}
+.by-actions .share .tool{color:var(--purple)}
+@media (max-width:760px){
+  .byline{flex-wrap:wrap}
+  .by-actions{justify-content:flex-start;width:100%}
+}
+.sp-round{justify-content:flex-start}
+.sp-round-s{flex:1;display:flex;flex-direction:column;justify-content:space-around;gap:12px}

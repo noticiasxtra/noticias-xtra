@@ -46,6 +46,7 @@ export type Standings = {
 
 export type Bracket = {
   name?: string; // e.g. "Serie Final 2027"
+  updated?: string; // e.g. "1 de octubre de 2026. Fuente: MLB.com"
   rounds: Array<{
     name: string; // e.g. "Semifinal"
     series: Array<{ a: string; b: string; aWins?: number; bWins?: number; note?: string }>;
