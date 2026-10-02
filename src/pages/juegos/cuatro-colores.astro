@@ -38,6 +38,7 @@ import { url } from '../../lib/site';
     </GameLayout>
   </main>
   <script>
+    import { award } from '../../lib/points';
     type C = { c: 'r' | 'y' | 'g' | 'b' | 'w'; v: string }; // v: '0'-'9', 'S' skip, 'R' reverse, '+2', 'W' wild, '+4'
     const box = document.querySelector<HTMLElement>('[data-cc]')!;
     const $ = (s: string) => box.querySelector<HTMLElement>(s)!;
@@ -92,7 +93,7 @@ import { url } from '../../lib/site';
     }
     // Apply a card's effect, then move the turn along
     function resolve(p: number, k: C) {
-      if (!hands[p].length) { over = true; say(p === 0 ? '¡Ganaste! 🎉' : `Ganó el Jugador ${p === 1 ? 'A' : 'B'}.`); $('[data-new]').hidden = false; render(); return; }
+      if (!hands[p].length) { over = true; if (p === 0) award('cuatro-colores', 40, 'Cuatro Colores ganado'); say(p === 0 ? '¡Ganaste! 🎉' : `Ganó el Jugador ${p === 1 ? 'A' : 'B'}.`); $('[data-new]').hidden = false; render(); return; }
       if (hands[p].length === 1) say(`${p === 0 ? '¡Te queda una carta!' : `¡Al Jugador ${p === 1 ? 'A' : 'B'} le queda una carta!`}`);
       if (k.v === 'R') dir = -dir;
       if (k.v === 'S') next(2);

@@ -19,6 +19,7 @@ import { url } from '../../lib/site';
     </GameLayout>
   </main>
   <script>
+    import { award } from '../../lib/points';
     const POOL = ['COQUI', 'MOFONGO', 'YUNQUE', 'PLENA', 'BOMBA', 'SALSA', 'PLAYA', 'CAFE', 'MANGO', 'PALMA',
       'TAINO', 'PASTEL', 'CUATRO', 'GUIRO', 'ARROZ', 'LECHON', 'COTORRA', 'FLAMBOYAN', 'ISLA', 'TOSTONES'].filter((w) => w.length <= 10);
     const N = 10;
@@ -67,6 +68,7 @@ import { url } from '../../lib/site';
       btns.flat().forEach((b) => b.classList.remove('got'));
       found.forEach((w) => placed[w].forEach(([r, c]) => btns[r][c].classList.add('got')));
       msg.textContent = found.length === words.length ? '¡Encontraste todas las palabras! Mañana hay una sopa nueva.' : `Encontradas: ${found.length} de ${words.length}`;
+      if (found.length === words.length) award('sopa', 80, 'Sopa de letras completa', key);
     }
     function tap(r: number, c: number) {
       if (!first) { first = [r, c]; btns[r][c].classList.add('sel'); return; }

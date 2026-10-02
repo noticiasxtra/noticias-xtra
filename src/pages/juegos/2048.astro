@@ -26,6 +26,7 @@ import GameLayout from '../../components/GameLayout.astro';
     </GameLayout>
   </main>
   <script>
+    import { award } from '../../lib/points';
     type Dir = 'up' | 'down' | 'left' | 'right';
     const box = document.querySelector<HTMLElement>('[data-g48]')!;
     const boardEl = box.querySelector<HTMLElement>('[data-board]')!;
@@ -85,8 +86,8 @@ import GameLayout from '../../components/GameLayout.astro';
       score += pts;
       if (score > best) { best = score; set('nx-2048-best', best); }
       const at = addTile();
-      if (!won && grid.flat().includes(2048)) { won = true; $('[data-msg]').textContent = '¡Llegaste a 2048! 🎉 Puedes seguir jugando.'; }
-      if (!canMove()) { over = true; $('[data-msg]').textContent = `Se acabaron las jugadas. Puntos: ${score}.`; }
+      if (!won && grid.flat().includes(2048)) { won = true; award('2048', 150, '¡Llegaste a 2048!'); $('[data-msg]').textContent = '¡Llegaste a 2048! 🎉 Puedes seguir jugando.'; }
+      if (!canMove()) { over = true; award('2048', Math.floor(score / 200), `Partida de 2048: ${score}`); $('[data-msg]').textContent = `Se acabaron las jugadas. Puntos: ${score}.`; }
       save(); paint(at, mergedAt);
     }
     box.querySelectorAll<HTMLButtonElement>('[data-dir]').forEach((b) => b.addEventListener('click', () => move(b.dataset.dir as Dir)));

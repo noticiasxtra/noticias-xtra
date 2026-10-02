@@ -28,6 +28,7 @@ import { url } from '../../lib/site';
     </GameLayout>
   </main>
   <script>
+    import { award } from '../../lib/points';
     const box = document.querySelector<HTMLElement>('[data-sudoku]')!;
     const boardEl = box.querySelector<HTMLElement>('.sd-board')!;
     const msg = box.querySelector<HTMLElement>('.jg-msg')!;
@@ -124,6 +125,7 @@ import { url } from '../../lib/site';
       if (cur.every((v, i) => v === sol[i])) {
         done = true; clearInterval(timer); tick();
         msg.textContent = `¡Felicidades! Completaste el sudoku en ${timeEl.textContent} con ${errors} ${errors === 1 ? 'error' : 'errores'}.`;
+        award('sudoku', 60 + Number(level) * 45, `Sudoku ${['fácil', 'medio', 'difícil'][Number(level)] ?? ''} resuelto`, key());
       }
       save(); paint();
     }

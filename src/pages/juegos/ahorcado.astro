@@ -27,6 +27,7 @@ import GameLayout from '../../components/GameLayout.astro';
     </GameLayout>
   </main>
   <script>
+    import { award } from '../../lib/points';
     // Words (written without accents) and their clues
     const WORDS: Array<[string, string]> = [
       ['COQUI', 'Ranita símbolo de Puerto Rico'], ['MOFONGO', 'Plátano majado con ajo'], ['YUNQUE', 'Bosque lluvioso del este'],
@@ -78,7 +79,7 @@ import GameLayout from '../../components/GameLayout.astro';
       const b = keys.get(ch)!; b.disabled = true; b.classList.add(hit ? 'hit' : 'no');
       if (!hit) misses++;
       if ([...word].every((c) => guessed.has(c))) {
-        over = true; store.set('nx-ahorcado-wins', store.get('nx-ahorcado-wins') + 1); store.set('nx-ahorcado-streak', store.get('nx-ahorcado-streak') + 1);
+        over = true; award('ahorcado', 20, `Ahorcado: ${word}`); store.set('nx-ahorcado-wins', store.get('nx-ahorcado-wins') + 1); store.set('nx-ahorcado-streak', store.get('nx-ahorcado-streak') + 1);
         $('[data-msg]').textContent = '¡Bien! Adivinaste la palabra. 🎉';
       } else if (misses >= 6) {
         over = true; store.set('nx-ahorcado-streak', 0);

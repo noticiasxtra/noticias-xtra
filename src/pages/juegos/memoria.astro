@@ -19,6 +19,7 @@ import { url } from '../../lib/site';
     </GameLayout>
   </main>
   <script>
+    import { award } from '../../lib/points';
     // Puerto Rico themed cards (emoji + name for screen readers)
     const CARDS: Array<[string, string]> = [['🐸', 'Coquí'], ['🌴', 'Palma'], ['🏖️', 'Playa'], ['⚾', 'Béisbol'],
       ['🥁', 'Bomba'], ['🌺', 'Flor de maga'], ['☕', 'Café'], ['🦜', 'Cotorra']];
@@ -53,6 +54,7 @@ import { url } from '../../lib/site';
             a.classList.add('done'); c.classList.add('done'); a.disabled = c.disabled = true; open = [];
             pairs++; pairsEl.textContent = String(pairs);
             if (pairs === CARDS.length) {
+              award('memoria', moves <= 12 ? 80 : moves <= 16 ? 60 : 40, `Memoria en ${moves} jugadas`);
               const best = getBest();
               if (!best || moves < best) { try { localStorage.setItem('nx-memoria-best', String(moves)); } catch { /* storage blocked */ } }
               msg.textContent = !best || moves < best ? `¡Nueva marca! Lo hiciste en ${moves} jugadas.` : `¡Completado en ${moves} jugadas!`;

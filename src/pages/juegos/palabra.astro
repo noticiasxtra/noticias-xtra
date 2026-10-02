@@ -19,6 +19,7 @@ import { url } from '../../lib/site';
     </GameLayout>
   </main>
   <script>
+    import { award } from '../../lib/points';
     // Everyday Spanish words, written without accents (the game ignores accents)
     const WORDS = ['PLAYA', 'SALSA', 'COQUI', 'MANGO', 'PLENA', 'BOMBA', 'ARROZ', 'CIELO', 'MONTE', 'VERDE', 'NOCHE', 'RITMO',
       'FUEGO', 'LLAVE', 'PIANO', 'RADIO', 'TORRE', 'BARCO', 'PLATO', 'QUESO', 'LIMON', 'DULCE', 'AMIGO', 'CANTO', 'CALLE',
@@ -77,6 +78,7 @@ import { url } from '../../lib/site';
       rows.forEach((w) => score(w).forEach((s, i) => best.set(w[i], Math.max(best.get(w[i]) ?? -1, s))));
       keyEls.forEach((b, ch) => { b.classList.remove('ok', 'in', 'no'); if (best.has(ch)) b.classList.add(CLS[best.get(ch)!]); });
       const won = rows.includes(answer);
+      if (won) award('palabra', 110 - rows.length * 10, `Palabra en ${rows.length} ${rows.length === 1 ? 'intento' : 'intentos'}`, key);
       over = won || rows.length >= 6;
       msg.textContent = won ? `¡Excelente! Lo lograste en ${rows.length} ${rows.length === 1 ? 'intento' : 'intentos'}. Vuelve mañana por otra palabra.`
         : over ? `La palabra era ${answer}. ¡Mañana hay otra!` : '';

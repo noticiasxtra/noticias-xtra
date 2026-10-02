@@ -140,8 +140,13 @@ export const TOWNS = [
   { name: 'Fajardo', temp: 28, sky: 'Lluvia' },
 ];
 
-// Channel shown on the "En vivo" page (src/pages/en-vivo.astro)
-export const LIVE_SOURCE = VIDEO_SOURCES.noticel;
+// "En vivo" page (src/pages/en-vivo.astro): live YouTube channels in order of priority. Each time the site
+// rebuilds (every 15 minutes), the first one that is live plays; if none is live, the first one's newest video plays.
+export const LIVE_SOURCES = [
+  { id: 'noticel', name: 'NotiCel', channel: VIDEO_SOURCES.noticel.channel, url: VIDEO_SOURCES.noticel.url },
+  { id: 'camara', name: 'Cámara de Representantes de PR', channel: 'UCm0SWjunIA5PDT9l4qW59Kw', url: 'https://www.youtube.com/channel/UCm0SWjunIA5PDT9l4qW59Kw' },
+  { id: 'casa-blanca', name: 'Casa Blanca (EE. UU.)', channel: 'UCYxRlFDqcWM4y7FfpiAN3KQ', url: 'https://www.youtube.com/@WhiteHouse' },
+];
 
 /* =========================================================
    Helpers

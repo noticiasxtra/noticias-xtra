@@ -2869,3 +2869,54 @@ html.nx-en .pf-menu .lang-tag{background:var(--red)}
 [aria-pressed="true"] > .pf-switch::after{transform:translateX(16px)}
 .pf-menu-i[hidden]{display:none}
 @media (max-width:420px){ .pf-menu{width:min(264px,calc(100vw - 24px))} }
+/* Juegos Xtra points: pill in each game banner and total in the profile menu */
+.jg-banner-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.jg-pts{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.18);color:#fff;font-size:12px;font-weight:700;box-shadow:inset 0 0 0 1px rgba(255,255,255,.3)}
+.jg-pts:hover{background:rgba(255,255,255,.28)}
+.jg-pts b{font-family:var(--head)}
+.pf-pts{margin-left:auto;padding:2px 8px;border-radius:999px;background:#FFF5DB;color:#7A4B00;font-size:12px;font-weight:800}
+/* Juegos page: "Tus puntos" */
+.jp{margin:var(--gap) 0;padding:18px;border-radius:20px;background:var(--card);border:1px solid var(--line);scroll-margin-top:90px}
+.jp-top{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:18px;align-items:center;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.jp-total{display:flex;align-items:center;gap:12px}
+.jp-star{display:grid;place-items:center;width:54px;height:54px;border-radius:16px;background:linear-gradient(135deg,#FDE68A,#F59E0B);font-size:28px}
+.jp-total h2{margin:0;font-size:14px;color:var(--muted);font-weight:700}
+.jp-total b{font-family:var(--head);font-size:34px;line-height:1;color:var(--ink)}
+.jp-level p{margin:0 0 6px;font-size:14px;color:var(--muted)}
+.jp-level p b{font-family:var(--head);color:var(--purple);font-size:16px}
+.jp-bar{height:10px;border-radius:999px;background:var(--soft);overflow:hidden}
+.jp-bar span{display:block;height:100%;width:0;border-radius:999px;background:linear-gradient(90deg,#F59E0B,var(--red));transition:width .4s}
+.jp-streak{margin:0;padding:8px 12px;border-radius:12px;background:#FFF5DB;color:#7A4B00;font-weight:700;font-size:13px;white-space:nowrap}
+.jp-body{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:20px;margin-top:14px}
+.jp-body h3{margin:0 0 8px;font-size:15px;color:var(--purple)}
+.jp-games{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.jp-games a{display:flex;align-items:center;gap:8px;padding:6px;border-radius:10px;color:var(--ink);font-size:13px;font-weight:600}
+.jp-games a:hover{background:var(--soft)}
+.jp-games img{flex:none;width:40px;height:28px;object-fit:cover;border-radius:6px}
+.jp-games span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.jp-games b{font-family:var(--head);color:var(--purple)}
+.jp-log{list-style:none;margin:0 0 10px;padding:0;display:grid;gap:4px}
+.jp-log li{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid var(--line);font-size:13px}
+.jp-log b{color:#13804A;font-family:var(--head)}
+.jp-log .jp-empty{border:0;color:var(--muted)}
+.jp-rules summary{cursor:pointer;font-weight:700;font-size:14px;color:var(--purple)}
+.jp-rules ul{margin:8px 0;padding-left:18px;font-size:13px;display:grid;gap:3px}
+.jp-rules p{margin:0;font-size:12px;color:var(--muted)}
+.jp-note{margin:14px 0 0;font-size:12px;color:var(--muted)}
+@media (max-width:760px){
+  .jp-top{grid-template-columns:auto minmax(0,1fr)}
+  .jp-streak{grid-column:1/-1;white-space:normal}
+  .jp-body{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:420px){ .jp-games{grid-template-columns:minmax(0,1fr)} }
+/* En vivo: channel buttons (priority order; a red dot when that channel is live) */
+.lv-srcs{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.lv-src{display:grid;gap:1px;text-align:left;padding:8px 12px;border-radius:12px;border:2px solid var(--line);background:var(--card);color:var(--ink);font:inherit;cursor:pointer}
+.lv-src b{font-family:var(--head);font-size:13px}
+.lv-src small{font-size:11px;color:var(--muted);font-weight:700}
+.lv-src.live small{color:var(--red)}
+.lv-src[aria-pressed="true"]{border-color:var(--red);background:color-mix(in srgb,var(--red) 6%,var(--card))}
+@media (max-width:899px){
+  .lv-info .lv-srcs{display:flex;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:4px calc(-1 * var(--gutter)) 0;padding:0 var(--gutter) 2px}
+  .lv-src{flex:none;padding:6px 10px}
+}

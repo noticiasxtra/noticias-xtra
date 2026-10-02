@@ -99,11 +99,6 @@ const columnist = d.section === 'opinion' ? columnistOf(d.author) : undefined;
         {d.section === 'opinion' && (
           <div class="ai"><strong>Columna de opinión</strong>Este texto expresa la opinión de su autor{d.author === 'Noticias Xtra' ? ' y la línea editorial de Noticias Xtra' : ''}. Las noticias de Noticias Xtra se redactan por separado y se limitan a los hechos.</div>
         )}
-        {d.section === 'opinion' ? null : d.aiAssisted ? (
-          <div class="ai"><strong>Cómo se preparó esta noticia</strong>Redactada con ayuda de inteligencia artificial a partir de las fuentes citadas, y revisada por un editor antes de publicarse. <a href={url('ia')}>Cómo usamos la IA</a></div>
-        ) : (
-          <div class="ai"><strong>Reportaje original</strong>Escrito por {d.author}.</div>
-        )}
 
         <Comments storyId={story.id} />
 

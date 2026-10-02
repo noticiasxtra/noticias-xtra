@@ -35,6 +35,7 @@ import GameLayout from '../../components/GameLayout.astro';
     </GameLayout>
   </main>
   <script>
+    import { award } from '../../lib/points';
     type Tile = [number, number];
     const box = document.querySelector<HTMLElement>('[data-domino]')!;
     const $ = (s: string) => box.querySelector<HTMLElement>(s)!;
@@ -164,6 +165,7 @@ import GameLayout from '../../components/GameLayout.astro';
       const matchOver = score[wTeam!] >= 100;
       const ours = wTeam! === 0;
       say(`${why} ${ours ? (mode === 4 ? 'Nosotros' : 'Tú') : (mode === 4 ? 'Ellos' : 'La computadora')} +${pts} puntos.${matchOver ? (ours ? ' ¡Ganamos la partida! 🎉' : ' Perdimos la partida.') : ''}`);
+      if (matchOver && ours) award('domino', 60, 'Partida de dominó ganada');
       if (matchOver && ours) { try { localStorage.setItem('nx-domino-wins', String(Number(localStorage.getItem('nx-domino-wins') || 0) + 1)); } catch { /* storage blocked */ } }
       render();
       showNext(matchOver);

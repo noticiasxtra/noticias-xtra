@@ -22,6 +22,7 @@ import GameLayout from '../../components/GameLayout.astro';
     </GameLayout>
   </main>
   <script>
+    import { award } from '../../lib/points';
     const W = 7, H = 6;
     const box = document.querySelector<HTMLElement>('[data-c4]')!;
     const boardEl = box.querySelector<HTMLElement>('[data-board]')!;
@@ -94,7 +95,7 @@ import GameLayout from '../../components/GameLayout.astro';
     function drop(c: number, p: number) {
       const r = free(grid, c); grid[r][c] = p;
       const won = line(grid, r, c);
-      if (won) { over = true; p === 1 ? wins.me++ : wins.cpu++; try { localStorage.setItem('nx-c4', JSON.stringify(wins)); } catch { /* storage blocked */ } showWins(); msg.textContent = p === 1 ? '¡Ganaste! 🎉' : 'Ganó la computadora. ¡Inténtalo otra vez!'; again.hidden = false; paint(won); return true; }
+      if (won) { over = true; if (p === 1) award('cuatro-en-linea', 30, 'Cuatro en Línea ganado'); p === 1 ? wins.me++ : wins.cpu++; try { localStorage.setItem('nx-c4', JSON.stringify(wins)); } catch { /* storage blocked */ } showWins(); msg.textContent = p === 1 ? '¡Ganaste! 🎉' : 'Ganó la computadora. ¡Inténtalo otra vez!'; again.hidden = false; paint(won); return true; }
       if (grid.every((row) => row.every(Boolean))) { over = true; msg.textContent = 'Empate. ¡El tablero se llenó!'; again.hidden = false; paint(); return true; }
       return false;
     }

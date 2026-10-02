@@ -23,6 +23,7 @@ const t = triviaOfTheDay();
     </GameLayout>
   </main>
   <script>
+    import { award } from '../../lib/points';
     const box = document.querySelector<HTMLElement>('[data-trivia]')!;
     const answer = Number(box.dataset.answer);
     const key = `nx-trivia-${new Date().toLocaleDateString('en-CA', { timeZone: 'America/Puerto_Rico' })}`;
@@ -34,6 +35,7 @@ const t = triviaOfTheDay();
     function show(choice: number) {
       buttons.forEach((b, i) => { b.disabled = true; b.classList.toggle('right', i === answer); b.classList.toggle('wrong', i === choice && i !== answer); });
       const ok = choice === answer;
+      if (ok) award('trivia', 30, 'Trivia acertada', key);
       result.textContent = ok ? '¡Correcto!' : 'Esta vez no. La respuesta correcta está marcada en verde.';
       result.className = `tv-result ${ok ? 'ok' : 'no'}`;
       result.hidden = false; note.hidden = false;

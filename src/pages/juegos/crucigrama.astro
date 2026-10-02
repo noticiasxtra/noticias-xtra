@@ -27,6 +27,7 @@ import GameLayout from '../../components/GameLayout.astro';
     </GameLayout>
   </main>
   <script>
+    import { award } from '../../lib/points';
     // Words without accents (the game ignores accents) and their clues
     const BANK: Array<[string, string]> = [
       ['COQUI', 'Ranita que canta de noche; símbolo de Puerto Rico'], ['MOFONGO', 'Plátano majado con ajo y chicharrón'],
@@ -172,6 +173,7 @@ import GameLayout from '../../components/GameLayout.astro';
       if (done === words.length && !finished) {
         finished = true;
         $('[data-msg]').textContent = `¡Completaste el crucigrama del día en ${$('[data-time]').textContent}! Vuelve mañana por otro.`;
+        award('crucigrama', 100, 'Crucigrama completo', key);
       }
     }
     function move(step: number) {

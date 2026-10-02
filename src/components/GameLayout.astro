@@ -11,7 +11,10 @@ const others = GAMES.filter((x) => x.id !== g.id);
 <div class="jg-layout" style={`--gc:${g.color}`}>
   <div class="jg-stage">
     <header class="jg-banner">
-      <a class="jg-back" href={url('juegos')}>‹ Juegos Xtra</a>
+      <div class="jg-banner-top">
+        <a class="jg-back" href={url('juegos')}>‹ Juegos Xtra</a>
+        <a class="jg-pts" href={`${url('juegos')}#puntos`} title="Tus puntos de Juegos Xtra">⭐ <b data-pts-total>0</b> pts · <span data-pts-level>Novato</span></a>
+      </div>
       <div class="jg-banner-main">
         <img class="jg-banner-img" src={url(`images/juegos/${g.id}.svg`)} alt="" />
         <div><h1>{g.name}</h1><p>{g.about}</p></div>
@@ -31,3 +34,9 @@ const others = GAMES.filter((x) => x.id !== g.id);
     <AdSlot size="halfpage" sticky class="jg-ad-tall" />
   </aside>
 </div>
+<script>
+  // Points pill in the banner: total and level (also refreshed when this game awards points)
+  import { getPoints, levelOf } from '../lib/points';
+  const lvl = () => document.querySelectorAll<HTMLElement>('[data-pts-level]').forEach((el) => (el.textContent = levelOf(getPoints().total).name));
+  lvl(); addEventListener('nx-points', lvl);
+</script>

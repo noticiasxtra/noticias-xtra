@@ -4,6 +4,7 @@ import Base from '../../layouts/Base.astro';
 import AdSlot from '../../components/AdSlot.astro';
 import { url } from '../../lib/site';
 import { GAMES, FEATURED_GAME } from '../../lib/games';
+import { RULES, LEVELS, DAILY_BONUS } from '../../lib/points';
 const featured = FEATURED_GAME;
 const rest = GAMES.filter((g) => g.id !== featured.id);
 ---
@@ -26,6 +27,36 @@ const rest = GAMES.filter((g) => g.id !== featured.id);
       </a>
     </section>
 
+    <section class="jp" id="puntos" aria-labelledby="jp-h" data-points data-games={JSON.stringify(GAMES.map(({ id, name }) => ({ id, name })))}>
+      <div class="jp-top">
+        <div class="jp-total">
+          <span class="jp-star" aria-hidden="true">⭐</span>
+          <div><h2 id="jp-h">Tus puntos</h2><b data-jp-total>0</b></div>
+        </div>
+        <div class="jp-level">
+          <p><b data-jp-level>Novato</b><span data-jp-next></span></p>
+          <div class="jp-bar"><span data-jp-bar></span></div>
+        </div>
+        <p class="jp-streak" data-jp-streak></p>
+      </div>
+      <div class="jp-body">
+        <div>
+          <h3>Por juego</h3>
+          <ul class="jp-games" data-jp-games></ul>
+        </div>
+        <div>
+          <h3>Lo último</h3>
+          <ul class="jp-log" data-jp-log></ul>
+          <details class="jp-rules">
+            <summary>¿Cómo gano puntos?</summary>
+            <ul>{GAMES.map((g) => RULES[g.id] && <li><b>{g.name}:</b> {RULES[g.id]}</li>)}</ul>
+            <p>Además, +{DAILY_BONUS} de bono el primer juego de cada día. Niveles: {LEVELS.map((l) => `${l.name} (${l.at})`).join(' · ')}.</p>
+          </details>
+        </div>
+      </div>
+      <p class="jp-note">Tus puntos se guardan en este dispositivo. Muy pronto, con tu cuenta, habrá tabla de líderes de Puerto Rico.</p>
+    </section>
+
     <div class="jh-grid jh-all">
       {rest.map((g) => (
         <a class="jh-card" href={url(`juegos/${g.id}`)} style={`--gc:${g.color}`}>
@@ -40,4 +71,24 @@ const rest = GAMES.filter((g) => g.id !== featured.id);
     </div>
     <AdSlot size="infeed" />
   </main>
+  <script>
+    import { getPoints, levelOf, streakOf } from '../../lib/points';
+    const box = document.querySelector<HTMLElement>('[data-points]')!;
+    const games: Array<{ id: string; name: string }> = JSON.parse(box.dataset.games!);
+    const base = document.body.dataset.base || '/';
+    const n = (v: number) => v.toLocaleString('es-PR');
+    function paint() {
+      const s = getPoints(); const lv = levelOf(s.total); const st = streakOf(s.days);
+      box.querySelector('[data-jp-total]')!.textContent = n(s.total);
+      box.querySelector('[data-jp-level]')!.textContent = lv.name;
+      box.querySelector('[data-jp-next]')!.textContent = lv.next ? ` · faltan ${n(lv.toNext)} para ${lv.next.name}` : ' · ¡Nivel máximo!';
+      box.querySelector<HTMLElement>('[data-jp-bar]')!.style.width = `${lv.pct}%`;
+      box.querySelector('[data-jp-streak]')!.textContent = st ? `🔥 ${st} ${st === 1 ? 'día' : 'días'} seguidos jugando` : 'Juega hoy para empezar tu racha 🔥';
+      box.querySelector('[data-jp-games]')!.innerHTML = games.map((g) => `<li><a href="${base}juegos/${g.id}/"><img src="${base}images/juegos/${g.id}.svg" alt="" loading="lazy" /><span>${g.name}</span><b>${n(s.games[g.id] ?? 0)}</b></a></li>`).join('');
+      box.querySelector('[data-jp-log]')!.innerHTML = s.log.length
+        ? s.log.slice(0, 6).map((l) => `<li><span>${l.why}</span><b>+${l.pts}</b></li>`).join('')
+        : '<li class="jp-empty">Todavía no tienes puntos. ¡Juega cualquier juego para empezar!</li>';
+    }
+    paint(); addEventListener('nx-points', paint); addEventListener('storage', (e) => e.key === 'nx-points' && paint());
+  </script>
 </Base>
