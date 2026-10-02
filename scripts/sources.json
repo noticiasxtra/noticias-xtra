@@ -46,7 +46,9 @@
     "linkBase": "https://www.bsnpr.com/noticias/",
     "section": "deportes",
     "league": "bsn",
-    "place": "Puerto Rico"
+    "place": "Puerto Rico",
+    "enabled": false,
+    "_nota": "Desactivada: los términos del BSN prohíben extraer su contenido de forma automatizada sin autorización escrita. Activar solo con permiso del BSN."
   },
   {
     "name": "Federación Puertorriqueña de Fútbol",

@@ -1,9 +1,15 @@
 ---
-// One page per league: /deportes/bsn/, /deportes/doble-a/ ...
+// One page per league: /deportes/bsn/, /deportes/invernal/ ...
+// Left: games, standings and playoffs. Right: that league's news.
 import Base from '../../layouts/Base.astro';
+import Time from '../../components/Time.astro';
+import Ph from '../../components/Ph.astro';
 import LeagueTabs from '../../components/deportes/LeagueTabs.astro';
+import LeagueBadge from '../../components/deportes/LeagueBadge.astro';
 import ScoreStrip from '../../components/deportes/ScoreStrip.astro';
-import FeedCard from '../../components/deportes/FeedCard.astro';
+import GamesList from '../../components/deportes/GamesList.astro';
+import StandingsTable from '../../components/deportes/StandingsTable.astro';
+import BracketView from '../../components/deportes/BracketView.astro';
 import { getStories, url } from '../../lib/site';
 import { LEAGUES, type League } from '../../lib/leagues';
 
@@ -11,24 +17,45 @@ export function getStaticPaths() {
   return LEAGUES.map((l) => ({ params: { liga: l.id }, props: { l } }));
 }
 const { l } = Astro.props as { l: League };
-const list = (await getStories()).filter((s) => s.data.section === 'deportes' && s.data.league === l.id);
+const news = (await getStories()).filter((s) => s.data.section === 'deportes' && s.data.league === l.id);
+const season = 'season' in l ? l.season : undefined;
+const official = 'url' in l ? l.url : undefined;
 ---
 <Base title={`${l.full} | Deportes`} active="deportes" description={`${l.full}: ${l.about}`}>
   <section class="sp-top sp-top-league" style={`--lc:${l.color}`}>
     <div class="wrap">
-      <div class="sp-title">
-        <h1><a href={url('seccion/deportes')}>Xtra <span>Deportes</span></a> <em>/</em> {l.name}</h1>
-        <p>{l.full}. {l.about}{'url' in l && l.url && <> <a href={l.url} rel="noopener" target="_blank">Sitio oficial ↗</a></>}</p>
+      <div class="sp-league-head">
+        <LeagueBadge id={l.id} size="lg" />
+        <div>
+          <p class="sp-crumb"><a href={url('seccion/deportes')}>Xtra Deportes</a></p>
+          <h1>{l.full}</h1>
+          <p>{l.about}{season && <> {season}</>}{official && <> <a href={official} rel="noopener" target="_blank">Sitio oficial ↗</a></>}</p>
+        </div>
       </div>
       <LeagueTabs active={l.id} />
       <ScoreStrip only={l.id} />
     </div>
   </section>
-  <main class="wrap" id="main">
-    {list.length ? (
-      <div class="sp-feed-list">{list.map((s) => <FeedCard story={s} />)}</div>
-    ) : (
-      <div class="empty"><p>Todavía no hay noticias de {l.full}.</p><a class="btn" href={url('seccion/deportes')}>Ver todos los deportes</a></div>
-    )}
+
+  <main class="wrap sp-league-page" id="main">
+    <div class="sp-data">
+      <GamesList league={l.id} season={season} />
+      <StandingsTable league={l.id} />
+      <BracketView league={l.id} />
+    </div>
+    <aside class="sp-news">
+      <h2>Noticias de {l.name}</h2>
+      {news.length ? news.map((s) => (
+        <article class="sp-news-item">
+          <a href={url(`noticia/${s.id}`)} tabindex="-1" aria-hidden="true"><Ph sectionId="deportes" image={s.data.image} league={s.data.league} /></a>
+          <div>
+            <a href={url(`noticia/${s.id}`)}><h3 class="hl">{s.data.title}</h3></a>
+            <Time date={s.data.date} />
+          </div>
+        </article>
+      )) : (
+        <p class="sp-note">Todavía no hay noticias de {l.full}. <a href={url('seccion/deportes')}>Ver todos los deportes</a></p>
+      )}
+    </aside>
   </main>
 </Base>

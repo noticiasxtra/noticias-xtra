@@ -1,0 +1,31 @@
+---
+// League page: playoff bracket (rounds left to right)
+import { bracket } from '../../lib/scores';
+interface Props { league: string }
+const b = bracket(Astro.props.league);
+---
+<section class="sp-panel">
+  <h2>{b?.name ?? 'Postemporada'}</h2>
+  {!b?.rounds?.length ? (
+    <p class="sp-note">Las llaves se publicarán cuando comience la postemporada.</p>
+  ) : (
+    <div class="sp-bracket">
+      {b.rounds.map((r) => (
+        <div class="sp-round">
+          <h3>{r.name}</h3>
+          {r.series.map((s) => {
+            const aWin = (s.aWins ?? 0) > (s.bWins ?? 0);
+            const bWin = (s.bWins ?? 0) > (s.aWins ?? 0);
+            return (
+              <div class="sp-series">
+                <div class:list={{ win: aWin }}><span>{s.a}</span><strong>{s.aWins ?? 0}</strong></div>
+                <div class:list={{ win: bWin }}><span>{s.b}</span><strong>{s.bWins ?? 0}</strong></div>
+                {s.note && <p>{s.note}</p>}
+              </div>
+            );
+          })}
+        </div>
+      ))}
+    </div>
+  )}
+</section>

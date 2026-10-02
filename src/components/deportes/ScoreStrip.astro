@@ -1,29 +1,33 @@
 ---
-// Horizontal score strip (only renders when src/data/marcadores.json has games)
-import { scores } from '../../lib/scores';
+// Horizontal score strip (ESPN-style). Renders only when src/data/marcadores.json has games.
+// theme="light" for the home page, dark (default) on the Deportes pages.
+import { scores, gameTime } from '../../lib/scores';
 import { league } from '../../lib/leagues';
-interface Props { only?: string }
-const { only } = Astro.props;
-const games = scores().filter((g) => !only || g.league === only);
-const time = (d: string) => new Date(d).toLocaleString('es-PR', { weekday: 'short', hour: 'numeric', minute: '2-digit', timeZone: 'America/Puerto_Rico' });
+import { url } from '../../lib/site';
+interface Props { only?: string; theme?: 'dark' | 'light'; title?: boolean }
+const { only, theme = 'dark', title = false } = Astro.props;
+const games = scores(only);
 ---
 {games.length > 0 && (
-  <div class="sp-scores" role="region" aria-label="Marcadores">
-    {games.map((g) => {
-      const l = league(g.league);
-      const done = g.status !== 'programado';
-      const awayWin = g.status === 'final' && (g.awayScore ?? 0) > (g.homeScore ?? 0);
-      const homeWin = g.status === 'final' && (g.homeScore ?? 0) > (g.awayScore ?? 0);
-      return (
-        <div class="sp-game" style={`--lc:${l?.color}`}>
-          <div class="sp-game-h">
-            <span>{l?.name}</span>
-            {g.status === 'en-vivo' ? <b class="live">EN VIVO{g.note && ` · ${g.note}`}</b> : g.status === 'final' ? <b>Final{g.note && ` · ${g.note}`}</b> : <b>{time(g.date)}</b>}
-          </div>
-          <div class:list={['sp-team', { win: awayWin }]}><span>{g.away}</span>{done && <strong>{g.awayScore}</strong>}</div>
-          <div class:list={['sp-team', { win: homeWin }]}><span>{g.home}</span>{done && <strong>{g.homeScore}</strong>}</div>
-        </div>
-      );
-    })}
+  <div class:list={['sp-scores-wrap', theme]}>
+    {title && <div class="sp-scores-h"><h2>Marcadores</h2><a href={url('seccion/deportes')}>Xtra Deportes</a></div>}
+    <div class="sp-scores" role="region" aria-label="Marcadores">
+      {games.map((g) => {
+        const l = league(g.league);
+        const done = g.status !== 'programado';
+        const awayWin = g.status === 'final' && (g.awayScore ?? 0) > (g.homeScore ?? 0);
+        const homeWin = g.status === 'final' && (g.homeScore ?? 0) > (g.awayScore ?? 0);
+        return (
+          <a class="sp-game" href={url(`deportes/${g.league}`)} style={`--lc:${l?.color}`}>
+            <div class="sp-game-h">
+              <span>{l?.name}</span>
+              {g.status === 'en-vivo' ? <b class="live">● EN VIVO{g.note && ` · ${g.note}`}</b> : g.status === 'final' ? <b>Final{g.note && ` · ${g.note}`}</b> : <b>{gameTime(g.date)}</b>}
+            </div>
+            <div class:list={['sp-team', { win: awayWin }]}><span>{g.away}</span>{done && <strong>{g.awayScore}</strong>}</div>
+            <div class:list={['sp-team', { win: homeWin }]}><span>{g.home}</span>{done && <strong>{g.homeScore}</strong>}</div>
+          </a>
+        );
+      })}
+    </div>
   </div>
 )}

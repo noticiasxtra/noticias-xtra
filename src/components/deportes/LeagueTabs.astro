@@ -1,13 +1,14 @@
 ---
 // League tabs under the XTRA DEPORTES title (ESPN-style sub-navigation)
+import LeagueBadge from './LeagueBadge.astro';
 import { LEAGUES } from '../../lib/leagues';
 import { url } from '../../lib/site';
 interface Props { active?: string }
 const { active } = Astro.props;
 ---
 <nav class="sp-tabs" aria-label="Ligas">
-  <a href={url('seccion/deportes')} aria-current={!active ? 'page' : undefined}>Todo</a>
+  <a href={url('seccion/deportes')} class="all" aria-current={!active ? 'page' : undefined}>Todo</a>
   {LEAGUES.map((l) => (
-    <a href={url(`deportes/${l.id}`)} style={`--lc:${l.color}`} aria-current={active === l.id ? 'page' : undefined}>{l.name}</a>
+    <a href={url(`deportes/${l.id}`)} style={`--lc:${l.color}`} aria-current={active === l.id ? 'page' : undefined}><LeagueBadge id={l.id} size="sm" />{l.name}</a>
   ))}
 </nav>

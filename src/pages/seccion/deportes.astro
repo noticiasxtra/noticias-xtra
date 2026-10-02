@@ -7,6 +7,7 @@ import LeagueTabs from '../../components/deportes/LeagueTabs.astro';
 import ScoreStrip from '../../components/deportes/ScoreStrip.astro';
 import LeaguePill from '../../components/deportes/LeaguePill.astro';
 import FeedCard from '../../components/deportes/FeedCard.astro';
+import LeagueBadge from '../../components/deportes/LeagueBadge.astro';
 import { getStories, url } from '../../lib/site';
 import { LEAGUES } from '../../lib/leagues';
 
@@ -58,7 +59,7 @@ const world = LEAGUES.filter((l) => !l.local);
         const last = latestFor(l.id);
         return (
           <article class="sp-league" style={`--lc:${l.color}`}>
-            <a class="sp-league-name" href={url(`deportes/${l.id}`)}><strong>{l.name}</strong><span>{l.full}</span></a>
+            <a class="sp-league-name" href={url(`deportes/${l.id}`)}><LeagueBadge id={l.id} size="md" /><span><strong>{l.name}</strong><span>{l.full}</span></span></a>
             <p>{l.about}</p>
             {last
               ? <a class="sp-league-last hl" href={url(`noticia/${last.id}`)}>{last.data.title}</a>
@@ -85,7 +86,7 @@ const world = LEAGUES.filter((l) => !l.local);
         const last = latestFor(l.id);
         return (
           <article class="sp-league" style={`--lc:${l.color}`}>
-            <a class="sp-league-name" href={url(`deportes/${l.id}`)}><strong>{l.name}</strong><span>{l.full}</span></a>
+            <a class="sp-league-name" href={url(`deportes/${l.id}`)}><LeagueBadge id={l.id} size="md" /><span><strong>{l.name}</strong><span>{l.full}</span></span></a>
             <p>{l.about}</p>
             {last
               ? <a class="sp-league-last hl" href={url(`noticia/${last.id}`)}>{last.data.title}</a>

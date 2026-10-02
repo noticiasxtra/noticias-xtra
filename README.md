@@ -112,7 +112,28 @@ The Deportes page (`src/pages/seccion/deportes.astro`) has league tabs, a big le
 ]
 ```
 
-`status` is `final`, `en-vivo` or `programado`. Optional `note`, e.g. `"4to parcial"`.
+`status` is `final`, `en-vivo` or `programado`. Optional `note` (e.g. `"4to parcial"`) and `venue`. Games show on the home page, the Deportes page and the league page.
+
+- **Standings:** `src/data/posiciones.json`, by league:
+
+```json
+{ "invernal": { "updated": "20 de noviembre", "groups": [ { "rows": [
+  { "team": "Cangrejeros", "w": 10, "l": 4 },
+  { "team": "Criollos", "w": 8, "l": 6, "gb": "2.0" }
+] } ] } }
+```
+
+- **Playoff brackets:** `src/data/llaves.json`, by league:
+
+```json
+{ "invernal": { "name": "Postemporada 2027", "rounds": [
+  { "name": "Semifinal", "series": [ { "a": "Cangrejeros", "b": "Indios", "aWins": 3, "bWins": 1 } ] },
+  { "name": "Final", "series": [ { "a": "Cangrejeros", "b": "Por definir" } ] }
+] } }
+```
+
+- **League logos:** put the official file from each league's press office in `public/logos/` named by league id (`bsn.png`, `invernal.svg`...). Until then the site shows a colored badge with the league's initials.
+- **Automatic scores:** not connected yet. Free feeds that work technically (MLB, ESPN, the BSN site) don't allow use by a news site, and the BSN's terms forbid automated collection. A licensed provider can later fill these same three files from a script.
 
 ### Red news bar
 
