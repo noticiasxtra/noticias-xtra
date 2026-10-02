@@ -5,12 +5,11 @@ import VideoCard from '../../components/VideoCard.astro';
 import Sidebar from '../../components/Sidebar.astro';
 import AdSlot from '../../components/AdSlot.astro';
 import GamesTeaser from '../../components/GamesTeaser.astro';
-import Columnists from '../../components/Columnists.astro';
 import { getStories, SECTIONS, SITE, VIDEOS, url } from '../../lib/site';
 
 export function getStaticPaths() {
-  // Deportes, Entretenimiento, Clima and Economía have their own pages (seccion/deportes.astro, entretenimiento.astro, clima.astro, economia.astro)
-  return SECTIONS.filter((s) => !['deportes', 'entretenimiento', 'clima', 'economia'].includes(s.id)).map((s) => ({ params: { id: s.id }, props: { sec: s } }));
+  // Deportes, Entretenimiento, Clima, Economía and Opinión have their own pages in this folder
+  return SECTIONS.filter((s) => !['deportes', 'entretenimiento', 'clima', 'economia', 'opinion'].includes(s.id)).map((s) => ({ params: { id: s.id }, props: { sec: s } }));
 }
 const { sec } = Astro.props;
 const all = await getStories();
@@ -22,7 +21,6 @@ const vids = SITE.features.videos ? VIDEOS.filter((v) => v.section === sec.id) :
     <div class="sec-h" style="margin-top:0"><h1 style="font-size:32px;margin:0;color:var(--purple)">{sec.name}</h1></div>
     <div class="art-grid">
       <div>
-        {sec.id === 'opinion' && <Columnists stories={all} />}
         {list.length > 0 ? (
           <>
             <div class="block">

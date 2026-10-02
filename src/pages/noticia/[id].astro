@@ -10,6 +10,7 @@ import AdSlot from '../../components/AdSlot.astro';
 import Comments from '../../components/Comments.astro';
 import GamesTeaser from '../../components/GamesTeaser.astro';
 import { getStories, section, url, defaultPhoto, type Story } from '../../lib/site';
+import { columnistOf } from '../../lib/columnists';
 
 export async function getStaticPaths() {
   const stories = await getStories();
@@ -33,6 +34,8 @@ const more = stories
   .filter((x) => x.id !== story.id)
   .sort((a, b) => Number(b.data.section === d.section) - Number(a.data.section === d.section))
   .slice(0, 4);
+// Opinion columns: the byline shows the columnist's picture and links to their profile
+const columnist = d.section === 'opinion' ? columnistOf(d.author) : undefined;
 ---
 <Base title={d.title} description={d.description} active={d.section} image={d.image ?? fallback.src} article={{ published: d.date, section: s.name }}>
   <main class="wrap" id="main">
@@ -46,8 +49,9 @@ const more = stories
         <p class="dek">{d.description}</p>
         {/* One line: who and when on the left; reading tools and sharing on the right */}
         <div class="byline">
+          {columnist?.photo && <a class="by-pic" href={url(`opinion/${columnist.slug}`)} tabindex="-1" aria-hidden="true"><img src={url(columnist.photo)} alt="" /></a>}
           <div class="by-who">
-            <strong>Por {d.author}</strong>
+            <strong>Por {columnist ? <a href={url(`opinion/${columnist.slug}`)}>{d.author}</a> : d.author}</strong>
             <span><Time date={d.date} />, <span class="notranslate" translate="no">{d.place}</span> · {minutes} min de lectura</span>
           </div>
           <div class="by-actions" role="toolbar" aria-label="Herramientas de lectura y compartir">
