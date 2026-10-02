@@ -23,7 +23,7 @@ export const SITE = {
   // Turn parts of the site on (true) or off (false). Off parts are hidden everywhere.
   features: {
     videos: true, // video section and pages (VIDEOS below: NotiCel and BSN YouTube channels)
-    live: false, // "En vivo" button and TV schedule (SCHEDULE below is a sample)
+    live: true, // "En vivo" button and page: LIVE_SOURCE's YouTube live stream, or its newest video when it isn't live
     weather: false, // town temperatures (TOWNS below are samples); a link to the official forecast shows instead
     newsletter: true, // newsletter sign-up box (demo: nothing is sent until an email service is connected)
     app: true, // "Descarga la app" link and banner (buttons say the app is coming soon)
@@ -140,13 +140,8 @@ export const TOWNS = [
   { name: 'Fajardo', temp: 28, sky: 'Lluvia' },
 ];
 
-export const SCHEDULE = [
-  { at: '6:00 a.m.', show: 'Xtra Temprano' },
-  { at: '12:00 p.m.', show: 'Noticias al Mediodía', now: true },
-  { at: '5:00 p.m.', show: 'Xtra Deportes' },
-  { at: '6:00 p.m.', show: 'Edición Estelar' },
-  { at: '10:00 p.m.', show: 'Noticias Xtra Noche' },
-];
+// Channel shown on the "En vivo" page (src/pages/en-vivo.astro)
+export const LIVE_SOURCE = VIDEO_SOURCES.noticel;
 
 /* =========================================================
    Helpers

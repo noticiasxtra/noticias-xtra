@@ -67,6 +67,10 @@ const columnist = d.section === 'opinion' ? columnistOf(d.author) : undefined;
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4zM15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14" /></svg>
               <span data-listen-label>Escuchar</span>
             </button>
+            <a class="tool icon cm-jump" href="#comentarios" aria-label="Ir a los comentarios" title="Comentarios">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z" /></svg>
+              <span class="cm-jump-n" data-cm-jump></span>
+            </a>
             <span class="by-sep" aria-hidden="true"></span>
             <span class="share" role="group" aria-label="Compartir">
               <button type="button" class="tool icon" data-share="facebook" aria-label="Compartir en Facebook" title="Facebook">
@@ -111,6 +115,15 @@ const columnist = d.section === 'opinion' ? columnistOf(d.author) : undefined;
     </div>
   </main>
   <script>
+    // Comment icon in the toolbar shows the same count as the comments section
+    {
+      const src = document.querySelector<HTMLElement>('[data-cm-count]');
+      const out = document.querySelector<HTMLElement>('[data-cm-jump]');
+      if (src && out) {
+        const sync = () => (out.textContent = (src.textContent || '').replace(/[()]/g, '').trim());
+        sync(); new MutationObserver(sync).observe(src, { childList: true, characterData: true, subtree: true });
+      }
+    }
     // "Para ti" on the home page: count which sections this reader opens. Stored only in this browser.
     const art = document.querySelector<HTMLElement>('[data-read-section]');
     if (art) {

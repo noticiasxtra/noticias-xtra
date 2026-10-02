@@ -104,7 +104,7 @@ const todayCap = today.charAt(0).toUpperCase() + today.slice(1);
             </button>
           </div>
           <a class="mh-ad-btn" href={url('publicidad')}>Anúnciate</a>
-          {F.live && <a href={url('en-vivo')} class="live-btn"><span class="dot"></span>En vivo</a>}
+          {F.live && <a href={url('en-vivo')} class="live-btn" aria-current={active === 'en-vivo' ? 'page' : undefined}><span class="dot" aria-hidden="true"></span>En vivo</a>}
         </div>
       </div>
     </header>
@@ -114,6 +114,7 @@ const todayCap = today.charAt(0).toUpperCase() + today.slice(1);
         <a href={url()} class="nav-logo" tabindex="-1" aria-hidden="true"><img src={url('logo.svg')} alt="" width="80" height="30" /></a>
         <div class="nav-links">
           <a class="nav-ad" href={url('publicidad')}>Anúnciate</a>
+          {F.live && <a class="nav-live" href={url('en-vivo')} aria-current={active === 'en-vivo' ? 'page' : undefined}><span class="dot" aria-hidden="true"></span>En vivo</a>}
           <a href={url()} aria-current={active === 'home' ? 'page' : undefined}>Portada</a>
           {SECTIONS.map((s) => (
             <a href={url(`seccion/${s.id}`)} aria-current={active === s.id ? 'page' : undefined}>{s.name}</a>

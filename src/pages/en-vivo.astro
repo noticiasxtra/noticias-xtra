@@ -1,24 +1,115 @@
 ---
+// En vivo: the live YouTube feed (LIVE_SOURCE in src/lib/site.ts) on the left, the latest news on the right.
+// Tapping a story opens it inside the right column, so the video keeps playing while the reader reads.
+// Live status is checked when the site is built (every hour): if the channel is live, its stream plays;
+// otherwise the newest video plays, with a button to try the live stream.
 import Base from '../layouts/Base.astro';
-import Player from '../components/Player.astro';
-import { SCHEDULE, SITE, url } from '../lib/site';
+import Ph from '../components/Ph.astro';
+import Time from '../components/Time.astro';
+import { getStories, section, url, LIVE_SOURCE } from '../lib/site';
+
+const stories = (await getStories()).slice(0, 20);
+const channel = LIVE_SOURCE.channel;
+
+let liveId: string | null = null;
+let liveTitle = '';
+try {
+  const html = await (await fetch(`https://www.youtube.com/channel/${channel}/live`, { headers: { 'User-Agent': 'Mozilla/5.0', 'Accept-Language': 'es' }, signal: AbortSignal.timeout(10000) })).text();
+  const id = html.match(/<link rel="canonical" href="https:\/\/www\.youtube\.com\/watch\?v=([\w-]{11})"/)?.[1];
+  // Live only when the stream is actually running (not a scheduled "waiting room" or an ended stream)
+  const running = /"isLive":true/.test(html) && !/"status":"LIVE_STREAM_OFFLINE"/.test(html) && !/"isUpcoming":true/.test(html);
+  if (id && running) {
+    liveId = id;
+    liveTitle = (html.match(/<meta name="title" content="([^"]*)"/)?.[1] ?? '').replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/&#39;/g, "'");
+  }
+} catch { /* YouTube unreachable: show the latest video */ }
+
+const params = 'autoplay=1&mute=1&rel=0&playsinline=1';
+const latestSrc = `https://www.youtube-nocookie.com/embed/videoseries?list=UU${channel.slice(2)}&${params}`;
+const liveSrc = liveId ? `https://www.youtube-nocookie.com/embed/${liveId}?${params}` : `https://www.youtube-nocookie.com/embed/live_stream?channel=${channel}&${params}`;
 ---
-<Base title="En vivo" description="Mira la transmisión en vivo de Noticias Xtra.">
-  <main class="wrap" id="main">
-    {SITE.features.live ? (
-      <div class="art-grid">
-        <div class="art">
-          <Player live />
-          <h1 style="font-size:32px;margin-top:16px">Noticias al Mediodía</h1>
-          <p class="dek">Transmisión en vivo con las noticias más importantes de Puerto Rico.</p>
+<Base title="En vivo" active="en-vivo" description={`Transmisión en vivo de ${LIVE_SOURCE.name} y las últimas noticias de Puerto Rico.`}>
+  <main class="wrap lv" id="main">
+    <div class="lv-grid">
+      <section class="lv-player" aria-labelledby="lv-title">
+        <div class="lv-frame">
+          <iframe data-player src={liveId ? liveSrc : latestSrc} title={liveId ? `En vivo: ${liveTitle}` : `Último video de ${LIVE_SOURCE.name}`}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
         </div>
-        <aside>
-          <h2 class="panel-h">Programación de hoy</h2>
-          <ul class="sched">{SCHEDULE.map((x) => <li class={x.now ? 'now' : ''}><b>{x.at}</b><span>{x.show}{x.now && ' (ahora)'}</span></li>)}</ul>
-        </aside>
-      </div>
-    ) : (
-      <div class="empty"><p>Muy pronto podrás ver nuestras transmisiones en vivo.</p><a class="btn" href={url()}>Ir a la portada</a></div>
-    )}
+        <div class="lv-info">
+          {liveId ? <span class="lv-badge"><i></i>EN VIVO</span> : <span class="lv-badge off">ÚLTIMO VIDEO</span>}
+          <h1 id="lv-title">{liveId ? liveTitle || `${LIVE_SOURCE.name} en vivo` : `${LIVE_SOURCE.name} no está transmitiendo ahora`}</h1>
+          <p>{liveId ? `Transmisión en vivo de ${LIVE_SOURCE.name}.` : 'Mientras tanto, mira su video más reciente.'} Toca una noticia a la derecha para leerla sin dejar de ver.</p>
+          <div class="lv-actions">
+            {!liveId && <button type="button" class="lv-btn" data-try-live={liveSrc}>Intentar el en vivo</button>}
+            <a class="lv-btn ghost" href={LIVE_SOURCE.url} rel="noopener" target="_blank">Ver en YouTube ↗</a>
+          </div>
+        </div>
+      </section>
+
+      <aside class="lv-side" aria-label="Noticias">
+        <div data-listview>
+          <h2 class="lv-h">Últimas noticias</h2>
+          <ol class="lv-news">
+            {stories.map((s) => (
+              <li>
+                <a href={url(`noticia/${s.id}`)} data-read>
+                  <Ph sectionId={s.data.section} image={s.data.image} league={s.data.league} />
+                  <span class="lv-n-t"><small>{section(s.data.section).name} · <Time date={s.data.date} /></small><b class="hl">{s.data.title}</b></span>
+                </a>
+              </li>
+            ))}
+          </ol>
+        </div>
+        <div class="lv-reader" data-reader hidden>
+          <div class="lv-reader-bar">
+            <button type="button" class="lv-back" data-back>‹ Noticias</button>
+            <a class="lv-open" data-open href="#">Abrir completa ↗</a>
+          </div>
+          <article class="lv-article" data-article aria-live="polite"></article>
+        </div>
+      </aside>
+    </div>
   </main>
+  <script>
+    // Try the live stream when the channel wasn't live at build time
+    document.querySelector<HTMLButtonElement>('[data-try-live]')?.addEventListener('click', (e) => {
+      const b = e.currentTarget as HTMLButtonElement;
+      document.querySelector<HTMLIFrameElement>('[data-player]')!.src = b.dataset.tryLive!;
+      b.remove();
+    });
+
+    // Phones: the reader's top bar sits right under the pinned video
+    const player = document.querySelector<HTMLElement>('.lv-player')!;
+    const setH = () => document.documentElement.style.setProperty('--lv-h', `${player.offsetHeight}px`);
+    setH(); addEventListener('resize', setH);
+
+    // Read a story inside the right column (the video keeps playing)
+    const side = document.querySelector<HTMLElement>('.lv-side')!;
+    const listView = side.querySelector<HTMLElement>('[data-listview]')!;
+    const reader = side.querySelector<HTMLElement>('[data-reader]')!;
+    const art = side.querySelector<HTMLElement>('[data-article]')!;
+    const open = side.querySelector<HTMLAnchorElement>('[data-open]')!;
+    const toTop = () => { side.scrollTop = 0; if (matchMedia('(max-width: 899px)').matches) reader.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+    async function read(href: string) {
+      listView.hidden = true; reader.hidden = false; open.href = href;
+      art.innerHTML = '<p class="lv-loading">Cargando…</p>'; toTop();
+      try {
+        const doc = new DOMParser().parseFromString(await (await fetch(href)).text(), 'text/html');
+        const src = doc.querySelector('article.art');
+        if (!src) throw new Error('no article');
+        // Keep the story itself (label, title, summary, byline, photo, text, sources); drop tools, comments, ads and extras
+        src.querySelectorAll('script, .crumbs, .by-actions, .by-pic, section, aside, nav, .ad-slot, .gt, form, button').forEach((n) => n.remove());
+        art.replaceChildren(document.importNode(src, true));
+      } catch {
+        art.innerHTML = `<p class="lv-loading">No se pudo cargar. <a href="${href}">Ábrela aquí</a>.</p>`;
+      }
+    }
+    side.addEventListener('click', (e) => {
+      const a = (e.target as HTMLElement).closest<HTMLAnchorElement>('a[data-read]');
+      if (!a || e.metaKey || e.ctrlKey || e.shiftKey) return;
+      e.preventDefault(); read(a.href);
+    });
+    side.querySelector('[data-back]')!.addEventListener('click', () => { reader.hidden = true; listView.hidden = false; art.innerHTML = ''; toTop(); });
+  </script>
 </Base>
