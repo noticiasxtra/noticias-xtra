@@ -118,6 +118,21 @@ const todayCap = today.charAt(0).toUpperCase() + today.slice(1);
         </div>
       </div>
     </nav>
+    <script is:inline>
+      // Phones: the section menu scrolls sideways. Keep it where the reader left it when they open another section,
+      // and make sure the current section is in view (runs right away so the menu doesn't jump).
+      (function () {
+        var bar = document.querySelector('.nav .wrap');
+        if (!bar) return;
+        try { var x = sessionStorage.getItem('nx-nav-x'); if (x) bar.scrollLeft = +x; } catch (e) { /* storage blocked */ }
+        var cur = bar.querySelector('[aria-current="page"]');
+        if (cur) {
+          var b = bar.getBoundingClientRect(), r = cur.getBoundingClientRect();
+          if (r.left < b.left || r.right > b.right) bar.scrollLeft += r.left - b.left - (b.width - r.width) / 2;
+        }
+        bar.addEventListener('click', function () { try { sessionStorage.setItem('nx-nav-x', String(bar.scrollLeft)); } catch (e) { /* storage blocked */ } });
+      })();
+    </script>
 
     {breaking && (
       <div class="breaking">
