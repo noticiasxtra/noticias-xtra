@@ -85,3 +85,34 @@ export function needs(r: Rep, l: (typeof LEVELS)[number]) {
   ];
   return 'cleanDays' in l ? [...list, { label: `Sin reportes en ${l.cleanDays} días`, have: cleanFor(r, l.cleanDays) ? 1 : 0, need: 1 }] : list;
 }
+
+// ---- Badges: the 4 levels (one at a time, shown next to the name) and 4 special badges (collected, shown in the panel) ----
+export const LEVEL_INFO: Record<string, { means: string; how: string }> = {
+  participante: { means: 'Ya forma parte de la conversación.', how: 'Llega a 30 puntos de reputación (unos 15 comentarios con texto real).' },
+  comentarista: { means: 'Comenta seguido y con sustancia.', how: '150 puntos y comentarios en 7 días distintos.' },
+  voz: { means: 'La comunidad valora lo que dice.', how: '500 puntos, 25 Me gusta de otros lectores y comentarios en 30 días distintos.' },
+  top: { means: 'De los comentaristas más respetados de Noticias Xtra.', how: '1,500 puntos, 100 Me gusta de otros, comentarios en 60 días distintos y ningún reporte en 90 días. Un reporte lo quita.' },
+};
+export const SPECIALS = [
+  { id: 'primero', name: 'Primer comentario', means: 'Se estrenó en la conversación.', how: 'Publica tu primer comentario con texto real (40 caracteres o más).' },
+  { id: 'constante', name: 'Constante 7 días', means: 'Comenta todos los días.', how: 'Comenta (con texto real) 7 días seguidos.' },
+  { id: 'destacado', name: 'Destacado por la redacción', means: 'La redacción escogió uno de sus comentarios como de los mejores.', how: 'Escribe comentarios útiles y respetuosos: la redacción los marca como “Destacado”.' },
+  { id: 'limpio', name: 'Sin reportes 90 días', means: 'Comenta con respeto.', how: 'Comenta durante 90 días sin que te reporten ni oculten un comentario.' },
+] as const;
+
+/** Longest run of consecutive days in a list of YYYY-MM-DD dates. */
+const longestRun = (days: string[]) => {
+  const set = [...new Set(days)].sort(); let best = 0, run = 0, prev = 0;
+  for (const d of set) { const t = Date.parse(`${d}T12:00:00Z`); run = prev && t - prev === 864e5 ? run + 1 : 1; best = Math.max(best, run); prev = t; }
+  return best;
+};
+/** Which special badges this reader has earned. */
+export function specialsOf(r: Rep): Record<string, boolean> {
+  const first = r.days.length ? Date.parse(`${[...r.days].sort()[0]}T12:00:00Z`) : 0;
+  return {
+    primero: r.days.length > 0,
+    constante: longestRun(r.days) >= 7,
+    destacado: r.featured > 0,
+    limpio: !!first && Date.now() - first >= 90 * 864e5 && cleanFor(r, 90),
+  };
+}

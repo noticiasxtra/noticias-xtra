@@ -16,12 +16,23 @@ const SAMPLES = kind === 'game' ? [
   { id: 's3', name: 'abuela_de_ponce', text: '🇵🇷🙏', likes: 7, ago: 'hace 5 h', level: 'comentarista' },
 ];
 // Commenter levels (src/lib/reputation.ts): badge shown next to the name
-import { LEVELS, RULES } from '../lib/reputation';
-const BADGE: Record<string, string> = { participante: '●', comentarista: '✦', voz: '◆', top: '★' };
+import { LEVELS, RULES, LEVEL_INFO, SPECIALS } from '../lib/reputation';
+// Small outline icons for each badge (option A: colored label with an icon)
+const svg = (d: string) => `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const BADGE: Record<string, string> = {
+  participante: svg('<circle cx="12" cy="12" r="4"/>'),
+  comentarista: svg('<path d="M12 3l1.8 4.6L18 9l-4.2 1.4L12 15l-1.8-4.6L6 9l4.2-1.4z"/><path d="M19 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/>'),
+  voz: svg('<path d="M6 4h12l3 5-9 11L3 9z"/><path d="M3 9h18"/>'),
+  top: svg('<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>'),
+  primero: svg('<path d="M4 5h16v11H9l-5 4z"/>'),
+  constante: svg('<path d="M12 3c1 3 4 4.5 4 8.5a4 4 0 0 1-8 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 0-7.5z"/>'),
+  destacado: svg('<circle cx="12" cy="9" r="5"/><path d="M8.5 13.5L7 21l5-3 5 3-1.5-7.5"/>'),
+  limpio: svg('<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>'),
+};
 const levelName = (id: string) => LEVELS.find((l) => l.id === id)?.name ?? '';
 const STICKERS = ['👏', '🔥', '❤️', '😂', '😮', '😢', '🙏', '🇵🇷', '💯', '⚾', '🏀', '🎶'];
 ---
-<section class="cm" id="comentarios" data-comments={storyId} aria-labelledby="cm-h">
+<section class="cm" id="comentarios" data-comments={storyId} data-badges={JSON.stringify(BADGE)} aria-labelledby="cm-h">
   <div class="cm-head">
     <h2 id="cm-h">Comentarios <span data-cm-count></span></h2>
     <span class="sp-demo">DEMO</span>
@@ -46,12 +57,24 @@ const STICKERS = ['👏', '🔥', '❤️', '😂', '😮', '😢', '🙏', '�
 
   <p class="cm-repnote" data-cm-repnote hidden></p>
   <details class="cm-rep" data-cm-rep>
-    <summary>Tu nivel: <b data-rep-level>Nuevo</b> · <span data-rep-pts>0</span> puntos de reputación</summary>
+    <summary>Tu nivel: <b data-rep-level>Nuevo</b> · <span data-rep-pts>0</span> puntos de reputación · <u>qué significan las insignias</u></summary>
     <div class="cm-rep-body">
       <p class="cm-rep-next" data-rep-next></p>
       <ul class="cm-rep-needs" data-rep-needs></ul>
-      <div class="cm-rep-levels">
-        {LEVELS.slice(1).map((l) => <span class={`cm-badge cm-b-${l.id}`}>{BADGE[l.id]} {l.name}</span>)}
+      <div class="cm-guide">
+        <p class="cm-guide-h">¿Qué significan las insignias?</p>
+        <p class="cm-guide-sub">Niveles: se muestra uno junto a tu nombre, el más alto que tengas.</p>
+        <ul>
+          {LEVELS.slice(1).map((l) => (
+            <li><span class={`cm-badge cm-b-${l.id}`}><Fragment set:html={BADGE[l.id]} /> {l.name}</span><span><b>{LEVEL_INFO[l.id].means}</b> {LEVEL_INFO[l.id].how}</span></li>
+          ))}
+        </ul>
+        <p class="cm-guide-sub">Insignias especiales: se coleccionan y aparecen en tu perfil.</p>
+        <ul data-specials>
+          {SPECIALS.map((x) => (
+            <li data-special={x.id}><span class={`cm-badge cm-b-${x.id}`}><Fragment set:html={BADGE[x.id]} /> {x.name}</span><span><b>{x.means}</b> {x.how}</span><i class="cm-got" aria-label="Ganada">✓</i></li>
+          ))}
+        </ul>
       </div>
       <ul class="cm-rep-rules">
         <li>+{RULES.comment} por comentario de {RULES.minChars} caracteres o más (+{RULES.reply} si es respuesta); cuentan hasta {RULES.perDay} al día.</li>
@@ -68,7 +91,7 @@ const STICKERS = ['👏', '🔥', '❤️', '😂', '😮', '😢', '🙏', '�
       <li class="cm-item" data-id={c.id} data-likes={c.likes}>
         <span class="cm-av" aria-hidden="true">{c.name[0].toUpperCase()}</span>
         <div class="cm-body">
-          <p><b>{c.name}</b> <span class={`cm-badge cm-b-${c.level}`} title={levelName(c.level)}>{BADGE[c.level]} {levelName(c.level)}</span> <span class="sp-demo">EJEMPLO</span> {c.text}</p>
+          <p><b>{c.name}</b> <span class={`cm-badge cm-b-${c.level}`} title={levelName(c.level)}><Fragment set:html={BADGE[c.level]} /> {levelName(c.level)}</span> <span class="sp-demo">EJEMPLO</span> {c.text}</p>
           <div class="cm-meta"><span>{c.ago}</span><span data-likes-label>{c.likes} Me gusta</span><button type="button" data-reply>Responder</button></div>
         </div>
         <button type="button" class="cm-like" data-like aria-pressed="false" aria-label="Me gusta">
@@ -80,7 +103,7 @@ const STICKERS = ['👏', '🔥', '❤️', '😂', '😮', '😢', '🙏', '�
 </section>
 
 <script>
-  import { addComment, removeComment, getRep, levelOf, needs } from '../lib/reputation';
+  import { addComment, removeComment, getRep, levelOf, needs, specialsOf } from '../lib/reputation';
   type Mine = { id: string; name: string; text: string; at: number; replyTo?: string };
   const BAD = /\b(pendej\w*|cabr[oó]n\w*|puñet\w*|carajo|mierd\w*|idiota)\b/i; // basic word filter
   const store = {
@@ -133,7 +156,7 @@ const STICKERS = ['👏', '🔥', '❤️', '😂', '😮', '😢', '🙏', '�
         li.querySelector('.cm-av')!.textContent = c.name[0].toUpperCase();
         li.querySelector('b')!.textContent = c.name;
         const lv = levelOf(getRep());
-        if (lv.index > 0) { const bd = document.createElement('span'); bd.className = `cm-badge cm-b-${lv.id}`; bd.textContent = `${({ participante: '●', comentarista: '✦', voz: '◆', top: '★' } as Record<string, string>)[lv.id]} ${lv.name}`; li.querySelector('b')!.after(' ', bd); }
+        if (lv.index > 0) { const bd = document.createElement('span'); bd.className = `cm-badge cm-b-${lv.id}`; bd.innerHTML = `${JSON.parse(root.dataset.badges || '{}')[lv.id] ?? ''} `; bd.append(lv.name); li.querySelector('b')!.after(' ', bd); }
         li.querySelector('.cm-text')!.textContent = c.text;
         li.querySelector('.cm-meta span')!.textContent = ago(c.at);
         li.querySelector('[data-del]')!.addEventListener('click', () => { store.set(key, store.get<Mine[]>(key, []).filter((x) => x.id !== c.id)); removeComment(c.id); render(); });
@@ -151,6 +174,8 @@ const STICKERS = ['👏', '🔥', '❤️', '😂', '😮', '😢', '🙏', '�
       root.querySelector('[data-rep-pts]')!.textContent = r.points.toLocaleString('es-PR');
       root.querySelector('[data-rep-next]')!.textContent = lv.next ? `Para llegar a ${lv.next.name} necesitas:` : '¡Eres Top comentarista! Mantén cero reportes para conservarlo.';
       root.querySelector('[data-rep-needs]')!.innerHTML = lv.next ? needs(r, lv.next).map((n) => `<li class="${n.have >= n.need ? 'ok' : ''}"><span>${n.have >= n.need ? '✓' : '○'} ${n.label}</span><b>${Math.min(n.have, n.need).toLocaleString('es-PR')}/${n.need.toLocaleString('es-PR')}</b></li>`).join('') : '';
+      const got = specialsOf(r);
+      root.querySelectorAll<HTMLElement>('[data-special]').forEach((li) => li.classList.toggle('won', !!got[li.dataset.special!]));
     };
     paintRep(); addEventListener('nx-rep', paintRep);
 

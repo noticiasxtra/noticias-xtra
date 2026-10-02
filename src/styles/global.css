@@ -2997,3 +2997,35 @@ html.nx-en .pf-menu .lang-tag{background:var(--red)}
 .jg-comments{padding:4px 22px 22px;border-top:1px solid var(--line)}
 .jg-comments .cm{margin-top:14px}
 @media (max-width:600px){ .jg-comments{padding:4px 14px 16px} }
+/* Commenter badges, option A: colored label with an icon */
+.cm-badge svg{flex:none}
+.cm-b-participante{background:#F1EFE8;color:#444441}
+.cm-b-comentarista{background:#E6F1FB;color:#0C447C}
+.cm-b-voz{background:#EEEDFE;color:#3C3489}
+.cm-b-top{background:#FAC775;color:#633806;box-shadow:none}
+.cm-b-primero{background:#E1F5EE;color:#085041}
+.cm-b-constante{background:#FAECE7;color:#712B13}
+.cm-b-destacado{background:#FBEAF0;color:#72243E}
+.cm-b-limpio{background:#EAF3DE;color:#27500A}
+[data-theme="dark"] .cm-b-participante{background:#444441;color:#F1EFE8}
+[data-theme="dark"] .cm-b-comentarista{background:#0C447C;color:#E6F1FB}
+[data-theme="dark"] .cm-b-voz{background:#3C3489;color:#EEEDFE}
+[data-theme="dark"] .cm-b-top{background:#854F0B;color:#FAEEDA}
+[data-theme="dark"] .cm-b-primero{background:#085041;color:#E1F5EE}
+[data-theme="dark"] .cm-b-constante{background:#712B13;color:#FAECE7}
+[data-theme="dark"] .cm-b-destacado{background:#72243E;color:#FBEAF0}
+[data-theme="dark"] .cm-b-limpio{background:#27500A;color:#EAF3DE}
+/* "¿Qué significan las insignias?" guide */
+.cm-rep summary u{text-decoration-color:var(--line);text-underline-offset:3px;color:var(--purple)}
+.cm-guide{display:grid;gap:6px;padding-top:6px;border-top:1px solid var(--line)}
+.cm-guide-h{margin:0;font-family:var(--head);font-weight:800;font-size:14px;color:var(--purple)}
+.cm-guide-sub{margin:4px 0 0;font-size:12px;color:var(--muted)}
+.cm-guide ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.cm-guide li{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:4px 10px;align-items:start;font-size:13px;line-height:1.4}
+.cm-guide li .cm-badge{justify-self:start;margin-top:1px}
+.cm-guide li b{color:var(--ink)}
+.cm-got{display:none;font-style:normal;font-weight:800;color:#13804A}
+[data-specials] li{opacity:.65}
+[data-specials] li.won{opacity:1}
+[data-specials] li.won .cm-got{display:inline}
+@media (max-width:600px){ .cm-guide li{grid-template-columns:minmax(0,1fr) auto} .cm-guide li > span:nth-child(2){grid-column:1/-1;grid-row:2} }
