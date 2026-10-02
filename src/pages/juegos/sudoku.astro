@@ -2,10 +2,12 @@
 // Sudoku del día: a new 9x9 puzzle every day (same for everyone), made in the browser.
 // Three levels. Progress and best times are kept only on this device.
 import Base from '../../layouts/Base.astro';
+import GameLayout from '../../components/GameLayout.astro';
 import { url } from '../../lib/site';
 ---
 <Base title="Sudoku del día" description="Un sudoku nuevo cada día, en tres niveles. Gratis y sin registrarte.">
   <main class="wrap" id="main">
+    <GameLayout id="sudoku">
     <div class="jg-game sd" data-sudoku>
       <p class="tv-kicker"><a href={url('juegos')}>Juegos Xtra</a> · Sudoku del día</p>
       <h1>Sudoku</h1>
@@ -23,6 +25,7 @@ import { url } from '../../lib/site';
       <p class="jg-help">Toca una casilla y luego un número. Cada fila, columna y cuadro de 3×3 debe tener del 1 al 9 sin repetir. Los errores se marcan en rojo.</p>
       <p class="jg-msg" aria-live="polite"></p>
     </div>
+    </GameLayout>
   </main>
   <script>
     const box = document.querySelector<HTMLElement>('[data-sudoku]')!;

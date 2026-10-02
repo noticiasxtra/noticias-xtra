@@ -1,0 +1,33 @@
+---
+// Shared frame for every game page: colorful header (icon, name, tagline), the game itself,
+// and a side column with an ad and "Más juegos" (below the game on phones).
+import AdSlot from './AdSlot.astro';
+import { url } from '../lib/site';
+import { GAMES } from '../lib/games';
+interface Props { id: (typeof GAMES)[number]['id'] }
+const g = GAMES.find((x) => x.id === Astro.props.id)!;
+const others = GAMES.filter((x) => x.id !== g.id);
+---
+<div class="jg-layout" style={`--gc:${g.color}`}>
+  <div class="jg-stage">
+    <header class="jg-banner">
+      <a class="jg-back" href={url('juegos')}>‹ Juegos Xtra</a>
+      <div class="jg-banner-main">
+        <span class="jg-banner-icon" aria-hidden="true">{g.icon}</span>
+        <div><h1>{g.name}</h1><p>{g.about}</p></div>
+      </div>
+    </header>
+    <slot />
+    <AdSlot size="infeed" class="jg-ad-below" />
+  </div>
+  <aside class="jg-aside">
+    <AdSlot size="rectangle" />
+    <section class="jg-more">
+      <h2>Más juegos</h2>
+      <ul>{others.map((x) => (
+        <li><a href={url(`juegos/${x.id}`)} style={`--gc:${x.color}`}><span aria-hidden="true">{x.icon}</span><b>{x.name}</b></a></li>
+      ))}</ul>
+    </section>
+    <AdSlot size="halfpage" sticky class="jg-ad-tall" />
+  </aside>
+</div>

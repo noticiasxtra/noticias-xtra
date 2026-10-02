@@ -4,6 +4,7 @@ import StoryCard from '../../components/StoryCard.astro';
 import VideoCard from '../../components/VideoCard.astro';
 import Sidebar from '../../components/Sidebar.astro';
 import AdSlot from '../../components/AdSlot.astro';
+import GamesTeaser from '../../components/GamesTeaser.astro';
 import Columnists from '../../components/Columnists.astro';
 import { getStories, SECTIONS, SITE, VIDEOS, url } from '../../lib/site';
 
@@ -23,14 +24,23 @@ const vids = SITE.features.videos ? VIDEOS.filter((v) => v.section === sec.id) :
       <div>
         {sec.id === 'opinion' && <Columnists stories={all} />}
         {list.length > 0 ? (
-          <div class="block">
-            <StoryCard story={list[0]} variant="big" />
-            <div class="list">{list.slice(1).map((s) => <StoryCard story={s} variant="item" />)}</div>
-          </div>
+          <>
+            <div class="block">
+              <StoryCard story={list[0]} variant="big" />
+              <div class="list">{list.slice(1, 5).map((s) => <StoryCard story={s} variant="item" />)}</div>
+            </div>
+            {list.length > 5 && (
+              <section>
+                <div class="sec-h"><h2>Más de {sec.name}</h2></div>
+                <div class="grid3">{list.slice(5).map((s) => <StoryCard story={s} />)}</div>
+              </section>
+            )}
+          </>
         ) : (
           <div class="empty"><p>Todavía no hay noticias de {sec.name.toLowerCase()} hoy.</p><a class="btn" href={url()}>Ir a la portada</a></div>
         )}
         <AdSlot size="infeed" />
+        <GamesTeaser />
         {vids.length > 0 && (
           <>
             <div class="sec-h"><h2>Videos de {sec.name}</h2></div>

@@ -11,6 +11,7 @@ import Label from '../components/Label.astro';
 import HomeStrip from '../components/HomeStrip.astro';
 import AdSlot from '../components/AdSlot.astro';
 import BracketView from '../components/deportes/BracketView.astro';
+import GamesTeaser from '../components/GamesTeaser.astro';
 import { getStories, url, SITE, SECTIONS, VIDEOS } from '../lib/site';
 
 const stories = await getStories();
@@ -79,6 +80,7 @@ const sectionIds = [...HOME_ORDER, ...SECTIONS.map((s) => s.id).filter((id) => i
             {/* a leftover block at the end spreads across the full width instead of leaving a gap */}
             <div class:list={{ 'sec-wide': i === sectionIds.length - 1 && sectionIds.length % 2 === 1 }}><SectionBlock sectionId={id} stories={stories} /></div>
             {i === 3 && i < sectionIds.length - 1 && <AdSlot size="infeed" class="ad-span" />}
+            {i === 5 && i < sectionIds.length - 1 && <div class="ad-span"><GamesTeaser /></div>}
           </>
         ))}
       </div>

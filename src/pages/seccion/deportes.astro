@@ -9,6 +9,9 @@ import ScoreStrip from '../../components/deportes/ScoreStrip.astro';
 import LeaguePill from '../../components/deportes/LeaguePill.astro';
 import LeagueBadge from '../../components/deportes/LeagueBadge.astro';
 import AdSlot from '../../components/AdSlot.astro';
+import GamesTeaser from '../../components/GamesTeaser.astro';
+import TeamLogo from '../../components/deportes/TeamLogo.astro';
+import { scores, gameTime } from '../../lib/scores';
 import { getStories, url, type Story } from '../../lib/site';
 import { LEAGUES, league } from '../../lib/leagues';
 
@@ -25,6 +28,12 @@ const shown = new Set([lead, ...related, ...row].filter(Boolean));
 const fresh = (list: Story[]) => list.filter((s) => !shown.has(s));
 const rails = LEAGUES.filter((l) => fresh(byLeague(l.id)).length > 0);
 const headlines = fresh(stories).slice(0, 7);
+// Side columns: recent results and next games (real and DEMO), so the columns stay full while scrolling
+const all = scores(undefined, 60);
+const results = all.filter((g) => g.status === 'final').slice(0, 6);
+const nextGames = all.filter((g) => g.status === 'programado').slice(0, 6);
+const gameHref = (g: (typeof all)[number]) => url(g.id ? `deportes/juego/${g.id}` : `deportes/${g.league}`);
+const bsnYT = LEAGUES.find((l) => l.id === 'bsn' && 'youtube' in l) as { youtube?: string } | undefined;
 const href = (s: Story) => url(`noticia/${s.id}`);
 
 // Purple news bar: the 5 newest sports stories; a sports story marked "breaking" in the last 12 hours goes first
@@ -127,6 +136,32 @@ const ago = (d: Date) => { const m = Math.round((Date.now() - d.valueOf()) / 600
               })}
             </ul>
           </section>
+          {results.length > 0 && (
+            <section class="ys-card">
+              <div class="ys-card-h"><h2>Resultados</h2></div>
+              <ul class="ys-games">{results.map((g) => (
+                <li><a href={gameHref(g)} class="notranslate" translate="no">
+                  <span class="ys-g-lg">{league(g.league)?.name}{g.demo && <i class="sp-demo">DEMO</i>}</span>
+                  <span class="ys-g-t"><TeamLogo league={g.league} name={g.away} size={18} /><span>{g.away}</span><b class:list={{ lose: (g.awayScore ?? 0) < (g.homeScore ?? 0) }}>{g.awayScore}</b></span>
+                  <span class="ys-g-t"><TeamLogo league={g.league} name={g.home} size={18} /><span>{g.home}</span><b class:list={{ lose: (g.homeScore ?? 0) < (g.awayScore ?? 0) }}>{g.homeScore}</b></span>
+                </a></li>
+              ))}</ul>
+            </section>
+          )}
+          {nextGames.length > 0 && (
+            <section class="ys-card">
+              <div class="ys-card-h"><h2>Próximos juegos</h2></div>
+              <ul class="ys-games">{nextGames.map((g) => (
+                <li><a href={gameHref(g)} class="notranslate" translate="no">
+                  <span class="ys-g-lg">{league(g.league)?.name} · {gameTime(g.date)}{g.demo && <i class="sp-demo">DEMO</i>}</span>
+                  <span class="ys-g-t"><TeamLogo league={g.league} name={g.away} size={18} /><span>{g.away}</span></span>
+                  <span class="ys-g-t"><TeamLogo league={g.league} name={g.home} size={18} /><span>{g.home}</span></span>
+                </a></li>
+              ))}</ul>
+            </section>
+          )}
+          <GamesTeaser compact />
+          <AdSlot size="rectangle" sticky />
         </aside>
 
         <!-- Right -->
@@ -140,6 +175,15 @@ const ago = (d: Date) => { const m = Math.round((Date.now() - d.valueOf()) / 600
             </section>
           )}
           <AdSlot size="rectangle" />
+          {bsnYT?.youtube && (
+            <section class="ys-card lg-video">
+              <div class="ys-card-h"><h2>Video del BSN</h2><a href={`https://www.youtube.com/channel/${bsnYT.youtube}`} rel="noopener" target="_blank">Canal ↗</a></div>
+              <div class="lg-video-frame">
+                <iframe src={`https://www.youtube-nocookie.com/embed/videoseries?list=UU${bsnYT.youtube.slice(2)}&rel=0&playsinline=1`} title="Último video del BSN en YouTube" loading="lazy"
+                  referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+              </div>
+            </section>
+          )}
           <section class="ys-card">
             <div class="ys-card-h"><h2>Más allá de la isla</h2></div>
             <ul class="ys-tree">

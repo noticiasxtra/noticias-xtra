@@ -2,10 +2,12 @@
 // Palabra Xtra: guess the 5-letter word of the day in six tries.
 // Green = right letter, right spot. Yellow = in the word, other spot. Gray = not in the word.
 import Base from '../../layouts/Base.astro';
+import GameLayout from '../../components/GameLayout.astro';
 import { url } from '../../lib/site';
 ---
 <Base title="Palabra Xtra" description="Adivina la palabra del día en seis intentos.">
   <main class="wrap" id="main">
+    <GameLayout id="palabra">
     <div class="jg-game" data-palabra>
       <p class="tv-kicker"><a href={url('juegos')}>Juegos Xtra</a> · Palabra del día</p>
       <h1>Palabra Xtra</h1>
@@ -14,6 +16,7 @@ import { url } from '../../lib/site';
       <p class="jg-msg" aria-live="polite"></p>
       <div class="pl-keys" aria-label="Teclado"></div>
     </div>
+    </GameLayout>
   </main>
   <script>
     // Everyday Spanish words, written without accents (the game ignores accents)

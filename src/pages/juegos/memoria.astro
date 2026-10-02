@@ -1,10 +1,12 @@
 ---
 // Memoria Boricua: flip two cards at a time and find the 8 pairs. Best score kept on this device.
 import Base from '../../layouts/Base.astro';
+import GameLayout from '../../components/GameLayout.astro';
 import { url } from '../../lib/site';
 ---
 <Base title="Memoria Boricua" description="Encuentra las parejas en la menor cantidad de jugadas.">
   <main class="wrap" id="main">
+    <GameLayout id="memoria">
     <div class="jg-game" data-memoria>
       <p class="tv-kicker"><a href={url('juegos')}>Juegos Xtra</a> · Memoria</p>
       <h1>Memoria Boricua</h1>
@@ -14,6 +16,7 @@ import { url } from '../../lib/site';
       <p class="jg-msg" aria-live="polite"></p>
       <button type="button" class="jg-btn" data-again hidden>Jugar otra vez</button>
     </div>
+    </GameLayout>
   </main>
   <script>
     // Puerto Rico themed cards (emoji + name for screen readers)

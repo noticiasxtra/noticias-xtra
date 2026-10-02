@@ -8,6 +8,7 @@ import StoryCard from '../../components/StoryCard.astro';
 import Sidebar from '../../components/Sidebar.astro';
 import AdSlot from '../../components/AdSlot.astro';
 import Comments from '../../components/Comments.astro';
+import GamesTeaser from '../../components/GamesTeaser.astro';
 import { getStories, section, url, defaultPhoto, type Story } from '../../lib/site';
 
 export async function getStaticPaths() {
@@ -100,6 +101,7 @@ const more = stories
 
         <div class="sec-h"><h2>Te puede interesar</h2></div>
         <div class="grid2">{more.map((x) => <StoryCard story={x} />)}</div>
+        <div style="margin-top:var(--gap-lg)"><GamesTeaser title="Tómate un break: Juegos Xtra" /></div>
       </article>
       <Sidebar />
     </div>

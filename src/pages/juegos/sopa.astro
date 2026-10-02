@@ -2,10 +2,12 @@
 // Sopa de letras: find six Puerto Rico words in a 10x10 grid. A new puzzle each day.
 // To mark a word, tap its first letter and then its last letter.
 import Base from '../../layouts/Base.astro';
+import GameLayout from '../../components/GameLayout.astro';
 import { url } from '../../lib/site';
 ---
 <Base title="Sopa de letras" description="Busca seis palabras bien boricuas en la sopa de letras del día.">
   <main class="wrap" id="main">
+    <GameLayout id="sopa">
     <div class="jg-game" data-sopa>
       <p class="tv-kicker"><a href={url('juegos')}>Juegos Xtra</a> · Sopa de letras del día</p>
       <h1>Sopa de letras</h1>
@@ -14,6 +16,7 @@ import { url } from '../../lib/site';
       <div class="sp-grid" role="grid" aria-label="Sopa de letras"></div>
       <p class="jg-msg" aria-live="polite"></p>
     </div>
+    </GameLayout>
   </main>
   <script>
     const POOL = ['COQUI', 'MOFONGO', 'YUNQUE', 'PLENA', 'BOMBA', 'SALSA', 'PLAYA', 'CAFE', 'MANGO', 'PALMA',

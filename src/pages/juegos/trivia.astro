@@ -1,11 +1,13 @@
 ---
 // Trivia Xtra: one Puerto Rico question a day. The answer is checked in the browser.
 import Base from '../../layouts/Base.astro';
+import GameLayout from '../../components/GameLayout.astro';
 import { triviaOfTheDay, todayLong } from '../../lib/daily';
 const t = triviaOfTheDay();
 ---
 <Base title="Trivia Xtra: la pregunta del día" description="Una pregunta diaria sobre Puerto Rico. ¿Cuánto sabes de tu isla?">
   <main class="wrap" id="main">
+    <GameLayout id="trivia">
     <div class="tv" data-trivia data-day={t.index} data-answer={t.answer}>
       <p class="tv-kicker">Juego del día · {todayLong()}</p>
       <h1>Trivia Xtra</h1>
@@ -18,6 +20,7 @@ const t = triviaOfTheDay();
       <p class="tv-streak" hidden></p>
       <p class="sp-note">Una pregunta nueva cada día. Vuelve mañana.</p>
     </div>
+    </GameLayout>
   </main>
   <script>
     const box = document.querySelector<HTMLElement>('[data-trivia]')!;

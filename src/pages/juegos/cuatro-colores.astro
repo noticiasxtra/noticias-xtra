@@ -4,10 +4,12 @@
 // +2, Comodín (pick the color) and Comodín +4. First to empty their hand wins.
 // (Our own game and name; "UNO" is a trademark of Mattel.)
 import Base from '../../layouts/Base.astro';
+import GameLayout from '../../components/GameLayout.astro';
 import { url } from '../../lib/site';
 ---
 <Base title="Cuatro Colores" description="Juego de cartas de colores contra la computadora. Combina color o número y quédate sin cartas primero.">
   <main class="wrap" id="main">
+    <GameLayout id="cuatro-colores">
     <div class="jg-game cc" data-cc>
       <p class="tv-kicker"><a href={url('juegos')}>Juegos Xtra</a> · Juego de cartas</p>
       <h1>Cuatro Colores</h1>
@@ -33,6 +35,7 @@ import { url } from '../../lib/site';
       </div>
       <p class="jg-help">Juega una carta del mismo color o del mismo número o símbolo. <b>⊘</b> salta al próximo jugador, <b>⇄</b> cambia el sentido, <b>+2</b> y <b>+4</b> hacen robar, y el <b>comodín</b> te deja escoger el color. Si no tienes jugada, roba una carta.</p>
     </div>
+    </GameLayout>
   </main>
   <script>
     type C = { c: 'r' | 'y' | 'g' | 'b' | 'w'; v: string }; // v: '0'-'9', 'S' skip, 'R' reverse, '+2', 'W' wild, '+4'

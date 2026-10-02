@@ -3,10 +3,12 @@
 // Match a number at either end of the line. Can't play? Draw from the pile, or pass when it's empty.
 // The round winner scores the points left in the other hand; first to 100 wins the match.
 import Base from '../../layouts/Base.astro';
+import GameLayout from '../../components/GameLayout.astro';
 import { url } from '../../lib/site';
 ---
 <Base title="Dominó" description="Juega dominó contra la computadora. Gratis, en tu celular o computadora.">
   <main class="wrap" id="main">
+    <GameLayout id="domino">
     <div class="jg-game dm" data-domino>
       <p class="tv-kicker"><a href={url('juegos')}>Juegos Xtra</a> · Dominó</p>
       <h1>Dominó</h1>
@@ -26,6 +28,7 @@ import { url } from '../../lib/site';
       </div>
       <p class="jg-help">Toca una ficha que tenga el mismo número que una de las puntas de la mesa. Si no tienes jugada, roba del montón; si se acaba, pasa.</p>
     </div>
+    </GameLayout>
   </main>
   <script>
     type Tile = [number, number];

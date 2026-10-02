@@ -1,24 +1,57 @@
 ---
-// Juegos Xtra: the games hub (opened from the home strip's "Juegos" card)
+// Juegos Xtra: games page. A big "Juego del día" up top, then the games grouped by type,
+// with an ad between groups and the day's trivia question as a quick invitation.
 import Base from '../../layouts/Base.astro';
+import AdSlot from '../../components/AdSlot.astro';
 import { url } from '../../lib/site';
-import { GAMES } from '../../lib/games';
+import { GAMES, GAME_CATS, gameOfTheDay } from '../../lib/games';
+import { triviaOfTheDay } from '../../lib/daily';
+const featured = gameOfTheDay();
+const trivia = triviaOfTheDay();
 ---
-<Base title="Juegos Xtra" description="Trivia, Palabra Xtra, Memoria Boricua y Sopa de letras: juegos diarios gratis sobre Puerto Rico.">
-  <main class="wrap" id="main">
-    <div class="jg-head">
-      <h1>Juegos <span>Xtra</span></h1>
-      <p>Juegos nuevos cada día. Gratis, sin registrarte.</p>
-    </div>
-    <div class="jg-grid">
-      {GAMES.map((g) => (
-        <a class="jg-card" href={url(`juegos/${g.id}`)} style={`--gc:${g.color}`}>
-          <span class="jg-icon" aria-hidden="true">{g.icon}</span>
-          <h2>{g.name}</h2>
-          <p>{g.about}</p>
-          <span class="jg-play">Jugar</span>
-        </a>
-      ))}
-    </div>
+<Base title="Juegos Xtra" description="Sudoku, dominó, Cuatro Colores, Cuatro en Línea, trivia, Palabra Xtra y más: juegos gratis sobre Puerto Rico.">
+  <main class="wrap jh" id="main">
+    <section class="jh-hero" style={`--gc:${featured.color}`}>
+      <div class="jh-hero-text">
+        <p class="jh-kicker">Juegos Xtra · Gratis, sin registrarte</p>
+        <h1>¿A qué jugamos hoy?</h1>
+        <p class="jh-lead">{GAMES.length} juegos para pasar el rato: palabras, números, dominó y cartas.</p>
+      </div>
+      <a class="jh-feat" href={url(`juegos/${featured.id}`)}>
+        <span class="jh-feat-tag">Juego del día</span>
+        <span class="jh-feat-icon" aria-hidden="true">{featured.icon}</span>
+        <strong>{featured.name}</strong>
+        <span>{featured.about}</span>
+        <span class="jh-feat-btn">Jugar ahora ›</span>
+      </a>
+    </section>
+
+    <a class="jh-trivia" href={url('juegos/trivia')}>
+      <span class="jh-trivia-q" aria-hidden="true">?</span>
+      <span><small>Pregunta de hoy</small><b>{trivia.q}</b></span>
+      <span class="jh-trivia-go">Responder ›</span>
+    </a>
+
+    {GAME_CATS.map((cat, i) => (
+      <>
+        <section class="jh-cat" aria-labelledby={`jh-${cat.id}`}>
+          <h2 id={`jh-${cat.id}`}>{cat.name}</h2>
+          <div class="jh-grid">
+            {GAMES.filter((g) => g.cat === cat.id).map((g) => (
+              <a class="jh-card" href={url(`juegos/${g.id}`)} style={`--gc:${g.color}`}>
+                <span class="jh-card-art" aria-hidden="true"><span>{g.icon}</span></span>
+                <span class="jh-card-body">
+                  <strong>{g.name}</strong>
+                  <span>{g.about}</span>
+                </span>
+                <span class="jh-card-play">Jugar</span>
+              </a>
+            ))}
+          </div>
+        </section>
+        {i === 0 && <AdSlot size="infeed" />}
+      </>
+    ))}
   </main>
 </Base>
+
