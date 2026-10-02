@@ -20,8 +20,8 @@ const related = (lead?.data.related ?? []).map((id) => stories.find((s) => s.id 
 const leadRelated = related.length ? related : others.slice(0, 3);
 ---
 <Base active="home">
+  <HomeStrip />
   <main class="wrap" id="main">
-    <HomeStrip />
     {!lead && <div class="empty"><p>Muy pronto publicaremos las primeras noticias.</p></div>}
     {lead && <div class="hero">
       <div class="stack left">{left.map((s) => <StoryCard story={s} variant="mini" />)}</div>

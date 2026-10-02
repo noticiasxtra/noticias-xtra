@@ -34,35 +34,23 @@ const next = LEAGUES.map((l) => ({ l, start: 'starts' in l ? new Date(l.starts a
   .sort((a, b) => a.start!.valueOf() - b.start!.valueOf())[0];
 const daysLeft = next ? Math.ceil((next.start!.valueOf() - Date.now()) / 864e5) : 0;
 ---
-<div class="sc hs" data-sc>
+<div class="hs-band"><div class="wrap"><div class="sc hs" data-sc>
   <div class="sc-rail">
     <button type="button" class="sc-arrow prev" aria-label="Ver tarjetas anteriores" hidden>
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
     </button>
     <div class="sc-track">
+      <a class="hs-card" href={url('horoscopo')}>
+        <div class="hs-text"><span class="hs-label">Horóscopo · {sign.name}</span><strong class="hs-clamp">{signText}</strong></div>
+        <span class="hs-sign hs-zodiac" aria-hidden="true">{sign.symbol}{'\uFE0E'}</span>
+      </a>
+
       {trend && (
         <a class="hs-card" href={url(`noticia/${trend.id}`)}>
           <div class="hs-text"><span class="hs-label hs-hot">{trend.label === 'TENDENCIA' ? 'Tendencia en Puerto Rico' : trend.label === 'ÚLTIMA HORA' ? 'Última hora' : 'Lo último'}</span><strong>{trend.text}</strong></div>
           {trendStory && <span class="hs-thumb"><Ph sectionId={trendStory.data.section} image={trendStory.data.image} league={trendStory.data.league} /></span>}
         </a>
       )}
-
-      {g && (
-        <a class="hs-card hs-game" href={url(g.id ? `deportes/juego/${g.id}` : `deportes/${g.league}`)}>
-          <div class="hs-text">
-            <span class="hs-label">Destacado · <em class:list={{ live: g.status === 'en-vivo' }}>{gLabel}</em>{g.demo && <i class="sp-demo">DEMO</i>}</span>
-            {[['away', g.away, g.awayScore], ['home', g.home, g.homeScore]].map(([, name, score]) => {
-              const t = team(g.league, name as string);
-              return <span class="hs-team"><i style={`background:${t.color}`}>{t.abbr}</i>{name}{g.status !== 'programado' && <b>{score}</b>}</span>;
-            })}
-          </div>
-        </a>
-      )}
-
-      <a class="hs-card" href={url('horoscopo')}>
-        <div class="hs-text"><span class="hs-label">Horóscopo · {sign.name}</span><strong class="hs-clamp">{signText}</strong></div>
-        <span class="hs-sign hs-zodiac" aria-hidden="true">{sign.symbol}{'\uFE0E'}</span>
-      </a>
 
       {forYou && (
         <a class="hs-card" href={url(`noticia/${forYou.id}`)} data-foryou={url('search-index.json')}>
@@ -75,6 +63,18 @@ const daysLeft = next ? Math.ceil((next.start!.valueOf() - Date.now()) / 864e5) 
         <div class="hs-text"><span class="hs-label">Juego del día</span><strong>Trivia Xtra</strong><small>{today} · 1 pregunta</small></div>
         <span class="hs-game-icon" aria-hidden="true"><b>?</b></span>
       </a>
+
+      {g && (
+        <a class="hs-card hs-game" href={url(g.id ? `deportes/juego/${g.id}` : `deportes/${g.league}`)}>
+          <div class="hs-text">
+            <span class="hs-label">Destacado · <em class:list={{ live: g.status === 'en-vivo' }}>{gLabel}</em>{g.demo && <i class="sp-demo">DEMO</i>}</span>
+            {[['away', g.away, g.awayScore], ['home', g.home, g.homeScore]].map(([, name, score]) => {
+              const t = team(g.league, name as string);
+              return <span class="hs-team"><i style={`background:${t.color}`} title={t.abbr} />{name}{g.status !== 'programado' && <b>{score}</b>}</span>;
+            })}
+          </div>
+        </a>
+      )}
 
       <a class="hs-card" href={SITE.forecastUrl} rel="noopener" target="_blank" data-weather="https://api.weather.gov/stations/TJSJ/observations/latest">
         <div class="hs-text"><span class="hs-label">Clima · San Juan</span><strong class="hs-temp" data-w-temp>Pronóstico</strong><small data-w-desc>Servicio Nacional de Meteorología</small></div>
@@ -92,7 +92,7 @@ const daysLeft = next ? Math.ceil((next.start!.valueOf() - Date.now()) / 864e5) 
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg>
     </button>
   </div>
-</div>
+</div></div></div>
 
 <script>
   // Arrows + faded edges (same behavior as the score cards)
