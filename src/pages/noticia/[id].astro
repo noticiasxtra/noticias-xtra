@@ -24,6 +24,9 @@ const fallback = defaultPhoto(d.section, d.league);
 const caption = d.image ? d.imageCaption ?? `${d.place}. Imagen de referencia.` : `${fallback.caption} Imagen de archivo.`;
 const credit = d.image ? d.imageCredit : fallback.credit;
 const creditUrl = d.image ? d.imageCreditUrl : fallback.creditUrl;
+// Reading time: about 200 words a minute
+const words = (story.body ?? '').split(/\s+/).filter(Boolean).length;
+const minutes = Math.max(1, Math.round(words / 200));
 const more = stories
   .filter((x) => x.id !== story.id)
   .sort((a, b) => Number(b.data.section === d.section) - Number(a.data.section === d.section))
@@ -32,7 +35,9 @@ const more = stories
 <Base title={d.title} description={d.description} active={d.section} image={d.image ?? fallback.src} article={{ published: d.date, section: s.name }}>
   <main class="wrap" id="main">
     <div class="art-grid">
-      <article class="art" data-read-section={s.name} data-read-url={url(`noticia/${story.id}`)}>
+      <div class="read-progress" aria-hidden="true"><span data-progress></span></div>
+      <article class="art" data-read-section={s.name} data-read-url={url(`noticia/${story.id}`)}
+        data-title={d.title} data-date={d.date.toISOString()} data-image={url(d.image ?? fallback.src)}>
         <div class="crumbs"><a href={url()}>Portada</a> / <a href={url(`seccion/${s.id}`)}>{s.name}</a></div>
         <Label story={story} />
         <h1>{d.title}</h1>
@@ -44,6 +49,21 @@ const more = stories
             <button type="button" data-share="whatsapp">WhatsApp</button>
             <button type="button" data-share="copy">Copiar enlace</button>
           </div>
+        </div>
+        <div class="tools" role="toolbar" aria-label="Herramientas de lectura">
+          <span class="tools-time">{minutes} min de lectura</span>
+          <button type="button" class="tool" data-save aria-pressed="false">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4z" /></svg>
+            <span data-save-label>Guardar</span>
+          </button>
+          <span class="tool-group" role="group" aria-label="Tamaño del texto">
+            <button type="button" class="tool" data-font="-1" aria-label="Letra más pequeña">A−</button>
+            <button type="button" class="tool" data-font="1" aria-label="Letra más grande">A+</button>
+          </span>
+          <button type="button" class="tool" data-listen hidden aria-pressed="false">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4zM15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14" /></svg>
+            <span data-listen-label>Escuchar</span>
+          </button>
         </div>
         <Ph sectionId={d.section} image={d.image} place={d.place} alt={caption} league={d.league} />
         <p class="caption">{caption}{credit && <> {creditUrl ? <a href={creditUrl} rel="noopener" target="_blank">{credit}</a> : credit}</>}</p>
@@ -82,6 +102,85 @@ const more = stories
         const seen = JSON.parse(localStorage.getItem('nx-seen') || '[]').filter((u: string) => u !== art.dataset.readUrl);
         localStorage.setItem('nx-seen', JSON.stringify([art.dataset.readUrl, ...seen].slice(0, 50)));
       } catch { /* private mode or storage blocked: nothing to remember */ }
+    }
+
+    // Reading tools. Everything is kept only in this browser.
+    const store = {
+      get: <T,>(k: string, d: T): T => { try { return JSON.parse(localStorage.getItem(k) || '') ?? d; } catch { return d; } },
+      set: (k: string, v: unknown) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* storage blocked */ } },
+    };
+
+    // Save for later (list shown on /guardadas)
+    type Saved = { u: string; t: string; s: string; d: string; i: string; at: number };
+    const saveBtn = document.querySelector<HTMLButtonElement>('[data-save]');
+    if (art && saveBtn) {
+      const me = art.dataset.readUrl!;
+      const paint = () => {
+        const on = store.get<Saved[]>('nx-saved', []).some((x) => x.u === me);
+        saveBtn.setAttribute('aria-pressed', String(on));
+        saveBtn.querySelector('[data-save-label]')!.textContent = on ? 'Guardada' : 'Guardar';
+      };
+      saveBtn.addEventListener('click', () => {
+        const list = store.get<Saved[]>('nx-saved', []);
+        const next = list.some((x) => x.u === me)
+          ? list.filter((x) => x.u !== me)
+          : [{ u: me, t: art.dataset.title!, s: art.dataset.readSection!, d: art.dataset.date!, i: art.dataset.image!, at: Date.now() }, ...list].slice(0, 100);
+        store.set('nx-saved', next);
+        dispatchEvent(new Event('nx-saved-change'));
+        paint();
+      });
+      paint();
+    }
+
+    // Text size: 5 steps, remembered for every story
+    const sizes = [0.9, 1, 1.12, 1.25, 1.4];
+    let step = Math.min(sizes.length - 1, Math.max(0, store.get<number>('nx-font', 1)));
+    const applySize = () => {
+      document.documentElement.style.setProperty('--read-scale', String(sizes[step]));
+      document.querySelectorAll<HTMLButtonElement>('[data-font]').forEach((b) => {
+        b.disabled = b.dataset.font === '-1' ? step === 0 : step === sizes.length - 1;
+      });
+    };
+    document.querySelectorAll<HTMLButtonElement>('[data-font]').forEach((b) => b.addEventListener('click', () => {
+      step = Math.min(sizes.length - 1, Math.max(0, step + Number(b.dataset.font)));
+      store.set('nx-font', step);
+      applySize();
+    }));
+    applySize();
+
+    // Listen: the browser reads the story aloud in Spanish
+    const listen = document.querySelector<HTMLButtonElement>('[data-listen]');
+    if (listen && 'speechSynthesis' in window) {
+      listen.hidden = false;
+      const label = listen.querySelector('[data-listen-label]')!;
+      const stop = () => { speechSynthesis.cancel(); listen.setAttribute('aria-pressed', 'false'); label.textContent = 'Escuchar'; };
+      listen.addEventListener('click', () => {
+        if (speechSynthesis.speaking) return stop();
+        const text = [document.querySelector('.art h1'), document.querySelector('.art .dek'), ...document.querySelectorAll('.art .body p')]
+          .map((el) => el?.textContent?.trim()).filter(Boolean).join('. ');
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'es-PR';
+        const voice = speechSynthesis.getVoices().find((v) => v.lang.startsWith('es'));
+        if (voice) u.voice = voice;
+        u.onend = stop;
+        speechSynthesis.speak(u);
+        listen.setAttribute('aria-pressed', 'true');
+        label.textContent = 'Detener';
+      });
+      addEventListener('pagehide', stop);
+    }
+
+    // Reading progress bar
+    const bar = document.querySelector<HTMLElement>('[data-progress]');
+    const body = document.querySelector<HTMLElement>('.art .body');
+    if (bar && body) {
+      const onScroll = () => {
+        const r = body.getBoundingClientRect();
+        const p = Math.min(1, Math.max(0, (innerHeight - r.top) / (r.height + innerHeight * 0.5)));
+        bar.style.transform = `scaleX(${p})`;
+      };
+      addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
     }
   </script>
   <script type="application/ld+json" set:html={JSON.stringify({

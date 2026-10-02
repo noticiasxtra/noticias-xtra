@@ -7,6 +7,7 @@ import Time from '../../components/Time.astro';
 import AdSlot from '../../components/AdSlot.astro';
 import { getStories, url } from '../../lib/site';
 import { SIGNS, horoscope, signOfTheDay, triviaOfTheDay, todayLong } from '../../lib/daily';
+import { upcomingEvents, dateTile, dateLong, calendarLink } from '../../lib/events';
 
 const stories = (await getStories()).filter((s) => s.data.section === 'entretenimiento');
 const [lead, ...rest] = stories;
@@ -16,6 +17,14 @@ const buzz = stories.slice(0, 5);
 const todaySign = signOfTheDay();
 const trivia = triviaOfTheDay();
 const href = (s: (typeof stories)[number]) => url(`noticia/${s.id}`);
+const events = upcomingEvents();
+const DAY = 86400000;
+// "Hoy", "Mañana", "En 23 días" (exact dates only)
+const countdown = (d: string) => {
+  if (d.length < 10) return '';
+  const n = Math.ceil((Date.parse(`${d}T00:00:00-04:00`) - Date.now()) / DAY);
+  return n <= 0 ? 'Hoy' : n === 1 ? 'Mañana' : `En ${n} días`;
+};
 // Column span of each mosaic tile (3 columns): every fifth tile is wide, and the last
 // tile stretches to fill its row so there is no empty gap at the end.
 let col = 0;
@@ -39,6 +48,7 @@ const spans = mosaic.map((_, i) => {
         <nav class="tb-chips" aria-label="Entretenimiento">
           <a href="#lo-ultimo">Lo último</a>
           <a href="#comentan">Lo que todos comentan</a>
+          {events.length > 0 && <a href="#eventos">Eventos</a>}
           <a href={url('horoscopo')}>Horóscopo</a>
           <a href={url('juegos/trivia')}>Trivia Xtra</a>
         </nav>
@@ -68,6 +78,37 @@ const spans = mosaic.map((_, i) => {
         </div>
       ) : (
         <div class="tb-empty"><span aria-hidden="true">★</span><h2>¡Muy pronto!</h2><p>Farándula, música, cine y televisión de Puerto Rico.</p></div>
+      )}
+
+      {events.length > 0 && (
+        <section class="tb-events" id="eventos" aria-labelledby="eventos-h">
+          <div class="tb-events-h"><h2 class="tb-h" id="eventos-h">Próximos eventos</h2><span>{events.length} {events.length === 1 ? 'evento' : 'eventos'}</span></div>
+          <div class="tb-ev-list">
+            {events.map((e) => {
+              const t = dateTile(e.date);
+              const cal = calendarLink(e);
+              const cd = countdown(e.date);
+              return (
+                <article class="tb-ev">
+                  <div class="tb-ev-date" aria-hidden="true"><span>{t.top}</span><b>{t.big}</b><span>{t.year}</span></div>
+                  <div class="tb-ev-body">
+                    <p class="tb-ev-kind">{e.kind}{cd && <em>{cd}</em>}</p>
+                    <h3>{e.story ? <a href={url(`noticia/${e.story}`)}>{e.title}</a> : e.title}</h3>
+                    <ul class="tb-ev-facts">
+                      <li><span class="sr">Fecha:</span>{dateLong(e.date)}{e.time && `, ${e.time}`}</li>
+                      <li class="notranslate" translate="no"><span class="sr">Lugar:</span>{e.venue}, {e.city}</li>
+                      {e.tickets && <li><span class="sr">Boletos:</span>Boletos: {e.ticketsUrl ? <a href={e.ticketsUrl} rel="noopener" target="_blank">{e.tickets}</a> : e.tickets}</li>}
+                    </ul>
+                    <div class="tb-ev-actions">
+                      {e.story && <a class="tb-ev-btn" href={url(`noticia/${e.story}`)}>Detalles</a>}
+                      {cal && <a class="tb-ev-btn ghost" href={cal} rel="noopener" target="_blank">Añadir al calendario</a>}
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        </section>
       )}
 
       <div class="tb-grid">
