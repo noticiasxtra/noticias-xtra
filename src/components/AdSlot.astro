@@ -1,0 +1,19 @@
+---
+// Ad placeholder in standard sizes. Shows only while SITE.features.ads is on.
+// When real ads are sold, replace the inside of .ad-box with the ad network's code.
+// leaderboard: 728×90 on computers, 320×100 on phones · rectangle: 300×250 · halfpage: 300×600 · infeed: 728×90
+import { SITE, url } from '../lib/site';
+interface Props { size: 'leaderboard' | 'rectangle' | 'halfpage' | 'infeed'; sticky?: boolean; class?: string }
+const { size, sticky = false, class: extra } = Astro.props;
+const label: Record<Props['size'], string> = { leaderboard: '728 × 90', rectangle: '300 × 250', halfpage: '300 × 600', infeed: '728 × 90' };
+---
+{SITE.features.ads && (
+  <div class:list={['ad-slot', `ad-${size}`, { 'ad-sticky': sticky }, extra]} role="complementary" aria-label="Publicidad">
+    <span class="ad-label">Publicidad</span>
+    <a class="ad-box" href={url('publicidad')}>
+      <strong>Espacio publicitario</strong>
+      <span class="ad-dims">{label[size]}{size === 'leaderboard' && <span class="ad-mob"> · 320 × 100 en celular</span>}</span>
+      <span class="ad-cta">Anúnciate aquí</span>
+    </a>
+  </div>
+)}

@@ -27,6 +27,7 @@ export const SITE = {
     weather: false, // town temperatures (TOWNS below are samples); a link to the official forecast shows instead
     newsletter: false, // newsletter sign-up box (needs an email service first)
     app: false, // "Descarga la app" link and banner
+    ads: true, // ad placeholders ("Espacio publicitario") across the site; see src/components/AdSlot.astro
   },
   // Official National Weather Service forecast for Puerto Rico
   forecastUrl: 'https://www.weather.gov/sju/',

@@ -1,4 +1,6 @@
 ---
+// Home page. Main column on the left, right column (Sidebar) for the whole height of the page,
+// so there are no empty gaps. Section blocks only appear for sections that have stories.
 import Base from '../layouts/Base.astro';
 import StoryCard from '../components/StoryCard.astro';
 import VideoCard from '../components/VideoCard.astro';
@@ -7,75 +9,80 @@ import Sidebar from '../components/Sidebar.astro';
 import Ph from '../components/Ph.astro';
 import Label from '../components/Label.astro';
 import HomeStrip from '../components/HomeStrip.astro';
-import { getStories, url, SITE, TOWNS, VIDEOS } from '../lib/site';
+import AdSlot from '../components/AdSlot.astro';
+import { getStories, url, SITE, SECTIONS, VIDEOS } from '../lib/site';
 
 const stories = await getStories();
 const F = SITE.features;
 const lead = stories.find((s) => s.data.featured) ?? stories[0];
 const others = stories.filter((s) => s.id !== lead?.id);
 const left = others.slice(0, 3);
-const grid = others.slice(3, 7);
-const more = others.slice(7, 12);
+const row = others.slice(3, 6);
+const more = others.slice(6, 11);
 const related = (lead?.data.related ?? []).map((id) => stories.find((s) => s.id === id)).filter((s) => s !== undefined);
 const leadRelated = related.length ? related : others.slice(0, 3);
+// Section blocks, in menu order, only for sections with stories (Puerto Rico is already up top)
+const sectionIds = SECTIONS.map((s) => s.id).filter((id) => id !== 'puerto-rico' && stories.some((s) => s.data.section === id));
 ---
-<Base active="home">
+<Base active="home" noTopAd>
   <HomeStrip />
-  <main class="wrap" id="main">
-    {!lead && <div class="empty"><p>Muy pronto publicaremos las primeras noticias.</p></div>}
-    {lead && <div class="hero">
-      <div class="stack left">{left.map((s) => <StoryCard story={s} variant="mini" />)}</div>
-      <article class="lead">
-        <a href={url(`noticia/${lead.id}`)} tabindex="-1" aria-hidden="true"><Ph sectionId={lead.data.section} image={lead.data.image} place={lead.data.place} league={lead.data.league} /></a>
-        <div style="margin-top:14px"><Label story={lead} /></div>
-        <a href={url(`noticia/${lead.id}`)}><h1 class="hl" style="margin-top:0">{lead.data.title}</h1></a>
-        <p class="dek">{lead.data.description}</p>
-        <ul class="related">{leadRelated.map((s) => <li><a href={url(`noticia/${s.id}`)} class="hl">{s.data.title}</a></li>)}</ul>
-      </article>
-      <Sidebar newsletter={false} />
-    </div>}
-
-    <section class="weather" aria-labelledby="wh">
-      <div class="weather-h"><h2 id="wh">El tiempo en Puerto Rico</h2><a href={SITE.forecastUrl} rel="noopener" target="_blank">Pronóstico oficial del Servicio Nacional de Meteorología</a></div>
-      {F.weather && (
-        <div class="towns">
-          {TOWNS.map((t) => <div class="town"><strong>{t.name}</strong><div class="t">{t.temp}°</div><span>{t.sky}</span></div>)}
+  <div class="wrap"><AdSlot size="leaderboard" class="ad-top" /></div>
+  <div class="wrap home-grid" id="main">
+    <main class="home-main">
+      {!lead && <div class="empty"><p>Muy pronto publicaremos las primeras noticias.</p></div>}
+      {lead && (
+        <div class="home-hero">
+          <article class="lead">
+            <a href={url(`noticia/${lead.id}`)} tabindex="-1" aria-hidden="true"><Ph sectionId={lead.data.section} image={lead.data.image} place={lead.data.place} league={lead.data.league} /></a>
+            <div style="margin-top:14px"><Label story={lead} /></div>
+            <a href={url(`noticia/${lead.id}`)}><h1 class="hl" style="margin-top:0">{lead.data.title}</h1></a>
+            <p class="dek">{lead.data.description}</p>
+            <ul class="related">{leadRelated.map((s) => <li><a href={url(`noticia/${s.id}`)} class="hl">{s.data.title}</a></li>)}</ul>
+          </article>
+          <div class="stack left">{left.map((s) => <StoryCard story={s} variant="mini" />)}</div>
         </div>
       )}
-    </section>
 
-    <div class="grid4" style="margin-top:32px">{grid.map((s) => <StoryCard story={s} />)}</div>
-  </main>
+      {row.length > 0 && <div class="home-row">{row.map((s) => <StoryCard story={s} />)}</div>}
 
-  {F.videos && <section class="vband">
-    <div class="wrap">
-      <div class="sec-h" style="margin-top:0"><h2>Videos</h2><a href={url('videos')}>Ver todos</a></div>
-      <div class="vgrid">{VIDEOS.slice(0, 4).map((v) => <VideoCard video={v} />)}</div>
-    </div>
-  </section>}
+      <AdSlot size="infeed" />
 
-  <main class="wrap flush">
-    {more.length > 0 && (
-      <section>
-        <div class="sec-h"><h2>Más noticias</h2><a href={url('seccion/puerto-rico')}>Ver Puerto Rico</a></div>
-        <div class="block">
-          <StoryCard story={more[0]} variant="big" />
-          <div class="list">{more.slice(1).map((s) => <StoryCard story={s} variant="item" />)}</div>
-        </div>
-      </section>
-    )}
-    <div class="two"><SectionBlock sectionId="estados-unidos" stories={stories} /><SectionBlock sectionId="mundo" stories={stories} /></div>
-    <div class="two"><SectionBlock sectionId="politica" stories={stories} /><SectionBlock sectionId="deportes" stories={stories} /></div>
-    <div class="two"><SectionBlock sectionId="entretenimiento" stories={stories} /><SectionBlock sectionId="economia" stories={stories} /></div>
-    <div class="two"><SectionBlock sectionId="opinion" stories={stories} /><SectionBlock sectionId="salud" stories={stories} /></div>
+      {more.length > 0 && (
+        <section>
+          <div class="sec-h"><h2>Más noticias</h2><a href={url('noticias')}>Ver todas</a></div>
+          <div class="block">
+            <StoryCard story={more[0]} variant="big" />
+            <div class="list">{more.slice(1).map((s) => <StoryCard story={s} variant="item" />)}</div>
+          </div>
+        </section>
+      )}
 
-    {F.app && <section class="promo">
-      <img src={url('icono-app.svg')} alt="" />
-      <div><h2>Descarga la app de Noticias Xtra</h2><p>Recibe alertas de última hora y mira la transmisión en vivo desde tu celular.</p></div>
-      <div class="stores">
-        <button class="store" type="button" data-app><small>Descárgala en</small>App Store</button>
-        <button class="store" type="button" data-app><small>Disponible en</small>Google Play</button>
+      {F.videos && (
+        <section>
+          <div class="sec-h"><h2>Videos</h2><a href={url('videos')}>Ver todos</a></div>
+          <div class="vgrid">{VIDEOS.slice(0, 4).map((v) => <VideoCard video={v} />)}</div>
+        </section>
+      )}
+
+      <div class="home-sections">
+        {sectionIds.map((id, i) => (
+          <>
+            {/* a leftover block at the end spreads across the full width instead of leaving a gap */}
+            <div class:list={{ 'sec-wide': i === sectionIds.length - 1 && sectionIds.length % 2 === 1 }}><SectionBlock sectionId={id} stories={stories} /></div>
+            {i === 3 && i < sectionIds.length - 1 && <AdSlot size="infeed" class="ad-span" />}
+          </>
+        ))}
       </div>
-    </section>}
-  </main>
+
+      {F.app && <section class="promo">
+        <img src={url('icono-app.svg')} alt="" />
+        <div><h2>Descarga la app de Noticias Xtra</h2><p>Recibe alertas de última hora y mira la transmisión en vivo desde tu celular.</p></div>
+        <div class="stores">
+          <button class="store" type="button" data-app><small>Descárgala en</small>App Store</button>
+          <button class="store" type="button" data-app><small>Disponible en</small>Google Play</button>
+        </div>
+      </section>}
+    </main>
+    <Sidebar newsletter={false} />
+  </div>
 </Base>

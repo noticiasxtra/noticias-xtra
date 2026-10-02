@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import { SITE, SECTIONS, url } from '../lib/site';
 import { getBreaking } from '../lib/breaking';
+import AdSlot from '../components/AdSlot.astro';
 
 interface Props {
   title?: string;
@@ -9,8 +10,9 @@ interface Props {
   active?: string; // nav item to highlight: 'home', a section id, or 'videos'
   image?: string;
   article?: { published: Date; section: string };
+  noTopAd?: boolean; // pages that place their own top ad (e.g. the home page, below the card strip)
 }
-const { title, description = SITE.description, active, image, article } = Astro.props;
+const { title, description = SITE.description, active, image, article, noTopAd = false } = Astro.props;
 const fullTitle = title ? `${title} | ${SITE.name}` : `${SITE.name} | ${SITE.tagline}`;
 const canonical = new URL(Astro.url.pathname, Astro.site).toString();
 // Local images ('images/x.jpg') need the base path; full URLs are used as-is
@@ -93,8 +95,11 @@ const todayCap = today.charAt(0).toUpperCase() + today.slice(1);
       </div>
     )}
 
+    {!noTopAd && <div class="wrap"><AdSlot size="leaderboard" class="ad-top" /></div>}
+
     <slot />
 
+    <div class="wrap"><AdSlot size="leaderboard" class="ad-bottom" /></div>
     <footer>
       <div class="wrap">
         <div>

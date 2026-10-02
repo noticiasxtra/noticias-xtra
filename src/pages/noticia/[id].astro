@@ -6,6 +6,7 @@ import Label from '../../components/Label.astro';
 import Time from '../../components/Time.astro';
 import StoryCard from '../../components/StoryCard.astro';
 import Sidebar from '../../components/Sidebar.astro';
+import AdSlot from '../../components/AdSlot.astro';
 import { getStories, section, url, defaultPhoto, type Story } from '../../lib/site';
 
 export async function getStaticPaths() {
@@ -47,6 +48,7 @@ const more = stories
         <Ph sectionId={d.section} image={d.image} place={d.place} alt={caption} league={d.league} />
         <p class="caption">{caption}{credit && <> {creditUrl ? <a href={creditUrl} rel="noopener" target="_blank">{credit}</a> : credit}</>}</p>
         <div class="body"><Content /></div>
+        <AdSlot size="infeed" />
 
         {d.correction && <p class="sources"><strong>Corrección:</strong> {d.correction} <a href={url('normas-editoriales')}>Nuestra política de correcciones</a></p>}
         {d.sources.length > 0 && (

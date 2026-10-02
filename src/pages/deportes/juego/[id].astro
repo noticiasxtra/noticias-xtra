@@ -3,6 +3,7 @@
 import Base from '../../../layouts/Base.astro';
 import Time from '../../../components/Time.astro';
 import LeagueBadge from '../../../components/deportes/LeagueBadge.astro';
+import AdSlot from '../../../components/AdSlot.astro';
 import { games, gameTime, type Game } from '../../../lib/scores';
 import { league } from '../../../lib/leagues';
 import { getStories, url } from '../../../lib/site';
@@ -92,7 +93,9 @@ const title = `${g.awayFull ?? g.away} vs. ${g.homeFull ?? g.home}`;
           )}
         </div>
 
-        <aside class="ys-card sp-news">
+        <aside class="sp-side">
+        <AdSlot size="rectangle" />
+        <section class="ys-card sp-news">
           <h2>Noticias de {l.name}</h2>
           {news.length ? news.map((s) => (
             <article class="sp-news-item gm-news">
@@ -100,6 +103,7 @@ const title = `${g.awayFull ?? g.away} vs. ${g.homeFull ?? g.home}`;
             </article>
           )) : <p class="sp-note">Todavía no hay noticias de {l.full}.</p>}
           <p class="gm-more"><a href={url(`deportes/${l.id}`)}>Calendario y posiciones de {l.name} ›</a></p>
+        </section>
         </aside>
       </div>
     </div>

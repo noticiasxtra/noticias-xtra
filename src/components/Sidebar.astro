@@ -1,7 +1,10 @@
 ---
-// Right column: Clima box, Tendencias (numbered photos, like big news portals), ad, newsletter.
+// Right column: Clima, Tendencias (numbered photos), ad, Lo último, newsletter, and a tall ad
+// that stays in view while scrolling so the column never leaves an empty gap.
 import Ph from './Ph.astro';
+import Time from './Time.astro';
 import WeatherBox from './WeatherBox.astro';
+import AdSlot from './AdSlot.astro';
 import { getStories, mostRead, url, SITE } from '../lib/site';
 import { getBreaking } from '../lib/breaking';
 interface Props { newsletter?: boolean }
@@ -12,6 +15,8 @@ const trend = await getBreaking();
 const first = trend ? stories.find((s) => s.id === trend.id) : undefined;
 const top = [first, ...mostRead(stories, 6)].filter((s, i, all) => s && all.indexOf(s) === i).slice(0, 5) as typeof stories;
 const isNew = (d: Date) => Date.now() - d.valueOf() < 6 * 36e5; // published in the last 6 hours
+const latest = stories.filter((s) => !top.includes(s)).slice(0, 5);
+const hhmm = (d: Date) => d.toLocaleTimeString('es-PR', { hour: 'numeric', minute: '2-digit', timeZone: 'America/Puerto_Rico' });
 ---
 <aside class="right">
   <WeatherBox />
@@ -31,7 +36,17 @@ const isNew = (d: Date) => Date.now() - d.valueOf() < 6 * 36e5; // published in 
       <a class="tr-more" href={url('noticias')}>Ver más noticias <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg></a>
     </section>
   )}
-  <div class="ad">Espacio publicitario<br />300 × 250</div>
+  <AdSlot size="rectangle" />
+  {latest.length > 0 && (
+    <section class="lu-box">
+      <h2 class="lu-h">Lo último</h2>
+      <ol class="lu-list">
+        {latest.map((s) => (
+          <li><span class="lu-time">{Date.now() - s.data.date.valueOf() < 864e5 ? hhmm(s.data.date) : <Time date={s.data.date} />}</span><a href={url(`noticia/${s.id}`)}>{s.data.title}</a></li>
+        ))}
+      </ol>
+    </section>
+  )}
   {newsletter && SITE.features.newsletter && (
     <div class="newsletter">
       <h3>Boletín Xtra</h3>
@@ -45,4 +60,5 @@ const isNew = (d: Date) => Date.now() - d.valueOf() < 6 * 36e5; // published in 
       <p class="ok" style="color:#fff" hidden>¡Listo! Recibirás el Boletín Xtra mañana temprano.</p>
     </div>
   )}
+  <AdSlot size="halfpage" sticky />
 </aside>

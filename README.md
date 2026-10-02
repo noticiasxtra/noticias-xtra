@@ -142,6 +142,10 @@ The Deportes page (`src/pages/seccion/deportes.astro`) has league tabs, a big le
 
 The red bar at the top updates by itself every hour (the site rebuilds hourly). It shows, in order: a story marked `breaking: true` in the last 12 hours (ÚLTIMA HORA), our recent story that best matches what people in Puerto Rico are searching on Google (TENDENCIA), or our newest story (LO ÚLTIMO). To force a specific story, set `breaking` in `src/lib/site.ts`. Weather alerts drafted by the AI are marked `breaking: true` automatically.
 
+### Ads
+
+Ad placeholders ("Espacio publicitario") appear across the site in standard sizes: a 728×90 banner under the header and above the footer on every page (320×100 on phones), 728×90 spots inside the home page, articles, sections and sports pages, and 300×250 / 300×600 spots in the right column (the tall one stays in view while scrolling). They link to the Anúnciate page. Turn them all off with `ads: false` in `src/lib/site.ts`. When ads are sold, put the ad network's code inside `src/components/AdSlot.astro`.
+
 ## RSS feed
 
 The site publishes its own feed at `/rss.xml`. Social media tools like Buffer, Zapier, or Make can watch it and post new stories to Facebook, Instagram, and X automatically.

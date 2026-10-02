@@ -3,6 +3,7 @@ import Base from '../../layouts/Base.astro';
 import StoryCard from '../../components/StoryCard.astro';
 import VideoCard from '../../components/VideoCard.astro';
 import Sidebar from '../../components/Sidebar.astro';
+import AdSlot from '../../components/AdSlot.astro';
 import { getStories, SECTIONS, SITE, VIDEOS, url } from '../../lib/site';
 
 export function getStaticPaths() {
@@ -26,6 +27,7 @@ const vids = SITE.features.videos ? VIDEOS.filter((v) => v.section === sec.id) :
         ) : (
           <div class="empty"><p>Todavía no hay noticias de {sec.name.toLowerCase()} hoy.</p><a class="btn" href={url()}>Ir a la portada</a></div>
         )}
+        <AdSlot size="infeed" />
         {vids.length > 0 && (
           <>
             <div class="sec-h"><h2>Videos de {sec.name}</h2></div>

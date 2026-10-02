@@ -10,6 +10,7 @@ import GamesList from '../../components/deportes/GamesList.astro';
 import StandingsTable from '../../components/deportes/StandingsTable.astro';
 import BracketView from '../../components/deportes/BracketView.astro';
 import TeamStatsTable from '../../components/deportes/TeamStatsTable.astro';
+import AdSlot from '../../components/AdSlot.astro';
 import { getStories, url } from '../../lib/site';
 import { LEAGUES, type League } from '../../lib/leagues';
 
@@ -48,8 +49,11 @@ const official = 'url' in l ? l.url : undefined;
           <StandingsTable league={l.id} />
           <TeamStatsTable league={l.id} />
           <BracketView league={l.id} />
+          <AdSlot size="infeed" class="ad-tight" />
         </div>
-        <aside class="ys-card sp-news">
+        <aside class="sp-side">
+        <AdSlot size="rectangle" />
+        <section class="ys-card sp-news">
           <h2>Noticias de {l.name}</h2>
           {news.length ? news.map((s) => (
             <article class="sp-news-item">
@@ -62,6 +66,7 @@ const official = 'url' in l ? l.url : undefined;
           )) : (
             <p class="sp-note">Todavía no hay noticias de {l.full}. <a href={url('seccion/deportes')}>Ver todos los deportes</a></p>
           )}
+        </section>
         </aside>
       </div>
     </div>

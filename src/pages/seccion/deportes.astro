@@ -8,6 +8,7 @@ import Time from '../../components/Time.astro';
 import ScoreStrip from '../../components/deportes/ScoreStrip.astro';
 import LeaguePill from '../../components/deportes/LeaguePill.astro';
 import LeagueBadge from '../../components/deportes/LeagueBadge.astro';
+import AdSlot from '../../components/AdSlot.astro';
 import { getStories, url, type Story } from '../../lib/site';
 import { LEAGUES, league } from '../../lib/leagues';
 
@@ -54,6 +55,7 @@ const fmt = (d: Date) => d.toLocaleDateString('es-PR', { day: 'numeric', month: 
         </a>
       )}
 
+      <AdSlot size="infeed" class="ad-tight" />
       <div class="ys-grid">
         <!-- Center -->
         <div class="ys-main">
@@ -132,6 +134,7 @@ const fmt = (d: Date) => d.toLocaleDateString('es-PR', { day: 'numeric', month: 
               </ul>
             </section>
           )}
+          <AdSlot size="rectangle" />
           <section class="ys-card">
             <div class="ys-card-h"><h2>Más allá de la isla</h2></div>
             <ul class="ys-tree">
@@ -154,6 +157,7 @@ const fmt = (d: Date) => d.toLocaleDateString('es-PR', { day: 'numeric', month: 
               ))}
             </ul>
           </section>
+          <AdSlot size="halfpage" sticky />
         </aside>
       </div>
     </div>
