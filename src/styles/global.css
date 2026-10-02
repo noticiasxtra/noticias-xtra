@@ -2609,3 +2609,12 @@ body.ad-skin{background:var(--ad-skin) center top/cover fixed}
   footer li a{display:inline-block;padding:9px 0}
   .fo-vote button{min-width:36px;min-height:32px}
 }
+/* Deportes on phones: smaller stories one after the other, small picture on the left */
+@media (max-width:760px){
+  .ys-row,.ys-rail-list,.lg-more{grid-template-columns:minmax(0,1fr);gap:0}
+  .ys-mini{display:grid;grid-template-columns:112px minmax(0,1fr);grid-template-rows:auto 1fr;column-gap:12px;padding:12px 0;border-top:1px solid var(--line)}
+  .ys-row .ys-mini:first-child,.ys-rail-list .ys-mini:first-child,.lg-more .ys-mini:first-child{border-top:0;padding-top:4px}
+  .ys-mini .ph{grid-row:1/3;aspect-ratio:4/3;height:auto;width:112px}
+  .ys-mini h3{margin:0 0 4px;font-size:15px}
+  .ys-mini .ys-by{align-self:start}
+}
