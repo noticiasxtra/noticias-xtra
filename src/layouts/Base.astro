@@ -3,6 +3,8 @@ import '../styles/global.css';
 import { SITE, SECTIONS, url } from '../lib/site';
 import { getBreaking } from '../lib/breaking';
 import AdSlot from '../components/AdSlot.astro';
+import Logo from '../components/Logo.astro';
+import { holidayOn, todayPR } from '../lib/holidays';
 
 interface Props {
   title?: string;
@@ -24,6 +26,8 @@ const bar = await getBreaking();
 const breaking = quietBar && bar?.label !== 'ÚLTIMA HORA' ? null : bar;
 const today = new Date().toLocaleDateString('es-PR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'America/Puerto_Rico' });
 const todayCap = today.charAt(0).toUpperCase() + today.slice(1);
+// Holiday logo: automatic by date, never during an ÚLTIMA HORA alert (a festive logo next to bad news looks wrong)
+const holiday = F.holidayLogo && bar?.label !== 'ÚLTIMA HORA' ? holidayOn(todayPR()) : undefined;
 ---
 <!doctype html>
 <html lang="es" data-theme={active === 'deportes' ? 'dark' : undefined} data-force-dark={active === 'deportes' ? '' : undefined}>
@@ -69,11 +73,7 @@ const todayCap = today.charAt(0).toUpperCase() + today.slice(1);
     {SITE.demoMode && <div class="demo">Sitio de demostración. Las noticias que aparecen son ejemplos.</div>}
     <header class="masthead">
       <div class="wrap">
-        <a href={url()} class="logo" aria-label={`${SITE.name}, ir a portada`}>
-          <img class="logo-light" src={url('logo.svg')} alt={SITE.name} width="155" height="58" />
-          {/* Dark mode: white "Xtra" with the blue "noticias" */}
-          <img class="logo-dark" src={url('logo-dark.svg')} alt="" width="155" height="58" aria-hidden="true" />
-        </a>
+        <Logo holiday={holiday} />
         {/* Today's date beside the logo (wide screens; phones see it in the profile menu) */}
         <time class="mh-date" datetime={new Date().toLocaleDateString('en-CA', { timeZone: 'America/Puerto_Rico' })}>{todayCap}</time>
         <form class="search" role="search" action={url('buscar')} method="get">

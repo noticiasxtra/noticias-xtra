@@ -3225,3 +3225,34 @@ html.nx-en .pf-menu .lang-tag{background:var(--red)}
 .tip-cta:hover{box-shadow:inset 0 0 0 2px var(--purple)}
 [data-theme="dark"] .tip-cta{background:#221A4D}
 [data-theme="dark"] .tip-cta b,[data-theme="dark"] .tip-cta svg,[data-theme="dark"] .tip-cta .tip-go{color:#C9B8FF}
+
+/* Holiday logo decorations (src/lib/holidays.ts) */
+.logo{position:relative}
+.logo-deco{position:absolute;pointer-events:none;overflow:visible}
+.ld-top{left:-5%;top:-30%;width:23%;transform:rotate(-14deg)}
+.ld-side{right:-14%;bottom:-2%;width:22%}
+.ld-sky{left:34%;top:-24%;width:50%}
+.logo-fest{margin-right:16px}
+/* Preview page */
+.lf-h{margin:0;font-size:30px;color:var(--purple)}
+.lf-grid{list-style:none;margin:18px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,420px),1fr));gap:14px}
+.lf-card{padding:16px;border-radius:16px;border:1px solid var(--line);background:var(--card)}
+.lf-card h2{margin:12px 0 4px;font-size:18px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lf-card p{margin:0;font-size:14px;color:var(--muted)}
+.lf-title{margin-top:4px !important;font-style:italic}
+.lf-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.lf-stage{display:grid;place-items:center;padding:30px 30px 18px 12px;border-radius:12px;background:#fff;border:1px solid var(--line);min-width:0}
+.lf-stage.dark{background:#16161D;border-color:#2A2C3D}
+.lf-stage .logo img{height:58px}
+.lf-stage .logo .logo-dark{display:none}
+.lf-stage .logo .logo-light{display:block}
+.lf-stage.dark .logo .logo-light{display:none}
+.lf-stage.dark .logo .logo-dark{display:block}
+.lf-tone{font-size:11px;font-weight:800;padding:2px 8px;border-radius:999px;background:#FFF5DB;color:#7A4B00}
+.lf-tone.solemne{background:#ECECEF;color:#3A3D47}
+@media (max-width:480px){ .lf-row{grid-template-columns:minmax(0,1fr)} }
+.ld-side{right:-18%;width:26%}
+.logo-fest{margin-right:22px}
+/* Room above the logo when a hat, crown or fireworks sit on top of it */
+.masthead:has(.ld-top,.ld-sky) .wrap{padding-top:24px}
+@media (max-width:999px){ .masthead:has(.ld-top,.ld-sky) .wrap{padding-top:18px} }

@@ -1,0 +1,17 @@
+---
+// The masthead logo, with an optional holiday decoration (src/lib/holidays.ts) drawn over it.
+import { SITE, url } from '../lib/site';
+import type { Holiday } from '../lib/holidays';
+interface Props { holiday?: Holiday; href?: string }
+const { holiday, href = url() } = Astro.props;
+const VB = { top: '0 0 100 80', side: '0 0 100 100', sky: '0 0 200 60' };
+---
+<a href={href} class:list={['logo', holiday && 'logo-fest', holiday && `tone-${holiday.tone}`]} aria-label={`${SITE.name}, ir a portada`} title={holiday?.title}>
+  <img class="logo-light" src={url('logo.svg')} alt={SITE.name} width="155" height="58" />
+  {/* Dark mode: white "Xtra" with the blue "noticias" */}
+  <img class="logo-dark" src={url('logo-dark.svg')} alt="" width="155" height="58" aria-hidden="true" />
+  {holiday?.decos.map((d) => (
+    <svg class={`logo-deco ld-${d.spot}`} viewBox={d.vb ?? VB[d.spot]} aria-hidden="true"><Fragment set:html={d.svg} /></svg>
+  ))}
+  {holiday && <span class="sr">{holiday.title}</span>}
+</a>

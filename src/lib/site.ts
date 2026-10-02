@@ -27,6 +27,7 @@ export const SITE = {
     weather: false, // town temperatures (TOWNS below are samples); a link to the official forecast shows instead
     newsletter: true, // newsletter sign-up box (demo: nothing is sent until an email service is connected)
     app: true, // "Descarga la app" link and banner (buttons say the app is coming soon)
+    holidayLogo: true, // small decoration on the logo on holidays (src/lib/holidays.ts; preview at /logos-festivos/)
     ads: true, // ad placeholders ("Espacio publicitario") across the site; see src/components/AdSlot.astro
   },
   // GIPHY key for GIF search in comments (free account at developers.giphy.com). Empty = only our own animated GIFs Xtra.
