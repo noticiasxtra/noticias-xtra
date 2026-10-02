@@ -1,10 +1,12 @@
 ---
-// Home page card strip (portal style): Tendencia, Marcador destacado, Horóscopo, Para ti,
-// Juego del día, Clima (live, National Weather Service) and a season countdown.
-// Uses the same carousel (arrows + faded edges) as the score cards.
+// Home page card strip (portal style): Horóscopo, Tendencia, Para ti, Juego del día,
+// Marcador destacado, Clima (live, National Weather Service) and a season countdown.
+// Computers: all cards fit in one row, and hovering (or tabbing to) a card opens a panel
+// with more. Phones: the row swipes and tapping a card opens its page.
 import Ph from './Ph.astro';
+import Time from './Time.astro';
 import LeagueBadge from './deportes/LeagueBadge.astro';
-import { getStories, section, url, SITE } from '../lib/site';
+import { getStories, mostRead, section, url, SITE } from '../lib/site';
 import { getBreaking } from '../lib/breaking';
 import { scores } from '../lib/scores';
 import { team } from '../lib/teams';
@@ -14,17 +16,24 @@ import { SIGNS, signOfTheDay, horoscope, triviaOfTheDay } from '../lib/daily';
 const stories = await getStories();
 const trend = await getBreaking();
 const trendStory = trend ? stories.find((s) => s.id === trend.id) : undefined;
+const moreTrending = mostRead(stories, 8).filter((s) => s.id !== trend?.id).slice(0, 5);
 
 // Featured game: a live local game first, then the next upcoming, then the latest final
-const g = scores().find((x) => league(x.league)?.local && x.status === 'en-vivo') ?? scores().find((x) => league(x.league)?.local);
-const gLabel = g ? (g.status === 'en-vivo' ? g.note ?? 'En vivo' : g.status === 'final' ? 'Final' : new Date(g.date).toLocaleString('es-PR', { weekday: 'short', hour: 'numeric', minute: '2-digit', timeZone: 'America/Puerto_Rico' })) : '';
+const allGames = scores();
+const g = allGames.find((x) => league(x.league)?.local && x.status === 'en-vivo') ?? allGames.find((x) => league(x.league)?.local);
+const shortTime = (d: string) =>
+  new Date(d).toLocaleString('es-PR', { weekday: 'short', hour: 'numeric', minute: '2-digit', timeZone: 'America/Puerto_Rico' }).replace(',', '');
+const gStatus = (x: NonNullable<typeof g>) => (x.status === 'en-vivo' ? x.note ?? 'En vivo' : x.status === 'final' ? 'Final' : shortTime(x.date));
+const otherGames = allGames.filter((x) => x !== g).slice(0, 5);
 
-const sign = signOfTheDay();
-const signText = horoscope(SIGNS.findIndex((s) => s.id === sign.id));
+const signIndex = SIGNS.findIndex((s) => s.id === signOfTheDay().id);
+const sign = SIGNS[signIndex];
+const signText = horoscope(signIndex);
 
 // "Para ti": default is the newest story outside the trending one; the browser swaps it for
 // one from the reader's most-read section (stored only in their own browser).
 const forYou = stories.find((s) => s.id !== trendStory?.id && s.data.section !== 'opinion') ?? stories[0];
+const forYouMore = forYou ? stories.filter((s) => s.data.section === forYou.data.section && s.id !== forYou.id).slice(0, 3) : [];
 
 const trivia = triviaOfTheDay();
 const today = new Date().toLocaleDateString('es-PR', { day: 'numeric', month: 'long', timeZone: 'America/Puerto_Rico' });
@@ -33,6 +42,8 @@ const next = LEAGUES.map((l) => ({ l, start: 'starts' in l ? new Date(l.starts a
   .filter((x) => x.start && x.start.valueOf() > Date.now())
   .sort((a, b) => a.start!.valueOf() - b.start!.valueOf())[0];
 const daysLeft = next ? Math.ceil((next.start!.valueOf() - Date.now()) / 864e5) : 0;
+const nextStory = next ? stories.find((s) => s.data.league === next.l.id) : undefined;
+const chev = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>';
 ---
 <div class="hs-band"><div class="wrap"><div class="sc hs" data-sc>
   <div class="sc-rail">
@@ -40,52 +51,118 @@ const daysLeft = next ? Math.ceil((next.start!.valueOf() - Date.now()) / 864e5) 
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
     </button>
     <div class="sc-track">
-      <a class="hs-card" href={url('horoscopo')}>
-        <div class="hs-text"><span class="hs-label">Horóscopo · {sign.name}</span><strong class="hs-clamp">{signText}</strong></div>
-        <span class="hs-sign hs-zodiac" aria-hidden="true">{sign.symbol}{'\uFE0E'}</span>
-      </a>
+
+      <div class="hs-item">
+        <a class="hs-card" href={url('horoscopo')}>
+          <div class="hs-text"><span class="hs-label">Horóscopo · {sign.name}</span><strong>{signText}</strong></div>
+          <span class="hs-sign hs-zodiac" aria-hidden="true">{sign.symbol}{'︎'}</span>
+        </a>
+        <div class="hs-pop">
+          <p class="hs-pop-h"><span class="hs-zodiac">{sign.symbol}{'︎'}</span> {sign.name} · {sign.dates}</p>
+          <p class="hs-quote">{signText}</p>
+          <div class="hs-signs">{SIGNS.map((s) => <a href={url(`horoscopo#${s.id}`)}><span class="hs-zodiac">{s.symbol}{'︎'}</span>{s.name}</a>)}</div>
+        </div>
+      </div>
 
       {trend && (
-        <a class="hs-card" href={url(`noticia/${trend.id}`)}>
-          <div class="hs-text"><span class="hs-label hs-hot">{trend.label === 'TENDENCIA' ? 'Tendencia en Puerto Rico' : trend.label === 'ÚLTIMA HORA' ? 'Última hora' : 'Lo último'}</span><strong>{trend.text}</strong></div>
-          {trendStory && <span class="hs-thumb"><Ph sectionId={trendStory.data.section} image={trendStory.data.image} league={trendStory.data.league} /></span>}
-        </a>
+        <div class="hs-item">
+          <a class="hs-card" href={url(`noticia/${trend.id}`)}>
+            <div class="hs-text"><span class="hs-label hs-hot">{trend.label === 'TENDENCIA' ? 'Tendencia' : trend.label === 'ÚLTIMA HORA' ? 'Última hora' : 'Lo último'}</span><strong>{trend.text}</strong></div>
+            {trendStory && <span class="hs-thumb"><Ph sectionId={trendStory.data.section} image={trendStory.data.image} league={trendStory.data.league} /></span>}
+          </a>
+          <div class="hs-pop">
+            <p class="hs-pop-h">Más noticias destacadas</p>
+            <ol class="hs-pop-list">{moreTrending.map((s, i) => <li><b>{i + 1}</b><a href={url(`noticia/${s.id}`)}>{s.data.title}</a></li>)}</ol>
+          </div>
+        </div>
       )}
 
       {forYou && (
-        <a class="hs-card" href={url(`noticia/${forYou.id}`)} data-foryou={url('search-index.json')}>
-          <div class="hs-text"><span class="hs-label">Para ti · <em data-fy-section>{section(forYou.data.section).name}</em></span><strong data-fy-title>{forYou.data.title}</strong></div>
-          <span class="hs-thumb" data-fy-thumb><Ph sectionId={forYou.data.section} image={forYou.data.image} league={forYou.data.league} /></span>
-        </a>
+        <div class="hs-item" data-foryou={url('search-index.json')}>
+          <a class="hs-card" href={url(`noticia/${forYou.id}`)}>
+            <div class="hs-text"><span class="hs-label">Para ti · <em data-fy-section>{section(forYou.data.section).name}</em></span><strong data-fy-title>{forYou.data.title}</strong></div>
+            <span class="hs-thumb" data-fy-thumb><Ph sectionId={forYou.data.section} image={forYou.data.image} league={forYou.data.league} /></span>
+          </a>
+          <div class="hs-pop">
+            <p class="hs-pop-h">Más de <span data-fy-section2>{section(forYou.data.section).name}</span></p>
+            <ul class="hs-pop-list plain" data-fy-more>
+              {forYouMore.length ? forYouMore.map((s) => <li><a href={url(`noticia/${s.id}`)}>{s.data.title}</a></li>) : <li><a href={url(`seccion/${forYou.data.section}`)}>Ver la sección</a></li>}
+            </ul>
+            <p class="hs-pop-foot">Elegido según las secciones que más lees. Se guarda solo en tu navegador.</p>
+          </div>
+        </div>
       )}
 
-      <a class="hs-card" href={url('juegos/trivia')}>
-        <div class="hs-text"><span class="hs-label">Juego del día</span><strong>Trivia Xtra</strong><small>{today} · 1 pregunta</small></div>
-        <span class="hs-game-icon" aria-hidden="true"><b>?</b></span>
-      </a>
+      <div class="hs-item">
+        <a class="hs-card" href={url('juegos/trivia')}>
+          <div class="hs-text"><span class="hs-label">Juego del día</span><strong>Trivia Xtra</strong><small>{today}</small></div>
+          <span class="hs-game-icon" aria-hidden="true"><b>?</b></span>
+        </a>
+        <div class="hs-pop">
+          <p class="hs-pop-h">Pregunta de hoy</p>
+          <p class="hs-quote">{trivia.q}</p>
+          <a class="hs-pop-btn" href={url('juegos/trivia')}>Jugar ahora</a>
+        </div>
+      </div>
 
       {g && (
-        <a class="hs-card hs-game" href={url(g.id ? `deportes/juego/${g.id}` : `deportes/${g.league}`)}>
-          <div class="hs-text">
-            <span class="hs-label">Destacado · <em class:list={{ live: g.status === 'en-vivo' }}>{gLabel}</em>{g.demo && <i class="sp-demo">DEMO</i>}</span>
-            {[['away', g.away, g.awayScore], ['home', g.home, g.homeScore]].map(([, name, score]) => {
-              const t = team(g.league, name as string);
-              return <span class="hs-team"><i style={`background:${t.color}`} title={t.abbr} />{name}{g.status !== 'programado' && <b>{score}</b>}</span>;
-            })}
+        <div class="hs-item">
+          <a class="hs-card hs-game" href={url(g.id ? `deportes/juego/${g.id}` : `deportes/${g.league}`)}>
+            <div class="hs-text">
+              <span class="hs-label"><em class:list={{ live: g.status === 'en-vivo' }}>{gStatus(g)}</em>{g.demo && <i class="sp-demo">DEMO</i>}</span>
+              {[[g.away, g.awayScore], [g.home, g.homeScore]].map(([name, score]) => (
+                <span class="hs-team"><i style={`background:${team(g.league, name as string).color}`} />{name}{g.status !== 'programado' && <b>{score}</b>}</span>
+              ))}
+            </div>
+          </a>
+          <div class="hs-pop">
+            <p class="hs-pop-h">Marcadores{allGames.some((x) => x.demo) && <span class="sp-demo">DEMO</span>}</p>
+            <ul class="hs-scores">
+              {otherGames.map((x) => (
+                <li>
+                  <a href={url(x.id ? `deportes/juego/${x.id}` : `deportes/${x.league}`)}>
+                    <span class="hs-sc-lg">{league(x.league)?.name}</span>
+                    <span class="hs-sc-t">{x.away}{x.status !== 'programado' && <b>{x.awayScore}</b>}</span>
+                    <span class="hs-sc-t">{x.home}{x.status !== 'programado' && <b>{x.homeScore}</b>}</span>
+                    <span class:list={['hs-sc-st', { live: x.status === 'en-vivo' }]}>{gStatus(x)}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+            <a class="hs-pop-more" href={url('seccion/deportes')}>Xtra Deportes <Fragment set:html={chev} /></a>
           </div>
-        </a>
+        </div>
       )}
 
-      <a class="hs-card" href={SITE.forecastUrl} rel="noopener" target="_blank" data-weather="https://api.weather.gov/stations/TJSJ/observations/latest">
-        <div class="hs-text"><span class="hs-label">Clima · San Juan</span><strong class="hs-temp" data-w-temp>Pronóstico</strong><small data-w-desc>Servicio Nacional de Meteorología</small></div>
-        <span class="hs-sign hs-wx" aria-hidden="true" data-w-icon><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18h10a4 4 0 0 0 0-8 6 6 0 0 0-11.5 1.5A3.3 3.3 0 0 0 7 18z" /></svg></span>
-      </a>
+      <div class="hs-item" data-weather="https://api.weather.gov/stations/TJSJ/observations/latest">
+        <a class="hs-card" href={SITE.forecastUrl} rel="noopener" target="_blank">
+          <div class="hs-text"><span class="hs-label">Clima · San Juan</span><strong class="hs-temp" data-w-temp>—</strong><small data-w-desc>Ver pronóstico</small></div>
+          <span class="hs-sign hs-wx" aria-hidden="true" data-w-icon><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18h10a4 4 0 0 0 0-8 6 6 0 0 0-11.5 1.5A3.3 3.3 0 0 0 7 18z" /></svg></span>
+        </a>
+        <div class="hs-pop">
+          <p class="hs-pop-h">San Juan ahora</p>
+          <dl class="hs-wx-list">
+            <div><dt>Sensación térmica</dt><dd data-w-feels>—</dd></div>
+            <div><dt>Humedad</dt><dd data-w-hum>—</dd></div>
+            <div><dt>Viento</dt><dd data-w-wind>—</dd></div>
+          </dl>
+          <a class="hs-pop-more" href={SITE.forecastUrl} rel="noopener" target="_blank">Pronóstico del Servicio Nacional de Meteorología <Fragment set:html={chev} /></a>
+        </div>
+      </div>
 
       {next && (
-        <a class="hs-card" href={url(`deportes/${next.l.id}`)}>
-          <div class="hs-text"><span class="hs-label">Cuenta regresiva</span><strong>{daysLeft === 1 ? 'Falta 1 día' : `Faltan ${daysLeft} días`} para {next.l.name}</strong><small>Temporada 2026-27</small></div>
-          <LeagueBadge id={next.l.id} size="md" />
-        </a>
+        <div class="hs-item">
+          <a class="hs-card" href={url(`deportes/${next.l.id}`)}>
+            <div class="hs-text"><span class="hs-label">Cuenta regresiva</span><strong>{daysLeft === 1 ? 'Falta 1 día' : `Faltan ${daysLeft} días`}</strong><small>para {next.l.name}</small></div>
+            <LeagueBadge id={next.l.id} size="md" />
+          </a>
+          <div class="hs-pop">
+            <p class="hs-pop-h">{next.l.full}</p>
+            {'season' in next.l && next.l.season && <p class="hs-quote">{next.l.season}</p>}
+            {nextStory && <p class="hs-pop-story"><a href={url(`noticia/${nextStory.id}`)}>{nextStory.data.title}</a> <Time date={nextStory.data.date} /></p>}
+            <a class="hs-pop-more" href={url(`deportes/${next.l.id}`)}>Calendario y noticias <Fragment set:html={chev} /></a>
+          </div>
+        </div>
       )}
     </div>
     <button type="button" class="sc-arrow next" aria-label="Ver más tarjetas" hidden>
@@ -95,7 +172,7 @@ const daysLeft = next ? Math.ceil((next.start!.valueOf() - Date.now()) / 864e5) 
 </div></div></div>
 
 <script>
-  // Arrows + faded edges (same behavior as the score cards)
+  // Phones/tablets: arrows + faded edges (on computers all cards fit, so these stay hidden)
   document.querySelectorAll<HTMLElement>('.hs[data-sc]').forEach((sc) => {
     const track = sc.querySelector<HTMLElement>('.sc-track')!;
     const prev = sc.querySelector<HTMLButtonElement>('.sc-arrow.prev')!;
@@ -121,41 +198,58 @@ const daysLeft = next ? Math.ceil((next.start!.valueOf() - Date.now()) / 864e5) 
     cloudy: 'Nublado', overcast: 'Cubierto', fair: 'Despejado', rain: 'Lluvia', 'light rain': 'Lluvia ligera',
     showers: 'Aguaceros', 'light showers': 'Aguaceros ligeros', thunderstorm: 'Tormenta eléctrica', fog: 'Neblina', haze: 'Bruma',
   };
-  // Small drawn icons (emoji look different, or are missing, on some devices)
-  const svg = (body: string) => `<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${body}</svg>`;
+  const svg = (body: string) => `<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${body}</svg>`;
   const SUN = '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>';
   const CLOUD = '<path d="M7 18h10a4 4 0 0 0 0-8 6 6 0 0 0-11.5 1.5A3.3 3.3 0 0 0 7 18z"/>';
   const PARTLY = '<path d="M8 3v1.5M3.5 8H2M4.6 4.6l1 1M11.4 4.6l-1 1"/><path d="M5.3 10.5A3.5 3.5 0 0 1 11 6.6"/><path d="M9 20h8a3.5 3.5 0 0 0 0-7 5 5 0 0 0-9.6 1.3A2.9 2.9 0 0 0 9 20z"/>';
-  const RAIN = CLOUD.replace('18h10', '15h10').replace('0 0 7 18z', '0 0 7 15z') + '<path d="M9 18l-1 3M13 18l-1 3M17 18l-1 3"/>';
-  const STORM = CLOUD.replace('18h10', '15h10').replace('0 0 7 18z', '0 0 7 15z') + '<path d="M12.5 16l-2 3.5h3l-2 3.5"/>';
+  const LOW = '<path d="M7 15h10a4 4 0 0 0 0-8 6 6 0 0 0-11.5 1.5A3.3 3.3 0 0 0 7 15z"/>';
+  const RAIN = LOW + '<path d="M9 18l-1 3M13 18l-1 3M17 18l-1 3"/>';
+  const STORM = LOW + '<path d="M12.5 16l-2 3.5h3l-2 3.5"/>';
   const ICON = (d: string) => svg(/thunder/i.test(d) ? STORM : /rain|shower|drizzle/i.test(d) ? RAIN : /partly|mostly sunny|mostly clear/i.test(d) ? PARTLY : /overcast|cloudy|fog|haze/i.test(d) ? CLOUD : SUN);
-  document.querySelectorAll<HTMLElement>('[data-weather]').forEach(async (card) => {
+  const F = (c: number) => `${Math.round((c * 9) / 5 + 32)}°F`;
+  const COMPASS = ['N', 'NE', 'E', 'SE', 'S', 'SO', 'O', 'NO'];
+  document.querySelectorAll<HTMLElement>('[data-weather]').forEach(async (box) => {
     try {
-      const r = await fetch(card.dataset.weather!, { headers: { Accept: 'application/geo+json' } });
-      const p = (await r.json()).properties;
+      const p = (await (await fetch(box.dataset.weather!, { headers: { Accept: 'application/geo+json' } })).json()).properties;
       const c = p.temperature?.value;
       if (typeof c !== 'number') return;
       const desc = String(p.textDescription || '');
-      card.querySelector('[data-w-temp]')!.textContent = `${Math.round((c * 9) / 5 + 32)}°F`;
-      card.querySelector('[data-w-desc]')!.textContent = SKY[desc.toLowerCase()] ?? 'Ver pronóstico';
-      card.querySelector('[data-w-icon]')!.innerHTML = ICON(desc);
+      const set = (sel: string, v: string) => { const el = box.querySelector(sel); if (el) el.textContent = v; };
+      set('[data-w-temp]', F(c));
+      set('[data-w-desc]', SKY[desc.toLowerCase()] ?? 'Ver pronóstico');
+      box.querySelector('[data-w-icon]')!.innerHTML = ICON(desc);
+      set('[data-w-feels]', F(typeof p.heatIndex?.value === 'number' ? p.heatIndex.value : c));
+      if (typeof p.relativeHumidity?.value === 'number') set('[data-w-hum]', `${Math.round(p.relativeHumidity.value)}%`);
+      if (typeof p.windSpeed?.value === 'number') {
+        const mph = Math.round(p.windSpeed.value * 0.621371);
+        const dir = typeof p.windDirection?.value === 'number' ? ` del ${COMPASS[Math.round(p.windDirection.value / 45) % 8]}` : '';
+        set('[data-w-wind]', mph ? `${mph} mph${dir}` : 'En calma');
+      }
     } catch { /* keep the link to the forecast */ }
   });
 
-  // Para ti: pick the newest story from the section this reader opens most (kept only in this browser)
-  document.querySelectorAll<HTMLAnchorElement>('[data-foryou]').forEach(async (card) => {
+  // Para ti: newest stories from the section this reader opens most (kept only in this browser)
+  document.querySelectorAll<HTMLElement>('[data-foryou]').forEach(async (box) => {
     try {
       const counts = JSON.parse(localStorage.getItem('nx-reads') || '{}') as Record<string, number>;
       const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0];
       if (!top) return;
       const seen = JSON.parse(localStorage.getItem('nx-seen') || '[]') as string[];
-      const items = (await (await fetch(card.dataset.foryou!)).json()) as Array<{ url: string; title: string; section: string }>;
-      const pick = items.find((i) => i.section === top && !seen.includes(i.url)) ?? items.find((i) => i.section === top);
+      const items = (await (await fetch(box.dataset.foryou!)).json()) as Array<{ url: string; title: string; section: string }>;
+      const inTop = items.filter((i) => i.section === top);
+      const pick = inTop.find((i) => !seen.includes(i.url)) ?? inTop[0];
       if (!pick) return;
+      const card = box.querySelector<HTMLAnchorElement>('.hs-card')!;
       card.href = pick.url;
-      card.querySelector('[data-fy-title]')!.textContent = pick.title;
-      card.querySelector('[data-fy-section]')!.textContent = pick.section;
-      card.querySelector<HTMLElement>('[data-fy-thumb]')?.remove();
+      box.querySelector('[data-fy-title]')!.textContent = pick.title;
+      box.querySelectorAll('[data-fy-section],[data-fy-section2]').forEach((e) => (e.textContent = top));
+      box.querySelector('[data-fy-thumb]')?.remove();
+      const more = inTop.filter((i) => i !== pick).slice(0, 3);
+      const list = box.querySelector('[data-fy-more]');
+      if (list && more.length) {
+        list.innerHTML = '';
+        more.forEach((i) => { const li = document.createElement('li'); const a = document.createElement('a'); a.href = i.url; a.textContent = i.title; li.append(a); list.append(li); });
+      }
     } catch { /* keep the default story */ }
   });
 </script>
