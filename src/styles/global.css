@@ -2147,6 +2147,11 @@ main.wrap,.home-grid,.ys-page,.tb-page{padding-top:var(--gap)}
 .cx-lbl{font-size:20px}
 .cx-tlbl{font-size:21px}
 @media (min-width:900px){ .cx-lbl{font-size:14px} .cx-tlbl{font-size:15px} }
+/* Clima: maps centered in a full-width row */
+.cx-maps{text-align:center}
+.cx-maps .cx-tabs > :first-child{margin-left:auto} .cx-maps .cx-tabs > :last-child{margin-right:auto}
+.cx-maps .cx-map{max-width:720px;margin:0 auto}
+@media (min-width:900px){ .cx-maps{grid-column:1/-1} }
 /* Home: extra headlines and an ad under the main story */
 .lead-extra{margin-top:14px}
 .lead-extra-h{margin:0 0 4px;font-family:var(--head);font-weight:800;font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--purple)}
