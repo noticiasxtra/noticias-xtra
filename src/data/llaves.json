@@ -87,5 +87,34 @@
         ]
       }
     ]
+  },
+  "lvsf": {
+    "name": "Postemporada 2026: Cangrejeras de Santurce, campeonas",
+    "updated": "29 de abril de 2026. Fuente: Federación Puertorriqueña de Voleibol",
+    "rounds": [
+      {
+        "name": "Semifinal",
+        "series": [
+          {
+            "a": "Cangrejeras de Santurce",
+            "b": "Valencianas de Juncos",
+            "aWins": 4,
+            "bWins": 0
+          }
+        ]
+      },
+      {
+        "name": "Serie Final",
+        "series": [
+          {
+            "a": "Cangrejeras de Santurce",
+            "b": "Leonas de Ponce",
+            "aWins": 4,
+            "bWins": 0,
+            "note": "Barrida histórica: temporada regular perfecta de 20-0"
+          }
+        ]
+      }
+    ]
   }
 }

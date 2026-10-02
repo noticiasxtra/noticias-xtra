@@ -191,12 +191,6 @@ export const DEMO_STANDINGS: Record<string, Standings> = {
       s('Plataneros de Corozal', 1, 3, '3.0', '1-3', 'P2'), s('Gigantes de Adjuntas', 0, 4, '4.0', '0-4', 'P4'),
     ] }],
   },
-  lvsf: {
-    groups: [{ columns: ['ÚLT. 10', 'RACHA'], rows: [
-      s('Cangrejeras de Santurce', 4, 0, '—', '4-0', 'G4'), s('Leonas de Ponce', 3, 1, '1.0', '3-1', 'G1'),
-      s('Criollas de Caguas', 2, 2, '2.0', '2-2', 'P1'), s('Valencianas de Juncos', 1, 3, '3.0', '1-3', 'P2'),
-    ] }],
-  },
 };
 
 export const DEMO_STATS: Record<string, TeamStats> = {
@@ -221,8 +215,9 @@ export const DEMO_STATS: Record<string, TeamStats> = {
     { team: 'Plataneros de Corozal', values: ['40.7', '27', '14', '5-10'] }, { team: 'Gigantes de Adjuntas', values: ['38.2', '24', '11', '2-12'] },
   ] },
   lvsf: { columns: ['ATAQUE %', 'BLOQUEOS', 'ACES', 'SETS G-P'], rows: [
-    { team: 'Cangrejeras de Santurce', values: ['46.4', '36', '24', '12-2'] }, { team: 'Leonas de Ponce', values: ['43.8', '31', '18', '10-5'] },
-    { team: 'Criollas de Caguas', values: ['41.2', '28', '16', '8-8'] }, { team: 'Valencianas de Juncos', values: ['39.5', '25', '13', '4-11'] },
+    { team: 'Cangrejeras de Santurce', values: ['46.4', '36', '24', '12-2'] }, { team: 'Criollas de Caguas', values: ['43.8', '31', '18', '10-5'] },
+    { team: 'Pinkin de Corozal', values: ['42.1', '29', '17', '9-7'] }, { team: 'Leonas de Ponce', values: ['41.2', '28', '16', '8-8'] },
+    { team: 'Atenienses de Manatí', values: ['40.3', '26', '14', '6-10'] }, { team: 'Valencianas de Juncos', values: ['39.5', '25', '13', '4-11'] },
   ] },
   'doble-a': { columns: ['PRO', 'HR', 'CA', 'EFE'], rows: [
     { team: 'Patrulleros de San Sebastián', values: ['.318', '24', '169', '1.92'] }, { team: 'Artesanos de Las Piedras', values: ['.305', '19', '154', '2.31'] },
@@ -250,12 +245,5 @@ export const DEMO_BRACKETS: Record<string, Bracket> = {
       { a: 'Patriotas de Lares', b: 'Changos de Naranjito', aWins: 2, bWins: 3 },
     ] },
     { name: 'Final', series: [{ a: 'Cafeteros de Yauco', b: 'Changos de Naranjito', aWins: 1, bWins: 1, note: 'Juego 3 el viernes' }] },
-  ] },
-  lvsf: { name: 'Postemporada', rounds: [
-    { name: 'Semifinal', series: [
-      { a: 'Cangrejeras de Santurce', b: 'Valencianas de Juncos', aWins: 2, bWins: 0 },
-      { a: 'Leonas de Ponce', b: 'Criollas de Caguas', aWins: 1, bWins: 1, note: 'Juego 3 el domingo' },
-    ] },
-    { name: 'Final', series: [{ a: 'Cangrejeras de Santurce', b: 'Por definir' }] },
   ] },
 };

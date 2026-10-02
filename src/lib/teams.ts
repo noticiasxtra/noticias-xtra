@@ -37,11 +37,13 @@ export const TEAMS: Record<string, Team> = {
   'lvsm:Changos': { abbr: 'NAR', color: '#2E7D32' },
   'lvsm:Gigantes de Adjuntas': { abbr: 'ADJ', color: '#1565C0' },
   'lvsm:Gigantes de Carolina': { abbr: 'CAR', color: '#1A1A1A' },
-  // LVSF (voleibol femenino; equipos confirmados en comunicados de la FPV)
-  'lvsf:Cangrejeras': { abbr: 'SAN', color: '#1B3F8B' },
-  'lvsf:Leonas': { abbr: 'PON', color: '#D52B1E' },
-  'lvsf:Criollas': { abbr: 'CAG', color: '#C8202F' },
-  'lvsf:Valencianas': { abbr: 'JUN', color: '#00897B' },
+  // LVSF (voleibol femenino, temporada 2026; logos de la tabla oficial de la FPV)
+  'lvsf:Cangrejeras de Santurce': { abbr: 'SAN', color: '#1B2A4A' },
+  'lvsf:Criollas de Caguas': { abbr: 'CAG', color: '#D7263D' },
+  'lvsf:Pinkin de Corozal': { abbr: 'COR', color: '#C9A227' },
+  'lvsf:Leonas de Ponce': { abbr: 'PON', color: '#8B1E2B' },
+  'lvsf:Atenienses de Manatí': { abbr: 'MAN', color: '#1B2F6B' },
+  'lvsf:Valencianas de Juncos': { abbr: 'JUN', color: '#C8202F' },
   // Doble A (45 equipos; nombres y logos del sitio oficial, beisboldobleapr.com)
   'doble-a:Artesanos de Las Piedras': { abbr: 'LPI', color: '#0B11CE' },
   'doble-a:Cariduros de Fajardo': { abbr: 'FAJ', color: '#0B080D' },
@@ -157,5 +159,7 @@ export const TEAMS: Record<string, Team> = {
 export function team(league: string, name: string): Team {
   const short = name.split(' de ')[0].trim();
   const fallback = { abbr: short.normalize('NFD').replace(/\p{M}/gu, '').slice(0, 3).toUpperCase(), color: '#5C5F6E' };
-  return TEAMS[`${league}:${name}`] ?? TEAMS[`${league}:${short}`] ?? fallback;
+  // A short name ("Criollas") also finds the full entry ("Criollas de Caguas")
+  const byPrefix = Object.keys(TEAMS).find((k) => k.startsWith(`${league}:${short} de `));
+  return TEAMS[`${league}:${name}`] ?? TEAMS[`${league}:${short}`] ?? (byPrefix ? TEAMS[byPrefix] : undefined) ?? fallback;
 }
