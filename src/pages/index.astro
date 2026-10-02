@@ -32,9 +32,11 @@ const sectionIds = SECTIONS.map((s) => s.id).filter((id) => id !== 'puerto-rico'
       {lead && (
         <div class="home-hero">
           <article class="lead">
-            <a href={url(`noticia/${lead.id}`)} tabindex="-1" aria-hidden="true"><Ph sectionId={lead.data.section} image={lead.data.image} place={lead.data.place} league={lead.data.league} /></a>
-            <div style="margin-top:14px"><Label story={lead} /></div>
-            <a href={url(`noticia/${lead.id}`)}><h1 class="hl" style="margin-top:0">{lead.data.title}</h1></a>
+            {/* Headline sits on the photo so it is visible without scrolling */}
+            <a class="lead-media" href={url(`noticia/${lead.id}`)}>
+              <Ph sectionId={lead.data.section} image={lead.data.image} place={lead.data.place} league={lead.data.league} />
+              <div class="lead-over"><Label story={lead} /><h1>{lead.data.title}</h1></div>
+            </a>
             <p class="dek">{lead.data.description}</p>
             <ul class="related">{leadRelated.map((s) => <li><a href={url(`noticia/${s.id}`)} class="hl">{s.data.title}</a></li>)}</ul>
           </article>

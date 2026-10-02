@@ -18,7 +18,10 @@ const canonical = new URL(Astro.url.pathname, Astro.site).toString();
 const ogImage = new URL(image ? (image.startsWith('http') ? image : url(image)) : url('icon-512.png'), Astro.site).toString();
 const half = Math.ceil(SECTIONS.length / 2);
 const F = SITE.features;
-const breaking = await getBreaking();
+// Deportes and Entretenimiento pages skip the red bar, except for a real ÚLTIMA HORA alert
+const quietBar = active === 'deportes' || active === 'entretenimiento';
+const bar = await getBreaking();
+const breaking = quietBar && bar?.label !== 'ÚLTIMA HORA' ? null : bar;
 const today = new Date().toLocaleDateString('es-PR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'America/Puerto_Rico' });
 const todayCap = today.charAt(0).toUpperCase() + today.slice(1);
 ---

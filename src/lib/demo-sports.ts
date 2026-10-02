@@ -106,17 +106,6 @@ export const DEMO_GAMES: Game[] = [
     date: at(1, '20:00'), away: 'Mets', home: 'Atléticos', awayFull: 'Mets de Guaynabo', homeFull: 'Atléticos de San Germán',
     venue: 'Coliseo Arquelio Torres Ramírez, San Germán', awayRecord: '14-18', homeRecord: '16-16',
   },
-  // Doble A
-  {
-    id: 'demo-aa-1', demo: true, league: 'doble-a', status: 'final',
-    date: at(-1, '13:00'), away: 'Grises', home: 'Toritos', awayScore: 3, homeScore: 6,
-    awayFull: 'Grises de Humacao', homeFull: 'Toritos de Cayey', venue: 'Cayey',
-    linescore: { labels: inningLabels, away: [0, 0, 1, 0, 0, 2, 0, 0, 0], home: [2, 0, 0, 3, 0, 0, 1, 0, 'X'], totals: ['C', 'H', 'E'], awayTotals: [3, 7, 2], homeTotals: [6, 10, 0] },
-  },
-  {
-    id: 'demo-aa-2', demo: true, league: 'doble-a', status: 'programado',
-    date: at(2, '13:00'), away: 'Bravos', home: 'Cariduros', awayFull: 'Bravos de Cidra', homeFull: 'Cariduros de Fajardo', venue: 'Fajardo',
-  },
 ];
 
 const s = (team: string, w: number, l: number, gb: string, l10: string, streak: string) => ({ team, w, l, gb, extra: [l10, streak] });
@@ -142,12 +131,6 @@ export const DEMO_STANDINGS: Record<string, Standings> = {
         s('Leones de Ponce', 14, 18, '6.0', '4-6', 'P2'), s('Osos de Manatí', 11, 21, '9.0', '2-8', 'P5'),
       ] },
     ],
-  },
-  'doble-a': {
-    groups: [{ name: 'Sección Este', columns: ['ÚLT. 10', 'RACHA'], rows: [
-      s('Toritos de Cayey', 10, 4, '—', '7-3', 'G2'), s('Cariduros de Fajardo', 9, 5, '1.0', '6-4', 'G1'),
-      s('Bravos de Cidra', 7, 7, '3.0', '5-5', 'P1'), s('Grises de Humacao', 4, 10, '6.0', '3-7', 'P3'),
-    ] }],
   },
 };
 
