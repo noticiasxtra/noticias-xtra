@@ -18,7 +18,7 @@ Elías "Larry" Ayuso regresa a la Villa del Capitán Correa, esta vez desde el b
 
 Ayuso jugó cinco temporadas con Arecibo (2005, 2006, 2010, 2011 y 2012) y fue pieza clave en el campeonato de 2005, que puso fin a 46 años sin título para la franquicia. Su número 10 está retirado y cuelga del techo del Coliseo Manuel "Petaca" Iguina. También fue miembro de los "12 Magníficos" de la Selección Nacional.
 
-"Larry vuelve a una casa donde dejó huellas imborrables, y vuelve para ayudarnos a escribir una nueva historia: la de volver a ser los reyes del BSN", expresó el gerente general, Luis Gabriel "Gaby" Miranda, en una comunicación escrita.
+"Larry vuelve a una casa donde dejó huellas imborrables, y vuelve para ayudarnos a escribir una nueva historia; la de volver a ser los reyes del BSN", expresó el gerente general, Luis Gabriel "Gaby" Miranda, en una comunicación escrita.
 
 Miranda recordó que muchos de los jóvenes del equipo actual crecieron admirando a Ayuso, y que hoy lo tendrán como entrenador en el camerino.
 

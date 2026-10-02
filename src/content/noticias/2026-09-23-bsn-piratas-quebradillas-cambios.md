@@ -21,5 +21,3 @@ Los Piratas de Quebradillas están armando su equipo para la próxima temporada.
 **Con los Gigantes de Carolina/Canóvanas:** Quebradillas recibe los derechos del jugador invitado Scottie James. Los Gigantes reciben los derechos del jugador invitado Emmanuel Mudiay y la selección de primera ronda de los Piratas en el sorteo de 2029.
 
 Además, el BSN reconoció un acuerdo entre Piratas y Gigantes en la disputa por el jugador Tai Odiase. Odiase queda declarado jugador nativo reserva de Quebradillas. Según la liga, las dos franquicias pondrán fin así al pleito que tenían en el Tribunal de Primera Instancia de San Juan.
-
-Un "jugador invitado" es un refuerzo, por lo general extranjero, que cada equipo puede contratar según las reglas de la liga. Un "jugador nativo" es un jugador que cuenta como puertorriqueño bajo esas reglas.

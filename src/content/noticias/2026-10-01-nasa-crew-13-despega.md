@@ -1,5 +1,5 @@
 ---
-title: "Despega la Crew-13 de la NASA rumbo a la Estación Espacial en el viaje más rápido de una nave estadounidense"
+title: "Despega la Crew-13 de la NASA rumbo a la Estación Espacial; busca el viaje más rápido de una nave estadounidense"
 description: "Dos astronautas de la NASA, uno canadiense y un cosmonauta ruso partieron desde Cabo Cañaveral en una cápsula Dragon de SpaceX."
 section: estados-unidos
 place: "Cabo Cañaveral, Florida"

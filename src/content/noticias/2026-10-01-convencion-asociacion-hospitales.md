@@ -1,6 +1,6 @@
 ---
 title: "Hospitales del país discuten el futuro de la salud ante los cambios de Washington"
-description: "La convención de la Asociación de Hospitales reunió a la gobernadora, al secretario de Salud y a funcionarios federales para hablar de Medicare, Medicaid y la escasez de personal."
+description: "La convención de la Asociación de Hospitales reunió a la gobernadora, al secretario de Salud y a funcionarios federales para hablar de Medicare, Medicaid y la fuerza laboral del sector."
 section: salud
 place: "Puerto Rico"
 date: 2026-10-01T13:29:00-04:00

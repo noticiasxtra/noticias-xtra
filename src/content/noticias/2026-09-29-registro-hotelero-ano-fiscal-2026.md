@@ -1,5 +1,5 @@
 ---
-title: "Más turistas en los hoteles de Puerto Rico, pero la noche cuesta $30 más"
+title: "Más turistas en los hoteles de Puerto Rico, pero la noche cuesta $31 más"
 description: "La ocupación subió a 72.6% en el año fiscal 2026 y la tarifa promedio por noche llegó a $325."
 section: economia
 place: "Puerto Rico"

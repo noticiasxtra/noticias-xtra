@@ -1,5 +1,5 @@
 ---
-title: "Factura de luz más alta desde octubre: lo que debes saber del aumento por kilovatio hora"
+title: "La factura de luz podría subir desde octubre: lo que debes saber del ajuste por kilovatio hora"
 description: "LUMA estimó un ajuste de 6.07 centavos por kilovatio hora, unos $48 más al mes para el cliente residencial promedio. La decisión final le corresponde al Negociado de Energía."
 section: economia
 place: "Puerto Rico"
