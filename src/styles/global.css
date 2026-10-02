@@ -769,7 +769,9 @@ a.sp-games-teams:hover span:first-child,a.sp-games-teams:hover span:last-child{c
   --ad1:#1C1E31; --ad2:#202338;
   color-scheme:dark;
 }
-[data-theme="dark"] .masthead .logo img,[data-theme="dark"] .nav-logo img{filter:brightness(0) invert(1)}
+/* Dark mode: the logo keeps its own colors, on a white backing so the purple stays readable */
+[data-theme="dark"] .masthead .logo{background:#fff;border-radius:10px;padding:4px 10px;display:inline-block}
+[data-theme="dark"] .nav-logo img{filter:brightness(0) invert(1)}
 [data-theme="dark"] .masthead{background:var(--card);border-bottom:1px solid var(--line)}
 [data-theme="dark"] .demo{background:#14162A}
 [data-theme="dark"] .search{background:var(--soft);border-color:var(--line)}
