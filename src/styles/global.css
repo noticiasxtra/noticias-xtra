@@ -2260,9 +2260,6 @@ body.ad-skin{background:var(--ad-skin) center top/cover fixed}
 
 /* Advertiser panel (DEMO) */
 .apn{padding-bottom:28px}
-.apn-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:14px;margin-bottom:14px}
-.apn-kicker{margin:0;font-family:var(--head);font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--red)}
-.apn-head h1{margin:2px 0;font-size:30px;color:var(--purple)}
 .apn-sub{margin:0;color:var(--muted);font-size:14px}
 .apn-actions{display:flex;gap:8px;flex-wrap:wrap}
 .apn-range{margin-bottom:12px}
@@ -2275,9 +2272,7 @@ body.ad-skin{background:var(--ad-skin) center top/cover fixed}
 .apn-kpis small.down{color:var(--red)}
 .apn-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
 .apn-wide{grid-column:1/-1}
-.apn-sec{margin-top:14px}
 .apn-card{padding:16px;border-radius:18px;background:var(--card);border:1px solid var(--line);min-width:0}
-.apn-card h2{margin:0 0 10px;font-size:18px}
 .apn-chart svg{display:block;width:100%;height:auto;touch-action:pan-y}
 .apn-grid-l{stroke:var(--line);stroke-width:1}
 .apn-ax{font-size:13px;fill:var(--muted)}
@@ -2298,18 +2293,13 @@ body.ad-skin{background:var(--ad-skin) center top/cover fixed}
 .apn-gifts{list-style:none;margin:0;padding:0;display:grid;gap:4px;font-size:13px;color:var(--muted)}
 .apn-gifts b{color:var(--ink);margin-right:6px}
 .apn-gifts .won{color:#14663F;font-weight:700}
-.apn-scroll{overflow-x:auto}
-.apn-table{width:100%;border-collapse:collapse;font-size:14px;white-space:nowrap}
-.apn-table th,.apn-table td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left}
-.apn-table th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
-.apn-table td:nth-child(n+4){text-align:right;font-variant-numeric:tabular-nums}
-.apn-thumb{display:inline-block;width:34px;height:26px;border-radius:5px;vertical-align:middle;margin-right:8px}
 .apn-st{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;background:var(--soft);color:var(--muted)}
 .apn-st.on{background:#E7F6EE;color:#14663F}
 .apn-mail{display:grid;gap:10px}
 .apn-mail label{display:grid;gap:4px;font-weight:700;font-size:14px}
 .apn-mail input,.apn-mail select{font:inherit;font-size:15px;font-weight:400;border:1px solid var(--line);border-radius:10px;padding:9px 11px;background:var(--card);color:var(--ink)}
 .apn-mail .adp-btn{justify-self:start}
+.apn-mail .adb-check{display:flex;margin:0;font-weight:500}
 .apn-inv{list-style:none;margin:0;padding:0}
 .apn-inv li{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:12px;align-items:center;padding:9px 0;border-top:1px solid var(--line);font-size:14px}
 .apn-inv li:first-child{border-top:0}
@@ -2318,4 +2308,80 @@ body.ad-skin{background:var(--ad-skin) center top/cover fixed}
   .apn-grid{grid-template-columns:minmax(0,1fr)}
   .apn-bars li{grid-template-columns:88px minmax(0,1fr) 56px}
   .apn-ax{font-size:22px}
+}
+
+/* Advertiser panel: friendlier layout (greeting, tabs, plain-language summary, campaign cards) */
+.apn-hero{display:flex;flex-wrap:wrap;align-items:center;gap:14px;padding:18px;border-radius:20px;margin-bottom:12px;color:#fff;background:linear-gradient(135deg,#1E0B5E,#2B1185 60%,#1F90DA 140%)}
+.apn-av{display:grid;place-items:center;flex:none;width:58px;height:58px;border-radius:50%;background:#B45309;color:#fff;font-family:var(--head);font-weight:800;font-size:20px;box-shadow:0 0 0 3px rgba(255,255,255,.35)}
+.apn-av.sm{width:32px;height:32px;font-size:12px;box-shadow:none;background:var(--purple)}
+.apn-hello{flex:1;min-width:200px}
+.apn-greet{margin:0;font-size:14px;opacity:.9}
+.apn-switch select{margin:2px 0;max-width:100%;font:inherit;font-family:var(--head);font-weight:800;font-size:22px;color:#fff;background:transparent;border:0;border-bottom:2px dashed rgba(255,255,255,.5);padding:0 22px 2px 0;cursor:pointer;appearance:none;background-image:linear-gradient(45deg,transparent 50%,#fff 50%),linear-gradient(135deg,#fff 50%,transparent 50%);background-position:calc(100% - 9px) 55%,calc(100% - 4px) 55%;background-size:5px 5px;background-repeat:no-repeat}
+.apn-switch select option{color:#111}
+.apn-hero .apn-sub{color:rgba(255,255,255,.85)}
+.apn-hero .adp-btn.ghost-dark{color:#fff;box-shadow:inset 0 0 0 2px rgba(255,255,255,.6)}
+.apn-tabs{position:sticky;top:60px;z-index:5;display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;margin:0 0 14px;padding:6px;border-radius:999px;background:var(--card);border:1px solid var(--line)}
+.apn-tabs button{flex:1 0 auto;font:inherit;font-family:var(--head);font-weight:700;font-size:14px;padding:9px 14px;border:0;border-radius:999px;background:transparent;color:var(--muted);cursor:pointer;white-space:nowrap}
+.apn-tabs button[aria-selected="true"]{background:var(--purple);color:#fff}
+.apn-range-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.apn-range-row .apn-range{margin:0}
+.apn-h{margin:0 0 10px;font-size:22px;color:var(--purple)}
+.apn-range-row .apn-h{margin:0}
+.apn-story{display:flex;gap:14px;align-items:center;padding:16px 18px;margin-bottom:12px;border-radius:18px;background:#E7F6EE;color:#0F3D27}
+.apn-story p{margin:0;font-size:16px;line-height:1.45}
+.apn-mood{font-size:38px;line-height:1}
+.apn-kpis small{color:var(--muted)}
+.apn-k-h{display:flex;align-items:center;gap:6px}
+.apn-k-h i{font-style:normal}
+.apn-card h3{margin:0 0 10px;font-size:17px}
+.apn-todo,.apn-tips{list-style:none;margin:0;padding:0;display:grid;gap:8px;font-size:14px}
+.apn-todo li{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-radius:12px;background:var(--soft)}
+.apn-todo li.warn{background:#FFF5DB;color:#5C3A00}
+.apn-todo button,.apn-camp-acts button,.apn-dl{flex:none;font:inherit;font-weight:700;font-size:13px;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--purple);cursor:pointer}
+.apn-todo button:hover,.apn-camp-acts button:hover,.apn-dl:hover{border-color:var(--purple)}
+.apn-tips li{padding-left:16px;position:relative}
+.apn-tips li::before{content:"";position:absolute;left:0;top:.55em;width:7px;height:7px;border-radius:50%;background:#F59E0B}
+.apn-camps{display:grid;gap:12px}
+.apn-group{margin:8px 0 0;font-size:14px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.apn-camp{display:grid;grid-template-columns:220px minmax(0,1fr);gap:16px;padding:14px;border-radius:18px;background:var(--card);border:1px solid var(--line)}
+.apn-prev{display:grid;align-content:center;gap:4px;padding:14px;border-radius:12px;color:#fff;min-height:120px;text-align:center}
+.apn-prev b{font-family:var(--head);font-size:19px;line-height:1.15}
+.apn-prev span{font-size:12px;opacity:.85}
+.apn-camp-body{display:grid;gap:8px;align-content:start;min-width:0}
+.apn-camp-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.apn-camp-top h4{margin:0;font-size:18px}
+.apn-camp-body .apn-small{margin:0}
+.apn-camp-k{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0}
+.apn-camp-k div{padding:8px 10px;border-radius:10px;background:var(--soft)}
+.apn-camp-k dt{font-size:12px;color:var(--muted)}
+.apn-camp-k dd{margin:0;font-family:var(--head);font-weight:800;font-size:18px}
+.apn-budget{display:grid;gap:4px;font-size:13px;color:var(--muted)}
+.apn-budget .cx-bar{display:block;margin:0}
+.apn-budget .cx-bar span{background:#1F90DA}
+.apn-camp-acts{display:flex;flex-wrap:wrap;gap:6px}
+.apn-st.wait{background:#FFF5DB;color:#7A4B00}
+.apn-inv li{grid-template-columns:minmax(0,1fr) auto auto auto}
+.apn-team{list-style:none;margin:0 0 12px;padding:0;display:grid;gap:8px}
+.apn-team li{display:flex;align-items:center;gap:10px;font-size:14px}
+.apn-team li .apn-st{margin-left:auto}
+.apn-gloss{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.apn-gloss details{padding:10px 12px;border-radius:12px;background:var(--soft)}
+.apn-gloss summary{cursor:pointer;font-weight:700;font-size:14px}
+.apn-gloss p{margin:6px 0 0;font-size:13px;color:var(--muted)}
+.apn-help{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.apn-help h3{margin:0}
+.apn-toast{position:fixed;left:50%;bottom:20px;z-index:60;transform:translateX(-50%);max-width:min(92vw,460px);padding:12px 18px;border-radius:14px;background:#1E0B5E;color:#fff;font-size:14px;box-shadow:0 10px 30px rgba(0,0,0,.3)}
+.apn-toast[hidden]{display:none}
+[data-theme="dark"] .apn-story{background:#12301F;color:#CFF2DD}
+[data-theme="dark"] .apn-todo li.warn{background:#3A2A08;color:#FFE7B0}
+@media (max-width:760px){
+  .apn-camp{grid-template-columns:minmax(0,1fr)}
+  .apn-prev{min-height:90px}
+  .apn-gloss{grid-template-columns:minmax(0,1fr)}
+  .apn-story{align-items:flex-start}
+  .apn-story p{font-size:15px}
+  .apn-hero .apn-actions{width:100%}
+  .apn-hero .apn-actions .adp-btn{flex:1;padding:10px 12px;font-size:14px}
+  .apn-switch select{font-size:19px;width:100%}
+  .apn-tabs{border-radius:14px}
 }
