@@ -100,6 +100,12 @@ const columnist = d.section === 'opinion' ? columnistOf(d.author) : undefined;
           <div class="ai"><strong>Columna de opinión</strong>Este texto expresa la opinión de su autor{d.author === 'Noticias Xtra' ? ' y la línea editorial de Noticias Xtra' : ''}. Las noticias de Noticias Xtra se redactan por separado y se limitan a los hechos.</div>
         )}
 
+        <a class="tip-cta" href={url('contacto')}>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v12H8l-4 4z" /><path d="M12 7v4M12 13.5h.01" /></svg>
+          <span><b>¿Sabes algo que debemos investigar?</b> Envía tu denuncia a la redacción.</span>
+          <span class="tip-go" aria-hidden="true">›</span>
+        </a>
+
         <Comments storyId={story.id} />
 
         <div class="sec-h"><h2>Te puede interesar</h2></div>

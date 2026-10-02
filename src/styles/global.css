@@ -3213,3 +3213,15 @@ html.nx-en .pf-menu .lang-tag{background:var(--red)}
 .pf-sm{display:none}
 @media (max-width:600px){ .pf-lg{display:none} .pf-sm{display:inline} }
 @media (max-width:600px){ .pf-tabs button{padding:8px 6px} }
+
+/* Date in the main header (the thin top bar was removed) */
+.masthead .mh-date{flex:none;padding-left:16px;border-left:1px solid var(--line);font-size:13px;line-height:1.3;color:var(--muted);max-width:150px}
+@media (max-width:1180px){ .masthead .mh-date{display:none} }
+/* "Envía tu denuncia" box at the end of each story */
+.tip-cta{display:flex;align-items:center;gap:12px;margin:var(--gap-lg) 0 0;padding:14px 16px;border-radius:14px;background:#EEE9FB;color:var(--ink);font-size:15px;line-height:1.4}
+.tip-cta svg{flex:none;color:var(--purple)}
+.tip-cta b{font-family:var(--head);color:var(--purple)}
+.tip-cta .tip-go{margin-left:auto;font-size:26px;line-height:1;color:var(--purple)}
+.tip-cta:hover{box-shadow:inset 0 0 0 2px var(--purple)}
+[data-theme="dark"] .tip-cta{background:#221A4D}
+[data-theme="dark"] .tip-cta b,[data-theme="dark"] .tip-cta svg,[data-theme="dark"] .tip-cta .tip-go{color:#C9B8FF}
