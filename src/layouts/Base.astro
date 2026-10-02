@@ -71,6 +71,9 @@ const todayCap = today.charAt(0).toUpperCase() + today.slice(1);
         <div class="mh-right">
           <div class="mh-tools">
             <span class="lang-sw notranslate" translate="no" role="group" aria-label="Idioma"><span class="on" aria-current="true">ES</span><a href="#" data-translate title="Read this page in English (Google Translate)">EN</a></span>
+            <a class="theme-btn pf-btn" href={url('perfil')} aria-label="Mi perfil" title="Mi perfil" data-pf-btn>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></svg>
+            </a>
             <a class="theme-btn saved-btn" href={url('guardadas')} aria-label="Noticias guardadas" title="Noticias guardadas">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4z" /></svg>
               <span class="saved-count" data-saved-count hidden></span>
@@ -131,6 +134,8 @@ const todayCap = today.charAt(0).toUpperCase() + today.slice(1);
             {F.live && <li><a href={url('en-vivo')}>Ver en vivo</a></li>}
             {F.videos && <li><a href={url('videos')}>Videos</a></li>}
             <li><a href={url('juegos')}>Juegos Xtra</a></li>
+            <li><a href={url('foro')}>Foro Xtra</a></li>
+            <li><a href={url('perfil')}>Mi perfil</a></li>
             <li><a href={url('horoscopo')}>Horóscopo</a></li>
             <li><a href={url('quienes-somos')}>Quiénes somos</a></li>
             <li><a href={url('normas-editoriales')}>Normas editoriales y correcciones</a></li>
@@ -214,6 +219,20 @@ const todayCap = today.charAt(0).toUpperCase() + today.slice(1);
       );
 
       // Share buttons
+      // Profile button: shows the reader's initial once they sign in (demo profile in localStorage 'nx-profile')
+      const showProfile = () => {
+        let p: { name?: string; color?: string } = {};
+        try { p = JSON.parse(localStorage.getItem('nx-profile') || '{}'); } catch { /* storage blocked */ }
+        document.querySelectorAll<HTMLElement>('[data-pf-btn]').forEach((b) => {
+          b.dataset.icon ??= b.innerHTML;
+          b.classList.toggle('in', !!p.name);
+          b.style.background = p.name ? p.color || '#2B1185' : '';
+          if (p.name) b.textContent = p.name[0].toUpperCase(); else b.innerHTML = b.dataset.icon;
+          b.title = p.name ? `Mi perfil: ${p.name}` : 'Mi perfil';
+        });
+      };
+      showProfile();
+      addEventListener('nx-profile-change', showProfile);
       // Saved stories counter in the header (list kept only in this browser, key 'nx-saved')
       const showSaved = () => {
         let n = 0;

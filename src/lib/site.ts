@@ -22,11 +22,11 @@ export const SITE = {
   sportsDemo: true,
   // Turn parts of the site on (true) or off (false). Off parts are hidden everywhere.
   features: {
-    videos: false, // video section and pages (VIDEOS below are samples)
+    videos: true, // video section and pages (VIDEOS below: the BSN's YouTube channel)
     live: false, // "En vivo" button and TV schedule (SCHEDULE below is a sample)
     weather: false, // town temperatures (TOWNS below are samples); a link to the official forecast shows instead
-    newsletter: false, // newsletter sign-up box (needs an email service first)
-    app: false, // "Descarga la app" link and banner
+    newsletter: true, // newsletter sign-up box (demo: nothing is sent until an email service is connected)
+    app: true, // "Descarga la app" link and banner (buttons say the app is coming soon)
     ads: true, // ad placeholders ("Espacio publicitario") across the site; see src/components/AdSlot.astro
   },
   // Official National Weather Service forecast for Puerto Rico
@@ -98,14 +98,22 @@ export const ICONS: Record<SectionId, string> = {
 };
 
 /* Sample videos. Later these can come from YouTube or a video host. */
+/* Videos: the official YouTube channel of the BSN (Baloncesto Superior Nacional), shown with
+   YouTube's own embedded player (allowed by YouTube; nothing is downloaded). Each page credits
+   the BSN and links to the video on YouTube. Titles are our Spanish summaries of the BSN's titles.
+   To add one: copy the 11-character code after "watch?v=" into `yt`. */
+export const VIDEO_SOURCE = { name: 'Baloncesto Superior Nacional (BSN)', url: 'https://www.youtube.com/@BaloncestoSuperiorNacionalPR' };
 export const VIDEOS = [
-  { id: 'lluvias-zona-este', section: 'clima', title: 'Así se ven las lluvias en la zona este esta tarde', duration: '1:42', date: '2026-10-01T16:00:00-04:00' },
-  { id: 'vecinos-santurce', section: 'puerto-rico', title: 'Vecinos de Santurce reaccionan a la repavimentación', duration: '2:15', date: '2026-10-01T14:00:00-04:00' },
-  { id: 'practicas-baloncesto', section: 'deportes', title: 'Primer día de prácticas de la selección de baloncesto', duration: '3:08', date: '2026-10-01T10:00:00-04:00' },
-  { id: 'festival-ponce', section: 'entretenimiento', title: 'Lo que debes saber antes de ir al festival en Ponce', duration: '1:55', date: '2026-10-01T09:00:00-04:00' },
-  { id: 'centro-caguas', section: 'economia', title: 'Recorrido por la construcción del nuevo centro en Caguas', duration: '2:40', date: '2026-10-01T11:00:00-04:00' },
-  { id: 'vacunas-mayaguez', section: 'salud', title: 'Dónde vacunarte gratis este fin de semana', duration: '0:58', date: '2026-10-01T08:00:00-04:00' },
-] as const satisfies ReadonlyArray<{ id: string; section: SectionId; title: string; duration: string; date: string }>;
+  { id: 'bsn-celebracion-bayamon-2026', yt: '7vcPJaj3vGA', section: 'deportes', league: 'bsn', title: 'Desde la cancha en Bayamón: así celebraron los Vaqueros el campeonato 2026', duration: '11:43' },
+  { id: 'bsn-bayamon-repite-campeon', yt: 'elqiQDkvjVk', section: 'deportes', league: 'bsn', title: 'Bayamón repite como campeón del BSN', duration: '2:12' },
+  { id: 'bsn-vaqueros-santeros-resumen-final', yt: 'KHbE8xipLcI', section: 'deportes', league: 'bsn', title: 'Vaqueros vs. Santeros: resumen del juego que coronó a Bayamón', duration: '14:11' },
+  { id: 'bsn-vaqueros-santeros-mejores-jugadas', yt: 'wLYomIbSvqk', section: 'deportes', league: 'bsn', title: 'Vaqueros vs. Santeros: las mejores jugadas', duration: '3:29' },
+  { id: 'bsn-final-juego-5', yt: 'mBpcnM4pnLE', section: 'deportes', league: 'bsn', title: 'Santeros vs. Vaqueros: resumen del Juego 5 de la Final', duration: '14:51' },
+  { id: 'bsn-final-juego-3', yt: 'zhSGVmdknZI', section: 'deportes', league: 'bsn', title: 'Santeros vs. Vaqueros: resumen del Juego 3 de la Final', duration: '16:13' },
+  { id: 'bsn-bayamon-gana-juego-1', yt: 'ze3yvdAUW4k', section: 'deportes', league: 'bsn', title: '¡Bayamón se lleva el primero de La Final Brava!', duration: '1:22' },
+  { id: 'bsn-final-juego-1', yt: '2VMwFuhnQWk', section: 'deportes', league: 'bsn', title: 'Santeros vs. Vaqueros: resumen del Juego 1 de la Final', duration: '13:26' },
+  { id: 'bsn-capitulo-final-2026', yt: 'kqHEowKdtIs', section: 'deportes', league: 'bsn', title: 'Llega el capítulo final de la temporada 2026', duration: '1:49' },
+] as const satisfies ReadonlyArray<{ id: string; yt: string; section: SectionId; league: string; title: string; duration: string }>;
 
 export type Video = (typeof VIDEOS)[number];
 

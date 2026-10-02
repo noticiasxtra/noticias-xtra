@@ -32,6 +32,9 @@ const upcoming = LEAGUES.map((l) => ({ l, start: 'starts' in l ? new Date(l.star
   .filter((x) => x.start && x.start.valueOf() > Date.now())
   .sort((a, b) => a.start!.valueOf() - b.start!.valueOf())[0];
 const fmt = (d: Date) => d.toLocaleDateString('es-PR', { day: 'numeric', month: 'long', timeZone: 'America/Puerto_Rico' });
+import VideoCard from '../../components/VideoCard.astro';
+import { VIDEOS as ALL_VIDEOS, SITE as SITE_CFG } from '../../lib/site';
+const sportsVideos = SITE_CFG.features.videos ? ALL_VIDEOS.filter((v) => v.section === 'deportes').slice(0, 4) : [];
 ---
 <Base title="Deportes" active="deportes" description="Deportes de Puerto Rico: BSN, Doble A, La Pro (Liga Roberto Clemente), voleibol masculino y femenino, boxeo, tenis y los boricuas en el mundo.">
   <div class="ys">
@@ -58,6 +61,13 @@ const fmt = (d: Date) => d.toLocaleDateString('es-PR', { day: 'numeric', month: 
           </div>
           <span class="ys-promo-btn">Ver la liga</span>
         </a>
+      )}
+
+      {sportsVideos.length > 0 && (
+        <section class="ys-card ys-videos">
+          <div class="ys-card-h"><h2>Videos del BSN</h2><a href={url('videos')}>Ver todos ›</a></div>
+          <div class="vgrid">{sportsVideos.map((v) => <VideoCard video={v} />)}</div>
+        </section>
       )}
 
       <div class="ys-grid">

@@ -1,0 +1,84 @@
+---
+// Mi perfil: sign in (demo), name and avatar color, and the reader's activity on this device:
+// saved stories, games, comments and forum topics.
+// DEMO: no accounts yet; the profile lives only in this browser (localStorage 'nx-profile').
+import Base from '../layouts/Base.astro';
+import { url } from '../lib/site';
+const COLORS = ['#2B1185', '#1F90DA', '#D7263D', '#0E8A5F', '#C2410C', '#7C3AED'];
+---
+<Base title="Mi perfil" description="Tu perfil de lector en Noticias Xtra.">
+  <main class="wrap" id="main">
+    <div class="pf">
+      <p class="pf-demo"><span class="sp-demo">DEMO</span> Vista previa de las cuentas: tu perfil se guarda solo en este dispositivo. Muy pronto podrás crear una cuenta real.</p>
+
+      <form class="pf-login" data-login novalidate hidden>
+        <h1>Entra a Noticias Xtra</h1>
+        <p>Guarda noticias, comenta y participa en el Foro Xtra.</p>
+        <label for="pf-name">Tu nombre de usuario</label>
+        <input id="pf-name" maxlength="24" placeholder="ej. lector_boricua" autocomplete="nickname" />
+        <fieldset class="pf-colors"><legend>Color de tu avatar</legend>
+          {COLORS.map((c, i) => <label><input type="radio" name="pf-color" value={c} checked={i === 0} /><span style={`background:${c}`}></span><b class="sr">{c}</b></label>)}
+        </fieldset>
+        <p class="cm-err" data-err hidden></p>
+        <button type="submit" class="jg-btn">Entrar</button>
+      </form>
+
+      <div class="pf-card" data-card hidden>
+        <div class="pf-top">
+          <span class="pf-av" data-av></span>
+          <div><h1 data-name></h1><p>Lector de Noticias Xtra</p></div>
+          <button type="button" class="tool" data-logout>Cerrar sesión</button>
+        </div>
+        <div class="pf-stats">
+          <a href={url('guardadas')}><b data-s="saved">0</b><span>Guardadas</span></a>
+          <a href={url('juegos/trivia')}><b data-s="trivia">0</b><span>Racha de trivia</span></a>
+          <a href={url('juegos/memoria')}><b data-s="memoria">—</b><span>Mejor marca en Memoria</span></a>
+          <span><b data-s="comments">0</b><span>Comentarios</span></span>
+          <a href={url('foro')}><b data-s="foro">0</b><span>Temas en el foro</span></a>
+        </div>
+        <div class="pf-links">
+          <a href={url('guardadas')}>Mis noticias guardadas ›</a>
+          <a href={url('juegos')}>Juegos Xtra ›</a>
+          <a href={url('foro')}>Foro Xtra ›</a>
+        </div>
+      </div>
+    </div>
+  </main>
+  <script>
+    type Profile = { name?: string; color?: string };
+    const get = <T,>(k: string, d: T): T => { try { return JSON.parse(localStorage.getItem(k) || '') ?? d; } catch { return d; } };
+    const set = (k: string, v: unknown) => { try { v === null ? localStorage.removeItem(k) : localStorage.setItem(k, JSON.stringify(v)); } catch { /* storage blocked */ } };
+    const login = document.querySelector<HTMLFormElement>('[data-login]')!;
+    const card = document.querySelector<HTMLElement>('[data-card]')!;
+    const err = login.querySelector<HTMLElement>('[data-err]')!;
+    function render() {
+      const p = get<Profile>('nx-profile', {});
+      login.hidden = !!p.name; card.hidden = !p.name;
+      dispatchEvent(new Event('nx-profile-change'));
+      if (!p.name) return;
+      const av = card.querySelector<HTMLElement>('[data-av]')!;
+      av.textContent = p.name[0].toUpperCase(); av.style.background = p.color || '#2B1185';
+      card.querySelector('[data-name]')!.textContent = p.name;
+      let comments = 0;
+      try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i)!; if (k.startsWith('nx-comments-')) comments += get<unknown[]>(k, []).length; } } catch { /* storage blocked */ }
+      const vals: Record<string, string> = {
+        saved: String(get<unknown[]>('nx-saved', []).length),
+        trivia: String(get<number>('nx-trivia-streak', 0)),
+        memoria: String(get<number>('nx-memoria-best', 0) || '—'),
+        comments: String(comments),
+        foro: String(get<{ threads: unknown[] }>('nx-foro', { threads: [] }).threads.length),
+      };
+      card.querySelectorAll<HTMLElement>('[data-s]').forEach((b) => (b.textContent = vals[b.dataset.s!]));
+    }
+    login.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = (login.querySelector('#pf-name') as HTMLInputElement).value.trim().replace(/\s+/g, '_');
+      if (name.length < 3) { err.textContent = 'Escribe un nombre de al menos 3 letras.'; err.hidden = false; return; }
+      const color = (login.querySelector('input[name="pf-color"]:checked') as HTMLInputElement)?.value;
+      set('nx-profile', { name, color });
+      render();
+    });
+    card.querySelector('[data-logout]')!.addEventListener('click', () => { set('nx-profile', null); render(); });
+    render();
+  </script>
+</Base>

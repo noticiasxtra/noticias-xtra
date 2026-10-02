@@ -1,10 +1,10 @@
 ---
+// Video page: YouTube player (BSN channel), credit and link to the original, more videos
 import Base from '../../layouts/Base.astro';
 import Player from '../../components/Player.astro';
 import VideoCard from '../../components/VideoCard.astro';
 import Sidebar from '../../components/Sidebar.astro';
-import Time from '../../components/Time.astro';
-import { SITE, VIDEOS, section, type Video } from '../../lib/site';
+import { SITE, VIDEOS, VIDEO_SOURCE, section, url, type Video } from '../../lib/site';
 
 export function getStaticPaths() {
   if (!SITE.features.videos) return [];
@@ -12,16 +12,19 @@ export function getStaticPaths() {
 }
 const { video } = Astro.props as { video: Video };
 ---
-<Base title={video.title} active="videos">
+<Base title={video.title} active="videos" image={`https://i.ytimg.com/vi/${video.yt}/hqdefault.jpg`}>
   <main class="wrap" id="main">
     <div class="art-grid">
       <div class="art">
-        <Player />
-        <div style="margin-top:14px"><span class="badge">{section(video.section).name}</span></div>
-        <h1 style="font-size:32px">{video.title}</h1>
-        <div class="time"><Time date={video.date} />, duración {video.duration}</div>
+        <div class="crumbs"><a href={url('videos')}>Videos</a> / <a href={url(`seccion/${video.section}`)}>{section(video.section).name}</a></div>
+        <Player yt={video.yt} title={video.title} />
+        <h1 style="font-size:30px;margin-top:14px">{video.title}</h1>
+        <p class="vsrc">
+          Video: <a href={VIDEO_SOURCE.url} rel="noopener" target="_blank">{VIDEO_SOURCE.name}</a>, en YouTube · duración {video.duration} ·
+          <a href={`https://www.youtube.com/watch?v=${video.yt}`} rel="noopener" target="_blank">Ver en YouTube ↗</a>
+        </p>
         <div class="sec-h"><h2>Más videos</h2></div>
-        <div class="autogrid">{VIDEOS.filter((v) => v.id !== video.id).map((v) => <VideoCard video={v} />)}</div>
+        <div class="autogrid">{VIDEOS.filter((v) => v.id !== video.id).slice(0, 6).map((v) => <VideoCard video={v} />)}</div>
       </div>
       <Sidebar newsletter={false} />
     </div>

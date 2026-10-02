@@ -1,13 +1,38 @@
 ---
+// Video player. With `yt`, shows the YouTube thumbnail and loads YouTube's player only after
+// the reader presses play (no YouTube cookies before that: youtube-nocookie.com).
 import { url } from '../lib/site';
-interface Props { live?: boolean }
-const { live = false } = Astro.props;
+interface Props { live?: boolean; yt?: string; title?: string }
+const { live = false, yt, title = 'Video' } = Astro.props;
 ---
-<div class="player">
-  {live && <span class="badge live tag">EN VIVO</span>}
-  <div class="bug"><img src={url('logo.svg')} alt="" /></div>
-  <button type="button" data-play>
-    <span class="circle"><svg width="34" height="34" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg></span>
-    {live ? 'Ver transmisión' : 'Reproducir video'}
-  </button>
-</div>
+{yt ? (
+  <div class="player yt" data-yt={yt} data-title={title}>
+    <img src={`https://i.ytimg.com/vi/${yt}/hqdefault.jpg`} alt="" />
+    <button type="button" data-yt-play>
+      <span class="circle"><svg width="34" height="34" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg></span>
+      Reproducir video
+    </button>
+  </div>
+) : (
+  <div class="player">
+    {live && <span class="badge live tag">EN VIVO</span>}
+    <div class="bug"><img src={url('logo.svg')} alt="" /></div>
+    <button type="button" data-play>
+      <span class="circle"><svg width="34" height="34" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg></span>
+      {live ? 'Ver transmisión' : 'Reproducir video'}
+    </button>
+  </div>
+)}
+<script>
+  document.querySelectorAll<HTMLElement>('[data-yt]').forEach((box) =>
+    box.querySelector('[data-yt-play]')?.addEventListener('click', () => {
+      const f = document.createElement('iframe');
+      f.src = `https://www.youtube-nocookie.com/embed/${box.dataset.yt}?autoplay=1&rel=0`;
+      f.title = box.dataset.title || 'Video';
+      f.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+      f.allowFullscreen = true;
+      f.referrerPolicy = 'strict-origin-when-cross-origin';
+      box.replaceChildren(f);
+    }),
+  );
+</script>

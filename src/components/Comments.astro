@@ -1,0 +1,135 @@
+---
+// Comments under each story, Instagram style: avatar, name, text, likes, replies, stickers.
+// DEMO: there is no server yet, so new comments are saved only in this reader's browser
+// (localStorage 'nx-comments-<story id>'), and the sample comments are marked EJEMPLO.
+// When a real service is connected (e.g. Supabase), this component is where it plugs in.
+interface Props { storyId: string }
+const { storyId } = Astro.props;
+// Sample comments: invented usernames, clearly labeled as examples
+const SAMPLES = [
+  { id: 's1', name: 'lectora_bayamon', text: 'Muy buena información, gracias por explicarlo claro. 👏', likes: 24, ago: 'hace 2 h' },
+  { id: 's2', name: 'jose.boricua', text: 'Esto hay que seguirlo de cerca. ¿Habrá vistas públicas?', likes: 11, ago: 'hace 3 h' },
+  { id: 's3', name: 'abuela_de_ponce', text: '🇵🇷🙏', likes: 7, ago: 'hace 5 h' },
+];
+const STICKERS = ['👏', '🔥', '❤️', '😂', '😮', '😢', '🙏', '🇵🇷', '💯', '⚾', '🏀', '🎶'];
+---
+<section class="cm" data-comments={storyId} aria-labelledby="cm-h">
+  <div class="cm-head">
+    <h2 id="cm-h">Comentarios <span data-cm-count></span></h2>
+    <span class="sp-demo">DEMO</span>
+  </div>
+  <p class="cm-note">Vista previa de los comentarios: lo que escribas se guarda solo en este dispositivo.</p>
+
+  <form class="cm-form" data-cm-form novalidate>
+    <span class="cm-av me" data-cm-me aria-hidden="true">T</span>
+    <div class="cm-box">
+      <label for={`cm-text-${storyId}`} class="sr">Escribe un comentario</label>
+      <textarea id={`cm-text-${storyId}`} rows="1" maxlength="500" placeholder="Añade un comentario…"></textarea>
+      <div class="cm-tools">
+        <details class="cm-stk">
+          <summary aria-label="Stickers">😊</summary>
+          <div class="cm-stk-grid">{STICKERS.map((s) => <button type="button" data-stk={s} aria-label={`Sticker ${s}`}>{s}</button>)}</div>
+        </details>
+        <span class="cm-err" data-cm-err hidden></span>
+        <button type="submit" class="cm-send">Publicar</button>
+      </div>
+    </div>
+  </form>
+
+  <ul class="cm-list" data-cm-list>
+    {SAMPLES.map((c) => (
+      <li class="cm-item" data-id={c.id} data-likes={c.likes}>
+        <span class="cm-av" aria-hidden="true">{c.name[0].toUpperCase()}</span>
+        <div class="cm-body">
+          <p><b>{c.name}</b> <span class="sp-demo">EJEMPLO</span> {c.text}</p>
+          <div class="cm-meta"><span>{c.ago}</span><span data-likes-label>{c.likes} Me gusta</span><button type="button" data-reply>Responder</button></div>
+        </div>
+        <button type="button" class="cm-like" data-like aria-pressed="false" aria-label="Me gusta">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.5-9.2C1 8.3 3.2 4.5 7 4.5c2 0 3.4 1.1 5 3 1.6-1.9 3-3 5-3 3.8 0 6 3.8 4.5 7.3C19.5 16.4 12 21 12 21z" /></svg>
+        </button>
+      </li>
+    ))}
+  </ul>
+</section>
+
+<script>
+  type Mine = { id: string; name: string; text: string; at: number; replyTo?: string };
+  const BAD = /\b(pendej\w*|cabr[oó]n\w*|puñet\w*|carajo|mierd\w*|idiota)\b/i; // basic word filter
+  const store = {
+    get: <T,>(k: string, d: T): T => { try { return JSON.parse(localStorage.getItem(k) || '') ?? d; } catch { return d; } },
+    set: (k: string, v: unknown) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* storage blocked */ } },
+  };
+  const profile = store.get<{ name?: string }>('nx-profile', {});
+  const myName = profile.name || 'Tú';
+  const ago = (t: number) => { const m = Math.round((Date.now() - t) / 60000); return m < 1 ? 'ahora' : m < 60 ? `hace ${m} min` : m < 1440 ? `hace ${Math.round(m / 60)} h` : `hace ${Math.round(m / 1440)} d`; };
+
+  document.querySelectorAll<HTMLElement>('[data-comments]').forEach((root) => {
+    const key = `nx-comments-${root.dataset.comments}`;
+    const likesKey = `nx-likes-${root.dataset.comments}`;
+    const list = root.querySelector<HTMLUListElement>('[data-cm-list]')!;
+    const form = root.querySelector<HTMLFormElement>('[data-cm-form]')!;
+    const ta = form.querySelector('textarea')!;
+    const err = root.querySelector<HTMLElement>('[data-cm-err]')!;
+    const count = root.querySelector<HTMLElement>('[data-cm-count]')!;
+    root.querySelector<HTMLElement>('[data-cm-me]')!.textContent = myName[0].toUpperCase();
+    let replyTo: string | undefined;
+
+    const liked = new Set(store.get<string[]>(likesKey, []));
+    const wireLike = (li: HTMLElement) => {
+      const btn = li.querySelector<HTMLButtonElement>('[data-like]')!;
+      const label = li.querySelector<HTMLElement>('[data-likes-label]')!;
+      const base = Number(li.dataset.likes || 0);
+      const paint = () => {
+        const on = liked.has(li.dataset.id!);
+        btn.setAttribute('aria-pressed', String(on));
+        const n = base + (on ? 1 : 0);
+        label.textContent = n ? `${n} Me gusta` : '';
+      };
+      btn.addEventListener('click', () => { liked.has(li.dataset.id!) ? liked.delete(li.dataset.id!) : liked.add(li.dataset.id!); store.set(likesKey, [...liked]); paint(); });
+      li.querySelector('[data-reply]')?.addEventListener('click', () => {
+        replyTo = li.dataset.id;
+        const who = li.querySelector('b')?.textContent || '';
+        ta.value = `@${who} `; ta.focus();
+      });
+      paint();
+    };
+
+    const render = () => {
+      list.querySelectorAll('.cm-item.mine').forEach((x) => x.remove());
+      const mine = store.get<Mine[]>(key, []);
+      mine.forEach((c) => {
+        const li = document.createElement('li');
+        li.className = `cm-item mine${c.replyTo ? ' reply' : ''}`;
+        li.dataset.id = c.id; li.dataset.likes = '0';
+        li.innerHTML = `<span class="cm-av me" aria-hidden="true"></span><div class="cm-body"><p><b></b> <span class="cm-text"></span></p><div class="cm-meta"><span></span><span data-likes-label></span><button type="button" data-reply>Responder</button><button type="button" data-del>Borrar</button></div></div><button type="button" class="cm-like" data-like aria-pressed="false" aria-label="Me gusta"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.5-9.2C1 8.3 3.2 4.5 7 4.5c2 0 3.4 1.1 5 3 1.6-1.9 3-3 5-3 3.8 0 6 3.8 4.5 7.3C19.5 16.4 12 21 12 21z" /></svg></button>`;
+        li.querySelector('.cm-av')!.textContent = c.name[0].toUpperCase();
+        li.querySelector('b')!.textContent = c.name;
+        li.querySelector('.cm-text')!.textContent = c.text;
+        li.querySelector('.cm-meta span')!.textContent = ago(c.at);
+        li.querySelector('[data-del]')!.addEventListener('click', () => { store.set(key, store.get<Mine[]>(key, []).filter((x) => x.id !== c.id)); render(); });
+        const parent = c.replyTo ? list.querySelector(`[data-id="${c.replyTo}"]`) : null;
+        if (parent) parent.after(li); else list.prepend(li);
+        wireLike(li);
+      });
+      count.textContent = `(${list.querySelectorAll('.cm-item').length})`;
+    };
+
+    list.querySelectorAll<HTMLElement>('.cm-item').forEach(wireLike);
+    root.querySelectorAll<HTMLButtonElement>('[data-stk]').forEach((b) => b.addEventListener('click', () => {
+      ta.value += b.dataset.stk; ta.focus(); b.closest('details')!.open = false;
+    }));
+    ta.addEventListener('input', () => { err.hidden = true; ta.style.height = 'auto'; ta.style.height = `${ta.scrollHeight}px`; });
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const text = ta.value.trim();
+      if (!text) { err.textContent = 'Escribe algo primero.'; err.hidden = false; return; }
+      if (BAD.test(text)) { err.textContent = 'Tu comentario tiene palabras no permitidas.'; err.hidden = false; return; }
+      const mine = store.get<Mine[]>(key, []);
+      mine.push({ id: `m${Date.now()}`, name: myName, text, at: Date.now(), replyTo });
+      store.set(key, mine);
+      ta.value = ''; ta.style.height = 'auto'; replyTo = undefined;
+      render();
+    });
+    render();
+  });
+</script>

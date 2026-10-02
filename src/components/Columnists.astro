@@ -31,6 +31,14 @@ const latest = (n: string) => stories.find((s) => s.data.section === 'opinion' &
         </article>
       );
     })}
+    <a class="col-card col-foro" href={url('foro')}>
+      <span class="col-pic col-ini" aria-hidden="true">💬</span>
+      <div>
+        <h3>Foro Xtra</h3>
+        <p>¿Tienes una opinión? Abre un tema, responde a otros lectores y vota por las mejores ideas.</p>
+        <span class="col-last">Entrar al foro ›</span>
+      </div>
+    </a>
     <article class="col-card col-join">
       <span class="col-pic col-ini" aria-hidden="true">+</span>
       <div>

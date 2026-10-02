@@ -7,6 +7,7 @@ import Time from '../../components/Time.astro';
 import StoryCard from '../../components/StoryCard.astro';
 import Sidebar from '../../components/Sidebar.astro';
 import AdSlot from '../../components/AdSlot.astro';
+import Comments from '../../components/Comments.astro';
 import { getStories, section, url, defaultPhoto, type Story } from '../../lib/site';
 
 export async function getStaticPaths() {
@@ -94,6 +95,8 @@ const more = stories
         ) : (
           <div class="ai"><strong>Reportaje original</strong>Escrito por {d.author}.</div>
         )}
+
+        <Comments storyId={story.id} />
 
         <div class="sec-h"><h2>Te puede interesar</h2></div>
         <div class="grid2">{more.map((x) => <StoryCard story={x} />)}</div>

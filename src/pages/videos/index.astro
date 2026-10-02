@@ -1,11 +1,12 @@
 ---
 import Base from '../../layouts/Base.astro';
 import VideoCard from '../../components/VideoCard.astro';
-import { SITE, VIDEOS, url } from '../../lib/site';
+import { SITE, VIDEOS, VIDEO_SOURCE, url } from '../../lib/site';
 ---
 <Base title="Videos" active="videos">
   <main class="wrap" id="main">
     <div class="sec-h" style="margin-top:0"><h1 style="font-size:32px;margin:0;color:var(--purple)">Videos</h1></div>
+    {SITE.features.videos && <p class="vsrc" style="margin-top:0">Videos del canal oficial de YouTube del <a href={VIDEO_SOURCE.url} rel="noopener" target="_blank">{VIDEO_SOURCE.name}</a>.</p>}
     {SITE.features.videos ? (
       <div class="autogrid">{VIDEOS.map((v) => <VideoCard video={v} />)}</div>
     ) : (

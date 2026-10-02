@@ -1,0 +1,158 @@
+---
+// Foro Xtra: readers' threads, Reddit style (topics, replies, votes), linked from Opinión.
+// DEMO: no server yet, so new topics, replies and votes are saved only in this reader's browser
+// (localStorage 'nx-foro'). The sample topics are marked EJEMPLO.
+import Base from '../layouts/Base.astro';
+import AdSlot from '../components/AdSlot.astro';
+import { url } from '../lib/site';
+const SAMPLES = [
+  { id: 'e1', cat: 'Puerto Rico', title: '¿Qué harían ustedes para mejorar el servicio de luz?', body: 'Cada mes la factura sube. ¿Qué soluciones prácticas ven para las familias?', by: 'vecino_de_caguas', votes: 128, ago: 'hace 3 h',
+    replies: [{ by: 'ingeniera_pr', text: 'Placas solares con baterías ayudan mucho, pero hacen falta más incentivos.', votes: 41 }, { by: 'don_ramon', text: 'Que se mantengan las plantas al día. Mantenimiento primero.', votes: 22 }] },
+  { id: 'e2', cat: 'Deportes', title: '¿Quién gana La Pro este año?', body: 'Arranca el 4 de noviembre. Yo digo Santurce. ¿Ustedes?', by: 'fanatico_cangrejero', votes: 96, ago: 'hace 5 h',
+    replies: [{ by: 'criollo_de_corazon', text: 'Caguas, sin duda. 🔥', votes: 18 }] },
+  { id: 'e3', cat: 'Educación', title: 'Ideas para que los jóvenes lean más', body: 'En mi casa apagamos el celular una hora cada noche. ¿Qué les funciona a ustedes?', by: 'maestra_retirada', votes: 74, ago: 'ayer', replies: [] },
+  { id: 'e4', cat: 'Fe y familia', title: 'Actividades familiares gratis este fin de semana', body: 'Compartan lo que conozcan en su pueblo.', by: 'mamá_de_tres', votes: 51, ago: 'ayer', replies: [] },
+];
+const CATS = ['Puerto Rico', 'Gobierno', 'Economía', 'Deportes', 'Educación', 'Fe y familia', 'Entretenimiento'];
+---
+<Base title="Foro Xtra" active="opinion" description="El foro de los lectores de Noticias Xtra: temas, respuestas y votos.">
+  <main class="wrap" id="main">
+    <div class="fo-head">
+      <div>
+        <h1>Foro <span>Xtra</span> <span class="sp-demo">DEMO</span></h1>
+        <p>Los lectores proponen temas, responden y votan. Vista previa: lo que publiques se guarda solo en este dispositivo.</p>
+      </div>
+      <a class="fo-back" href={url('seccion/opinion')}>← Opinión</a>
+    </div>
+    <div class="fo-grid">
+      <div>
+        <form class="fo-new" data-fo-new novalidate>
+          <h2>Nuevo tema</h2>
+          <label class="sr" for="fo-title">Título</label>
+          <input id="fo-title" maxlength="120" placeholder="Título del tema" />
+          <label class="sr" for="fo-body">Texto</label>
+          <textarea id="fo-body" rows="3" maxlength="1500" placeholder="¿Qué quieres conversar?"></textarea>
+          <div class="fo-row">
+            <label class="sr" for="fo-cat">Categoría</label>
+            <select id="fo-cat">{CATS.map((c) => <option>{c}</option>)}</select>
+            <span class="cm-err" data-fo-err hidden></span>
+            <button type="submit" class="jg-btn" style="margin:0 0 0 auto">Publicar tema</button>
+          </div>
+        </form>
+        <div class="fo-sort" role="group" aria-label="Ordenar">
+          <button type="button" data-sort="top" aria-pressed="true">Populares</button>
+          <button type="button" data-sort="new" aria-pressed="false">Recientes</button>
+        </div>
+        <ul class="fo-list" data-fo-list></ul>
+        <p class="sp-note">Normas: respeto, sin insultos ni datos personales de otras personas. Los temas que rompan las normas se eliminan.</p>
+      </div>
+      <aside class="fo-side">
+        <section class="tb-box">
+          <h2>Categorías</h2>
+          <ul class="fo-cats">{CATS.map((c) => <li><button type="button" data-cat={c}>{c}</button></li>)}</ul>
+          <button type="button" class="fo-all" data-cat="">Ver todas</button>
+        </section>
+        <AdSlot size="rectangle" />
+      </aside>
+    </div>
+  </main>
+  <script define:vars={{ SAMPLES }}>
+    window.__FORO_SAMPLES = SAMPLES;
+  </script>
+  <script>
+    type Reply = { by: string; text: string; votes: number; mine?: boolean };
+    type Thread = { id: string; cat: string; title: string; body: string; by: string; votes: number; ago?: string; at?: number; replies: Reply[]; mine?: boolean; sample?: boolean };
+    const BAD = /\b(pendej\w*|cabr[oó]n\w*|puñet\w*|carajo|mierd\w*|idiota)\b/i;
+    const store = {
+      get: <T,>(k: string, d: T): T => { try { return JSON.parse(localStorage.getItem(k) || '') ?? d; } catch { return d; } },
+      set: (k: string, v: unknown) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* storage blocked */ } },
+    };
+    const me = store.get<{ name?: string }>('nx-profile', {}).name || 'Tú';
+    const samples: Thread[] = ((window as any).__FORO_SAMPLES as Thread[]).map((t) => ({ ...t, sample: true }));
+    type Saved = { threads: Thread[]; replies: Record<string, Reply[]>; votes: Record<string, number> };
+    const load = (): Saved => store.get<Saved>('nx-foro', { threads: [], replies: {}, votes: {} });
+    const save = (d: Saved) => store.set('nx-foro', d);
+    const ago = (t?: number, fallback = '') => { if (!t) return fallback; const m = Math.round((Date.now() - t) / 60000); return m < 1 ? 'ahora' : m < 60 ? `hace ${m} min` : m < 1440 ? `hace ${Math.round(m / 60)} h` : `hace ${Math.round(m / 1440)} d`; };
+    const list = document.querySelector<HTMLUListElement>('[data-fo-list]')!;
+    let sort: 'top' | 'new' = 'top';
+    let cat = '';
+    const open = new Set<string>();
+
+    function all(): Thread[] {
+      const d = load();
+      return [...d.threads, ...samples].map((t) => ({ ...t, replies: [...t.replies, ...(d.replies[t.id] ?? [])], votes: t.votes + (d.votes[t.id] ?? 0) }));
+    }
+    function el<K extends keyof HTMLElementTagNameMap>(tag: K, cls?: string, text?: string) { const e = document.createElement(tag); if (cls) e.className = cls; if (text !== undefined) e.textContent = text; return e; }
+    function render() {
+      const d = load();
+      let items = all().filter((t) => !cat || t.cat === cat);
+      items = sort === 'top' ? items.sort((a, b) => b.votes - a.votes) : items.sort((a, b) => (b.at ?? 0) - (a.at ?? 0));
+      list.replaceChildren(...items.map((t) => {
+        const li = el('li', 'fo-item');
+        const vote = el('div', 'fo-vote');
+        const up = el('button', 'up', '▲'); up.type = 'button'; up.setAttribute('aria-label', 'Votar a favor');
+        const dn = el('button', 'dn', '▼'); dn.type = 'button'; dn.setAttribute('aria-label', 'Votar en contra');
+        const mineVote = d.votes[t.id] ?? 0;
+        up.setAttribute('aria-pressed', String(mineVote === 1)); dn.setAttribute('aria-pressed', String(mineVote === -1));
+        const castVote = (v: number) => { const s = load(); s.votes[t.id] = (s.votes[t.id] ?? 0) === v ? 0 : v; save(s); render(); };
+        up.addEventListener('click', () => castVote(1)); dn.addEventListener('click', () => castVote(-1));
+        vote.append(up, el('b', '', String(t.votes)), dn);
+        const body = el('div', 'fo-body');
+        const meta = el('p', 'fo-meta');
+        meta.append(el('span', 'fo-cat', t.cat), document.createTextNode(` · ${t.by} · ${ago(t.at, t.ago)}`));
+        if (t.sample) meta.append(' ', el('span', 'sp-demo', 'EJEMPLO'));
+        const h = el('h3', '', t.title);
+        const p = el('p', 'fo-text', t.body);
+        const actions = el('div', 'fo-actions');
+        const toggle = el('button', '', `💬 ${t.replies.length} ${t.replies.length === 1 ? 'respuesta' : 'respuestas'}`); toggle.type = 'button';
+        toggle.addEventListener('click', () => { open.has(t.id) ? open.delete(t.id) : open.add(t.id); render(); });
+        actions.append(toggle);
+        if (t.mine) {
+          const del = el('button', '', 'Borrar'); del.type = 'button';
+          del.addEventListener('click', () => { const s = load(); s.threads = s.threads.filter((x) => x.id !== t.id); save(s); render(); });
+          actions.append(del);
+        }
+        body.append(meta, h, p, actions);
+        if (open.has(t.id)) {
+          const rl = el('ul', 'fo-replies');
+          t.replies.forEach((r) => { const ri = el('li'); ri.append(el('b', '', r.by), document.createTextNode(` ${r.text}`)); rl.append(ri); });
+          const f = document.createElement('form'); f.className = 'fo-reply';
+          const inp = document.createElement('input'); inp.placeholder = 'Escribe una respuesta…'; inp.maxLength = 500; inp.setAttribute('aria-label', 'Respuesta');
+          const go = el('button', 'cm-send', 'Responder'); (go as HTMLButtonElement).type = 'submit';
+          f.append(inp, go);
+          f.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const text = inp.value.trim();
+            if (!text || BAD.test(text)) { inp.value = ''; inp.placeholder = BAD.test(text) ? 'Palabras no permitidas.' : 'Escribe algo primero.'; return; }
+            const s = load(); (s.replies[t.id] ??= []).push({ by: me, text, votes: 0, mine: true }); save(s); render();
+          });
+          body.append(rl, f);
+        }
+        li.append(vote, body);
+        return li;
+      }));
+    }
+    document.querySelectorAll<HTMLButtonElement>('[data-sort]').forEach((b) => b.addEventListener('click', () => {
+      sort = b.dataset.sort as 'top' | 'new';
+      document.querySelectorAll('[data-sort]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      render();
+    }));
+    document.querySelectorAll<HTMLButtonElement>('[data-cat]').forEach((b) => b.addEventListener('click', () => { cat = b.dataset.cat || ''; render(); }));
+    const form = document.querySelector<HTMLFormElement>('[data-fo-new]')!;
+    const err = form.querySelector<HTMLElement>('[data-fo-err]')!;
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const title = (form.querySelector('#fo-title') as HTMLInputElement).value.trim();
+      const body = (form.querySelector('#fo-body') as HTMLTextAreaElement).value.trim();
+      const c = (form.querySelector('#fo-cat') as HTMLSelectElement).value;
+      if (title.length < 5) { err.textContent = 'Escribe un título más largo.'; err.hidden = false; return; }
+      if (BAD.test(title + ' ' + body)) { err.textContent = 'Tu tema tiene palabras no permitidas.'; err.hidden = false; return; }
+      err.hidden = true;
+      const s = load(); s.threads.unshift({ id: `t${Date.now()}`, cat: c, title, body, by: me, votes: 1, at: Date.now(), replies: [], mine: true }); save(s);
+      form.reset(); sort = 'new';
+      document.querySelectorAll('[data-sort]').forEach((x) => x.setAttribute('aria-pressed', String((x as HTMLElement).dataset.sort === 'new')));
+      render();
+    });
+    render();
+  </script>
+</Base>
