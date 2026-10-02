@@ -1,6 +1,7 @@
 ---
 // Home page. Main column on the left, right column (Sidebar) for the whole height of the page,
 // so there are no empty gaps. Section blocks only appear for sections that have stories.
+import Markets from '../components/economia/Markets.astro';
 import Base from '../layouts/Base.astro';
 import StoryCard from '../components/StoryCard.astro';
 import VideoCard from '../components/VideoCard.astro';
@@ -104,6 +105,8 @@ while (queue.length) {
           </div>
         </section>
       )}
+
+      <Markets strip />
 
       <div class="home-sections">
         {rows.map((row, i) => (

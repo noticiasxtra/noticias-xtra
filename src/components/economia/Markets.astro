@@ -2,9 +2,12 @@
 // Market numbers that matter in Puerto Rico: local companies on Wall Street, the big indexes, oil, gasoline, gold and crypto.
 // Prices come from Yahoo Finance when the site is built (it rebuilds every hour), so they can be up to an hour late.
 // Bitcoin and Ethereum also refresh live in the reader's browser (CoinGecko). If a source fails, that item is left out.
-// `tape`: the scrolling strip under the section header · otherwise: the full "Mercados" board.
-interface Props { tape?: boolean }
-const { tape = false } = Astro.props;
+// `tape`: the scrolling strip under the section header · `strip`: the same strip on its own (home page),
+// with a "Mercados" link to Economía · otherwise: the full "Mercados" board.
+import { url } from '../../lib/site';
+interface Props { tape?: boolean; strip?: boolean }
+const { tape: tapeOnly = false, strip = false } = Astro.props;
+const tape = tapeOnly || strip;
 
 type Quote = { sym: string; name: string; group: string; price: number; prev: number; spark: number[]; unit?: string; coin?: string; digits?: number };
 const LIST: Array<Omit<Quote, 'price' | 'prev' | 'spark'>> = [
@@ -48,7 +51,8 @@ const spark = (v: number[]) => {
 const when = at.toLocaleString('es-PR', { weekday: 'long', hour: 'numeric', minute: '2-digit', timeZone: 'America/Puerto_Rico' });
 ---
 {list.length > 0 && (tape ? (
-  <div class="eco-tape" aria-label="Mercados">
+  <div class:list={['eco-tape', { 'eco-strip': strip }]} aria-label="Mercados">
+    {strip && <a class="eco-strip-l" href={url('seccion/economia')}>Mercados <span aria-hidden="true">›</span></a>}
     <div class="eco-tape-track">
       {[0, 1].map((copy) => (
         <ul aria-hidden={copy ? 'true' : undefined}>

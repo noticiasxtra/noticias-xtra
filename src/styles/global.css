@@ -2082,17 +2082,22 @@ main.wrap,.home-grid,.ys-page,.tb-page{padding-top:var(--gap)}
 .cx-tlbl{font-size:21px}
 @media (min-width:900px){
   .cx{grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);align-items:start;gap:18px}
-  .cx-head,.cx-alerts,.cx > section:last-child:not(.cx-card){grid-column:1/-1}
-  .cx-left{grid-column:1;grid-row:3}
-  .cx-mid{grid-column:2;grid-row:3}
-  .cx-side{grid-column:1/-1}
+  .cx-head,.cx-alerts,.cx-news{grid-column:1/-1}
+  .cx-head{grid-row:1} .cx-alerts{grid-row:2} .cx-news{grid-row:3}
+  .cx-left{grid-column:1;grid-row:4}
+  .cx-mid{grid-column:2;grid-row:4}
+  .cx-side{grid-column:1/-1;grid-row:5}
   .cx-left .cx-now{order:0}
   .cx-now-temp{font-size:64px}
 }
 @media (min-width:1150px){
   .cx{grid-template-columns:minmax(0,1fr) minmax(0,1.35fr) 290px}
-  .cx-side{grid-column:3;grid-row:3;position:sticky;top:84px}
+  .cx-side{grid-column:3;grid-row:4}
 }
+/* Weather news at the top, compact */
+.cx-news .sec-h{margin:0 0 10px}
+.cx-news-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 24px}
+@media (max-width:760px){ .cx-news-list{grid-template-columns:minmax(0,1fr)} }
 /* Town picker next to the title */
 .cx-head-row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .cx-pick{display:inline-flex;align-items:center;gap:6px;padding:7px 10px 7px 12px;border-radius:999px;background:var(--purple);color:#fff;cursor:pointer;box-shadow:0 3px 10px rgba(43,17,133,.25)}
@@ -2484,10 +2489,10 @@ body.ad-skin{background:var(--ad-skin) center top/cover fixed}
 .eco-tape-track{display:flex;width:max-content;animation:ecoTape 60s linear infinite}
 .eco-tape:hover .eco-tape-track{animation-play-state:paused}
 .eco-tape ul{display:flex;list-style:none;margin:0;padding:0}
-.eco-tape li{display:flex;align-items:center;gap:6px;padding:9px 18px;font-size:14px;white-space:nowrap;border-right:1px solid rgba(255,255,255,.1)}
+.eco-tape li{display:flex;align-items:center;gap:8px;padding:12px 20px;font-size:15px;white-space:nowrap;border-right:1px solid rgba(255,255,255,.1)}
 .eco-tape b{font-weight:700;opacity:.9}
 .eco-n{font-variant-numeric:tabular-nums;font-family:var(--head);font-weight:700}
-.eco-ch{font-size:13px;font-weight:800;font-variant-numeric:tabular-nums}
+.eco-ch{font-size:14px;font-weight:800;font-variant-numeric:tabular-nums}
 .eco-tape .eco-ch.up{color:#4ADE80}
 .eco-tape .eco-ch.down{color:#FF7A8A}
 @keyframes ecoTape{from{transform:translateX(0)}to{transform:translateX(-50%)}}
@@ -2518,3 +2523,11 @@ body.ad-skin{background:var(--ad-skin) center top/cover fixed}
   .eco-hero h1{font-size:28px}
   .eco-hero-t{padding:16px 16px 12px}
 }
+
+/* Home: market strip on its own, with a "Mercados" label linking to Economía */
+.eco-tape.eco-strip{position:relative;display:flex;align-items:stretch;margin:var(--gap) 0;border-radius:14px;color:#fff;background:linear-gradient(120deg,#0B1F3A,#123B5C 60%,#14708F);border:0}
+.eco-strip-l{position:relative;z-index:1;flex:none;display:flex;align-items:center;gap:4px;padding:0 16px;background:#14708F;color:#fff;font-family:var(--head);font-weight:800;font-size:15px;text-decoration:none;box-shadow:8px 0 16px rgba(11,31,58,.6)}
+.eco-strip-l:hover{background:#1A86AA}
+.eco-strip .eco-tape-track{flex:none}
+.eco-strip .eco-ch.up{color:#4ADE80}
+.eco-strip .eco-ch.down{color:#FF7A8A}

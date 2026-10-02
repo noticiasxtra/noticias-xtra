@@ -2,7 +2,7 @@
 // Clima: weather page, designed for phones first. Live data from the National Weather Service (NWS/SNM),
 // read in the reader's browser: pick a town → current conditions, 24-hour chart, 7-day forecast.
 // Maps (radar, satellite, tropics), alerts, and "En la isla hoy" (every town at a glance).
-// Layout: phones show the radar first; computers show forecast + temperature | radar | towns.
+// Layout: weather news first, then (phones) radar first; (computers) forecast + temperature | radar | towns.
 import Base from '../../layouts/Base.astro';
 import StoryCard from '../../components/StoryCard.astro';
 import { getStories, url } from '../../lib/site';
@@ -33,6 +33,13 @@ const TOWNS: Array<[string, number, number]> = [
     </header>
 
     <div class="cx-alerts" data-alerts hidden></div>
+
+    {news.length > 0 && (
+      <section class="cx-news" aria-labelledby="cx-news-h">
+        <div class="sec-h"><h2 id="cx-news-h">Noticias del tiempo</h2></div>
+        <div class="cx-news-list">{news.slice(0, 4).map((s) => <StoryCard story={s} variant="item" />)}</div>
+      </section>
+    )}
 
     <!-- Phones: radar first. Computers: forecast and temperature on the left, radar in the middle, towns on the right. -->
     <section class="cx-card cx-maps cx-mid">
@@ -93,12 +100,6 @@ const TOWNS: Array<[string, number, number]> = [
     </section>
     </aside>
 
-    {news.length > 0 && (
-      <section>
-        <div class="sec-h"><h2>Noticias del tiempo</h2></div>
-        <div class="grid2">{news.slice(0, 4).map((s) => <StoryCard story={s} />)}</div>
-      </section>
-    )}
   </main>
 
   <script>
