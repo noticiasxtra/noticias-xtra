@@ -195,7 +195,7 @@ const GIF_IMGS = [['gif-wepa', '¡Wepa! animado'], ['gif-coqui', 'Coquí saltand
       const r = getRep(); const lv = levelOf(r);
       root.querySelector('[data-rep-level]')!.textContent = lv.name;
       root.querySelector('[data-rep-pts]')!.textContent = r.points.toLocaleString('es-PR');
-      root.querySelector('[data-rep-next]')!.textContent = lv.next ? `Para llegar a ${lv.next.name} necesitas:` : '¡Eres Top comentarista! Mantén cero reportes para conservarlo.';
+      root.querySelector('[data-rep-next]')!.textContent = lv.next ? `Para llegar a ${lv.next.name} necesitas:` : '¡Eres Diamante! Mantén cero reportes para conservarlo.';
       root.querySelector('[data-rep-needs]')!.innerHTML = lv.next ? needs(r, lv.next).map((n) => `<li class="${n.have >= n.need ? 'ok' : ''}"><span>${n.have >= n.need ? '✓' : '○'} ${n.label}</span><b>${Math.min(n.have, n.need).toLocaleString('es-PR')}/${n.need.toLocaleString('es-PR')}</b></li>`).join('') : '';
       const got = specialsOf(r);
       root.querySelectorAll<HTMLElement>('[data-special]').forEach((li) => li.classList.toggle('won', !!got[li.dataset.special!]));
