@@ -7,12 +7,12 @@ interface Props { storyId: string; kind?: 'story' | 'game' }
 const { storyId, kind = 'story' } = Astro.props;
 // Sample comments: invented usernames, clearly labeled as examples
 const SAMPLES = kind === 'game' ? [
-  { id: 's1', name: 'tito_domino', text: '¡Hoy llegué a 100 primero! Este juego me tiene enganchao. 🔥', likes: 18, ago: 'hace 1 h', level: 'top' },
-  { id: 's2', name: 'la_nena_de_caguas', text: '¿Alguien más se tranca siempre en el nivel difícil? Denme un truco.', likes: 9, ago: 'hace 3 h', level: 'voz' },
-  { id: 's3', name: 'abuela_sudoku', text: 'Lo juego todas las mañanas con el café. ☕', likes: 6, ago: 'hace 6 h', level: 'comentarista' },
+  { id: 's1', name: 'tito_domino', text: '¡Hoy llegué a 100 primero! Este juego me tiene enganchao. 🔥', likes: 18, ago: 'hace 1 h', level: 'diamante' },
+  { id: 's2', name: 'la_nena_de_caguas', text: '¿Alguien más se tranca siempre en el nivel difícil? Denme un truco.', likes: 9, ago: 'hace 3 h', level: 'top' },
+  { id: 's3', name: 'abuela_sudoku', text: 'Lo juego todas las mañanas con el café. ☕', likes: 6, ago: 'hace 6 h', level: 'voz' },
 ] : [
-  { id: 's1', name: 'lectora_bayamon', text: 'Muy buena información, gracias por explicarlo claro. 👏', likes: 24, ago: 'hace 2 h', level: 'top' },
-  { id: 's2', name: 'jose.boricua', text: 'Esto hay que seguirlo de cerca. ¿Habrá vistas públicas?', likes: 11, ago: 'hace 3 h', level: 'voz' },
+  { id: 's1', name: 'lectora_bayamon', text: 'Muy buena información, gracias por explicarlo claro. 👏', likes: 24, ago: 'hace 2 h', level: 'diamante' },
+  { id: 's2', name: 'jose.boricua', text: 'Esto hay que seguirlo de cerca. ¿Habrá vistas públicas?', likes: 11, ago: 'hace 3 h', level: 'top' },
   { id: 's3', name: 'abuela_de_ponce', text: '🇵🇷🙏', likes: 7, ago: 'hace 5 h', level: 'comentarista' },
 ];
 // Commenter levels (src/lib/reputation.ts): badge shown next to the name
@@ -20,13 +20,12 @@ import { LEVELS, RULES, LEVEL_INFO, SPECIALS } from '../lib/reputation';
 // Small outline icons for each badge (option A: colored label with an icon)
 const svg = (d: string) => `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
 const BADGE: Record<string, string> = {
-  participante: svg('<circle cx="12" cy="12" r="4"/>'),
   comentarista: svg('<path d="M12 3l1.8 4.6L18 9l-4.2 1.4L12 15l-1.8-4.6L6 9l4.2-1.4z"/><path d="M19 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/>'),
-  voz: svg('<path d="M6 4h12l3 5-9 11L3 9z"/><path d="M3 9h18"/>'),
+  voz: svg('<path d="M4 10v4h3l7 4V6L7 10z"/><path d="M17.5 9a4 4 0 0 1 0 6M20 7a7 7 0 0 1 0 10"/>'),
+  diamante: svg('<path d="M6 4h12l3 5-9 11L3 9z"/><path d="M3 9h18M9 4l3 16M15 4l-3 16"/>'),
   top: svg('<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>'),
   primero: svg('<path d="M4 5h16v11H9l-5 4z"/>'),
   constante: svg('<path d="M12 3c1 3 4 4.5 4 8.5a4 4 0 0 1-8 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 0-7.5z"/>'),
-  destacado: svg('<circle cx="12" cy="9" r="5"/><path d="M8.5 13.5L7 21l5-3 5 3-1.5-7.5"/>'),
   limpio: svg('<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>'),
 };
 const levelName = (id: string) => LEVELS.find((l) => l.id === id)?.name ?? '';
@@ -79,7 +78,7 @@ const STICKERS = ['👏', '🔥', '❤️', '😂', '😮', '😢', '🙏', '�
       <ul class="cm-rep-rules">
         <li>+{RULES.comment} por comentario de {RULES.minChars} caracteres o más (+{RULES.reply} si es respuesta); cuentan hasta {RULES.perDay} al día.</li>
         <li>+{RULES.like} por cada Me gusta de otro lector · +{RULES.featured} si la redacción destaca tu comentario.</li>
-        <li>{RULES.report} si un comentario tuyo es reportado y ocultado. Top comentarista se pierde con un reporte.</li>
+        <li>{RULES.report} si un comentario tuyo es reportado y ocultado. Top comentarista y Diamante se pierden con un reporte.</li>
         <li>Si borras un comentario, se restan sus puntos. Stickers y respuestas cortas no suman.</li>
       </ul>
       <p class="cm-rep-demo">Vista previa: tu reputación se guarda en este dispositivo. Los Me gusta de otros y los destacados llegarán con las cuentas.</p>

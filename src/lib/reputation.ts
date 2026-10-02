@@ -21,10 +21,10 @@ export const RULES = {
 };
 export const LEVELS = [
   { id: 'nuevo', name: 'Nuevo', points: 0, days: 0, likes: 0 },
-  { id: 'participante', name: 'Participante', points: 30, days: 0, likes: 0 },
   { id: 'comentarista', name: 'Comentarista', points: 150, days: 7, likes: 0 },
   { id: 'voz', name: 'Voz de la comunidad', points: 500, days: 30, likes: 25 },
   { id: 'top', name: 'Top comentarista', points: 1500, days: 60, likes: 100, cleanDays: 90 },
+  { id: 'diamante', name: 'Diamante', points: 5000, days: 150, likes: 300, cleanDays: 180 },
 ] as const;
 export type LevelId = (typeof LEVELS)[number]['id'];
 
@@ -86,17 +86,16 @@ export function needs(r: Rep, l: (typeof LEVELS)[number]) {
   return 'cleanDays' in l ? [...list, { label: `Sin reportes en ${l.cleanDays} días`, have: cleanFor(r, l.cleanDays) ? 1 : 0, need: 1 }] : list;
 }
 
-// ---- Badges: the 4 levels (one at a time, shown next to the name) and 4 special badges (collected, shown in the panel) ----
+// ---- Badges: the 4 levels (one at a time, shown next to the name) and 3 special badges (collected, shown in the panel) ----
 export const LEVEL_INFO: Record<string, { means: string; how: string }> = {
-  participante: { means: 'Ya forma parte de la conversación.', how: 'Llega a 30 puntos de reputación (unos 15 comentarios con texto real).' },
   comentarista: { means: 'Comenta seguido y con sustancia.', how: '150 puntos y comentarios en 7 días distintos.' },
   voz: { means: 'La comunidad valora lo que dice.', how: '500 puntos, 25 Me gusta de otros lectores y comentarios en 30 días distintos.' },
   top: { means: 'De los comentaristas más respetados de Noticias Xtra.', how: '1,500 puntos, 100 Me gusta de otros, comentarios en 60 días distintos y ningún reporte en 90 días. Un reporte lo quita.' },
+  diamante: { means: 'Lo más alto: una voz ejemplar de la comunidad, por encima de Top comentarista.', how: '5,000 puntos, 300 Me gusta de otros lectores, comentarios en 150 días distintos y ningún reporte en 180 días. Un reporte lo quita.' },
 };
 export const SPECIALS = [
   { id: 'primero', name: 'Primer comentario', means: 'Se estrenó en la conversación.', how: 'Publica tu primer comentario con texto real (40 caracteres o más).' },
   { id: 'constante', name: 'Constante 7 días', means: 'Comenta todos los días.', how: 'Comenta (con texto real) 7 días seguidos.' },
-  { id: 'destacado', name: 'Destacado por la redacción', means: 'La redacción escogió uno de sus comentarios como de los mejores.', how: 'Escribe comentarios útiles y respetuosos: la redacción los marca como “Destacado”.' },
   { id: 'limpio', name: 'Sin reportes 90 días', means: 'Comenta con respeto.', how: 'Comenta durante 90 días sin que te reporten ni oculten un comentario.' },
 ] as const;
 
@@ -112,7 +111,6 @@ export function specialsOf(r: Rep): Record<string, boolean> {
   return {
     primero: r.days.length > 0,
     constante: longestRun(r.days) >= 7,
-    destacado: r.featured > 0,
     limpio: !!first && Date.now() - first >= 90 * 864e5 && cleanFor(r, 90),
   };
 }
