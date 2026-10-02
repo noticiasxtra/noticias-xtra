@@ -6,11 +6,12 @@ import Time from './Time.astro';
 import WeatherBox from './WeatherBox.astro';
 import AdSlot from './AdSlot.astro';
 import DominoBox from './DominoBox.astro';
+import HomeExtras from './HomeExtras.astro';
 import { getStories, mostRead, url, SITE } from '../lib/site';
 import { getBreaking } from '../lib/breaking';
 import foro from '../data/foro.json';
-interface Props { newsletter?: boolean; foro?: boolean }
-const { newsletter = true, foro: showForo = false } = Astro.props;
+interface Props { newsletter?: boolean; foro?: boolean; extras?: boolean }
+const { newsletter = true, foro: showForo = false, extras = false } = Astro.props;
 // Small Foro Xtra teaser (home page): the three most-voted sample topics
 const foroTop = [...foro].sort((a, b) => b.votes - a.votes).slice(0, 3);
 const stories = await getStories();
@@ -72,5 +73,6 @@ const hhmm = (d: Date) => d.toLocaleTimeString('es-PR', { hour: 'numeric', minut
       <a class="fx-go" href={url('foro')}>Únete a la conversación ›</a>
     </section>
   )}
+  {extras && <HomeExtras />}
   <AdSlot size="halfpage" sticky />
 </aside>

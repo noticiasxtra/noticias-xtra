@@ -1834,3 +1834,48 @@ main.wrap,.home-grid,.ys-page,.tb-page{padding-top:var(--gap)}
   .nav-links > a.nav-ad{display:inline-flex;align-items:center;align-self:center;margin:0 10px 0 0;padding:4px 10px;border-radius:999px;background:var(--red);color:#fff;opacity:1;font-weight:800;border-bottom:0;box-shadow:0 2px 0 #A9172B}
 }
 @media (min-width:601px){ .nav-links > a.nav-ad + a{padding-left:0} }
+
+/* Home right column extras (src/components/HomeExtras.astro) */
+.hx-box{display:block;background:var(--card);border:1px solid #D7D3CA;border-radius:12px;padding:12px 14px;color:var(--ink)}
+.hx-h{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:6px}
+.hx-h h2{margin:0;font-size:16px;color:var(--ink)}
+.hx-h a{font-size:13px;font-weight:700;color:var(--purple)}
+.hx-games,.hx-events,.hx-list{list-style:none;margin:0;padding:0}
+.hx-games li a{display:grid;gap:2px;padding:7px 0;border-top:1px solid var(--line);color:var(--ink)}
+.hx-games li:first-child a{border-top:0}
+.hx-g-lg{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;text-transform:uppercase;color:var(--muted)}
+.hx-g-lg .sp-demo{font-size:9px;padding:1px 4px}
+.hx-g-lg em{margin-left:auto;font-style:normal;text-transform:none}
+.hx-g-lg em.live{color:var(--red)}
+.hx-g-t{display:flex;align-items:center;gap:7px;font-family:var(--head);font-weight:600;font-size:14px}
+.hx-g-t > span:not(.tm-logo){flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hx-events li a{display:flex;gap:10px;align-items:center;padding:7px 0;border-top:1px solid var(--line);color:var(--ink)}
+.hx-events li:first-child a{border-top:0}
+.hx-date{flex:none;display:grid;justify-items:center;width:44px;padding:4px 0;border-radius:8px;background:#2B1185;color:#fff;font-family:var(--head)}
+.hx-date small{font-size:10px;opacity:.85}
+.hx-date b{font-size:18px;line-height:1;color:#FFE27A}
+.hx-events strong{display:block;font-family:var(--head);font-size:14px;line-height:1.25}
+.hx-events small{font-size:12px;color:var(--muted)}
+.hx-horo{display:flex;gap:12px;align-items:flex-start;background:linear-gradient(135deg,#F3EEFF,#FFF);text-decoration:none}
+.hx-sign{flex:none;display:grid;place-items:center;width:44px;height:44px;border-radius:50%;background:var(--purple);color:#fff;font-size:22px}
+.hx-horo small{display:block;font-size:12px;font-weight:700;color:var(--blue)}
+.hx-horo b{display:block;font-family:var(--head);font-size:14px;line-height:1.3;margin:2px 0}
+.hx-horo em{font-style:normal;font-size:13px;font-weight:700;color:var(--purple)}
+.hx-list li a{display:block;padding:8px 0;border-top:1px solid var(--line);font-family:var(--head);font-weight:600;font-size:14px;line-height:1.3;color:var(--ink)}
+.hx-list li:first-child a{border-top:0}
+.hx-list small{display:block;font-family:var(--body);font-weight:700;font-size:11px;color:var(--blue);text-transform:uppercase}
+.hx-box a:hover strong,.hx-list a:hover,.hx-games a:hover span{color:var(--purple)}
+[data-theme="dark"] .hx-box{border-color:#34364D}
+[data-theme="dark"] .hx-horo{background:linear-gradient(135deg,#221A44,var(--card))}
+
+/* Home: the games row spans the full width (not squeezed); section boxes are more compact */
+.home-sections > div.ad-span{display:block}
+.home-sections .sec-block .big .ph{aspect-ratio:auto;height:clamp(170px,13vw,240px)}
+.home-sections .sec-block .item{grid-template-columns:104px 1fr;gap:12px;padding:10px 0}
+.home-sections .sec-block .item h3{font-size:15px}
+.home-sections .sec-block .big h2,.home-sections .sec-block .big h3{font-size:20px}
+/* Home: a full-width section box with only one story shows it as a wide feature, not a half-empty block */
+.home-sections .sec-wide .block:has(.list:empty){grid-template-columns:1fr}
+.home-sections .sec-wide .block:has(.list:empty) .big{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:18px;align-items:center}
+.home-sections .sec-wide .block:has(.list:empty) .big > *:not(a:first-child){grid-column:2}
+.home-sections .sec-wide .block:has(.list:empty) .big > a:first-child{grid-row:1 / span 4}

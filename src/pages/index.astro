@@ -29,6 +29,17 @@ const leadRelated = related.length ? related : others.slice(0, 3);
 const HOME_ORDER = ['gobierno', 'politica', 'deportes', 'economia', 'entretenimiento', 'salud', 'clima', 'estados-unidos', 'mundo', 'opinion'] as const;
 const sectionIds = [...HOME_ORDER, ...SECTIONS.map((s) => s.id).filter((id) => id !== 'puerto-rico' && !(HOME_ORDER as readonly string[]).includes(id))]
   .filter((id) => stories.some((s) => s.data.section === id)) as Array<(typeof SECTIONS)[number]['id']>;
+// Section boxes sit side by side in pairs. To avoid blank space under a shorter box, each section is
+// paired with the next one (in priority order) that shows the same number of stories (a box shows up to 4).
+// A section with no match gets a full-width row of its own.
+const shown = (id: string) => Math.min(4, stories.filter((s) => s.data.section === id).length);
+const rows: Array<typeof sectionIds> = [];
+const queue = [...sectionIds];
+while (queue.length) {
+  const a = queue.shift()!;
+  const j = queue.findIndex((b) => shown(b) === shown(a));
+  rows.push(j >= 0 ? [a, queue.splice(j, 1)[0]] : [a]);
+}
 ---
 <Base active="home">
   <HomeStrip />
@@ -52,11 +63,6 @@ const sectionIds = [...HOME_ORDER, ...SECTIONS.map((s) => s.id).filter((id) => i
 
       {row.length > 0 && <div class="home-row">{row.map((s) => <StoryCard story={s} />)}</div>}
 
-      {/* MLB postseason bracket (shows only while src/data/llaves.json has one) */}
-      <BracketView league="mlb" home />
-
-      <AdSlot size="infeed" />
-
       {more.length > 0 && (
         <section>
           <div class="sec-h"><h2>Más noticias</h2><a href={url('noticias')}>Ver todas</a></div>
@@ -67,6 +73,11 @@ const sectionIds = [...HOME_ORDER, ...SECTIONS.map((s) => s.id).filter((id) => i
         </section>
       )}
 
+      <AdSlot size="infeed" />
+
+      {/* MLB postseason bracket (shows only while src/data/llaves.json has one) */}
+      <BracketView league="mlb" home />
+
       {F.videos && (
         <section>
           <div class="sec-h"><h2>Videos</h2><a href={url('videos')}>Ver todos</a></div>
@@ -75,12 +86,11 @@ const sectionIds = [...HOME_ORDER, ...SECTIONS.map((s) => s.id).filter((id) => i
       )}
 
       <div class="home-sections">
-        {sectionIds.map((id, i) => (
+        {rows.map((row, i) => (
           <>
-            {/* a leftover block at the end spreads across the full width instead of leaving a gap */}
-            <div class:list={{ 'sec-wide': i === sectionIds.length - 1 && sectionIds.length % 2 === 1 }}><SectionBlock sectionId={id} stories={stories} /></div>
-            {i === 3 && i < sectionIds.length - 1 && <AdSlot size="infeed" class="ad-span" />}
-            {i === 5 && i < sectionIds.length - 1 && <div class="ad-span"><GamesTeaser /></div>}
+            {row.map((id) => <div class:list={{ 'sec-wide': row.length === 1 }}><SectionBlock sectionId={id} stories={stories} /></div>)}
+            {i === 1 && i < rows.length - 1 && <AdSlot size="infeed" class="ad-span" />}
+            {i === 3 && i < rows.length - 1 && <div class="ad-span"><GamesTeaser /></div>}
           </>
         ))}
       </div>
@@ -94,6 +104,6 @@ const sectionIds = [...HOME_ORDER, ...SECTIONS.map((s) => s.id).filter((id) => i
         </div>
       </section>}
     </main>
-    <Sidebar newsletter={false} foro />
+    <Sidebar foro extras />
   </div>
 </Base>
