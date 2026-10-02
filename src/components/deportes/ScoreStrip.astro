@@ -1,7 +1,7 @@
 ---
 // Score carousel (home, Deportes, league pages). Renders only when there are games.
 // Cards: two-color team bar on top, status + league, team badges with scores, abbreviations.
-// Faded edges with arrow buttons; league filter buttons when showing several leagues.
+// Faded edges with arrow buttons.
 import { scores, type Game } from '../../lib/scores';
 import { league } from '../../lib/leagues';
 import { team } from '../../lib/teams';
@@ -10,7 +10,6 @@ import TeamLogo from './TeamLogo.astro';
 interface Props { only?: string; title?: boolean; theme?: string }
 const { only } = Astro.props;
 const games = scores(only);
-const leaguesHere = [...new Set(games.map((g) => g.league))].map((id) => league(id)!).filter(Boolean);
 const link = (g: Game) => url(g.id ? `deportes/juego/${g.id}` : `deportes/${g.league}`);
 
 const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Puerto_Rico' });
@@ -28,16 +27,7 @@ function status(g: Game): { text: string; live?: boolean } {
 ---
 {games.length > 0 && (
   <div class="sc" data-sc>
-    {/* No title: league filters only (each card shows its own DEMO tag). League pages skip this row. */}
-    {!only && <div class="sc-h">
-      {leaguesHere.length > 1 && (
-        <div class="sc-filters" role="group" aria-label="Filtrar por liga">
-          <button type="button" data-f="" aria-pressed="true">Todos</button>
-          {leaguesHere.map((l) => <button type="button" data-f={l.id} aria-pressed="false">{l.name}</button>)}
-        </div>
-      )}
-      <a class="sc-more" href={url('seccion/deportes')}>Xtra Deportes ›</a>
-    </div>}
+    {/* No header row: the score cards start right away */}
     <div class="sc-rail">
       <button type="button" class="sc-arrow prev" aria-label="Ver juegos anteriores" hidden>
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
@@ -95,15 +85,6 @@ function status(g: Game): { text: string; live?: boolean } {
     next.addEventListener('click', () => track.scrollBy({ left: step(), behavior: 'smooth' }));
     track.addEventListener('scroll', update, { passive: true });
     window.addEventListener('resize', update);
-    // League filter buttons
-    sc.querySelectorAll<HTMLButtonElement>('[data-f]').forEach((b) =>
-      b.addEventListener('click', () => {
-        sc.querySelectorAll('[data-f]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
-        sc.querySelectorAll<HTMLElement>('.sc-card').forEach((c) => (c.hidden = !!b.dataset.f && c.dataset.league !== b.dataset.f));
-        track.scrollLeft = 0;
-        update();
-      }),
-    );
     update();
   });
 </script>
