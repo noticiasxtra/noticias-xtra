@@ -6,23 +6,26 @@
 export type AdSize = 'leaderboard' | 'rectangle' | 'halfpage' | 'infeed';
 
 // ---- Prices (launch prices, USD per month unless `per` says otherwise) ----
+// `art`: the image sizes (width × height) the client uploads, or that we create for them.
 export const FORMATS = [
-  { id: 'valla', name: 'Valla digital', size: 'Rota en el banner superior', price: 69, per: 'mes', slots: ['leaderboard'] as AdSize[],
-    about: 'Tu anuncio rota con hasta 3 marcas más, como una valla en la carretera. Cambia cada 8 segundos.', w: 728, h: 90 },
-  { id: 'rectangle', name: 'Rectángulo', size: '300 × 250', price: 99, per: 'mes', slots: ['rectangle'] as AdSize[],
-    about: 'Columna derecha de la portada, las noticias, Deportes y cada juego. Igual en celular.', w: 300, h: 250 },
-  { id: 'infeed', name: 'Entre noticias', size: '728 × 90 · 320 × 100 en celular', price: 99, per: 'mes', slots: ['infeed'] as AdSize[],
-    about: 'Dentro de la portada, al final de cada noticia y en las secciones.', w: 728, h: 90 },
-  { id: 'leaderboard', name: 'Banner exclusivo', size: '728 × 90 · 320 × 100 en celular', price: 149, per: 'mes', slots: ['leaderboard'] as AdSize[],
-    about: 'El banner horizontal de todo el sitio, solo para tu marca (sin rotación).', w: 728, h: 90 },
-  { id: 'halfpage', name: 'Media página', size: '300 × 600', price: 179, per: 'mes', slots: ['halfpage'] as AdSize[],
-    about: 'El espacio más grande; se queda a la vista mientras el lector baja. Solo en computadora.', w: 300, h: 600 },
-  { id: 'patrocinio', name: 'Patrocinio de sección', size: 'Juegos, Deportes, Clima…', price: 299, per: 'mes', slots: [] as AdSize[],
-    about: '“Presentado por” tu marca y todos los espacios de esa sección.', w: 300, h: 250 },
-  { id: 'takeover', name: 'Toma de portada', size: 'Todo el sitio por un día', price: 249, per: 'día', slots: [] as AdSize[],
-    about: 'Todos los espacios y el fondo de la portada con tu marca durante 24 horas.', w: 728, h: 90 },
+  { id: 'valla', name: 'Valla digital', size: 'Banner superior, rota con otras marcas', price: 29, per: 'mes', slots: ['leaderboard'] as AdSize[],
+    about: 'Tu anuncio rota cada 8 segundos con hasta 3 marcas más. La forma más barata de empezar.', art: [[728, 90], [320, 100]], popular: false },
+  { id: 'rectangle', name: 'Rectángulo', size: '300 × 250', price: 49, per: 'mes', slots: ['rectangle'] as AdSize[],
+    about: 'Al lado de las noticias, Deportes y los juegos. Se ve igual en celular.', art: [[300, 250]], popular: true },
+  { id: 'infeed', name: 'Entre noticias', size: '728 × 90', price: 49, per: 'mes', slots: ['infeed'] as AdSize[],
+    about: 'Entre las noticias de la portada y al final de cada noticia.', art: [[728, 90], [320, 100]], popular: false },
+  { id: 'leaderboard', name: 'Banner exclusivo', size: '728 × 90', price: 89, per: 'mes', slots: ['leaderboard'] as AdSize[],
+    about: 'El banner de arriba, solo para tu marca (sin rotar).', art: [[728, 90], [320, 100]], popular: false },
+  { id: 'halfpage', name: 'Media página', size: '300 × 600', price: 99, per: 'mes', slots: ['halfpage'] as AdSize[],
+    about: 'El espacio más grande; se queda a la vista al bajar. Solo en computadora.', art: [[300, 600]], popular: false },
+  { id: 'patrocinio', name: 'Patrocinio de sección', size: 'Juegos, Deportes, Clima…', price: 149, per: 'mes', slots: [] as AdSize[],
+    about: '“Presentado por” tu marca y todos los espacios de una sección.', art: [[300, 250], [728, 90]], popular: false },
+  { id: 'takeover', name: 'Toma de portada', size: 'Todo el sitio por un día', price: 99, per: 'día', slots: [] as AdSize[],
+    about: 'Todos los espacios del sitio con tu marca durante 24 horas.', art: [[300, 250], [728, 90], [300, 600]], popular: false },
 ];
-export const DESIGN_FEE = 49; // we design the ad when the client has no artwork
+export const DESIGN_FEE = 19; // we create the ad from the client's text and logo
+export const DESIGN_FREE_FROM_MONTHS = 3; // ...free in campaigns this long or longer
+export const UPLOAD = { maxMB: 3, types: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'] };
 
 // ---- Where the ads show ----
 // Share of the full price for each audience choice
@@ -35,29 +38,29 @@ export const REGIONS = [
   { id: 'este', name: 'Este', towns: 'Fajardo, Humacao, Río Grande, Yabucoa…' },
   { id: 'islas', name: 'Vieques y Culebra', towns: 'Las islas municipio' },
 ];
-export const AUDIENCE = { all: 1, island: 0.85, diaspora: 0.5, perRegion: 0.3 }; // regions add up, capped at `island`
+export const AUDIENCE = { all: 1, island: 0.85, diaspora: 0.5, perRegion: 0.25 }; // regions add up, capped at `island`
 
 // ---- Discounts ----
-export const LAUNCH_DISCOUNT = { pct: 30, months: 3, text: 'Anunciante fundador: 30% de descuento los primeros 3 meses.' };
+export const LAUNCH_DISCOUNT = { pct: 40, months: 3, text: 'Anunciante fundador: 40% de descuento los primeros 3 meses.' };
 export const DURATION_DISCOUNTS = [ // months → % off
-  { months: 3, pct: 10 }, { months: 6, pct: 15 }, { months: 12, pct: 25 },
+  { months: 3, pct: 15 }, { months: 6, pct: 20 }, { months: 12, pct: 30 },
 ];
 export const OTHER_DISCOUNTS = [
   { id: 'combo', pct: 10, text: '2 formatos o más en la misma campaña' },
   { id: 'prepago', pct: 5, text: 'Pago completo por adelantado' },
   { id: 'nonprofit', pct: 50, text: 'Organizaciones sin fines de lucro' },
 ];
-export const MAX_DISCOUNT = 50; // discounts add up to this cap
+export const MAX_DISCOUNT = 60; // discounts add up to this cap
 // Free ads after the total spent (lifetime, per client)
 export const REWARDS = [
-  { at: 1000, gift: '1 semana de Valla digital gratis' },
-  { at: 2500, gift: '1 mes de Rectángulo gratis' },
-  { at: 5000, gift: '1 Toma de portada gratis' },
-  { at: 10000, gift: '1 mes de Patrocinio de sección gratis' },
+  { at: 250, gift: '1 mes de Valla digital gratis' },
+  { at: 500, gift: '1 mes de Rectángulo gratis' },
+  { at: 1000, gift: '1 Toma de portada gratis' },
+  { at: 2500, gift: '1 mes de Patrocinio de sección gratis' },
 ];
 // Agencies and big brands: discount by yearly volume
 export const VOLUME_TIERS = [
-  { from: 3000, pct: 10 }, { from: 7500, pct: 15 }, { from: 15000, pct: 20 }, { from: 30000, pct: 25 },
+  { from: 1000, pct: 10 }, { from: 2500, pct: 15 }, { from: 5000, pct: 20 }, { from: 10000, pct: 25 },
 ];
 export const AGENCY_COMMISSION = 15;
 
@@ -84,3 +87,13 @@ export const GOOGLE = {
 };
 
 export const ROTATE_SECONDS = 8;
+
+// ---- Online payment and ad requests ----
+// Fill these in once the accounts exist. While empty, the Anúnciate page works as a preview: nothing is charged
+// or sent, and it tells the visitor to write to us.
+//  - stripeLink: a Stripe Payment Link set to "customer chooses the amount" (cards, Apple Pay, Google Pay).
+//  - athMovil: ATH Móvil Business public token (the payment button for websites).
+//  - requestsUrl: where requests (with the uploaded files) are saved for the employee who approves them.
+export const PAYMENTS = { stripeLink: '', athMovilToken: '' };
+export const REQUESTS = { url: '', key: '' };
+export const APPROVAL_HOURS = 24; // promise shown to clients

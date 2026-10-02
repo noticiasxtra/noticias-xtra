@@ -153,23 +153,23 @@ const GLOSSARY = [
     type Camp = { name: string; fmt: string; from: string; to: string; daysLeft: number; imp: number; clk: number; budget: number; used: number; st: 'Activa' | 'En revisión' | 'Pausada' | 'Terminó'; bg: string; line: string };
     type Biz = { name: string; initials: string; role: string; base: number; spentAll: number; inv: Array<[string, number, string]>; team: Array<[string, string]>; camps: Camp[]; top: string; color: string; regions: Array<[string, number]> };
     const BIZ: Record<string, Biz> = {
-      panaderia: { name: 'Panadería La Esquina', initials: 'PE', role: 'Eres dueño de esta cuenta · Negocio local', base: 420, spentAll: 347, color: '#B45309', top: 'Metro',
+      panaderia: { name: 'Panadería La Esquina', initials: 'PE', role: 'Eres dueño de esta cuenta · Negocio local', base: 420, spentAll: 171, color: '#B45309', top: 'Metro',
         regions: [['Metro', 0.34], ['Norte', 0.16], ['Este', 0.13], ['Centro', 0.12], ['Sur', 0.11], ['Oeste', 0.09], ['Diáspora', 0.05]],
-        inv: [['Octubre 2026', 118, 'Pagada'], ['Septiembre 2026', 132, 'Pagada'], ['Agosto 2026', 97, 'Pagada']],
+        inv: [['Octubre 2026', 58, 'Pagada'], ['Septiembre 2026', 64, 'Pagada'], ['Agosto 2026', 49, 'Pagada']],
         team: [['Tú', 'Dueño'], ['Carmen (gerente)', 'Puede editar'], ['Contable', 'Solo puede ver']],
         camps: [
-          { name: 'Pan sobao de otoño', fmt: 'Rectángulo · Toda la isla', from: '15 sep', to: '15 oct', daysLeft: 13, imp: 9210, clk: 116, budget: 99, used: 57, st: 'Activa', bg: 'linear-gradient(135deg,#B45309,#F59E0B)', line: 'Pan sobao calientito' },
-          { name: 'Quesitos 2×1', fmt: 'Valla digital · Metro', from: '20 sep', to: '20 oct', daysLeft: 18, imp: 12480, clk: 141, budget: 69, used: 28, st: 'Activa', bg: 'linear-gradient(135deg,#D7263D,#F28C28)', line: 'Quesitos 2×1 hoy' },
-          { name: 'Café y desayuno', fmt: 'Entre noticias', from: '1 nov', to: '30 nov', daysLeft: 0, imp: 0, clk: 0, budget: 99, used: 0, st: 'En revisión', bg: 'linear-gradient(135deg,#5B3A1E,#A16207)', line: 'Desayuno criollo $5.99' },
-          { name: 'Gran apertura Caguas', fmt: 'Rectángulo · Centro', from: '10 ago', to: '31 ago', daysLeft: 0, imp: 9840, clk: 157, budget: 52, used: 52, st: 'Terminó', bg: 'linear-gradient(135deg,#2B1185,#1F90DA)', line: '¡Abrimos en Caguas!' },
+          { name: 'Pan sobao de otoño', fmt: 'Rectángulo · Toda la isla', from: '15 sep', to: '15 oct', daysLeft: 13, imp: 9210, clk: 116, budget: 49, used: 28, st: 'Activa', bg: 'linear-gradient(135deg,#B45309,#F59E0B)', line: 'Pan sobao calientito' },
+          { name: 'Quesitos 2×1', fmt: 'Valla digital · Metro', from: '20 sep', to: '20 oct', daysLeft: 18, imp: 12480, clk: 141, budget: 29, used: 12, st: 'Activa', bg: 'linear-gradient(135deg,#D7263D,#F28C28)', line: 'Quesitos 2×1 hoy' },
+          { name: 'Café y desayuno', fmt: 'Entre noticias', from: '1 nov', to: '30 nov', daysLeft: 0, imp: 0, clk: 0, budget: 49, used: 0, st: 'En revisión', bg: 'linear-gradient(135deg,#5B3A1E,#A16207)', line: 'Desayuno criollo $5.99' },
+          { name: 'Gran apertura Caguas', fmt: 'Rectángulo · Centro', from: '10 ago', to: '31 ago', daysLeft: 0, imp: 9840, clk: 157, budget: 25, used: 25, st: 'Terminó', bg: 'linear-gradient(135deg,#2B1185,#1F90DA)', line: '¡Abrimos en Caguas!' },
         ] },
-      ferreteria: { name: 'Ferretería Díaz', initials: 'FD', role: 'Puedes editar · Cuenta manejada por tu agencia', base: 900, spentAll: 2860, color: '#0E7490', top: 'Oeste',
+      ferreteria: { name: 'Ferretería Díaz', initials: 'FD', role: 'Puedes editar · Cuenta manejada por tu agencia', base: 900, spentAll: 1430, color: '#0E7490', top: 'Oeste',
         regions: [['Oeste', 0.52], ['Sur', 0.48]],
-        inv: [['Octubre 2026', 640, 'Pendiente'], ['Septiembre 2026', 690, 'Pagada'], ['Agosto 2026', 610, 'Pagada']],
+        inv: [['Octubre 2026', 320, 'Pendiente'], ['Septiembre 2026', 345, 'Pagada'], ['Agosto 2026', 305, 'Pagada']],
         team: [['Agencia Creativa PR', 'Administra'], ['Sr. Díaz', 'Dueño'], ['Tú', 'Puede editar']],
         camps: [
-          { name: 'Temporada de huracanes', fmt: 'Media página · Oeste y Sur', from: '1 sep', to: '30 nov', daysLeft: 59, imp: 41200, clk: 455, budget: 537, used: 189, st: 'Activa', bg: 'linear-gradient(135deg,#0E7490,#22D3EE)', line: 'Generadores y plantas' },
-          { name: 'Toma de portada: Black Friday', fmt: 'Toma de portada · 1 día', from: '28 nov', to: '28 nov', daysLeft: 0, imp: 0, clk: 0, budget: 249, used: 0, st: 'Pausada', bg: 'linear-gradient(135deg,#111827,#4B5563)', line: 'Black Friday −40%' },
+          { name: 'Temporada de huracanes', fmt: 'Media página · Oeste y Sur', from: '1 sep', to: '30 nov', daysLeft: 59, imp: 41200, clk: 455, budget: 297, used: 105, st: 'Activa', bg: 'linear-gradient(135deg,#0E7490,#22D3EE)', line: 'Generadores y plantas' },
+          { name: 'Toma de portada: Black Friday', fmt: 'Toma de portada · 1 día', from: '28 nov', to: '28 nov', daysLeft: 0, imp: 0, clk: 0, budget: 99, used: 0, st: 'Pausada', bg: 'linear-gradient(135deg,#111827,#4B5563)', line: 'Black Friday −40%' },
         ] },
     };
     let biz = BIZ.panaderia;
