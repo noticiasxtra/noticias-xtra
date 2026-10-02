@@ -3256,6 +3256,3 @@ html.nx-en .pf-menu .lang-tag{background:var(--red)}
 /* Room above the logo when a hat, crown or fireworks sit on top of it */
 .masthead:has(.ld-top,.ld-sky) .wrap{padding-top:24px}
 @media (max-width:999px){ .masthead:has(.ld-top,.ld-sky) .wrap{padding-top:18px} }
-.lf-sub{margin:26px 0 0;font-size:20px}
-.ld-side.wide{width:38%;right:-34%;bottom:6%}
-.logo-fest:has(.wide){margin-right:56px}
