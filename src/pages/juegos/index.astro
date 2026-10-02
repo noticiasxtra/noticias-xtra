@@ -19,7 +19,7 @@ const trivia = triviaOfTheDay();
       </div>
       <a class="jh-feat" href={url(`juegos/${featured.id}`)}>
         <span class="jh-feat-tag">Juego del día</span>
-        <span class="jh-feat-icon" aria-hidden="true">{featured.icon}</span>
+        <img class="jh-feat-img" src={url(`images/juegos/${featured.id}.svg`)} alt="" />
         <strong>{featured.name}</strong>
         <span>{featured.about}</span>
         <span class="jh-feat-btn">Jugar ahora ›</span>
@@ -39,7 +39,7 @@ const trivia = triviaOfTheDay();
           <div class="jh-grid">
             {GAMES.filter((g) => g.cat === cat.id).map((g) => (
               <a class="jh-card" href={url(`juegos/${g.id}`)} style={`--gc:${g.color}`}>
-                <span class="jh-card-art" aria-hidden="true"><span>{g.icon}</span></span>
+                <span class="jh-card-art" aria-hidden="true"><img src={url(`images/juegos/${g.id}.svg`)} alt="" loading="lazy" /></span>
                 <span class="jh-card-body">
                   <strong>{g.name}</strong>
                   <span>{g.about}</span>

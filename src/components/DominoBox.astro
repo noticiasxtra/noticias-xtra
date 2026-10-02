@@ -1,0 +1,13 @@
+---
+// Right-column promo for the Dominó game (on every page that uses the Sidebar)
+import { url } from '../lib/site';
+---
+<a class="dmx" href={url('juegos/domino')}>
+  <img src={url('images/juegos/domino.svg')} alt="" loading="lazy" />
+  <span class="dmx-body">
+    <span class="dmx-tag">Juegos Xtra</span>
+    <strong>¿Echamos una mano de dominó?</strong>
+    <span>Doble seis contra la computadora. Partida a 100.</span>
+    <span class="dmx-btn">Jugar dominó ›</span>
+  </span>
+</a>

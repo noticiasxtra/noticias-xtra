@@ -13,7 +13,7 @@ const others = GAMES.filter((x) => x.id !== g.id);
     <header class="jg-banner">
       <a class="jg-back" href={url('juegos')}>‹ Juegos Xtra</a>
       <div class="jg-banner-main">
-        <span class="jg-banner-icon" aria-hidden="true">{g.icon}</span>
+        <img class="jg-banner-img" src={url(`images/juegos/${g.id}.svg`)} alt="" />
         <div><h1>{g.name}</h1><p>{g.about}</p></div>
       </div>
     </header>

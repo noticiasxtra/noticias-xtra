@@ -5,6 +5,7 @@ import Ph from './Ph.astro';
 import Time from './Time.astro';
 import WeatherBox from './WeatherBox.astro';
 import AdSlot from './AdSlot.astro';
+import DominoBox from './DominoBox.astro';
 import { getStories, mostRead, url, SITE } from '../lib/site';
 import { getBreaking } from '../lib/breaking';
 import foro from '../data/foro.json';
@@ -40,6 +41,7 @@ const hhmm = (d: Date) => d.toLocaleTimeString('es-PR', { hour: 'numeric', minut
     </section>
   )}
   <AdSlot size="rectangle" />
+  <DominoBox />
   {latest.length > 0 && (
     <section class="lu-box">
       <h2 class="lu-h">Lo último</h2>
