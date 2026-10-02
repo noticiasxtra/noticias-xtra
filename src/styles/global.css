@@ -562,7 +562,7 @@ a.sp-games-teams:hover span:first-child,a.sp-games-teams:hover span:last-child{c
 /* Computers: all cards in one row (no scrolling), wider cards for longer text */
 .hs-item{position:relative;flex:none;min-width:0}
 .hs-item>.hs-card{height:80px}
-@media (min-width:1180px){
+@media (min-width:1000px){
   .hs-band{position:relative;z-index:15}
   .hs .sc-track{display:grid;grid-template-columns:1.2fr 1.3fr 1.2fr .95fr 1fr .95fr 1.05fr;overflow:visible;-webkit-mask-image:none!important;mask-image:none!important}
   .hs .sc-arrow{display:none}
@@ -573,11 +573,17 @@ a.sp-games-teams:hover span:first-child,a.sp-games-teams:hover span:last-child{c
   .hs-item .hs-game-icon b{font-size:22px}
   .hs-item .hs-game .hs-text{min-width:0}
 }
+/* Smaller computer screens: hide the small pictures so all seven cards still fit */
+@media (min-width:1000px) and (max-width:1179px){
+  .hs-item .hs-thumb,.hs-item .hs-sign,.hs-item .hs-game-icon,.hs-item .sp-badge-md{display:none}
+  .hs-item .hs-text strong{font-size:12.5px}
+  .hs-temp{font-size:18px!important}
+}
 /* Hover panel (computers only; on touch screens tapping the card opens its page) */
 .hs-pop{position:absolute;top:calc(100% + 8px);left:0;z-index:40;width:320px;background:#fff;border-radius:12px;padding:14px 16px;box-shadow:0 14px 36px rgba(22,22,29,.20);visibility:hidden;opacity:0;transform:translateY(-6px);transition:opacity .15s,transform .15s,visibility 0s .15s}
 .hs-pop::before{content:"";position:absolute;left:0;right:0;top:-10px;height:10px} /* keeps the panel open while moving the pointer down */
 .hs-item:nth-last-child(-n+2) .hs-pop{left:auto;right:0}
-@media (hover:hover) and (min-width:1180px){
+@media (hover:hover) and (min-width:1000px){
   .hs-item:hover .hs-pop,.hs-item:focus-within .hs-pop{visibility:visible;opacity:1;transform:none;transition:opacity .15s,transform .15s}
   .hs-item:hover>.hs-card,.hs-item:focus-within>.hs-card{box-shadow:0 2px 10px rgba(22,22,29,.12)}
 }
