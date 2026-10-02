@@ -7,7 +7,7 @@ export const GAMES = [
   { id: 'sopa', name: 'Sopa de letras', icon: 'A', color: '#C2410C', cat: 'palabras', about: 'Busca seis palabras bien boricuas.' },
   { id: 'sudoku', name: 'Sudoku del día', icon: '9', color: '#7C3AED', cat: 'mente', about: 'Un sudoku nuevo cada día, en tres niveles.' },
   { id: 'memoria', name: 'Memoria Boricua', icon: '◆', color: '#0E8A5F', cat: 'mente', about: 'Encuentra las parejas en la menor cantidad de jugadas.' },
-  { id: 'domino', name: 'Dominó', icon: '⚃', color: '#14111F', cat: 'mesa', about: 'Doble seis contra la computadora. Partida a 100.' },
+  { id: 'domino', name: 'Dominó', icon: '⚃', color: '#14111F', cat: 'mesa', about: 'Mano a mano o en parejas de cuatro. Partida a 100.' },
   { id: 'cuatro-colores', name: 'Cuatro Colores', icon: '+4', color: '#D7263D', cat: 'mesa', about: 'Combina color o número y quédate sin cartas primero.' },
   { id: 'cuatro-en-linea', name: 'Cuatro en Línea', icon: '●', color: '#E8A400', cat: 'mesa', about: 'Conecta cuatro fichas antes que la computadora.' },
 ] as const;

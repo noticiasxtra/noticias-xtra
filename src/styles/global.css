@@ -1753,3 +1753,12 @@ main.wrap,.home-grid,.ys-page,.tb-page{padding-top:var(--gap)}
 .art h1{font-size:clamp(28px,3.2vw,42px)}
 @media (max-width:760px){ .art > .ph{height:clamp(190px,56vw,300px);border-radius:8px} }
 @media (min-width:1101px){ .hs-item .hs-dm-img{width:44px;height:30px} }
+
+/* Dominó: other players around the table */
+.dm-players{display:flex;justify-content:center;flex-wrap:wrap;gap:8px}
+.dm-players:empty{display:none}
+.dm-seat{display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;background:var(--soft);font-size:13px;font-weight:700;color:var(--ink);transition:box-shadow .2s}
+.dm-seat.on{box-shadow:0 0 0 3px var(--gc,#14111F)}
+.dm-seat.mate{background:#E7F6EE;color:#0A5239}
+.dm-seat .dm-backs i{width:8px;height:16px}
+[data-theme="dark"] .dm-seat.mate{background:#12372A;color:#CDEBDD}
