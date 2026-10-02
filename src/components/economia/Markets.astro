@@ -25,6 +25,7 @@ const LIST: Info[] = [
   { sym: 'GC=F', name: 'Oro (onza)', group: 'mp', digits: 0, about: 'Precio de una onza de oro.' },
   { sym: 'BTC-USD', name: 'Bitcoin', group: 'cr', coin: 'bitcoin', digits: 0, about: 'La criptomoneda más grande. Su precio sube y baja mucho.' },
   { sym: 'ETH-USD', name: 'Ethereum', group: 'cr', coin: 'ethereum', digits: 0, about: 'La segunda criptomoneda más grande.' },
+  { sym: 'XRP-USD', name: 'XRP', group: 'cr', coin: 'ripple', digits: 2, about: 'La criptomoneda de la empresa Ripple, pensada para enviar dinero entre países.' },
 ];
 const GROUPS: Record<string, string> = { pr: 'Empresas de Puerto Rico', us: 'Bolsa de Nueva York', mp: 'Petróleo, gasolina y oro', cr: 'Criptomonedas' };
 const CHIPS: Record<string, string> = { all: 'Todos', pr: 'Puerto Rico', us: 'Bolsa', mp: 'Petróleo y oro', cr: 'Cripto' };
@@ -69,7 +70,7 @@ const data = Object.fromEntries(list.map((q) => [q.key, { name: q.name, about: q
         {[0, 1].map((copy) => (
           <ul aria-hidden={copy ? 'true' : undefined}>
             {list.map((q) => { const p = pct(q); return (
-              <li data-coin={q.coin}>
+              <li data-coin={q.coin} data-digits={q.digits ?? 2}>
                 <a href={`${board}#m-${q.key}`} tabindex={copy ? -1 : undefined} data-open={q.key}>
                   <b>{q.name.replace(/ \(.*/, '')}</b> <span class="eco-n" data-price>{fmt(q)}</span> <span class:list={['eco-ch', p >= 0 ? 'up' : 'down']} data-ch>{p >= 0 ? '▲' : '▼'} {Math.abs(p).toFixed(2)}%</span>
                 </a>
@@ -97,7 +98,7 @@ const data = Object.fromEntries(list.map((q) => [q.key, { name: q.name, about: q
           <h3>{title}</h3>
           <ul>
             {qs.map((q) => { const p = pct(q); return (
-              <li data-coin={q.coin} id={`m-${q.key}`}>
+              <li data-coin={q.coin} data-digits={q.digits ?? 2} id={`m-${q.key}`}>
                 <button type="button" class="eco-row" data-row={q.key} aria-expanded="false">
                   <span class="eco-name"><b>{q.name}</b><small>{q.key}</small></span>
                   <svg class:list={['eco-spark', (q.c.at(-1) ?? 0) >= (q.c.at(-20) ?? q.c[0] ?? 0) ? 'up' : 'down']} viewBox="0 0 90 28" aria-hidden="true"><polyline points={spark(q.c.slice(-20))} /></svg>
@@ -210,7 +211,8 @@ const data = Object.fromEntries(list.map((q) => [q.key, { name: q.name, about: q
       .then((d) => coins.forEach((el) => {
         const c = d[el.dataset.coin!]; if (!c?.usd) return;
         const price = el.querySelector<HTMLElement>('[data-price]')!, ch = el.querySelector<HTMLElement>('[data-ch]')!;
-        const txt = Math.round(c.usd).toLocaleString('en-US');
+        const dg = Number(el.dataset.digits ?? 2);
+        const txt = c.usd.toLocaleString('en-US', { minimumFractionDigits: dg, maximumFractionDigits: dg });
         if (price.textContent !== txt) {
           const upNow = c.usd >= Number(price.textContent!.replace(/,/g, ''));
           price.textContent = txt;

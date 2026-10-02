@@ -2,7 +2,7 @@
 // Clima: weather page, designed for phones first. Live data from the National Weather Service (NWS/SNM),
 // read in the reader's browser: pick a town → current conditions, 24-hour chart, 7-day forecast.
 // Maps (radar, satellite, tropics), alerts, and "En la isla hoy" (every town at a glance).
-// Layout: weather news first, then (phones) radar first; (computers) forecast + temperature | radar | towns.
+// Layout: phones: news, radar, temperature, forecast, towns · computers: radar + forecast + temperature | news | towns.
 import Base from '../../layouts/Base.astro';
 import StoryCard from '../../components/StoryCard.astro';
 import { getStories, url } from '../../lib/site';
@@ -34,15 +34,22 @@ const TOWNS: Array<[string, number, number]> = [
 
     <div class="cx-alerts" data-alerts hidden></div>
 
-    {news.length > 0 && (
-      <section class="cx-news" aria-labelledby="cx-news-h">
-        <div class="sec-h"><h2 id="cx-news-h">Noticias del tiempo</h2></div>
-        <div class="cx-news-list">{news.slice(0, 4).map((s) => <StoryCard story={s} variant="item" />)}</div>
-      </section>
-    )}
+    <!-- Phones: news (main story + 2 more), then the radar, temperature, forecast and towns.
+         Computers: radar, forecast and temperature (left) · news like the front page (middle) · towns (right). -->
+    <section class="cx-news" aria-labelledby="cx-news-h">
+      <div class="sec-h"><h2 id="cx-news-h">Noticias del tiempo</h2></div>
+      {news.length > 0 ? (
+        <>
+          <StoryCard story={news[0]} variant="big" />
+          {news.length > 1 && <div class="cx-news-list">{news.slice(1, 6).map((s) => <StoryCard story={s} variant="item" />)}</div>}
+        </>
+      ) : (
+        <p class="cx-loading">No hay noticias del tiempo hoy.</p>
+      )}
+    </section>
 
-    <!-- Phones: radar first. Computers: forecast and temperature on the left, radar in the middle, towns on the right. -->
-    <section class="cx-card cx-maps cx-mid">
+    <div class="cx-left">
+    <section class="cx-card cx-maps">
       <h2>Mapas</h2>
       <div class="cx-tabs" role="tablist">
         <button type="button" role="tab" aria-selected="true" data-map="radar">Radar</button>
@@ -57,7 +64,6 @@ const TOWNS: Array<[string, number, number]> = [
     </section>
 
 
-    <div class="cx-left">
     <section class="cx-card">
       <div class="cx-tabs" role="tablist">
         <button type="button" role="tab" aria-selected="true" data-tab="hours">Próximas 24 horas</button>

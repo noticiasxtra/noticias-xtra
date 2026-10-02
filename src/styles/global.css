@@ -2077,27 +2077,29 @@ main.wrap,.home-grid,.ys-page,.tb-page{padding-top:var(--gap)}
 /* Clima layout. Phones: one column, radar first, then temperature, forecast and towns.
    Computers: forecast with the temperature under it (left) · radar (middle) · "En la isla hoy" (right). */
 .cx-left,.cx-side{display:grid;gap:14px;min-width:0;align-content:start}
-.cx-left .cx-now{order:-1}
+/* Phones: news, then radar, temperature, forecast, towns */
+.cx-left .cx-maps{order:0} .cx-left .cx-now{order:1} .cx-left > .cx-card:not(.cx-maps){order:2}
 .cx-lbl{font-size:20px}
 .cx-tlbl{font-size:21px}
+@media (max-width:899px){ .cx-news-list > :nth-child(n+3){display:none} }
 @media (min-width:900px){
   .cx{grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);align-items:start;gap:18px}
-  .cx-head,.cx-alerts,.cx-news{grid-column:1/-1}
-  .cx-head{grid-row:1} .cx-alerts{grid-row:2} .cx-news{grid-row:3}
-  .cx-left{grid-column:1;grid-row:4}
-  .cx-mid{grid-column:2;grid-row:4}
-  .cx-side{grid-column:1/-1;grid-row:5}
-  .cx-left .cx-now{order:0}
+  .cx-head,.cx-alerts{grid-column:1/-1}
+  .cx-head{grid-row:1} .cx-alerts{grid-row:2}
+  .cx-left{grid-column:1;grid-row:3}
+  .cx-news{grid-column:2;grid-row:3}
+  .cx-side{grid-column:1/-1;grid-row:4}
+  .cx-left .cx-now{order:2} .cx-left > .cx-card:not(.cx-maps){order:1}
   .cx-now-temp{font-size:64px}
 }
 @media (min-width:1150px){
-  .cx{grid-template-columns:minmax(0,1fr) minmax(0,1.35fr) 290px}
-  .cx-side{grid-column:3;grid-row:4}
+  .cx{grid-template-columns:minmax(0,1fr) minmax(0,1.3fr) 290px}
+  .cx-side{grid-column:3;grid-row:3}
 }
 /* Weather news at the top, compact */
-.cx-news .sec-h{margin:0 0 10px}
-.cx-news-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 24px}
-@media (max-width:760px){ .cx-news-list{grid-template-columns:minmax(0,1fr)} }
+.cx-news{min-width:0}
+.cx-news .sec-h{margin:0 0 12px}
+.cx-news-list{display:grid;gap:12px;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
 /* Town picker next to the title */
 .cx-head-row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .cx-pick{display:inline-flex;align-items:center;gap:6px;padding:7px 10px 7px 12px;border-radius:999px;background:var(--purple);color:#fff;cursor:pointer;box-shadow:0 3px 10px rgba(43,17,133,.25)}
@@ -2478,14 +2480,14 @@ body.ad-skin{background:var(--ad-skin) center top/cover fixed}
 @media (max-width:760px){ .apr-design{grid-template-columns:minmax(0,1fr)} .apr-reject{margin-left:0} }
 
 /* Economía: navy + teal market look, green/red for up/down, numbers in a steady width */
-.eco{--eco:#14708F;--eco-d:#0B1F3A;--eco-up:#14804A;--eco-down:#C81E33}
+.eco{--eco:#0F7A4A;--eco-d:#0B3324;--eco-gold:#E2B33C;--eco-up:#13804A;--eco-down:#C81E33}
 .eco .sec-h{border-bottom-color:var(--eco)}
 .eco .sec-h h2,.eco .sec-h a{color:var(--eco-d)}
-.eco-hero{margin:0 0 var(--gap);border-radius:18px;overflow:hidden;color:#fff;background:radial-gradient(circle at 92% 0%,rgba(31,144,218,.35),transparent 45%),linear-gradient(120deg,var(--eco-d),#123B5C 55%,var(--eco))}
+.eco-hero{margin:0 0 var(--gap);border-radius:18px;overflow:hidden;color:#fff;background:radial-gradient(circle at 92% 0%,rgba(226,179,60,.28),transparent 45%),linear-gradient(120deg,#0A2A1E,#0E4A33 55%,#12764A)}
 .eco-hero-t{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px;padding:20px 22px 14px}
 .eco-hero h1{margin:0;font-size:34px;color:#fff}
 .eco-hero p{margin:0;font-size:15px;opacity:.85}
-.eco-tape{display:flex;align-items:stretch;background:rgba(3,12,26,.55);border-top:1px solid rgba(255,255,255,.12)}
+.eco-tape{display:flex;align-items:stretch;background:rgba(2,20,13,.55);border-top:1px solid rgba(255,255,255,.12)}
 .eco-tape-view{flex:1;min-width:0;overflow:hidden}
 .eco-tape-track{display:flex;width:max-content;animation:ecoTape 60s linear infinite}
 .eco-tape:hover .eco-tape-track,.eco-tape.paused .eco-tape-track,.eco-tape:focus-within .eco-tape-track{animation-play-state:paused}
@@ -2493,7 +2495,7 @@ body.ad-skin{background:var(--ad-skin) center top/cover fixed}
 .eco-tape li{white-space:nowrap;border-right:1px solid rgba(255,255,255,.1)}
 .eco-tape li a{display:flex;align-items:center;gap:8px;padding:12px 20px;font-size:15px;color:#fff;text-decoration:none;transition:background .15s}
 .eco-tape li a:hover,.eco-tape li a:focus-visible{background:rgba(255,255,255,.12)}
-.eco-tape-btn{flex:none;width:40px;border:0;border-left:1px solid rgba(255,255,255,.15);background:rgba(3,12,26,.35);color:#fff;font-size:12px;cursor:pointer}
+.eco-tape-btn{flex:none;width:40px;border:0;border-left:1px solid rgba(255,255,255,.15);background:rgba(2,20,13,.35);color:#fff;font-size:12px;cursor:pointer}
 .eco-tape-btn:hover{background:rgba(255,255,255,.15)}
 .eco-tape b{font-weight:700;opacity:.9}
 .eco-n{font-variant-numeric:tabular-nums;font-family:var(--head);font-weight:700}
@@ -2502,7 +2504,7 @@ body.ad-skin{background:var(--ad-skin) center top/cover fixed}
 .eco-tape .eco-ch.down{color:#FF7A8A}
 @keyframes ecoTape{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 @media (prefers-reduced-motion:reduce){ .eco-tape{overflow-x:auto} .eco-tape-track{animation:none} }
-.eco-board{margin:var(--gap-lg) 0;padding:18px;border-radius:18px;background:var(--card);border:1px solid var(--line);border-top:4px solid var(--eco)}
+.eco-board{margin:var(--gap-lg) 0;padding:18px;border-radius:18px;background:var(--card);border:1px solid var(--line);border-top:4px solid var(--eco);box-shadow:inset 0 3px 0 var(--eco-gold, #E2B33C)}
 .eco-board-h{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 12px;margin-bottom:12px}
 .eco-board-h h2{margin:0;font-size:24px;color:var(--eco-d)}
 .eco-board-h p{margin:0;font-size:12px;color:var(--muted)}
@@ -2524,7 +2526,7 @@ body.ad-skin{background:var(--ad-skin) center top/cover fixed}
 .eco-board .eco-ch.up{color:var(--eco-up)}
 .eco-board .eco-ch.down{color:var(--eco-down)}
 .eco-note{margin:10px 0 0;font-size:12px;color:var(--muted)}
-[data-theme="dark"] .eco{--eco:#3BA7C9;--eco-d:#CFE6F2;--eco-up:#4ADE80;--eco-down:#FF7A8A}
+[data-theme="dark"] .eco{--eco:#34C27A;--eco-d:#D3F2E2;--eco-up:#4ADE80;--eco-down:#FF7A8A}
 @media (max-width:760px){
   .eco-groups{grid-template-columns:minmax(0,1fr)}
   .eco-hero h1{font-size:28px}
@@ -2532,9 +2534,9 @@ body.ad-skin{background:var(--ad-skin) center top/cover fixed}
 }
 
 /* Home: market strip on its own, with a "Mercados" label linking to Economía */
-.eco-tape.eco-strip{position:relative;overflow:hidden;margin:var(--gap) 0;border-radius:14px;color:#fff;background:linear-gradient(120deg,#0B1F3A,#123B5C 60%,#14708F);border:0}
-.eco-strip-l{position:relative;z-index:1;flex:none;display:flex;align-items:center;gap:4px;padding:0 16px;background:#14708F;color:#fff;font-family:var(--head);font-weight:800;font-size:15px;text-decoration:none;box-shadow:8px 0 16px rgba(11,31,58,.6)}
-.eco-strip-l:hover{background:#1A86AA}
+.eco-tape.eco-strip{position:relative;overflow:hidden;margin:var(--gap) 0;border-radius:14px;color:#fff;background:linear-gradient(120deg,#0A2A1E,#0E4A33 60%,#12764A);border:0}
+.eco-strip-l{position:relative;z-index:1;flex:none;display:flex;align-items:center;gap:4px;padding:0 16px;background:#E2B33C;color:#0B3324;font-family:var(--head);font-weight:800;font-size:15px;text-decoration:none;box-shadow:8px 0 16px rgba(11,31,58,.6)}
+.eco-strip-l:hover{background:#F0C552}
 .eco-strip .eco-ch.up{color:#4ADE80}
 .eco-strip .eco-ch.down{color:#FF7A8A}
 
@@ -2570,3 +2572,10 @@ body.ad-skin{background:var(--ad-skin) center top/cover fixed}
 .flash-up{animation:ecoUp 1.2s ease} .flash-down{animation:ecoDown 1.2s ease}
 @keyframes ecoUp{0%,30%{background:rgba(34,197,94,.35);border-radius:4px}100%{background:transparent}}
 @keyframes ecoDown{0%,30%{background:rgba(239,68,68,.35);border-radius:4px}100%{background:transparent}}
+
+/* Economía money-green: gold details */
+.eco-hero h1::after{content:"";display:inline-block;width:10px;height:10px;margin-left:8px;border-radius:50%;background:var(--eco-gold);vertical-align:middle}
+.eco .sec-h{border-bottom-color:var(--eco)}
+.eco-group h3{color:var(--eco)}
+.eco-chips button[aria-pressed="true"],.eco-tabs button[aria-pressed="true"]{background:var(--eco);border-color:var(--eco)}
+.eco-range-bar i{border-color:var(--eco)}
