@@ -3,5 +3,35 @@
     "name": "Noticias Xtra",
     "role": "Editorial",
     "bio": "La voz institucional de Noticias Xtra: la familia, la fe, el trabajo honrado, la ley y el buen uso del dinero del pueblo."
+  },
+  {
+    "name": "Carmen L.",
+    "role": "Economía y familia",
+    "bio": "Escribe sobre el costo de vida, los pequeños negocios y el presupuesto de las familias puertorriqueñas.",
+    "demo": true
+  },
+  {
+    "name": "Rafael M.",
+    "role": "Gobierno y transparencia",
+    "bio": "Sigue de cerca cómo se usa el dinero público y qué rinden las agencias.",
+    "demo": true
+  },
+  {
+    "name": "Ana Sofía T.",
+    "role": "Educación",
+    "bio": "Maestra retirada. Escribe sobre las escuelas, los padres y la disciplina en el salón.",
+    "demo": true
+  },
+  {
+    "name": "Luis E.",
+    "role": "Deportes y comunidad",
+    "bio": "El béisbol de los pueblos, el BSN y lo que el deporte enseña a los jóvenes.",
+    "demo": true
+  },
+  {
+    "name": "Isabel V.",
+    "role": "Fe y valores",
+    "bio": "Reflexiones sobre la fe, la familia y la vida en comunidad.",
+    "demo": true
   }
 ]

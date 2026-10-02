@@ -1,0 +1,26 @@
+---
+// Juegos Xtra: the games hub (opened from the home strip's "Juegos" card)
+import Base from '../../layouts/Base.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import { url } from '../../lib/site';
+import { GAMES } from '../../lib/games';
+---
+<Base title="Juegos Xtra" description="Trivia, Palabra Xtra, Memoria Boricua y Sopa de letras: juegos diarios gratis sobre Puerto Rico.">
+  <main class="wrap" id="main">
+    <div class="jg-head">
+      <h1>Juegos <span>Xtra</span></h1>
+      <p>Juegos nuevos cada día. Gratis, sin registrarte.</p>
+    </div>
+    <div class="jg-grid">
+      {GAMES.map((g) => (
+        <a class="jg-card" href={url(`juegos/${g.id}`)} style={`--gc:${g.color}`}>
+          <span class="jg-icon" aria-hidden="true">{g.icon}</span>
+          <h2>{g.name}</h2>
+          <p>{g.about}</p>
+          <span class="jg-play">Jugar</span>
+        </a>
+      ))}
+    </div>
+    <AdSlot size="infeed" />
+  </main>
+</Base>

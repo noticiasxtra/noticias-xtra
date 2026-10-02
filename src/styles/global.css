@@ -1198,3 +1198,65 @@ main.wrap,.home-grid,.ys-page,.tb-page{padding-top:var(--gap)}
   .lg-jump{display:none}
   .lg-jump-m{display:block}
 }
+
+/* =========================================================
+   Juegos Xtra (/juegos and each game)
+   ========================================================= */
+.jg-head{text-align:center;margin:0 0 var(--gap-lg)}
+.jg-head h1{margin:0;font-size:clamp(30px,4vw,44px);font-weight:800;color:var(--purple);text-transform:uppercase;font-style:italic}
+.jg-head h1 span{color:var(--blue)}
+.jg-head p{margin:4px 0 0;color:var(--muted)}
+.jg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:var(--gap);max-width:1100px;margin:0 auto}
+.jg-card{display:flex;flex-direction:column;align-items:flex-start;gap:6px;background:var(--card);border:1px solid #D7D3CA;border-top:6px solid var(--gc);border-radius:14px;padding:18px;color:var(--ink);transition:transform .15s,box-shadow .15s}
+.jg-card:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(22,22,29,.12)}
+.jg-icon{display:grid;place-items:center;width:52px;height:52px;border-radius:14px;background:var(--gc);color:#fff;font-family:var(--head);font-weight:800;font-size:26px}
+.jg-card h2{margin:6px 0 0;font-size:20px}
+.jg-card p{margin:0;color:var(--muted);font-size:14px;flex:1}
+.jg-play{margin-top:8px;background:var(--gc);color:#fff;font-family:var(--head);font-weight:700;font-size:14px;padding:7px 16px;border-radius:999px}
+.jg-game{max-width:560px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 18px;text-align:center}
+.jg-game h1{margin:4px 0 8px;font-size:32px;color:var(--purple)}
+.jg-game .tv-kicker a{color:inherit}
+.jg-help{margin:0 0 14px;font-size:14px;color:var(--muted)}
+.jg-msg{min-height:1.4em;margin:12px 0 0;font-family:var(--head);font-weight:700}
+.jg-stats{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;font-size:14px;margin:0 0 12px;color:var(--muted)}
+.jg-btn{margin-top:12px;background:var(--purple);color:#fff;border:0;border-radius:999px;padding:10px 20px;font-family:var(--head);font-weight:700;font-size:15px;cursor:pointer}
+/* Palabra Xtra */
+.pl-k{padding:0 4px;border-radius:3px;color:#fff}
+.pl-k.ok,.pl-tile.ok,.pl-keys button.ok{background:#1B8A5A;border-color:#1B8A5A;color:#fff}
+.pl-k.in,.pl-tile.in,.pl-keys button.in{background:#D9A400;border-color:#D9A400;color:#fff}
+.pl-k.no,.pl-tile.no,.pl-keys button.no{background:#787C88;border-color:#787C88;color:#fff}
+.pl-board{display:grid;gap:6px;justify-content:center;margin:0 auto}
+.pl-row{display:grid;grid-template-columns:repeat(5,52px);gap:6px}
+.pl-tile{height:52px;display:grid;place-items:center;border:2px solid var(--line);border-radius:6px;font-family:var(--head);font-weight:800;font-size:24px;text-transform:uppercase}
+.pl-tile.typed{border-color:var(--ink)}
+.pl-keys{display:grid;gap:6px;margin-top:14px}
+.pl-krow{display:flex;justify-content:center;gap:4px}
+.pl-keys button{flex:1;max-width:40px;height:46px;border:0;border-radius:6px;background:var(--soft);color:var(--ink);font-family:var(--head);font-weight:700;font-size:15px;cursor:pointer}
+.pl-keys button.wide{max-width:66px;flex:1.6;font-size:13px}
+/* Memoria */
+.mm-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-width:400px;margin:0 auto}
+.mm-card{aspect-ratio:1;border:0;border-radius:12px;background:linear-gradient(135deg,var(--purple),var(--blue));color:#fff;font-size:34px;cursor:pointer;position:relative;transition:transform .2s}
+.mm-card .mm-back{font-family:var(--head);font-weight:800;font-size:20px;opacity:.6}
+.mm-card .mm-face{display:none}
+.mm-card.up{background:var(--soft);transform:scale(1.03)}
+.mm-card.up .mm-back{display:none}
+.mm-card.up .mm-face{display:inline}
+.mm-card.done{background:#E7F6EE;box-shadow:inset 0 0 0 2px #1B8A5A}
+/* Sopa de letras */
+.sp-words{list-style:none;margin:0 0 12px;padding:0;display:flex;flex-wrap:wrap;justify-content:center;gap:6px}
+.sp-words li{font-family:var(--head);font-weight:700;font-size:13px;padding:4px 10px;border-radius:999px;background:var(--soft)}
+.sp-words li.got{background:#E7F6EE;color:#14663F;text-decoration:line-through}
+.sp-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:3px;max-width:420px;margin:0 auto}
+.sp-cell{aspect-ratio:1;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--ink);font-family:var(--head);font-weight:700;font-size:16px;cursor:pointer;padding:0}
+.sp-cell.sel{background:var(--purple);color:#fff;border-color:var(--purple)}
+.sp-cell.got{background:#E7F6EE;color:#14663F;border-color:#9AD6B5}
+/* Home strip pop-out: games list */
+.hs-games{margin:10px 0}
+.hs-games a{display:flex;align-items:center;gap:8px}
+.hs-games span{display:grid;place-items:center;width:22px;height:22px;border-radius:6px;background:var(--gc);color:#fff;font-weight:800;font-size:12px}
+@media (max-width:420px){ .pl-row{grid-template-columns:repeat(5,46px)} .pl-tile{height:46px} .sp-cell{font-size:13px} }
+.mm-card.up{color:var(--ink)}
+.mm-card.up .mm-face{display:flex;flex-direction:column;align-items:center;gap:2px}
+.mm-face i{font-style:normal;font-size:32px;line-height:1;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif}
+.mm-face small{font-family:var(--head);font-weight:700;font-size:11px;color:var(--ink)}
+.mm-card.done .mm-face small{color:#14663F}

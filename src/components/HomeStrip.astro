@@ -47,6 +47,7 @@ const upcoming = LEAGUES.map((l) => ({ l, start: 'starts' in l ? new Date(l.star
 const daysText = (n: number) => (n === 1 ? 'Falta 1 día' : `Faltan ${n} días`);
 const startText = (d: Date) => d.toLocaleDateString('es-PR', { day: 'numeric', month: 'long', timeZone: 'America/Puerto_Rico' });
 const chev = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>';
+import { GAMES } from '../lib/games';
 ---
 <div class="hs-band"><div class="wrap"><div class="sc hs" data-sc>
   <div class="sc-rail">
@@ -83,18 +84,6 @@ const chev = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke
           </div>
         </div>
       )}
-
-      <div class="hs-item">
-        <a class="hs-card" href={url('juegos/trivia')}>
-          <div class="hs-text"><span class="hs-label">Juego del día</span><strong>Trivia Xtra</strong><small>{today}</small></div>
-          <span class="hs-game-icon" aria-hidden="true"><b>?</b></span>
-        </a>
-        <div class="hs-pop">
-          <p class="hs-pop-h">Pregunta de hoy</p>
-          <p class="hs-quote">{trivia.q}</p>
-          <a class="hs-pop-btn" href={url('juegos/trivia')}>Jugar ahora</a>
-        </div>
-      </div>
 
       {g && (
         <div class="hs-item">
@@ -146,6 +135,22 @@ const chev = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke
           </div>
         </div>
       )}
+
+      {/* Juegos: right end of the row, next to Horóscopo. Opens the games page. */}
+      <div class="hs-item">
+        <a class="hs-card" href={url('juegos')}>
+          <div class="hs-text"><span class="hs-label">Juegos Xtra</span><strong>Trivia y más</strong><small>{GAMES.length} juegos gratis</small></div>
+          <span class="hs-game-icon" aria-hidden="true"><b>?</b></span>
+        </a>
+        <div class="hs-pop">
+          <p class="hs-pop-h">Pregunta de hoy</p>
+          <p class="hs-quote">{trivia.q}</p>
+          <ul class="hs-pop-list plain hs-games">
+            {GAMES.map((x) => <li><a href={url(`juegos/${x.id}`)}><span style={`--gc:${x.color}`}>{x.icon}</span>{x.name}</a></li>)}
+          </ul>
+          <a class="hs-pop-btn" href={url('juegos')}>Ver todos los juegos</a>
+        </div>
+      </div>
 
       {/* Horóscopo sits last, at the right end of the row */}
       <div class="hs-item">
