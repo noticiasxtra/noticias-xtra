@@ -13,7 +13,7 @@ const groups = (Object.keys(VIDEO_SOURCES) as Array<keyof typeof VIDEO_SOURCES>)
       <>
         <section class="vx-latest">
           <div class="lg-video-frame">
-            <iframe src={`https://www.youtube-nocookie.com/embed/videoseries?list=UU${VIDEO_SOURCES.noticel.channel.slice(2)}&rel=0&playsinline=1`} title="Lo más reciente de NotiCel en YouTube" loading="lazy"
+            <iframe src={`https://www.youtube-nocookie.com/embed/videoseries?list=UU${VIDEO_SOURCES.noticel.channel.slice(2)}&autoplay=1&mute=1&rel=0&playsinline=1`} title="Lo más reciente de NotiCel en YouTube" loading="lazy"
               referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
           </div>
           <p class="vsrc">Lo más reciente del canal de <a href={VIDEO_SOURCES.noticel.url} rel="noopener" target="_blank">NotiCel en YouTube</a>.</p>

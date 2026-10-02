@@ -2988,3 +2988,8 @@ html.nx-en .pf-menu .lang-tag{background:var(--red)}
   .by-actions .tool [data-save-label],.by-actions .tool[data-listen] span{display:none}
   .by-actions .tool[data-save],.by-actions .tool[data-listen]{width:34px;padding:0;justify-content:center}
 }
+/* Phones: more tap room for the remaining small text links (layout unchanged: padding offset by negative margin) */
+@media (max-width:760px){
+  .gt-head a,.ls-more,.fx-go,.ys-card-h > a,.lg-season > a,.cm-meta button,.by-who strong a,.apr-reject,.lvbox-f a,.op-box a{display:inline-block;padding:10px 4px;margin:-10px -4px}
+  .ys-news-item{padding-top:6px;padding-bottom:6px}
+}

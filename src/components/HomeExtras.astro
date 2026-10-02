@@ -57,7 +57,7 @@ const status = (g: (typeof games)[number]) => g.status === 'en-vivo' ? (g.note ?
   <section class="hx-box lg-video">
     <div class="hx-h"><h2>Video del BSN</h2><a href={`https://www.youtube.com/channel/${bsn.youtube}`} rel="noopener" target="_blank">Canal ↗</a></div>
     <div class="lg-video-frame">
-      <iframe src={`https://www.youtube-nocookie.com/embed/videoseries?list=UU${bsn.youtube.slice(2)}&rel=0&playsinline=1`} title="Último video del BSN en YouTube" loading="lazy"
+      <iframe src={`https://www.youtube-nocookie.com/embed/videoseries?list=UU${bsn.youtube.slice(2)}&autoplay=1&mute=1&rel=0&playsinline=1`} title="Último video del BSN en YouTube" loading="lazy"
         referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
     </div>
   </section>

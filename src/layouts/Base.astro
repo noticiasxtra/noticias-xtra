@@ -51,9 +51,16 @@ const todayCap = today.charAt(0).toUpperCase() + today.slice(1);
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Noto+Sans:wght@400;600&display=swap" rel="stylesheet" />
     <script is:inline>
-      // Apply the reader's saved theme before the page paints (no white flash in dark mode)
-      // Sports pages are always dark (data-force-dark); elsewhere, the reader's saved choice
-      try { var t = localStorage.getItem('nx-theme'); if (!document.documentElement.hasAttribute('data-force-dark') && (t === 'dark' || t === 'light')) document.documentElement.dataset.theme = t; } catch (e) {}
+      // Theme before the page paints (no white flash). Automatic by Puerto Rico time: dark from 7 p.m. to 6 a.m.,
+      // light during the day. A reader's switch in the profile menu lasts until the next automatic change.
+      // Sports pages are always dark (data-force-dark).
+      (function () {
+        var h = (new Date().getUTCHours() + 20) % 24; // Puerto Rico is UTC-4 all year
+        var auto = h >= 19 || h < 6 ? 'dark' : 'light';
+        var t = null;
+        try { var m = JSON.parse(localStorage.getItem('nx-theme-manual') || 'null'); if (m && Date.now() < m.until) t = m.theme; localStorage.removeItem('nx-theme'); } catch (e) {}
+        if (!document.documentElement.hasAttribute('data-force-dark')) document.documentElement.dataset.theme = t || auto;
+      })();
       // Reader's text size for stories (set on the story page), applied before paint
       try { var f = [0.9, 1, 1.12, 1.25, 1.4][JSON.parse(localStorage.getItem('nx-font') || '1')]; if (f) document.documentElement.style.setProperty('--read-scale', f); } catch (e) {}
     </script>
@@ -224,12 +231,25 @@ const todayCap = today.charAt(0).toUpperCase() + today.slice(1);
           themeBtn.setAttribute('aria-pressed', String(dark));
         };
         sync();
+        // Next automatic change: 6 a.m. or 7 p.m. Puerto Rico time (UTC-4)
+        const nextSwitch = () => {
+          const pr = new Date(Date.now() - 4 * 36e5); const h = pr.getUTCHours();
+          const at = h < 6 ? 6 : h < 19 ? 19 : 30; // 30 = tomorrow 6 a.m.
+          return Date.UTC(pr.getUTCFullYear(), pr.getUTCMonth(), pr.getUTCDate(), at + 4);
+        };
+        const autoTheme = () => { const h = (new Date().getUTCHours() + 20) % 24; return h >= 19 || h < 6 ? 'dark' : 'light'; };
         themeBtn.addEventListener('click', () => {
           const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
           document.documentElement.dataset.theme = next;
-          try { localStorage.setItem('nx-theme', next); } catch { /* storage blocked */ }
+          try { localStorage.setItem('nx-theme-manual', JSON.stringify({ theme: next, until: nextSwitch() })); } catch { /* storage blocked */ }
           sync();
         });
+        // Switch by itself at 6 a.m. / 7 p.m. while the page is open (unless the reader chose otherwise)
+        setInterval(() => {
+          let manual = false;
+          try { const m = JSON.parse(localStorage.getItem('nx-theme-manual') || 'null'); manual = !!m && Date.now() < m.until; } catch { /* storage blocked */ }
+          if (!manual && document.documentElement.dataset.theme !== autoTheme()) { document.documentElement.dataset.theme = autoTheme(); sync(); }
+        }, 60000);
       }
 
       // English: the page is translated in place by Google's translation tool, with Google's bar and pop-ups hidden.
