@@ -2717,3 +2717,5 @@ a.op-box:hover b{color:var(--purple)}
 .byline:has(.by-pic) .by-who{margin-right:auto}
 .by-who strong a{color:inherit;text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}
 .by-who strong a:hover{color:var(--purple)}
+/* Language button in the header icons (English through Google Translate; "ES" on the translated copy) */
+.mh-ico .lang-tag{position:absolute;right:0;bottom:2px;font-family:var(--head);font-weight:800;font-size:9px;line-height:1;padding:2px 3px;border-radius:5px;background:var(--blue);color:#fff;pointer-events:none}
