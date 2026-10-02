@@ -1,0 +1,17 @@
+---
+// All stories, newest first
+import Base from '../layouts/Base.astro';
+import StoryCard from '../components/StoryCard.astro';
+import Sidebar from '../components/Sidebar.astro';
+import { getStories } from '../lib/site';
+const stories = await getStories();
+---
+<Base title="Todas las noticias" description="Todas las noticias de Noticias Xtra, de la más reciente a la más antigua.">
+  <main class="wrap" id="main">
+    <div class="sec-h" style="margin-top:0"><h1 style="font-size:32px;margin:0;color:var(--purple)">Todas las noticias</h1></div>
+    <div class="art-grid">
+      <div class="list">{stories.map((s) => <StoryCard story={s} variant="item" />)}</div>
+      <Sidebar />
+    </div>
+  </main>
+</Base>

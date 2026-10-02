@@ -89,9 +89,6 @@ main.wrap{padding-top:24px;padding-bottom:48px}
 .related li{padding:10px 0 10px 18px;border-bottom:1px solid var(--line);position:relative;font-weight:600}
 .related li::before{content:"";position:absolute;left:2px;top:18px;width:8px;height:8px;background:var(--blue);border-radius:2px}
 .panel-h{font-family:var(--head);font-size:18px;font-weight:800;margin:0 0 10px;padding-bottom:8px;border-bottom:4px solid var(--purple)}
-.ranked{list-style:none;margin:0 0 24px;padding:0;counter-reset:r}
-.ranked li{counter-increment:r;display:grid;grid-template-columns:34px 1fr;gap:6px;padding:11px 0;border-bottom:1px solid var(--line);font-weight:600;line-height:1.3;font-size:15px}
-.ranked li::before{content:counter(r);font-family:var(--head);font-weight:800;font-size:24px;color:var(--blue);line-height:1}
 .ad{background:var(--soft);border:1px dashed #C9CAD6;color:var(--muted);font-size:13px;display:grid;place-items:center;text-align:center;aspect-ratio:6/5;padding:12px}
 
 /* Weather strip */
@@ -564,7 +561,7 @@ a.sp-games-teams:hover span:first-child,a.sp-games-teams:hover span:last-child{c
 .hs-item>.hs-card{height:80px}
 @media (min-width:1000px){
   .hs-band{position:relative;z-index:15}
-  .hs .sc-track{display:grid;grid-template-columns:1.2fr 1.3fr 1.2fr .95fr 1fr .95fr 1.05fr;overflow:visible;-webkit-mask-image:none!important;mask-image:none!important}
+  .hs .sc-track{display:grid;grid-template-columns:1.2fr 1.3fr 1.2fr .95fr 1fr 1.05fr;overflow:visible;-webkit-mask-image:none!important;mask-image:none!important}
   .hs .sc-arrow{display:none}
   .hs-item>.hs-card{width:100%;max-width:none;min-width:0;padding:9px 10px;gap:8px}
   .hs-item .hs-text{max-width:none}
@@ -651,3 +648,33 @@ a.sp-games-teams:hover span:first-child,a.sp-games-teams:hover span:last-child{c
 .tv-note{margin:0 0 8px;color:var(--ink)}
 .tv-streak{font-weight:600;color:var(--purple)}
 @media (max-width:520px){.tv-options{grid-template-columns:1fr}}
+
+/* Right column boxes (src/components/WeatherBox.astro, Sidebar.astro) */
+.wx-box,.tr-box{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 18px;margin-bottom:22px}
+.wx-h{display:flex;align-items:center;justify-content:space-between}
+.wx-h h2{margin:0;font-size:20px;font-weight:700;color:var(--ink)}
+.wx-place{display:inline-flex;align-items:center;gap:4px;font-size:14px;color:var(--muted)}
+.wx-place svg{color:var(--purple)}
+.wx-now{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:12px 0 4px}
+.wx-desc{margin:0;font-family:var(--head);font-weight:600;font-size:15px;line-height:1.3;color:var(--ink)}
+.wx-src{margin:2px 0 0;font-size:12px;color:var(--muted)}
+.wx-temp{display:flex;align-items:center;gap:6px;flex:none;color:var(--ink)}
+.wx-temp b{font-family:var(--head);font-weight:700;font-size:30px;line-height:1}
+.wx-list{margin:10px 0 0;padding-top:6px;border-top:1px solid var(--line)}
+.wx-list div{display:flex;justify-content:space-between;padding:6px 0;font-size:14px}
+.wx-list dt{color:var(--muted)}
+.wx-list dd{margin:0;font-weight:600}
+.wx-more,.tr-more{display:flex;align-items:center;justify-content:center;gap:4px;margin-top:8px;padding-top:12px;border-top:1px solid var(--line);font-family:var(--head);font-weight:700;font-size:15px;color:var(--ink)}
+.wx-more:hover,.tr-more:hover{color:var(--purple)}
+.tr-h{display:flex;align-items:center;gap:10px;margin:0 0 6px;font-size:24px;font-weight:800;color:var(--ink)}
+.tr-list{list-style:none;margin:0;padding:0}
+.tr-list li+li{border-top:1px solid var(--line)}
+.tr-list a{display:flex;align-items:center;gap:12px;padding:12px 0}
+.tr-pic{position:relative;flex:none;width:60px;height:60px;border-radius:8px;overflow:hidden}
+.tr-pic .ph{aspect-ratio:auto;width:100%;height:100%}
+.tr-pic .ph .place,.tr-pic .ph svg.ic{display:none}
+.tr-pic b{position:absolute;left:2px;top:2px;z-index:1;min-width:20px;height:20px;padding:0 4px;display:grid;place-items:center;background:#fff;color:var(--ink);border:2px solid var(--ink);border-radius:4px;font-family:var(--head);font-weight:800;font-size:12px;line-height:1}
+.tr-text{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:5px}
+.tr-title{font-family:var(--head);font-weight:600;font-size:15px;line-height:1.3;color:var(--ink)}
+.tr-list a:hover .tr-title{color:var(--purple);text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px}
+.tr-new{background:#F7F43C;color:#1A1919;font-family:var(--head);font-weight:700;font-size:13px;padding:3px 8px;border-radius:6px}

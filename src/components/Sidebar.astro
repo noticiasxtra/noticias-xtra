@@ -1,17 +1,35 @@
 ---
+// Right column: Clima box, Tendencias (numbered photos, like big news portals), ad, newsletter.
+import Ph from './Ph.astro';
+import WeatherBox from './WeatherBox.astro';
 import { getStories, mostRead, url, SITE } from '../lib/site';
+import { getBreaking } from '../lib/breaking';
 interface Props { newsletter?: boolean }
 const { newsletter = true } = Astro.props;
-const top = mostRead(await getStories());
+const stories = await getStories();
+// The story matching what Puerto Rico is searching for goes first, then featured and newest
+const trend = await getBreaking();
+const first = trend ? stories.find((s) => s.id === trend.id) : undefined;
+const top = [first, ...mostRead(stories, 6)].filter((s, i, all) => s && all.indexOf(s) === i).slice(0, 5) as typeof stories;
+const isNew = (d: Date) => Date.now() - d.valueOf() < 6 * 36e5; // published in the last 6 hours
 ---
 <aside class="right">
+  <WeatherBox />
   {top.length > 0 && (
-    <div>
-      <h2 class="panel-h">Lo más destacado</h2>
-      <ol class="ranked">
-        {top.map((s) => <li><a href={url(`noticia/${s.id}`)} class="hl">{s.data.title}</a></li>)}
+    <section class="tr-box">
+      <h2 class="tr-h"><svg width="22" height="22" viewBox="0 0 24 24" fill="#B9A7F5" stroke="var(--purple)" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z" /></svg>Tendencias</h2>
+      <ol class="tr-list">
+        {top.map((s, i) => (
+          <li>
+            <a href={url(`noticia/${s.id}`)}>
+              <span class="tr-pic"><Ph sectionId={s.data.section} image={s.data.image} league={s.data.league} /><b>{i + 1}</b></span>
+              <span class="tr-text"><span class="tr-title">{s.data.title}</span>{isNew(s.data.date) && <span class="tr-new">Nuevo</span>}</span>
+            </a>
+          </li>
+        ))}
       </ol>
-    </div>
+      <a class="tr-more" href={url('noticias')}>Ver más noticias <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg></a>
+    </section>
   )}
   <div class="ad">Espacio publicitario<br />300 × 250</div>
   {newsletter && SITE.features.newsletter && (
