@@ -50,7 +50,12 @@ const fmt = (d: Date) => d.toLocaleDateString('es-PR', { day: 'numeric', month: 
       {upcoming && (
         <a class="ys-promo" href={url(`deportes/${upcoming.l.id}`)}>
           <LeagueBadge id={upcoming.l.id} size="md" />
-          <div><strong>{upcoming.l.full}: la temporada arranca el {fmt(upcoming.start!)}</strong><span>Calendario, posiciones y noticias de la liga.</span></div>
+          <div>
+            <strong class="pr-long">{upcoming.l.full}: la temporada arranca el {fmt(upcoming.start!)}</strong>
+            {/* Phones: one short line */}
+            <strong class="pr-short">{upcoming.l.name} · {fmt(upcoming.start!)}</strong>
+            <span class="pr-sub">Calendario, posiciones y noticias de la liga.</span>
+          </div>
           <span class="ys-promo-btn">Ver la liga</span>
         </a>
       )}
