@@ -21,6 +21,8 @@ const others = stories.filter((s) => s.id !== lead?.id);
 const left = others.slice(0, 3);
 const row = others.slice(3, 6);
 const more = others.slice(6, 11);
+// Two more headlines under the main story (not shown anywhere else near the top)
+const extra = others.slice(11).filter((s) => !(lead?.data.related ?? []).includes(s.id)).slice(0, 2);
 const related = (lead?.data.related ?? []).map((id) => stories.find((s) => s.id === id)).filter((s) => s !== undefined);
 const leadRelated = related.length ? related : others.slice(0, 3);
 // Section blocks in the order a Puerto Rico reader cares about: island news first (government,
@@ -56,6 +58,14 @@ while (queue.length) {
             </a>
             <p class="dek">{lead.data.description}</p>
             <ul class="related">{leadRelated.map((s) => <li><a href={url(`noticia/${s.id}`)} class="hl">{s.data.title}</a></li>)}</ul>
+            {/* Fills the space under the main story (the left column is taller): two more headlines and an ad */}
+            {extra.length > 0 && (
+              <div class="lead-extra">
+                <p class="lead-extra-h">Más titulares</p>
+                <div class="lead-extra-grid">{extra.map((s) => <StoryCard story={s} variant="item" />)}</div>
+              </div>
+            )}
+            <AdSlot size="infeed" class="lead-ad" />
           </article>
           <div class="stack left">{left.map((s) => <StoryCard story={s} variant="mini" />)}</div>
         </div>

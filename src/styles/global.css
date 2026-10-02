@@ -2041,3 +2041,117 @@ main.wrap,.home-grid,.ys-page,.tb-page{padding-top:var(--gap)}
 @media (max-width:760px){ .home-sections{grid-template-columns:minmax(0,1fr)} }
 .gt:not(.gt-compact) .gt-tiles{grid-auto-columns:minmax(0,1fr);overflow-x:visible}
 @media (max-width:760px){ .gt:not(.gt-compact) .gt-tiles{grid-auto-columns:minmax(104px,1fr);overflow-x:auto} }
+
+/* =========================================================
+   Clima page, phones first (src/pages/seccion/clima.astro)
+   ========================================================= */
+.cx{display:grid;gap:14px;padding-bottom:28px}
+.cx-head h1{margin:0;font-size:30px;color:var(--purple)}
+.cx-head p{margin:2px 0 0;font-size:13px;color:var(--muted)}
+.cx-head a,.cx-links a{color:var(--purple);font-weight:600}
+.cx-towns{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -12px;padding:0 12px}
+.cx-towns::-webkit-scrollbar{display:none}
+.cx-towns button{flex:none;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:7px 14px;font-family:var(--head);font-weight:700;font-size:14px;cursor:pointer}
+.cx-towns button[aria-pressed="true"]{background:var(--purple);border-color:var(--purple);color:#fff}
+.cx-alerts{display:grid;gap:6px}
+.cx-alerts details{border:1px solid #F3B4BD;border-left:5px solid var(--red);border-radius:10px;background:#FDECEE;padding:10px 12px;color:#5B0F1A}
+.cx-alerts summary{display:flex;justify-content:space-between;gap:10px;cursor:pointer;list-style:none}
+.cx-alerts summary b{color:var(--red)}
+.cx-alerts p{margin:6px 0 0;font-size:13px}
+.cx-alerts.ok{display:block;padding:10px 12px;border-radius:10px;background:#E7F6EE;border:1px solid #A8DCC0;color:#14663F;font-weight:600;font-size:14px}
+.cx-now{border-radius:18px;padding:16px;color:#fff;background:radial-gradient(circle at 90% 0%,rgba(255,226,122,.35),transparent 45%),linear-gradient(160deg,#1F90DA,#2B1185)}
+.cx-now-top{display:flex;align-items:center;gap:14px}
+.cx-now-icon svg{color:#FFE27A;display:block}
+.cx-now-place{margin:0;font-weight:700;opacity:.9}
+.cx-now-temp{display:block;font-family:var(--head);font-size:58px;font-weight:800;line-height:1}
+.cx-now-sky{margin:2px 0 0;font-family:var(--head);font-weight:700;font-size:17px}
+.cx-now-feels{margin:0;opacity:.85;font-size:14px}
+.cx-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:14px 0 6px}
+.cx-facts div{background:rgba(255,255,255,.14);border-radius:10px;padding:7px 9px}
+.cx-facts dt{font-size:11px;opacity:.8}
+.cx-facts dd{margin:0;font-weight:700;font-size:14px}
+.cx-src{margin:0;font-size:11px;opacity:.75}
+.cx-card{background:var(--card);border:1px solid #D7D3CA;border-radius:16px;padding:14px}
+.cx-card h2{margin:0 0 10px;font-size:18px;color:var(--purple)}
+.cx-tabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-bottom:10px}
+.cx-tabs button{flex:none;border:0;background:var(--soft);color:var(--ink);border-radius:999px;padding:7px 14px;font-family:var(--head);font-weight:700;font-size:13px;cursor:pointer}
+.cx-tabs button[aria-selected="true"]{background:var(--blue);color:#fff}
+.cx-chart svg{display:block;width:100%;height:auto;touch-action:pan-y}
+.cx-line{fill:none;stroke:#E8590C;stroke-width:3;stroke-linejoin:round}
+.cx-dot{fill:#E8590C}
+.cx-rain{fill:#1F90DA;opacity:.45}
+.cx-lbl{font-size:13px;fill:var(--muted);text-anchor:middle}
+.cx-tlbl{font-size:13px;font-weight:700;fill:var(--ink);text-anchor:middle}
+.cx-cursor{stroke:var(--purple);stroke-width:2;stroke-dasharray:4 4}
+.cx-chart-read{margin:8px 0 0;padding:8px 10px;border-radius:10px;background:var(--soft);font-size:14px}
+.cx-loading{color:var(--muted);font-size:14px}
+.cx-days{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.cx-days details{border-radius:12px;background:var(--soft)}
+.cx-days summary{display:grid;grid-template-columns:32px minmax(0,1fr) auto auto;grid-template-areas:"ic name rain t" "ic sky sky sky";align-items:center;gap:0 10px;padding:9px 12px;cursor:pointer;list-style:none}
+.cx-days summary::-webkit-details-marker{display:none}
+.cx-days summary svg{grid-area:ic;color:#1F6FA8}
+.cx-d-name{grid-area:name;font-family:var(--head);font-weight:700;text-transform:capitalize}
+.cx-d-sky{grid-area:sky;font-size:13px;color:var(--muted)}
+.cx-d-rain{grid-area:rain;font-size:12px;font-weight:700;color:#1F6FA8}
+.cx-d-t{grid-area:t;color:var(--muted)}
+.cx-d-t b{color:var(--ink);font-size:17px}
+.cx-days details p{margin:0;padding:0 12px 10px 54px;font-size:13px;color:var(--muted)}
+.cx-map{margin:0}
+.cx-map img{display:block;width:100%;border-radius:12px;background:#0B1220;aspect-ratio:1;object-fit:contain}
+.cx-map figcaption{margin-top:6px;font-size:12px;color:var(--muted)}
+.cx-hurr-head,.cx-prep-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.cx-hurr-head h2,.cx-prep-head h2{margin:0}
+.cx-season{font-size:12px;font-weight:800;padding:4px 10px;border-radius:999px;background:var(--soft);color:var(--muted)}
+.cx-season.on{background:#FFF1E0;color:#B45309}
+.cx-small{margin:8px 0;font-size:13px;color:var(--muted)}
+.cx-storms{display:grid;gap:10px}
+.cx-storm{border:1px solid var(--line);border-radius:14px;padding:12px}
+.cx-storm.near{border:2px solid var(--red);background:#FFF5F6}
+.cx-storm-head{display:flex;gap:12px;align-items:center}
+.cx-storm-badge{flex:none;display:grid;place-items:center;width:46px;height:46px;border-radius:50%;background:#B45309;color:#fff;font-family:var(--head);font-weight:800;font-size:18px}
+.cx-storm h3{margin:0;font-size:17px}
+.cx-storm-head p,.cx-storm-where{margin:2px 0 0;font-size:13px;color:var(--muted)}
+.cx-storm-where{margin-top:8px}
+.cx-cone{display:block;width:100%;margin-top:10px;border-radius:10px}
+.cx-links{display:flex;gap:14px;flex-wrap:wrap;margin:8px 0 0;font-size:14px}
+.cx-calm{margin:10px 0;padding:10px 12px;border-radius:10px;background:#E7F6EE;color:#14663F;font-weight:600;font-size:14px}
+.cx-scale{margin-top:10px;border-radius:12px;background:var(--soft);padding:10px 12px}
+.cx-scale summary{cursor:pointer;font-weight:700;font-size:14px}
+.cx-scale ul{margin:8px 0 0;padding-left:18px;font-size:13px;display:grid;gap:4px}
+.cx-prep-head span{font-family:var(--head);font-weight:800;color:var(--purple)}
+.cx-bar{height:8px;border-radius:999px;background:var(--soft);overflow:hidden;margin-top:8px}
+.cx-bar span{display:block;height:100%;width:0;background:linear-gradient(90deg,#1B8A5A,#1F90DA);transition:width .3s}
+.cx-prep{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.cx-prep label{display:flex;gap:10px;align-items:flex-start;padding:8px 6px;border-radius:8px;cursor:pointer;font-size:14px}
+.cx-prep label:hover{background:var(--soft)}
+.cx-prep input{width:20px;height:20px;flex:none;margin:0;accent-color:#1B8A5A}
+.cx-prep input:checked + span{color:var(--muted);text-decoration:line-through}
+.cx-island{list-style:none;margin:0;padding:0}
+.cx-island button{display:grid;grid-template-columns:96px minmax(0,1fr) auto;align-items:center;gap:8px;width:100%;padding:9px 4px;border:0;border-top:1px solid var(--line);background:transparent;color:var(--ink);font:inherit;font-size:14px;text-align:left;cursor:pointer}
+.cx-island li:first-child button{border-top:0}
+.cx-island button:hover{background:var(--soft)}
+.cx-i-sky{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:13px;min-width:0}
+.cx-i-sky svg{flex:none;color:#1F6FA8}
+.cx-i-t{font-family:var(--head);font-weight:800;font-size:17px}
+[data-theme="dark"] .cx-card{border-color:#34364D}
+[data-theme="dark"] .cx-alerts details{background:#3A1820;color:#F8D7DC;border-color:#6B2A35}
+[data-theme="dark"] .cx-storm.near{background:#2E1418}
+/* Larger screens: two columns */
+@media (min-width:900px){
+  .cx{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);align-items:start;gap:18px}
+  .cx-head,.cx-towns,.cx-alerts,.cx > section:last-child:not(.cx-card){grid-column:1/-1}
+  .cx-towns{margin:0;padding:0;flex-wrap:wrap}
+  .cx-now-temp{font-size:72px}
+  .cx-facts{grid-template-columns:repeat(3,1fr)}
+}
+.cx-lbl{font-size:20px}
+.cx-tlbl{font-size:21px}
+@media (min-width:900px){ .cx-lbl{font-size:14px} .cx-tlbl{font-size:15px} }
+/* Home: extra headlines and an ad under the main story */
+.lead-extra{margin-top:14px}
+.lead-extra-h{margin:0 0 4px;font-family:var(--head);font-weight:800;font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--purple)}
+.lead-extra-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}
+.lead-extra-grid .item{grid-template-columns:110px 1fr;border-bottom:0}
+.home-hero .lead-ad{margin:14px auto 0}
+@media (max-width:760px){ .lead-extra-grid{grid-template-columns:1fr} }
+@media (max-width:1699px){ .home-hero .lead-ad{display:none} }
