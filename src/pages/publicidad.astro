@@ -1,17 +1,131 @@
 ---
+// Anúnciate: advertising page. Every "Anúnciate aquí" link on an ad placeholder lands here, and so does
+// the red "Anúnciate" button in the header. No audience numbers or prices are invented: packages say
+// "Cotización a la medida" until the sales team sets them.
+// The contact form opens the reader's email app addressed to SITE.email (src/lib/site.ts).
 import Base from '../layouts/Base.astro';
-import { SITE } from '../lib/site';
+import { SITE, url } from '../lib/site';
+const FORMATS = [
+  { id: 'leaderboard', name: 'Banner horizontal', size: '728 × 90', mobile: '320 × 100 en celular', where: 'Arriba del pie de página en todo el sitio y entre secciones de la portada.', w: 728, h: 90 },
+  { id: 'rectangle', name: 'Rectángulo', size: '300 × 250', mobile: 'Igual en celular', where: 'Columna derecha de la portada, las noticias, Deportes y cada juego.', w: 300, h: 250 },
+  { id: 'halfpage', name: 'Media página', size: '300 × 600', mobile: 'Solo en computadora', where: 'Columna derecha; se queda a la vista mientras el lector baja por la página.', w: 300, h: 600 },
+  { id: 'infeed', name: 'Entre noticias', size: '728 × 90', mobile: '320 × 100 en celular', where: 'Dentro de la portada, al final de cada noticia y en las páginas de sección.', w: 728, h: 90 },
+];
+const SPONSOR = [
+  { icon: '🎮', name: 'Juegos Xtra', text: 'Tu marca en el dominó, el sudoku y la trivia del día, donde los lectores pasan más tiempo.' },
+  { icon: '⚾', name: 'Deportes', text: 'Presenta los marcadores, la Doble A, La Pro, el BSN o el voleibol.' },
+  { icon: '🌦️', name: 'Clima', text: 'El pronóstico del día “presentado por” tu negocio.' },
+  { icon: '★', name: 'Entretenimiento', text: 'Eventos, conciertos y la farándula boricua.' },
+];
+const PACKAGES = [
+  { name: 'Local', tag: 'Para empezar', items: ['Rectángulo 300 × 250 en las noticias', 'Rotación en todas las secciones', 'Informe mensual de impresiones y clics'] },
+  { name: 'Destacado', tag: 'El más pedido', items: ['Todo lo del paquete Local', 'Banner en la portada', 'Media página en la columna derecha', 'Presencia en Deportes y Juegos Xtra'], featured: true },
+  { name: 'Patrocinio', tag: 'Tu marca, dueña de una sección', items: ['Patrocinio exclusivo de una sección (Juegos, Deportes, Clima…)', 'Todos los formatos en esa sección', 'Mención “presentado por”'] },
+];
+const INTERESTS = ['Banner horizontal', 'Rectángulo', 'Media página', 'Patrocinio de sección', 'Contenido patrocinado'];
 ---
-<Base title="Anúnciate con nosotros">
-  <main class="wrap" id="main">
-    <div class="page">
-      <h1>Anúnciate con nosotros</h1>
-      <p>Lleva tu mensaje a lectores de Puerto Rico con anuncios en la portada y junto a nuestras noticias.</p>
-      {SITE.email ? (
-        <p>Para conocer opciones y precios, escríbenos a <a href={`mailto:${SITE.email}?subject=${encodeURIComponent('Publicidad')}`}>{SITE.email}</a>.</p>
-      ) : (
-        <p>Muy pronto publicaremos la información de contacto de ventas.</p>
-      )}
-    </div>
+<Base title="Anúnciate" description="Anúnciate en Noticias Xtra: formatos, ubicaciones y patrocinios para llegar a lectores de Puerto Rico.">
+  <main class="wrap ad-page" id="main">
+    <section class="adp-hero">
+      <div>
+        <p class="adp-kicker">Publicidad en Noticias Xtra</p>
+        <h1>Lleva tu negocio a los lectores de Puerto Rico</h1>
+        <p class="adp-lead">Noticias locales, deportes boricuas y juegos diarios: un lugar al que la gente vuelve todos los días. Tu anuncio, junto a lo que más les importa.</p>
+        <div class="adp-ctas">
+          <a class="adp-btn red" href="#contacto">Solicitar información</a>
+          <a class="adp-btn ghost" href="#formatos">Ver formatos</a>
+        </div>
+      </div>
+      <ul class="adp-why">
+        <li><b>100% boricua</b><span>Noticias de Puerto Rico, en español, para lectores de la isla y la diáspora.</span></li>
+        <li><b>Lectores que se quedan</b><span>Deportes, clima y juegos diarios hacen que la visita dure más.</span></li>
+        <li><b>Formatos estándar</b><span>Tamaños de la industria (IAB): usa los mismos artes que ya tienes.</span></li>
+        <li><b>Celular y computadora</b><span>Cada espacio se adapta a la pantalla del lector.</span></li>
+      </ul>
+    </section>
+
+    <section class="adp-sec" id="formatos" aria-labelledby="adp-f">
+      <h2 id="adp-f">Formatos</h2>
+      <div class="adp-formats">
+        {FORMATS.map((f) => (
+          <article class="adp-fmt">
+            <div class="adp-preview" style={`--w:${f.w};--h:${f.h}`}><span>{f.size}</span></div>
+            <h3>{f.name} <small>{f.size}</small></h3>
+            <p class="adp-mob">{f.mobile}</p>
+            <p>{f.where}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section class="adp-sec" aria-labelledby="adp-s">
+      <h2 id="adp-s">Patrocina una sección</h2>
+      <div class="adp-sponsor">
+        {SPONSOR.map((s) => <div><span aria-hidden="true">{s.icon}</span><b>{s.name}</b><p>{s.text}</p></div>)}
+      </div>
+    </section>
+
+    <section class="adp-sec" aria-labelledby="adp-p">
+      <h2 id="adp-p">Paquetes</h2>
+      <div class="adp-packs">
+        {PACKAGES.map((p) => (
+          <article class:list={['adp-pack', { featured: p.featured }]}>
+            <span class="adp-tag">{p.tag}</span>
+            <h3>{p.name}</h3>
+            <ul>{p.items.map((i) => <li>{i}</li>)}</ul>
+            <p class="adp-price">Cotización a la medida</p>
+            <a class="adp-btn" href="#contacto">Pedir cotización</a>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section class="adp-sec adp-contact" id="contacto" aria-labelledby="adp-c">
+      <div>
+        <h2 id="adp-c">Solicita información</h2>
+        <p>Cuéntanos de tu negocio y te enviamos opciones y precios.</p>
+        {SITE.email && <p>También puedes escribirnos a <a href={`mailto:${SITE.email}?subject=${encodeURIComponent('Publicidad en Noticias Xtra')}`}>{SITE.email}</a>.</p>}
+      </div>
+      <form class="adp-form" data-ad-form data-email={SITE.email} novalidate>
+        <label>Nombre<input name="nombre" autocomplete="name" required /></label>
+        <label>Negocio<input name="negocio" autocomplete="organization" required /></label>
+        <label>Correo electrónico<input name="correo" type="email" autocomplete="email" required /></label>
+        <label>Teléfono<input name="telefono" type="tel" autocomplete="tel" /></label>
+        <fieldset><legend>Me interesa</legend>
+          {INTERESTS.map((i) => <label class="adp-check"><input type="checkbox" name="interes" value={i} />{i}</label>)}
+        </fieldset>
+        <label>Presupuesto mensual
+          <select name="presupuesto"><option value="">Prefiero no decir</option><option>Menos de $500</option><option>$500 a $1,500</option><option>$1,500 a $5,000</option><option>Más de $5,000</option></select>
+        </label>
+        <label class="adp-wide">Mensaje<textarea name="mensaje" rows="3" placeholder="¿Qué quieres anunciar y cuándo?"></textarea></label>
+        <p class="cm-err adp-wide" data-err hidden></p>
+        <button type="submit" class="adp-btn red adp-wide">Enviar solicitud</button>
+        <p class="adp-note adp-wide" data-note hidden></p>
+      </form>
+    </section>
   </main>
+  <script>
+    const form = document.querySelector<HTMLFormElement>('[data-ad-form]')!;
+    const err = form.querySelector<HTMLElement>('[data-err]')!;
+    const note = form.querySelector<HTMLElement>('[data-note]')!;
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const d = new FormData(form);
+      const v = (k: string) => String(d.get(k) || '').trim();
+      if (!v('nombre') || !v('negocio')) { err.textContent = 'Escribe tu nombre y el de tu negocio.'; err.hidden = false; return; }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v('correo'))) { err.textContent = 'Escribe un correo válido, por ejemplo nombre@negocio.com.'; err.hidden = false; return; }
+      err.hidden = true;
+      const to = form.dataset.email;
+      if (!to) {
+        note.textContent = 'Gracias. El envío de solicitudes se activará muy pronto, cuando publiquemos el correo de ventas.';
+        note.hidden = false; return;
+      }
+      // Opens the reader's email app with the request already written
+      const body = [`Nombre: ${v('nombre')}`, `Negocio: ${v('negocio')}`, `Correo: ${v('correo')}`, `Teléfono: ${v('telefono')}`,
+        `Me interesa: ${d.getAll('interes').join(', ') || '—'}`, `Presupuesto: ${v('presupuesto') || 'Prefiero no decir'}`, '', v('mensaje')].join('\n');
+      location.href = `mailto:${to}?subject=${encodeURIComponent(`Publicidad: ${v('negocio')}`)}&body=${encodeURIComponent(body)}`;
+      note.textContent = 'Se abrió tu correo con la solicitud lista. Solo tienes que enviarla.';
+      note.hidden = false;
+    });
+  </script>
 </Base>

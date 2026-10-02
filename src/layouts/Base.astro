@@ -73,6 +73,7 @@ const todayCap = today.charAt(0).toUpperCase() + today.slice(1);
         </a>
         <div class="mh-right">
           <div class="mh-tools">
+            <a class="mh-ad-btn" href={url('publicidad')}>Anúnciate</a>
             <span class="lang-sw notranslate" translate="no" role="group" aria-label="Idioma"><span class="on" aria-current="true">ES</span><a href="#" data-translate title="Read this page in English (Google Translate)">EN</a></span>
             <a class="theme-btn pf-btn" href={url('perfil')} aria-label="Mi perfil" title="Mi perfil" data-pf-btn>
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></svg>
@@ -105,6 +106,7 @@ const todayCap = today.charAt(0).toUpperCase() + today.slice(1);
       <div class="wrap">
         <a href={url()} class="nav-logo" tabindex="-1" aria-hidden="true"><img src={url('logo.svg')} alt="" width="80" height="30" /></a>
         <div class="nav-links">
+          <a class="nav-ad" href={url('publicidad')}>Anúnciate</a>
           <a href={url()} aria-current={active === 'home' ? 'page' : undefined}>Portada</a>
           {SECTIONS.map((s) => (
             <a href={url(`seccion/${s.id}`)} aria-current={active === s.id ? 'page' : undefined}>{s.name}</a>
