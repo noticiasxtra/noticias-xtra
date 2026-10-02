@@ -67,7 +67,9 @@ const todayCap = today.charAt(0).toUpperCase() + today.slice(1);
           <a href={url('contacto')}>Envía tu denuncia</a>
         </div>
         <a href={url()} class="logo" aria-label={`${SITE.name}, ir a portada`}>
-          <img src={url('logo.svg')} alt={SITE.name} width="155" height="58" />
+          <img class="logo-light" src={url('logo.svg')} alt={SITE.name} width="155" height="58" />
+          {/* Dark mode: white "Xtra" with the blue "noticias" */}
+          <img class="logo-dark" src={url('logo-dark.svg')} alt="" width="155" height="58" aria-hidden="true" />
         </a>
         <div class="mh-right">
           <div class="mh-tools">
