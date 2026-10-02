@@ -211,7 +211,7 @@ footer li a:hover{opacity:1;text-decoration:underline}
   .town:nth-child(4){border-left:0}
   .town:nth-child(n+4){border-top:1px solid var(--line)}
   .vgrid,.grid4{grid-template-columns:repeat(2,1fr)}
-  .art-grid{grid-template-columns:1fr}
+  .art-grid{grid-template-columns:minmax(0,1fr)}
   footer .wrap{grid-template-columns:1fr 1fr}
 }
 @media (max-width:720px){
@@ -2036,7 +2036,7 @@ main.wrap,.home-grid,.ys-page,.tb-page{padding-top:var(--gap)}
   .mh-right{gap:6px}
 }
 /* The single-row games strip scrolls inside its box; it must not widen the section grid */
-.home-sections > *,.gt{min-width:0}
+.home-sections > *,.art-grid > *,.gt{min-width:0}
 .home-sections{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
 @media (max-width:760px){ .home-sections{grid-template-columns:minmax(0,1fr)} }
 .gt:not(.gt-compact) .gt-tiles{grid-auto-columns:minmax(0,1fr);overflow-x:visible}
