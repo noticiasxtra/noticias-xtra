@@ -7,10 +7,14 @@ interface Props { storyId: string }
 const { storyId } = Astro.props;
 // Sample comments: invented usernames, clearly labeled as examples
 const SAMPLES = [
-  { id: 's1', name: 'lectora_bayamon', text: 'Muy buena información, gracias por explicarlo claro. 👏', likes: 24, ago: 'hace 2 h' },
-  { id: 's2', name: 'jose.boricua', text: 'Esto hay que seguirlo de cerca. ¿Habrá vistas públicas?', likes: 11, ago: 'hace 3 h' },
-  { id: 's3', name: 'abuela_de_ponce', text: '🇵🇷🙏', likes: 7, ago: 'hace 5 h' },
+  { id: 's1', name: 'lectora_bayamon', text: 'Muy buena información, gracias por explicarlo claro. 👏', likes: 24, ago: 'hace 2 h', level: 'top' },
+  { id: 's2', name: 'jose.boricua', text: 'Esto hay que seguirlo de cerca. ¿Habrá vistas públicas?', likes: 11, ago: 'hace 3 h', level: 'voz' },
+  { id: 's3', name: 'abuela_de_ponce', text: '🇵🇷🙏', likes: 7, ago: 'hace 5 h', level: 'comentarista' },
 ];
+// Commenter levels (src/lib/reputation.ts): badge shown next to the name
+import { LEVELS, RULES } from '../lib/reputation';
+const BADGE: Record<string, string> = { participante: '●', comentarista: '✦', voz: '◆', top: '★' };
+const levelName = (id: string) => LEVELS.find((l) => l.id === id)?.name ?? '';
 const STICKERS = ['👏', '🔥', '❤️', '😂', '😮', '😢', '🙏', '🇵🇷', '💯', '⚾', '🏀', '🎶'];
 ---
 <section class="cm" id="comentarios" data-comments={storyId} aria-labelledby="cm-h">
@@ -36,12 +40,31 @@ const STICKERS = ['👏', '🔥', '❤️', '😂', '😮', '😢', '🙏', '�
     </div>
   </form>
 
+  <p class="cm-repnote" data-cm-repnote hidden></p>
+  <details class="cm-rep" data-cm-rep>
+    <summary>Tu nivel: <b data-rep-level>Nuevo</b> · <span data-rep-pts>0</span> puntos de reputación</summary>
+    <div class="cm-rep-body">
+      <p class="cm-rep-next" data-rep-next></p>
+      <ul class="cm-rep-needs" data-rep-needs></ul>
+      <div class="cm-rep-levels">
+        {LEVELS.slice(1).map((l) => <span class={`cm-badge cm-b-${l.id}`}>{BADGE[l.id]} {l.name}</span>)}
+      </div>
+      <ul class="cm-rep-rules">
+        <li>+{RULES.comment} por comentario de {RULES.minChars} caracteres o más (+{RULES.reply} si es respuesta); cuentan hasta {RULES.perDay} al día.</li>
+        <li>+{RULES.like} por cada Me gusta de otro lector · +{RULES.featured} si la redacción destaca tu comentario.</li>
+        <li>{RULES.report} si un comentario tuyo es reportado y ocultado. Top comentarista se pierde con un reporte.</li>
+        <li>Si borras un comentario, se restan sus puntos. Stickers y respuestas cortas no suman.</li>
+      </ul>
+      <p class="cm-rep-demo">Vista previa: tu reputación se guarda en este dispositivo. Los Me gusta de otros y los destacados llegarán con las cuentas.</p>
+    </div>
+  </details>
+
   <ul class="cm-list" data-cm-list>
     {SAMPLES.map((c) => (
       <li class="cm-item" data-id={c.id} data-likes={c.likes}>
         <span class="cm-av" aria-hidden="true">{c.name[0].toUpperCase()}</span>
         <div class="cm-body">
-          <p><b>{c.name}</b> <span class="sp-demo">EJEMPLO</span> {c.text}</p>
+          <p><b>{c.name}</b> <span class={`cm-badge cm-b-${c.level}`} title={levelName(c.level)}>{BADGE[c.level]} {levelName(c.level)}</span> <span class="sp-demo">EJEMPLO</span> {c.text}</p>
           <div class="cm-meta"><span>{c.ago}</span><span data-likes-label>{c.likes} Me gusta</span><button type="button" data-reply>Responder</button></div>
         </div>
         <button type="button" class="cm-like" data-like aria-pressed="false" aria-label="Me gusta">
@@ -53,6 +76,7 @@ const STICKERS = ['👏', '🔥', '❤️', '😂', '😮', '😢', '🙏', '�
 </section>
 
 <script>
+  import { addComment, removeComment, getRep, levelOf, needs } from '../lib/reputation';
   type Mine = { id: string; name: string; text: string; at: number; replyTo?: string };
   const BAD = /\b(pendej\w*|cabr[oó]n\w*|puñet\w*|carajo|mierd\w*|idiota)\b/i; // basic word filter
   const store = {
@@ -104,15 +128,27 @@ const STICKERS = ['👏', '🔥', '❤️', '😂', '😮', '😢', '🙏', '�
         li.innerHTML = `<span class="cm-av me" aria-hidden="true"></span><div class="cm-body"><p><b></b> <span class="cm-text"></span></p><div class="cm-meta"><span></span><span data-likes-label></span><button type="button" data-reply>Responder</button><button type="button" data-del>Borrar</button></div></div><button type="button" class="cm-like" data-like aria-pressed="false" aria-label="Me gusta"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.5-9.2C1 8.3 3.2 4.5 7 4.5c2 0 3.4 1.1 5 3 1.6-1.9 3-3 5-3 3.8 0 6 3.8 4.5 7.3C19.5 16.4 12 21 12 21z" /></svg></button>`;
         li.querySelector('.cm-av')!.textContent = c.name[0].toUpperCase();
         li.querySelector('b')!.textContent = c.name;
+        const lv = levelOf(getRep());
+        if (lv.index > 0) { const bd = document.createElement('span'); bd.className = `cm-badge cm-b-${lv.id}`; bd.textContent = `${({ participante: '●', comentarista: '✦', voz: '◆', top: '★' } as Record<string, string>)[lv.id]} ${lv.name}`; li.querySelector('b')!.after(' ', bd); }
         li.querySelector('.cm-text')!.textContent = c.text;
         li.querySelector('.cm-meta span')!.textContent = ago(c.at);
-        li.querySelector('[data-del]')!.addEventListener('click', () => { store.set(key, store.get<Mine[]>(key, []).filter((x) => x.id !== c.id)); render(); });
+        li.querySelector('[data-del]')!.addEventListener('click', () => { store.set(key, store.get<Mine[]>(key, []).filter((x) => x.id !== c.id)); removeComment(c.id); render(); });
         const parent = c.replyTo ? list.querySelector(`[data-id="${c.replyTo}"]`) : null;
         if (parent) parent.after(li); else list.prepend(li);
         wireLike(li);
       });
       count.textContent = `(${list.querySelectorAll('.cm-item').length})`;
     };
+
+    // "Tu nivel" panel: level, points and what's missing for the next badge
+    const paintRep = () => {
+      const r = getRep(); const lv = levelOf(r);
+      root.querySelector('[data-rep-level]')!.textContent = lv.name;
+      root.querySelector('[data-rep-pts]')!.textContent = r.points.toLocaleString('es-PR');
+      root.querySelector('[data-rep-next]')!.textContent = lv.next ? `Para llegar a ${lv.next.name} necesitas:` : '¡Eres Top comentarista! Mantén cero reportes para conservarlo.';
+      root.querySelector('[data-rep-needs]')!.innerHTML = lv.next ? needs(r, lv.next).map((n) => `<li class="${n.have >= n.need ? 'ok' : ''}"><span>${n.have >= n.need ? '✓' : '○'} ${n.label}</span><b>${Math.min(n.have, n.need).toLocaleString('es-PR')}/${n.need.toLocaleString('es-PR')}</b></li>`).join('') : '';
+    };
+    paintRep(); addEventListener('nx-rep', paintRep);
 
     list.querySelectorAll<HTMLElement>('.cm-item').forEach(wireLike);
     root.querySelectorAll<HTMLButtonElement>('[data-stk]').forEach((b) => b.addEventListener('click', () => {
@@ -125,8 +161,12 @@ const STICKERS = ['👏', '🔥', '❤️', '😂', '😮', '😢', '🙏', '�
       if (!text) { err.textContent = 'Escribe algo primero.'; err.hidden = false; return; }
       if (BAD.test(text)) { err.textContent = 'Tu comentario tiene palabras no permitidas.'; err.hidden = false; return; }
       const mine = store.get<Mine[]>(key, []);
-      mine.push({ id: `m${Date.now()}`, name: myName, text, at: Date.now(), replyTo });
+      const id = `m${Date.now()}`;
+      mine.push({ id, name: myName, text, at: Date.now(), replyTo });
       store.set(key, mine);
+      const res = addComment(id, text, !!replyTo);
+      const note = root.querySelector<HTMLElement>('[data-cm-repnote]')!;
+      note.textContent = res.pts ? `⭐ ${res.why}` : res.why; note.className = `cm-repnote ${res.pts ? 'ok' : ''}`; note.hidden = false;
       ta.value = ''; ta.style.height = 'auto'; replyTo = undefined;
       render();
     });
