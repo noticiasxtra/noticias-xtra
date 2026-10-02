@@ -55,18 +55,6 @@ const chev = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke
     </button>
     <div class="sc-track">
 
-      <div class="hs-item">
-        <a class="hs-card" href={url('horoscopo')}>
-          <span class="hs-sign hs-zodiac" aria-hidden="true">{sign.symbol}{'︎'}</span>
-          <div class="hs-text"><span class="hs-label">Horóscopo · {sign.name}</span><strong>{signText}</strong></div>
-        </a>
-        <div class="hs-pop">
-          <p class="hs-pop-h"><span class="hs-zodiac">{sign.symbol}{'︎'}</span> {sign.name} · {sign.dates}</p>
-          <p class="hs-quote">{signText}</p>
-          <div class="hs-signs">{SIGNS.map((s) => <a href={url(`horoscopo#${s.id}`)}><span class="hs-zodiac">{s.symbol}{'︎'}</span>{s.name}</a>)}</div>
-        </div>
-      </div>
-
       {trend && (
         <div class="hs-item">
           <a class="hs-card" href={url(`noticia/${trend.id}`)}>
@@ -158,6 +146,19 @@ const chev = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke
           </div>
         </div>
       )}
+
+      {/* Horóscopo sits last, at the right end of the row */}
+      <div class="hs-item">
+        <a class="hs-card" href={url('horoscopo')}>
+          <span class="hs-sign hs-zodiac" aria-hidden="true">{sign.symbol}{'︎'}</span>
+          <div class="hs-text"><span class="hs-label">Horóscopo · {sign.name}</span><strong>{signText}</strong></div>
+        </a>
+        <div class="hs-pop">
+          <p class="hs-pop-h"><span class="hs-zodiac">{sign.symbol}{'︎'}</span> {sign.name} · {sign.dates}</p>
+          <p class="hs-quote">{signText}</p>
+          <div class="hs-signs">{SIGNS.map((s) => <a href={url(`horoscopo#${s.id}`)}><span class="hs-zodiac">{s.symbol}{'︎'}</span>{s.name}</a>)}</div>
+        </div>
+      </div>
     </div>
     <button type="button" class="sc-arrow next" aria-label="Ver más tarjetas" hidden>
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg>

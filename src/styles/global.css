@@ -1164,3 +1164,37 @@ main.wrap,.home-grid,.ys-page,.tb-page{padding-top:var(--gap)}
   .nm-short{display:inline}
   .ys-grid,.ys-main{gap:var(--gap)}
 }
+
+/* Home strip: the last card's pop-out opens toward the left */
+.hs-item:last-child .hs-pop{left:auto;right:0}
+
+/* Deportes page: the word "Deportes" in red (requested by the publisher) */
+.ys-title span{color:var(--red)}
+
+/* League pages: compact header, section links live in the title row */
+.lg-title{padding:10px 0;gap:14px;flex-wrap:wrap}
+.lg-name{min-width:0;flex:1 1 320px}
+.lg-name .lg-crumb{padding:0;margin:0 0 2px;font-size:12px}
+.lg-about{margin:2px 0 0;font-size:14px}
+.lg-jump{display:flex;gap:6px;flex-wrap:wrap}
+.lg-jump a{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border:1px solid var(--line);border-radius:999px;font-family:var(--head);font-weight:700;font-size:13px;color:var(--ink);background:var(--card)}
+.lg-jump a svg{color:var(--lc)}
+.lg-jump a:hover{border-color:var(--lc);color:var(--purple)}
+.lg-site{margin-left:0}
+.lg-jump-m{display:none;position:relative}
+.lg-jump-m summary{list-style:none;cursor:pointer;font-weight:700;font-size:14px;color:var(--purple);border:1px solid var(--line);border-radius:999px;padding:7px 14px}
+.lg-jump-m summary::-webkit-details-marker{display:none}
+.lg-jump-m summary::after{content:" ▾"}
+.lg-jump-m[open] summary{border-color:var(--purple)}
+.lg-jump-m nav{position:absolute;left:0;top:calc(100% + 6px);z-index:30;min-width:180px;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 30px rgba(22,22,29,.18);padding:6px;display:grid}
+.lg-jump-m nav a{padding:9px 12px;border-radius:8px;font-family:var(--head);font-weight:600;font-size:14px;color:var(--ink)}
+.lg-jump-m nav a:hover{background:var(--soft);color:var(--purple)}
+@media (max-width:760px){
+  .lg-title{gap:10px}
+  .lg-title .sp-badge{width:44px;height:44px}
+  .lg-name{flex-basis:calc(100% - 60px)}
+  .lg-name h1{font-size:22px}
+  .lg-about{display:none}
+  .lg-jump{display:none}
+  .lg-jump-m{display:block}
+}
