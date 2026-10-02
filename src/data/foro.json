@@ -1,0 +1,59 @@
+[
+  {
+    "id": "e1",
+    "cat": "Puerto Rico",
+    "title": "¿Qué harían ustedes para mejorar el servicio de luz?",
+    "body": "Cada mes la factura sube. ¿Qué soluciones prácticas ven para las familias?",
+    "by": "vecino_de_caguas",
+    "votes": 128,
+    "ago": "hace 3 h",
+    "replies": [
+      {
+        "by": "ingeniera_pr",
+        "text": "Placas solares con baterías ayudan mucho, pero hacen falta más incentivos.",
+        "votes": 41
+      },
+      {
+        "by": "don_ramon",
+        "text": "Que se mantengan las plantas al día. Mantenimiento primero.",
+        "votes": 22
+      }
+    ]
+  },
+  {
+    "id": "e2",
+    "cat": "Deportes",
+    "title": "¿Quién gana La Pro este año?",
+    "body": "Arranca el 4 de noviembre. Yo digo Santurce. ¿Ustedes?",
+    "by": "fanatico_cangrejero",
+    "votes": 96,
+    "ago": "hace 5 h",
+    "replies": [
+      {
+        "by": "criollo_de_corazon",
+        "text": "Caguas, sin duda. 🔥",
+        "votes": 18
+      }
+    ]
+  },
+  {
+    "id": "e3",
+    "cat": "Educación",
+    "title": "Ideas para que los jóvenes lean más",
+    "body": "En mi casa apagamos el celular una hora cada noche. ¿Qué les funciona a ustedes?",
+    "by": "maestra_retirada",
+    "votes": 74,
+    "ago": "ayer",
+    "replies": []
+  },
+  {
+    "id": "e4",
+    "cat": "Fe y familia",
+    "title": "Actividades familiares gratis este fin de semana",
+    "body": "Compartan lo que conozcan en su pueblo.",
+    "by": "mamá_de_tres",
+    "votes": 51,
+    "ago": "ayer",
+    "replies": []
+  }
+]

@@ -8,8 +8,8 @@ import Columnists from '../../components/Columnists.astro';
 import { getStories, SECTIONS, SITE, VIDEOS, url } from '../../lib/site';
 
 export function getStaticPaths() {
-  // Deportes and Entretenimiento have their own pages (seccion/deportes.astro, seccion/entretenimiento.astro)
-  return SECTIONS.filter((s) => s.id !== 'deportes' && s.id !== 'entretenimiento').map((s) => ({ params: { id: s.id }, props: { sec: s } }));
+  // Deportes, Entretenimiento and Clima have their own pages (seccion/deportes.astro, entretenimiento.astro, clima.astro)
+  return SECTIONS.filter((s) => !['deportes', 'entretenimiento', 'clima'].includes(s.id)).map((s) => ({ params: { id: s.id }, props: { sec: s } }));
 }
 const { sec } = Astro.props;
 const all = await getStories();

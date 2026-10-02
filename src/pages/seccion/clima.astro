@@ -1,0 +1,184 @@
+---
+// Clima: a weather page with live data from the National Weather Service (NWS / SNM) and the
+// National Hurricane Center, read in the reader's browser (the NWS API allows it):
+// current conditions at San Juan airport, alerts for Puerto Rico, 7-day and hourly forecast for
+// San Juan, temperatures in other towns, radar, the tropical outlook and our Clima stories.
+import Base from '../../layouts/Base.astro';
+import StoryCard from '../../components/StoryCard.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import { getStories, url } from '../../lib/site';
+const news = (await getStories()).filter((s) => s.data.section === 'clima');
+// Town forecasts (latitude, longitude). The NWS grid for each is looked up in the browser.
+const TOWNS: Array<[string, number, number]> = [
+  ['Ponce', 18.0111, -66.6141], ['Mayagüez', 18.2013, -67.1397], ['Arecibo', 18.4724, -66.7157],
+  ['Caguas', 18.2341, -66.0485], ['Fajardo', 18.3258, -65.6524], ['Aguadilla', 18.4277, -67.1541],
+];
+---
+<Base title="Clima" active="clima" description="El tiempo en Puerto Rico: condiciones actuales, pronóstico de 7 días, alertas, radar y el trópico, con datos del Servicio Nacional de Meteorología.">
+  <main class="wrap wx-page" id="main" data-wx-page data-towns={JSON.stringify(TOWNS)}>
+    <div class="wx-head">
+      <h1>Clima</h1>
+      <p>Datos en vivo del <a href="https://www.weather.gov/sju/" rel="noopener" target="_blank">Servicio Nacional de Meteorología en San Juan</a> y del <a href="https://www.nhc.noaa.gov/" rel="noopener" target="_blank">Centro Nacional de Huracanes</a>.</p>
+    </div>
+
+    <div class="wx-alerts" data-wx-alerts hidden></div>
+
+    <div class="wx-top">
+      <section class="wx-now" aria-labelledby="wx-now-h">
+        <h2 id="wx-now-h">Ahora en San Juan</h2>
+        <div class="wx-now-main">
+          <span class="wx-now-icon" data-now-icon aria-hidden="true"></span>
+          <b class="wx-now-temp" data-now-temp>—</b>
+          <div>
+            <p class="wx-now-sky" data-now-sky>Cargando…</p>
+            <p class="wx-now-feels" data-now-feels></p>
+          </div>
+        </div>
+        <dl class="wx-now-facts">
+          <div><dt>Humedad</dt><dd data-now-hum>—</dd></div>
+          <div><dt>Viento</dt><dd data-now-wind>—</dd></div>
+          <div><dt>Visibilidad</dt><dd data-now-vis>—</dd></div>
+          <div><dt>Actualizado</dt><dd data-now-time>—</dd></div>
+        </dl>
+        <p class="wx-src">Aeropuerto Luis Muñoz Marín (estación TJSJ).</p>
+      </section>
+
+      <section class="wx-hourly" aria-labelledby="wx-hr-h">
+        <h2 id="wx-hr-h">Próximas horas</h2>
+        <ol class="wx-hours" data-hours><li class="wx-loading">Cargando…</li></ol>
+      </section>
+    </div>
+
+    <section class="wx-week" aria-labelledby="wx-wk-h">
+      <h2 id="wx-wk-h">Pronóstico de 7 días · San Juan</h2>
+      <ol class="wx-days" data-days><li class="wx-loading">Cargando pronóstico…</li></ol>
+    </section>
+
+    <div class="wx-grid">
+      <section class="wx-towns" aria-labelledby="wx-tw-h">
+        <h2 id="wx-tw-h">En la isla hoy</h2>
+        <ul data-towns-list>{TOWNS.map(([n]) => <li data-town={n}><b class="notranslate" translate="no">{n}</b><span class="wx-t-sky">…</span><span class="wx-t-temp">—</span></li>)}</ul>
+      </section>
+      <section class="wx-radar" aria-labelledby="wx-rd-h">
+        <h2 id="wx-rd-h">Radar</h2>
+        <img src="https://radar.weather.gov/ridge/standard/TJUA_loop.gif" alt="Radar Doppler de Puerto Rico (animación de la última hora)" loading="lazy" />
+        <p class="wx-src">Radar Doppler TJUA, Cayey. Fuente: NWS.</p>
+      </section>
+      <section class="wx-tropics" aria-labelledby="wx-tr-h">
+        <h2 id="wx-tr-h">El trópico</h2>
+        <img src="https://www.nhc.noaa.gov/xgtwo/two_atl_7d0.png" alt="Mapa del Centro Nacional de Huracanes con las áreas vigiladas en el Atlántico en los próximos 7 días" loading="lazy" />
+        <p class="wx-src">Perspectiva de 7 días del Atlántico. <a href="https://www.nhc.noaa.gov/gtwo.php?basin=atlc" rel="noopener" target="_blank">Ver en el Centro Nacional de Huracanes ↗</a></p>
+      </section>
+    </div>
+
+    {news.length > 0 && (
+      <section>
+        <div class="sec-h"><h2>Noticias del tiempo</h2></div>
+        <div class="grid2">{news.slice(0, 4).map((s) => <StoryCard story={s} />)}</div>
+      </section>
+    )}
+    <AdSlot size="infeed" />
+  </main>
+
+  <script>
+    const page = document.querySelector<HTMLElement>('[data-wx-page]')!;
+    const API = 'https://api.weather.gov';
+    const SJ = `${API}/gridpoints/SJU/162,132`;
+    const get = async (u: string) => { const r = await fetch(u, { headers: { Accept: 'application/geo+json' } }); if (!r.ok) throw new Error(String(r.status)); return r.json(); };
+    const $ = (s: string) => page.querySelector<HTMLElement>(s)!;
+
+    // English forecast words → Spanish
+    const PHRASES: Array<[RegExp, string]> = [
+      [/Showers And Thunderstorms Likely/i, 'Aguaceros y tormentas probables'], [/Chance Showers And Thunderstorms/i, 'Posibles aguaceros y tormentas'],
+      [/Showers And Thunderstorms/i, 'Aguaceros y tormentas'], [/Slight Chance Rain Showers/i, 'Leve probabilidad de aguaceros'],
+      [/Chance Rain Showers/i, 'Posibles aguaceros'], [/Rain Showers Likely/i, 'Aguaceros probables'], [/Scattered Rain Showers/i, 'Aguaceros dispersos'],
+      [/Isolated Rain Showers/i, 'Aguaceros aislados'], [/Rain Showers/i, 'Aguaceros'], [/Thunderstorms?/i, 'Tormentas eléctricas'],
+      [/Mostly Sunny/i, 'Mayormente soleado'], [/Partly Sunny/i, 'Parcialmente soleado'], [/Sunny/i, 'Soleado'],
+      [/Mostly Clear/i, 'Mayormente despejado'], [/Partly Cloudy/i, 'Parcialmente nublado'], [/Mostly Cloudy/i, 'Mayormente nublado'],
+      [/Clear|Fair/i, 'Despejado'], [/Cloudy|Overcast/i, 'Nublado'], [/Light Rain/i, 'Lluvia ligera'], [/Rain/i, 'Lluvia'], [/Haze/i, 'Bruma'], [/Fog/i, 'Neblina'],
+    ];
+    const es = (t = '') => { const parts = t.split(/\s+then\s+/i).map((p) => (PHRASES.find(([re]) => re.test(p))?.[1] ?? p)); return [...new Set(parts)].join(', luego '); };
+    const ALERTS: Record<string, string> = {
+      'Flood Advisory': 'Aviso de inundaciones', 'Flood Warning': 'Advertencia de inundaciones', 'Flood Watch': 'Vigilancia de inundaciones',
+      'Flash Flood Warning': 'Advertencia de inundaciones repentinas', 'Flash Flood Watch': 'Vigilancia de inundaciones repentinas',
+      'Heat Advisory': 'Aviso de calor', 'Excessive Heat Warning': 'Advertencia de calor extremo', 'Extreme Heat Warning': 'Advertencia de calor extremo',
+      'Small Craft Advisory': 'Aviso a embarcaciones pequeñas', 'High Surf Advisory': 'Aviso de marejada', 'Rip Current Statement': 'Corrientes marinas peligrosas',
+      'Tropical Storm Watch': 'Vigilancia de tormenta tropical', 'Tropical Storm Warning': 'Advertencia de tormenta tropical',
+      'Hurricane Watch': 'Vigilancia de huracán', 'Hurricane Warning': 'Advertencia de huracán', 'Special Weather Statement': 'Declaración especial del tiempo',
+    };
+    // Drawn icons
+    const ic = (body: string, size = 34) => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${body}</svg>`;
+    const SUN = '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>';
+    const MOON = '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>';
+    const CLOUD = '<path d="M7 18h10a4 4 0 0 0 0-8 6 6 0 0 0-11.5 1.5A3.3 3.3 0 0 0 7 18z"/>';
+    const PARTLY = '<path d="M8 3v1.5M3.5 8H2M4.6 4.6l1 1M11.4 4.6l-1 1"/><path d="M5.3 10.5A3.5 3.5 0 0 1 11 6.6"/><path d="M9 20h8a3.5 3.5 0 0 0 0-7 5 5 0 0 0-9.6 1.3A2.9 2.9 0 0 0 9 20z"/>';
+    const LOW = '<path d="M7 15h10a4 4 0 0 0 0-8 6 6 0 0 0-11.5 1.5A3.3 3.3 0 0 0 7 15z"/>';
+    const RAIN = LOW + '<path d="M9 18l-1 3M13 18l-1 3M17 18l-1 3"/>';
+    const STORM = LOW + '<path d="M12.5 16l-2 3.5h3l-2 3.5"/>';
+    const icon = (t = '', day = true, size?: number) => ic(/thunder/i.test(t) ? STORM : /rain|shower|drizzle/i.test(t) ? RAIN : /mostly cloudy|overcast|^cloudy/i.test(t) ? CLOUD : /partly|mostly sunny|mostly clear/i.test(t) ? PARTLY : day ? SUN : MOON, size);
+    const f = (c: number | null) => (c == null ? null : Math.round(c * 9 / 5 + 32));
+    const hour = (iso: string) => new Date(iso).toLocaleTimeString('es-PR', { hour: 'numeric', timeZone: 'America/Puerto_Rico' });
+    const dayName = (iso: string, i: number) => i === 0 ? 'Hoy' : new Date(iso).toLocaleDateString('es-PR', { weekday: 'short', day: 'numeric', timeZone: 'America/Puerto_Rico' });
+
+    // Current conditions (newest reading that has a temperature)
+    get(`${API}/stations/TJSJ/observations?limit=6`).then((d) => {
+      const o = d.features.map((x: any) => x.properties).find((p: any) => p.temperature?.value != null);
+      if (!o) throw new Error('no data');
+      const t = f(o.temperature.value)!;
+      const feels = f(o.heatIndex?.value) ?? t;
+      $('[data-now-temp]').textContent = `${t}°`;
+      $('[data-now-sky]').textContent = es(o.textDescription) || '—';
+      $('[data-now-feels]').textContent = `Sensación de ${feels}°`;
+      $('[data-now-icon]').innerHTML = icon(o.textDescription, new Date(o.timestamp).getHours() >= 6 && new Date(o.timestamp).getHours() < 19, 64);
+      $('[data-now-hum]').textContent = o.relativeHumidity?.value != null ? `${Math.round(o.relativeHumidity.value)}%` : '—';
+      $('[data-now-wind]').textContent = o.windSpeed?.value != null ? `${Math.round(o.windSpeed.value / 1.609)} mph` : '—';
+      $('[data-now-vis]').textContent = o.visibility?.value != null ? `${Math.round(o.visibility.value / 1609)} mi` : '—';
+      $('[data-now-time]').textContent = new Date(o.timestamp).toLocaleTimeString('es-PR', { hour: 'numeric', minute: '2-digit', timeZone: 'America/Puerto_Rico' });
+    }).catch(() => { $('[data-now-sky]').textContent = 'No pudimos cargar las condiciones. Intenta más tarde.'; });
+
+    // 7-day forecast: day period (high) + the night after it (low)
+    get(`${SJ}/forecast`).then((d) => {
+      const ps = d.properties.periods;
+      const days: string[] = [];
+      for (let i = 0; i < ps.length && days.length < 7; i++) {
+        const p = ps[i];
+        if (!p.isDaytime && i > 0) continue;
+        const night = p.isDaytime ? ps[i + 1] : p;
+        const hi = p.isDaytime ? `${p.temperature}°` : '—';
+        const rain = Math.max(p.probabilityOfPrecipitation?.value ?? 0, night?.probabilityOfPrecipitation?.value ?? 0);
+        days.push(`<li><span class="wx-d-name">${p.isDaytime ? dayName(p.startTime, days.length) : 'Esta noche'}</span>${icon(p.shortForecast, p.isDaytime)}<span class="wx-d-sky">${es(p.shortForecast)}</span><span class="wx-d-t"><b>${hi}</b> <span>${night ? night.temperature + '°' : ''}</span></span><span class="wx-d-rain" title="Probabilidad de lluvia">💧 ${rain}%</span></li>`);
+      }
+      $('[data-days]').innerHTML = days.join('');
+    }).catch(() => { $('[data-days]').innerHTML = '<li class="wx-loading">No pudimos cargar el pronóstico.</li>'; });
+
+    // Next 12 hours
+    get(`${SJ}/forecast/hourly`).then((d) => {
+      $('[data-hours]').innerHTML = d.properties.periods.slice(0, 12).map((p: any) =>
+        `<li><span>${hour(p.startTime)}</span>${icon(p.shortForecast, p.isDaytime, 26)}<b>${p.temperature}°</b><small>💧 ${p.probabilityOfPrecipitation?.value ?? 0}%</small></li>`).join('');
+    }).catch(() => { $('[data-hours]').innerHTML = '<li class="wx-loading">No disponible.</li>'; });
+
+    // Alerts for Puerto Rico
+    get(`${API}/alerts/active?area=PR`).then((d) => {
+      const list = d.features.map((x: any) => x.properties);
+      const box = $('[data-wx-alerts]');
+      if (!list.length) { box.hidden = false; box.className = 'wx-alerts ok'; box.textContent = 'No hay alertas del tiempo activas para Puerto Rico.'; return; }
+      box.hidden = false;
+      box.innerHTML = list.slice(0, 4).map((a: any) => `<a href="https://www.weather.gov/sju/" target="_blank" rel="noopener"><b>${ALERTS[a.event] ?? a.event}</b> <span>${(a.areaDesc || '').split(';').slice(0, 6).join(', ')}</span><small>Hasta ${new Date(a.ends || a.expires).toLocaleString('es-PR', { weekday: 'short', hour: 'numeric', minute: '2-digit', timeZone: 'America/Puerto_Rico' })}</small></a>`).join('');
+    }).catch(() => { /* alerts box stays hidden */ });
+
+    // Other towns: today's high and sky (grid looked up once per visit)
+    const towns: Array<[string, number, number]> = JSON.parse(page.dataset.towns!);
+    towns.forEach(async ([name, lat, lon]) => {
+      const li = page.querySelector<HTMLElement>(`[data-town="${name}"]`)!;
+      try {
+        const key = `nx-grid-${name}`;
+        let fc: string | null = null;
+        try { fc = sessionStorage.getItem(key); } catch { /* storage blocked */ }
+        if (!fc) { fc = (await get(`${API}/points/${lat},${lon}`)).properties.forecast as string; try { sessionStorage.setItem(key, fc!); } catch { /* storage blocked */ } }
+        const p = (await get(fc!)).properties.periods[0];
+        li.querySelector('.wx-t-sky')!.innerHTML = `${icon(p.shortForecast, p.isDaytime, 22)} ${es(p.shortForecast)}`;
+        li.querySelector('.wx-t-temp')!.textContent = `${p.temperature}°`;
+      } catch { li.querySelector('.wx-t-sky')!.textContent = 'No disponible'; }
+    });
+  </script>
+</Base>

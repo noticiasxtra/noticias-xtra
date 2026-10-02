@@ -7,8 +7,11 @@ import WeatherBox from './WeatherBox.astro';
 import AdSlot from './AdSlot.astro';
 import { getStories, mostRead, url, SITE } from '../lib/site';
 import { getBreaking } from '../lib/breaking';
-interface Props { newsletter?: boolean }
-const { newsletter = true } = Astro.props;
+import foro from '../data/foro.json';
+interface Props { newsletter?: boolean; foro?: boolean }
+const { newsletter = true, foro: showForo = false } = Astro.props;
+// Small Foro Xtra teaser (home page): the three most-voted sample topics
+const foroTop = [...foro].sort((a, b) => b.votes - a.votes).slice(0, 3);
 const stories = await getStories();
 // The story matching what Puerto Rico is searching for goes first, then featured and newest
 const trend = await getBreaking();
@@ -59,6 +62,13 @@ const hhmm = (d: Date) => d.toLocaleTimeString('es-PR', { hour: 'numeric', minut
       </form>
       <p class="ok" style="color:#fff" hidden>¡Gracias! El Boletín Xtra comenzará muy pronto.</p>
     </div>
+  )}
+  {showForo && (
+    <section class="fx-box">
+      <h2 class="fx-h"><span aria-hidden="true">💬</span> Foro Xtra <span class="sp-demo">DEMO</span></h2>
+      <ul>{foroTop.map((t) => <li><a href={url('foro')}><span class="fx-v">▲ {t.votes}</span>{t.title}</a></li>)}</ul>
+      <a class="fx-go" href={url('foro')}>Únete a la conversación ›</a>
+    </section>
   )}
   <AdSlot size="halfpage" sticky />
 </aside>
