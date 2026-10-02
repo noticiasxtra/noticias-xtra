@@ -6,7 +6,7 @@ import SectionBlock from '../components/SectionBlock.astro';
 import Sidebar from '../components/Sidebar.astro';
 import Ph from '../components/Ph.astro';
 import Label from '../components/Label.astro';
-import ScoreStrip from '../components/deportes/ScoreStrip.astro';
+import HomeStrip from '../components/HomeStrip.astro';
 import { getStories, url, SITE, TOWNS, VIDEOS } from '../lib/site';
 
 const stories = await getStories();
@@ -21,7 +21,7 @@ const leadRelated = related.length ? related : others.slice(0, 3);
 ---
 <Base active="home">
   <main class="wrap" id="main">
-    <ScoreStrip theme="light" title />
+    <HomeStrip />
     {!lead && <div class="empty"><p>Muy pronto publicaremos las primeras noticias.</p></div>}
     {lead && <div class="hero">
       <div class="stack left">{left.map((s) => <StoryCard story={s} variant="mini" />)}</div>

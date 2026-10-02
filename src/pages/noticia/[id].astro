@@ -31,7 +31,7 @@ const more = stories
 <Base title={d.title} description={d.description} active={d.section} image={d.image ?? fallback.src} article={{ published: d.date, section: s.name }}>
   <main class="wrap" id="main">
     <div class="art-grid">
-      <article class="art">
+      <article class="art" data-read-section={s.name} data-read-url={url(`noticia/${story.id}`)}>
         <div class="crumbs"><a href={url()}>Portada</a> / <a href={url(`seccion/${s.id}`)}>{s.name}</a></div>
         <Label story={story} />
         <h1>{d.title}</h1>
@@ -69,6 +69,19 @@ const more = stories
       <Sidebar />
     </div>
   </main>
+  <script>
+    // "Para ti" on the home page: count which sections this reader opens. Stored only in this browser.
+    const art = document.querySelector<HTMLElement>('[data-read-section]');
+    if (art) {
+      try {
+        const reads = JSON.parse(localStorage.getItem('nx-reads') || '{}');
+        reads[art.dataset.readSection!] = (reads[art.dataset.readSection!] || 0) + 1;
+        localStorage.setItem('nx-reads', JSON.stringify(reads));
+        const seen = JSON.parse(localStorage.getItem('nx-seen') || '[]').filter((u: string) => u !== art.dataset.readUrl);
+        localStorage.setItem('nx-seen', JSON.stringify([art.dataset.readUrl, ...seen].slice(0, 50)));
+      } catch { /* private mode or storage blocked: nothing to remember */ }
+    }
+  </script>
   <script type="application/ld+json" set:html={JSON.stringify({
     '@context': 'https://schema.org',
     '@type': 'NewsArticle',
