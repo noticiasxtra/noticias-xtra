@@ -10,6 +10,8 @@ export const GAMES = [
   { id: 'memoria', name: 'Memoria Boricua', icon: '◆', color: '#0E8A5F', cat: 'mente', about: 'Encuentra las parejas en la menor cantidad de jugadas.' },
   { id: 'domino', name: 'Dominó', icon: '⚃', color: '#14111F', cat: 'mesa', about: 'Mano a mano o en parejas de cuatro. Partida a 100.' },
   { id: 'cuatro-colores', name: 'Cuatro Colores', icon: '+4', color: '#D7263D', cat: 'mesa', about: 'Combina color o número y quédate sin cartas primero.' },
+  { id: 'ahorcado', name: 'Ahorcado boricua', icon: 'Á', color: '#B45309', cat: 'palabras', about: 'Adivina la palabra boricua letra por letra.' },
+  { id: '2048', name: '2048', icon: '2K', color: '#C2185B', cat: 'mente', about: 'Une los números iguales hasta llegar a 2048.' },
   { id: 'cuatro-en-linea', name: 'Cuatro en Línea', icon: '●', color: '#E8A400', cat: 'mesa', about: 'Conecta cuatro fichas antes que la computadora.' },
 ] as const;
 

@@ -1954,3 +1954,90 @@ main.wrap,.home-grid,.ys-page,.tb-page{padding-top:var(--gap)}
 [data-theme="dark"] .cw-clue,[data-theme="dark"] .cw-clues li.on{background:#1C2A44;color:#E3ECFA}
 @media (max-width:560px){ .cw-clues{grid-template-columns:1fr} }
 .jg-game.cw{position:relative}
+
+/* Juegos Xtra teaser: cover illustrations; the full-width version is a single row (scrolls sideways if needed) */
+.gt-tile{gap:8px;padding:8px 8px 10px}
+.gt-art{display:block;width:100%;aspect-ratio:5/3;object-fit:cover;border-radius:9px;box-shadow:0 4px 12px rgba(0,0,0,.28)}
+.gt:not(.gt-compact) .gt-tiles{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:minmax(118px,1fr);overflow-x:auto;scrollbar-width:thin;padding-bottom:4px}
+.gt-compact .gt-tile{padding:6px 6px 8px}
+.gt-compact .gt-art{border-radius:7px}
+
+/* Ahorcado */
+.ah-draw{display:block;width:min(240px,70%);margin:0 auto}
+.ah-draw .ah-base{fill:none;stroke:var(--ink);stroke-width:5;stroke-linecap:round}
+.ah-draw .ah-p{fill:none;stroke:var(--gc);stroke-width:5;stroke-linecap:round;opacity:0;transition:opacity .25s}
+.ah-draw .ah-p.on{opacity:1}
+.ah-hint{margin:6px 0 10px;font-size:15px;color:var(--muted)}
+.ah-hint b{color:var(--gc)}
+.ah-word{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin:0 0 6px}
+.ah-word span{display:grid;place-items:end center;width:34px;height:44px;border-bottom:4px solid var(--ink);font-family:var(--head);font-weight:800;font-size:26px;color:var(--ink)}
+.ah-word span.miss{color:var(--red)}
+.ah-keys{display:flex;flex-wrap:wrap;justify-content:center;gap:5px;max-width:520px;margin:12px auto 0}
+.ah-keys button{width:38px;height:42px;border:0;border-radius:8px;background:var(--soft);color:var(--ink);font-family:var(--head);font-weight:800;font-size:16px;cursor:pointer;box-shadow:0 3px 0 var(--line)}
+.ah-keys button.hit{background:#1B8A5A;color:#fff;box-shadow:none}
+.ah-keys button.no{background:#787C88;color:#fff;box-shadow:none}
+.ah-keys button:disabled{cursor:default}
+
+/* 2048 */
+.g48-top{display:flex;justify-content:center;align-items:center;gap:10px;margin-bottom:12px}
+.g48-score{display:grid;justify-items:center;min-width:80px;padding:6px 12px;border-radius:10px;background:#5C1A3D;color:#fff}
+.g48-score small{font-size:11px;font-weight:700;opacity:.8;text-transform:uppercase}
+.g48-score b{font-family:var(--head);font-size:20px}
+.g48-top .jg-btn{margin:0}
+.g48-board{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;max-width:400px;margin:0 auto;padding:10px;border-radius:14px;background:#5C1A3D;touch-action:none;outline:none}
+.g48-cell{display:grid;place-items:center;aspect-ratio:1;border-radius:8px;background:#7A2F55;font-family:var(--head);font-weight:800;font-size:clamp(18px,5vw,30px);color:#fff;transition:background .12s}
+.g48-cell.t2{background:#FCE4EC;color:#4A148C}.g48-cell.t4{background:#F8BBD0;color:#4A148C}.g48-cell.t8{background:#F48FB1;color:#4A148C}
+.g48-cell.t16{background:#F06292}.g48-cell.t32{background:#EC407A}.g48-cell.t64{background:#D81B60}.g48-cell.t128{background:#AD1457;font-size:clamp(16px,4.4vw,26px)}
+.g48-cell.t256{background:#880E4F;font-size:clamp(16px,4.4vw,26px)}.g48-cell.t512{background:#6A1B9A;font-size:clamp(16px,4.4vw,26px)}
+.g48-cell.t1024{background:#4A148C;font-size:clamp(13px,3.6vw,21px)}.g48-cell.t2048,.g48-cell.t4096{background:#FFC107;color:#4A148C;font-size:clamp(13px,3.6vw,21px)}
+.g48-cell.new{animation:g48-in .18s ease-out}
+.g48-cell.pop{animation:g48-pop .2s ease-out}
+@keyframes g48-in{from{transform:scale(.4)}to{transform:none}}
+@keyframes g48-pop{50%{transform:scale(1.12)}}
+.g48-pad{display:grid;grid-template-columns:repeat(3,48px);grid-template-rows:repeat(2,44px);gap:6px;justify-content:center;margin-top:12px}
+.g48-pad button{border:0;border-radius:10px;background:var(--soft);color:var(--ink);font-size:18px;cursor:pointer}
+.g48-pad [data-dir="up"]{grid-column:2}
+.g48-pad [data-dir="left"]{grid-column:1;grid-row:2}
+.g48-pad [data-dir="down"]{grid-column:2;grid-row:2}
+.g48-pad [data-dir="right"]{grid-column:3;grid-row:2}
+@media (prefers-reduced-motion:reduce){ .g48-cell{animation:none !important} }
+
+/* =========================================================
+   Header, reorganized: thin top bar (date, denuncia, language) + main row
+   (logo · search · one icon group · Anúnciate)
+   ========================================================= */
+.topbar{background:var(--soft);border-bottom:1px solid var(--line);font-size:12px;color:var(--muted)}
+.topbar .wrap{display:flex;align-items:center;gap:14px;min-height:32px}
+.tb-tip{color:var(--purple);font-weight:700}
+.tb-tip:hover{text-decoration:underline}
+.topbar .lang-sw{margin-left:auto;background:var(--card)}
+.topbar .lang-sw a,.topbar .lang-sw span{padding:3px 9px;font-size:11px}
+.masthead .wrap{gap:24px;padding-top:14px;padding-bottom:14px}
+.masthead .search{flex:1;max-width:460px;margin:0 auto}
+.masthead .search input{width:100%;min-width:0}
+.mh-right{order:0;margin-left:0;display:flex;align-items:center;gap:12px}
+.mh-icons{display:flex;align-items:center;gap:2px;padding:3px;border:1px solid var(--line);border-radius:999px;background:var(--card)}
+.mh-ico{position:relative;display:grid;place-items:center;width:36px;height:36px;border:0;border-radius:50%;background:transparent;color:var(--ink);cursor:pointer}
+.mh-ico:hover{background:var(--soft);color:var(--purple)}
+.mh-icons .search-btn{display:none}
+.mh-ico.pf-btn.in{color:#fff}
+.mh-ad-btn{height:36px;margin:0;padding:0 16px}
+[data-theme="dark"] .topbar{background:#12131F}
+@media (min-width:1000px) and (max-width:1180px){ .masthead .wrap{gap:16px} .masthead .search{max-width:320px} }
+@media (max-width:999px){
+  .masthead .search{display:none}
+  .mh-icons .search-btn{display:grid}
+  .mh-right{margin-left:auto}
+}
+@media (max-width:600px){
+  .topbar .mh-date{display:none}
+  .topbar .wrap{min-height:30px}
+  .mh-ico{width:34px;height:34px}
+  .mh-right{gap:6px}
+}
+/* The single-row games strip scrolls inside its box; it must not widen the section grid */
+.home-sections > *,.gt{min-width:0}
+.home-sections{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+@media (max-width:760px){ .home-sections{grid-template-columns:minmax(0,1fr)} }
+.gt:not(.gt-compact) .gt-tiles{grid-auto-columns:minmax(0,1fr);overflow-x:visible}
+@media (max-width:760px){ .gt:not(.gt-compact) .gt-tiles{grid-auto-columns:minmax(104px,1fr);overflow-x:auto} }
