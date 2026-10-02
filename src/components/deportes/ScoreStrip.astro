@@ -1,35 +1,116 @@
 ---
-// Horizontal score strip (ESPN-style). Renders only when src/data/marcadores.json has games.
-// theme="light" for the home page, dark (default) on the Deportes pages.
-import { scores, gameTime } from '../../lib/scores';
+// Score carousel (home, Deportes, league pages). Renders only when there are games.
+// Cards: two-color team bar on top, status + league, team badges with scores, abbreviations.
+// Faded edges with arrow buttons; league filter buttons when showing several leagues.
+import fs from 'node:fs';
+import path from 'node:path';
+import { scores, type Game } from '../../lib/scores';
 import { league } from '../../lib/leagues';
+import { team } from '../../lib/teams';
 import { url } from '../../lib/site';
-interface Props { only?: string; theme?: 'dark' | 'light'; title?: boolean }
-const { only, theme = 'dark', title = false } = Astro.props;
+interface Props { only?: string; title?: boolean; theme?: string }
+const { only } = Astro.props;
 const games = scores(only);
 const anyDemo = games.some((g) => g.demo);
-const link = (g: (typeof games)[number]) => url(g.id ? `deportes/juego/${g.id}` : `deportes/${g.league}`);
+const leaguesHere = [...new Set(games.map((g) => g.league))].map((id) => league(id)!).filter(Boolean);
+const link = (g: Game) => url(g.id ? `deportes/juego/${g.id}` : `deportes/${g.league}`);
+
+const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Puerto_Rico' });
+function status(g: Game): { text: string; live?: boolean } {
+  if (g.status === 'en-vivo') return { text: g.note ?? 'En vivo', live: true };
+  if (g.status === 'final') {
+    const extra = g.note?.match(/^(\d+)\s*entradas?$/i); // "10 entradas" -> "Final/10"
+    return { text: extra ? `Final/${extra[1]}` : g.note ? `Final · ${g.note}` : 'Final' };
+  }
+  const d = new Date(g.date);
+  const time = d.toLocaleTimeString('es-PR', { hour: 'numeric', minute: '2-digit', timeZone: 'America/Puerto_Rico' });
+  const day = d.toLocaleDateString('en-CA', { timeZone: 'America/Puerto_Rico' }) === today ? 'Hoy' : d.toLocaleDateString('es-PR', { weekday: 'short', timeZone: 'America/Puerto_Rico' });
+  return { text: `${day} ${time}` };
+}
+// Official team logo if present at public/logos/teams/<league>-<abbr>.png|svg|webp
+const logoFor = (lg: string, abbr: string) =>
+  ['svg', 'png', 'webp'].map((e) => `logos/teams/${lg}-${abbr.toLowerCase()}.${e}`).find((f) => fs.existsSync(path.join(process.cwd(), 'public', f)));
 ---
 {games.length > 0 && (
-  <div class:list={['sp-scores-wrap', theme]}>
-    {title && <div class="sp-scores-h"><h2>Marcadores{anyDemo && <span class="sp-demo">DEMO</span>}</h2><a href={url('seccion/deportes')}>Xtra Deportes</a></div>}
-    <div class="sp-scores" role="region" aria-label="Marcadores">
-      {games.map((g) => {
-        const l = league(g.league);
-        const done = g.status !== 'programado';
-        const awayWin = g.status === 'final' && (g.awayScore ?? 0) > (g.homeScore ?? 0);
-        const homeWin = g.status === 'final' && (g.homeScore ?? 0) > (g.awayScore ?? 0);
-        return (
-          <a class="sp-game" href={link(g)} style={`--lc:${l?.color}`}>
-            <div class="sp-game-h">
-              <span>{l?.name}{g.demo && <i class="sp-demo">DEMO</i>}</span>
-              {g.status === 'en-vivo' ? <b class="live">● EN VIVO{g.note && ` · ${g.note}`}</b> : g.status === 'final' ? <b>Final{g.note && ` · ${g.note}`}</b> : <b>{gameTime(g.date)}</b>}
-            </div>
-            <div class:list={['sp-team', { win: awayWin }]}><span>{g.away}</span>{done && <strong>{g.awayScore}</strong>}</div>
-            <div class:list={['sp-team', { win: homeWin }]}><span>{g.home}</span>{done && <strong>{g.homeScore}</strong>}</div>
-          </a>
-        );
-      })}
+  <div class="sc" data-sc>
+    <div class="sc-h">
+      <h2>Marcadores{anyDemo && <span class="sp-demo">DEMO</span>}</h2>
+      {!only && leaguesHere.length > 1 && (
+        <div class="sc-filters" role="group" aria-label="Filtrar por liga">
+          <button type="button" data-f="" aria-pressed="true">Todos</button>
+          {leaguesHere.map((l) => <button type="button" data-f={l.id} aria-pressed="false">{l.name}</button>)}
+        </div>
+      )}
+      {!only && <a class="sc-more" href={url('seccion/deportes')}>Xtra Deportes ›</a>}
+    </div>
+    <div class="sc-rail">
+      <button type="button" class="sc-arrow prev" aria-label="Ver juegos anteriores" hidden>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
+      </button>
+      <div class="sc-track">
+        {games.map((g) => {
+          const a = team(g.league, g.away);
+          const h = team(g.league, g.home);
+          const st = status(g);
+          const done = g.status !== 'programado';
+          const awayWin = g.status === 'final' && (g.awayScore ?? 0) > (g.homeScore ?? 0);
+          const homeWin = g.status === 'final' && (g.homeScore ?? 0) > (g.awayScore ?? 0);
+          const aLogo = logoFor(g.league, a.abbr);
+          const hLogo = logoFor(g.league, h.abbr);
+          return (
+            <a class="sc-card" href={link(g)} data-league={g.league} style={`--a:${a.color};--h:${h.color}`}
+               aria-label={`${g.awayFull ?? g.away} ${done ? g.awayScore : ''}, ${g.homeFull ?? g.home} ${done ? g.homeScore : ''}. ${st.text}`}>
+              <div class="sc-meta">
+                <span class:list={['sc-status', { live: st.live }]}>{st.live && <i class="sc-dot" />}{st.text}</span>
+                <span class="sc-lg">{league(g.league)?.name}{g.demo && <i class="sp-demo">DEMO</i>}</span>
+              </div>
+              <div class="sc-row">
+                <span class="sc-logo" style={`--c:${a.color}`}>{aLogo ? <img src={url(aLogo)} alt="" /> : <b>{a.abbr}</b>}</span>
+                {done ? <b class:list={['sc-score', { lose: homeWin }]}>{g.awayScore}</b> : <span class="sc-rec">{g.awayRecord}</span>}
+                <span class="sc-gap" />
+                {done ? <b class:list={['sc-score', { lose: awayWin }]}>{g.homeScore}</b> : <span class="sc-rec">{g.homeRecord}</span>}
+                <span class="sc-logo" style={`--c:${h.color}`}>{hLogo ? <img src={url(hLogo)} alt="" /> : <b>{h.abbr}</b>}</span>
+              </div>
+              <div class="sc-abbr"><span>{a.abbr}</span><span>{h.abbr}</span></div>
+            </a>
+          );
+        })}
+      </div>
+      <button type="button" class="sc-arrow next" aria-label="Ver más juegos" hidden>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg>
+      </button>
     </div>
   </div>
 )}
+
+<script>
+  // Arrows slide the cards; faded edges and arrows only show where there is more to see.
+  document.querySelectorAll<HTMLElement>('[data-sc]').forEach((sc) => {
+    const track = sc.querySelector<HTMLElement>('.sc-track')!;
+    const prev = sc.querySelector<HTMLButtonElement>('.sc-arrow.prev')!;
+    const next = sc.querySelector<HTMLButtonElement>('.sc-arrow.next')!;
+    const update = () => {
+      const start = track.scrollLeft <= 2;
+      const end = track.scrollLeft + track.clientWidth >= track.scrollWidth - 2;
+      prev.hidden = start;
+      next.hidden = end;
+      track.classList.toggle('fade-l', !start);
+      track.classList.toggle('fade-r', !end);
+    };
+    const step = () => Math.max(track.clientWidth * 0.8, 240);
+    prev.addEventListener('click', () => track.scrollBy({ left: -step(), behavior: 'smooth' }));
+    next.addEventListener('click', () => track.scrollBy({ left: step(), behavior: 'smooth' }));
+    track.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+    // League filter buttons
+    sc.querySelectorAll<HTMLButtonElement>('[data-f]').forEach((b) =>
+      b.addEventListener('click', () => {
+        sc.querySelectorAll('[data-f]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+        sc.querySelectorAll<HTMLElement>('.sc-card').forEach((c) => (c.hidden = !!b.dataset.f && c.dataset.league !== b.dataset.f));
+        track.scrollLeft = 0;
+        update();
+      }),
+    );
+    update();
+  });
+</script>
