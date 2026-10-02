@@ -4,7 +4,6 @@
 import Base from '../../layouts/Base.astro';
 import Time from '../../components/Time.astro';
 import Ph from '../../components/Ph.astro';
-import LeagueTabs from '../../components/deportes/LeagueTabs.astro';
 import LeagueBadge from '../../components/deportes/LeagueBadge.astro';
 import ScoreStrip from '../../components/deportes/ScoreStrip.astro';
 import GamesList from '../../components/deportes/GamesList.astro';
@@ -22,40 +21,47 @@ const season = 'season' in l ? l.season : undefined;
 const official = 'url' in l ? l.url : undefined;
 ---
 <Base title={`${l.full} | Deportes`} active="deportes" description={`${l.full}: ${l.about}`}>
-  <section class="sp-top sp-top-league" style={`--lc:${l.color}`}>
-    <div class="wrap">
-      <div class="sp-league-head">
+  <div class="ys">
+    <div class="ys-bar">
+      <div class="wrap">
+        <a class="ys-title" href={url('seccion/deportes')}>Xtra <span>Deportes</span></a>
+        <nav class="ys-leagues" aria-label="Ligas">
+          {LEAGUES.map((x) => <a href={url(`deportes/${x.id}`)} aria-current={x.id === l.id ? 'page' : undefined}><LeagueBadge id={x.id} size="sm" />{x.name}</a>)}
+        </nav>
+      </div>
+    </div>
+
+    <div class="wrap ys-page" id="main">
+      <header class="ys-card ys-league-head" style={`--lc:${l.color}`}>
         <LeagueBadge id={l.id} size="lg" />
         <div>
-          <p class="sp-crumb"><a href={url('seccion/deportes')}>Xtra Deportes</a></p>
           <h1>{l.full}</h1>
           <p>{l.about}{season && <> {season}</>}{official && <> <a href={official} rel="noopener" target="_blank">Sitio oficial ↗</a></>}</p>
         </div>
-      </div>
-      <LeagueTabs active={l.id} />
-      <ScoreStrip only={l.id} />
-    </div>
-  </section>
+      </header>
+      <ScoreStrip only={l.id} theme="light" />
 
-  <main class="wrap sp-league-page" id="main">
-    <div class="sp-data">
-      <GamesList league={l.id} season={season} />
-      <StandingsTable league={l.id} />
-      <BracketView league={l.id} />
+      <div class="sp-league-page">
+        <div class="sp-data">
+          <GamesList league={l.id} season={season} />
+          <StandingsTable league={l.id} />
+          <BracketView league={l.id} />
+        </div>
+        <aside class="ys-card sp-news">
+          <h2>Noticias de {l.name}</h2>
+          {news.length ? news.map((s) => (
+            <article class="sp-news-item">
+              <a href={url(`noticia/${s.id}`)} tabindex="-1" aria-hidden="true"><Ph sectionId="deportes" image={s.data.image} league={s.data.league} /></a>
+              <div>
+                <a href={url(`noticia/${s.id}`)}><h3 class="hl">{s.data.title}</h3></a>
+                <Time date={s.data.date} />
+              </div>
+            </article>
+          )) : (
+            <p class="sp-note">Todavía no hay noticias de {l.full}. <a href={url('seccion/deportes')}>Ver todos los deportes</a></p>
+          )}
+        </aside>
+      </div>
     </div>
-    <aside class="sp-news">
-      <h2>Noticias de {l.name}</h2>
-      {news.length ? news.map((s) => (
-        <article class="sp-news-item">
-          <a href={url(`noticia/${s.id}`)} tabindex="-1" aria-hidden="true"><Ph sectionId="deportes" image={s.data.image} league={s.data.league} /></a>
-          <div>
-            <a href={url(`noticia/${s.id}`)}><h3 class="hl">{s.data.title}</h3></a>
-            <Time date={s.data.date} />
-          </div>
-        </article>
-      )) : (
-        <p class="sp-note">Todavía no hay noticias de {l.full}. <a href={url('seccion/deportes')}>Ver todos los deportes</a></p>
-      )}
-    </aside>
-  </main>
+  </div>
 </Base>
