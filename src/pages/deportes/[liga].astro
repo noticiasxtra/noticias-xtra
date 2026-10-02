@@ -35,7 +35,7 @@ const st = standings(l.id);
 const stDemo = !!st && isDemoTable('standings', l.id);
 const pct = (w: number, p: number) => (w + p ? (w / (w + p)).toFixed(3).replace(/^0/, '') : '.000');
 const tabs = [
-  ['inicio', 'Inicio'], ['marcadores', 'Marcadores'], ['posiciones', 'Posiciones'],
+  ['inicio', 'Inicio'], ['posiciones', 'Posiciones'],
   ['estadisticas', 'Estadísticas'], ['equipos', 'Equipos'], ['noticias', 'Noticias'],
 ];
 ---
