@@ -37,6 +37,7 @@
 </section>
 
 <script>
+  import { ask } from '../../lib/dialogs';
   const root = document.querySelector<HTMLElement>('[data-tk]');
   if (root) {
     type Status = 'todo' | 'doing' | 'done';
@@ -162,7 +163,7 @@
       save(all); dlg.close(); render();
     });
     $$('[data-tk-close]').forEach((b) => b.addEventListener('click', () => dlg.close()));
-    $('[data-tk-del]').addEventListener('click', () => { if (editing && confirm('¿Borrar esta tarea?')) { save(tasks().filter((x) => x.id !== editing!.id)); dlg.close(); render(); } });
+    $('[data-tk-del]').addEventListener('click', async () => { if (editing && await ask('¿Borrar esta tarea?', { ok: 'Borrar', danger: true })) { save(tasks().filter((x) => x.id !== editing!.id)); dlg.close(); render(); } });
     $('[data-tk-new]').addEventListener('click', () => openForm(null));
 
     // ---- actions on a task ----

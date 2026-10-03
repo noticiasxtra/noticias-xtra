@@ -100,6 +100,7 @@ const booked = CAMPAIGNS.filter((c) => c.takeover).map((c) => ({ start: c.start,
 </section>
 
 <script>
+  import { ask, askText } from '../../lib/dialogs';
   import { quote, lengthLabel, SPECIALS, SALES_DISCOUNT_LIMIT, type QuoteInput, type CustomLine } from '../../lib/ads';
   import { saveRequest } from '../../lib/adrequests';
   const root = document.querySelector<HTMLElement>('[data-sd]');
@@ -312,7 +313,7 @@ const booked = CAMPAIGNS.filter((c) => c.takeover).map((c) => ({ start: c.start,
       save(all); dlg.close(); render(); toast(editing ? 'Consulta actualizada.' : 'Consulta guardada.');
     });
     $$('[data-sd-close]').forEach((b) => b.addEventListener('click', () => dlg.close()));
-    $('[data-sd-del]').addEventListener('click', () => { if (!editing || !confirm(`¿Borrar la consulta de ${editing.business}?`)) return; save(load().filter((x) => x.id !== editing!.id)); dlg.close(); render(); });
+    $('[data-sd-del]').addEventListener('click', async () => { if (!editing || !(await ask(`¿Borrar la consulta de ${editing.business}?`, { ok: 'Borrar', danger: true }))) return; save(load().filter((x) => x.id !== editing!.id)); dlg.close(); render(); });
     $('[data-sd-new]').addEventListener('click', () => open(null));
 
     // ---- proposal (printable page in a new window; "Guardar como PDF" from the print dialog) ----
@@ -346,7 +347,7 @@ const booked = CAMPAIGNS.filter((c) => c.takeover).map((c) => ({ start: c.start,
       const id = t.closest<HTMLElement>('[data-id]')!.dataset.id!; const all = load(); const l = all.find((x) => x.id === id)!;
       if (a.dataset.a === 'edit') open(l);
       if (a.dataset.a === 'approve') { l.approved = true; l.notes.unshift({ at: Date.now(), text: 'Descuento aprobado por el administrador.' }); save(all); render(); toast('Descuento aprobado.'); }
-      if (a.dataset.a === 'note') { const text = prompt(`Nota sobre ${l.business}:`, ''); if (text?.trim()) { l.notes.unshift({ at: Date.now(), text: text.trim() }); save(all); render(); } }
+      if (a.dataset.a === 'note') { const text = await askText(`Nota sobre ${l.business}:`, { placeholder: 'ej. Llamar el lunes para confirmar fechas.', ok: 'Guardar nota', multiline: true }); if (text?.trim()) { l.notes.unshift({ at: Date.now(), text: text.trim() }); save(all); render(); } }
       if (a.dataset.a === 'proposal') { proposal(l); if (l.stage === 'new' || l.stage === 'talking') { l.stage = 'proposal'; save(all); render(); } }
       if (a.dataset.a === 'convert') {
         // A won deal becomes a request in the ad approval queue (Anuncios), waiting for the client's art and payment

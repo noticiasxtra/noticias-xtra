@@ -29,6 +29,7 @@ const Tag = embedded ? 'section' : 'main';
   <div class="apn-toast" data-toast role="status" hidden></div>
 </Tag>
 <script>
+  import { ask, askText } from '../lib/dialogs';
   import { drawAd, THEMES } from '../lib/adcreative';
   import { listRequests, saveRequest, updateRequest, type AdRequest } from '../lib/adrequests';
   import { hasBackend, publishCampaign, campaignStats } from '../lib/backend';
@@ -154,7 +155,7 @@ const Tag = embedded ? 'section' : 'main';
     const d = t.closest<HTMLElement>('[data-design]'); if (d) drawDesign(d);
     if (t.matches('[data-chk]')) { const card = t.closest<HTMLElement>('[data-id]')!; card.querySelector<HTMLButtonElement>('[data-act="approve"]')!.disabled = [...card.querySelectorAll<HTMLInputElement>('[data-chk]')].some((c) => !c.checked); }
   });
-  page.addEventListener('click', (e) => {
+  page.addEventListener('click', async (e) => {
     const t = e.target as HTMLElement;
     const card = t.closest<HTMLElement>('[data-id]');
     if (t.matches('[data-f]') || t.closest('[data-f]')) {
@@ -183,12 +184,12 @@ const Tag = embedded ? 'section' : 'main';
         publishCampaign(campaignOf({ ...r, ...patch } as AdRequest)).then((ok) => toast(ok ? `Aprobado y publicado: ya sale para todos los lectores.` : 'Se aprobó, pero no se pudo publicar. Revisa tu sesión e intenta otra vez.'));
       } else toast(`Aprobado. Ya lo ves en el sitio en este dispositivo (vista previa). Con la base de datos conectada, sale para todos al instante.`);
     } else if (act === 'changes') {
-      const msg = prompt('¿Qué cambios necesita el cliente?', 'Hola, ¿nos puedes enviar el anuncio en 300 × 250 píxeles?');
+      const msg = await askText('¿Qué cambios necesita el cliente? Se le enviará por correo.', { value: 'Hola, ¿nos puedes enviar el anuncio en 300 × 250 píxeles?', ok: 'Escribir el correo', multiline: true });
       if (!msg) return;
       updateRequest(id, { status: 'cambios', note: msg });
       location.href = `mailto:${r.client.email}?subject=${encodeURIComponent(`Tu anuncio en Noticias Xtra (${r.id})`)}&body=${encodeURIComponent(msg)}`;
     } else if (act === 'reject') {
-      if (!confirm(`¿Rechazar el anuncio de ${r.client.business}? Habrá que devolverle ${money(r.total)}.`)) return;
+      if (!(await ask(`¿Rechazar el anuncio de ${r.client.business}? Habrá que devolverle ${money(r.total)}.`, { ok: 'Rechazar', danger: true }))) return;
       updateRequest(id, { status: 'rechazada' });
       toast('Rechazado. Recuerda hacer el reembolso.');
     }

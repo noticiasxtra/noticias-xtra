@@ -196,6 +196,7 @@ const TOOLS = [
 <script>
   import { embedFor } from '../../lib/embeds.mjs';
   import { docCard } from '../../lib/doccard.mjs';
+  import { ask, askText } from '../../lib/dialogs';
   import { hasBackend, listArticles, putArticle, deleteArticle, uploadStoryFile, publishArticle } from '../../lib/backend';
   const root = document.querySelector<HTMLElement>('[data-wr]');
   if (root) {
@@ -719,7 +720,7 @@ const TOOLS = [
     goBtn.addEventListener('click', async () => {
       if (!cur) return;
       const ok = sync();
-      if (!ok && !confirm('Faltan cosas en “Antes de publicar”. ¿Seguir de todos modos?')) return;
+      if (!ok && !(await ask('Faltan cosas en “Antes de publicar”. ¿Seguir de todos modos?', { ok: 'Seguir' }))) return;
       goBtn.disabled = true;
       try {
         if (!canPublish()) { cur.note = ''; if (await persist('review')) { toast('Enviada a revisión. Un editor la revisará.'); closeEditor(); } return; }
@@ -739,9 +740,9 @@ const TOOLS = [
       if (la.dataset.la === 'edit') openEditor(a);
       if (la.dataset.la === 'preview') showPreview(a);
       if (la.dataset.la === 'dup') { const { slug: _s, ...copy } = structuredClone(a); await store({ ...copy, id: `A-${Date.now().toString(36)}`, status: 'draft', title: `${a.title} (copia)`, updated: Date.now(), owner: me()?.name ?? a.owner }); renderList(); }
-      if (la.dataset.la === 'del') { if (confirm(`¿Borrar “${a.title || 'Sin titular'}”?`)) { await drop(id); renderList(); } }
+      if (la.dataset.la === 'del') { if (await ask(`¿Borrar “${a.title || 'Sin titular'}”?`, { ok: 'Borrar', danger: true })) { await drop(id); renderList(); } }
       if (la.dataset.la === 'approve') { (la as HTMLButtonElement).disabled = true; await goLive(structuredClone(a)); renderList(); }
-      if (la.dataset.la === 'return') { const n = prompt('¿Qué debe corregir el periodista?', ''); if (n === null) return; await store({ ...a, status: 'draft', note: n, updated: Date.now() }); renderList(); }
+      if (la.dataset.la === 'return') { const n = await askText('¿Qué debe corregir el periodista?', { placeholder: 'ej. Falta la fuente oficial del dato.', ok: 'Devolver', multiline: true }); if (n === null) return; await store({ ...a, status: 'draft', note: n, updated: Date.now() }); renderList(); }
     });
     addEventListener('beforeunload', () => { if (cur && dirty) void persist(); });
     if (DB) { $('[data-wr-list]').innerHTML = '<p class="apr-empty">Cargando las noticias del equipo…</p>'; refresh().then(renderList); } else renderList();

@@ -191,6 +191,7 @@ const TABS = [
   </main>
 
   <script>
+    import { ask } from '../../lib/dialogs';
     import { getReports } from '../../lib/moderation';
     import { listRequests } from '../../lib/adrequests';
     import { hasBackend, staffLogin, staffLogout, staffProfile } from '../../lib/backend';
@@ -522,7 +523,7 @@ const TABS = [
 
     // ---------- actions ----------
     let nf = 'pending';
-    root.addEventListener('click', (e) => {
+    root.addEventListener('click', async (e) => {
       const t = e.target as HTMLElement;
       const sub = t.closest<HTMLElement>('[data-nf]');
       if (sub) { nf = sub.dataset.nf!; $$('[data-nf]').forEach((b) => b.setAttribute('aria-selected', String(b === sub))); paint.noticias(); return; }
@@ -542,9 +543,9 @@ const TABS = [
         return;
       }
       if (a === 'approve') { setNews(id, { status: 'approved', body: card.querySelector<HTMLTextAreaElement>('[data-edit]')?.value, at: Date.now() }); toast('Aprobada. En la versión real se publica en el sitio en unos 2 minutos.'); }
-      if (a === 'reject') { if (!confirm('¿Rechazar esta noticia? No se publicará.')) return; setNews(id, { status: 'rejected', at: Date.now() }); toast('Rechazada.'); }
+      if (a === 'reject') { if (!(await ask('¿Rechazar esta noticia? No se publicará.', { ok: 'Rechazar', danger: true }))) return; setNews(id, { status: 'rejected', at: Date.now() }); toast('Rechazada.'); }
       if (a === 'ok') { setNews(id, { status: 'ok', at: Date.now() }); toast('Marcada como revisada.'); }
-      if (a === 'remove') { if (!confirm('¿Quitar esta noticia del sitio? Podrás corregirla y volver a publicarla.')) return; setNews(id, { status: 'removed', at: Date.now() }); toast('Vista previa: en la versión real desaparece del sitio en unos minutos.'); }
+      if (a === 'remove') { if (!(await ask('¿Quitar esta noticia del sitio? Podrás corregirla y volver a publicarla.', { ok: 'Quitar', danger: true }))) return; setNews(id, { status: 'removed', at: Date.now() }); toast('Vista previa: en la versión real desaparece del sitio en unos minutos.'); }
       card.classList.add('pnl-gone'); setTimeout(() => { paint.noticias(); paintCounts(); }, 250);
     });
     $<HTMLFormElement>('[data-add]').addEventListener('submit', (e) => {

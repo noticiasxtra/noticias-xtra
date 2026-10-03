@@ -138,6 +138,7 @@ const BADGES = [
     </div>
   </main>
   <script>
+    import { ask } from '../lib/dialogs';
     import { getRep, levelOf as repLevel, needs, specialsOf, LEVELS } from '../lib/reputation';
     import { getPoints, levelOf as ptsLevel, streakOf } from '../lib/points';
     import { getNotifs, markRead, getPrefs, setPrefs, ago, type NotifKind } from '../lib/notifications';
@@ -288,8 +289,8 @@ const BADGES = [
     $('[data-nf-full]').addEventListener('click', (e) => { const a = (e.target as HTMLElement).closest<HTMLElement>('[data-nf-id]'); if (a) markRead(a.dataset.nfId); });
     addEventListener('nx-notifs', paintNotifs);
     $('[data-logout]').addEventListener('click', () => { set('nx-profile', null); render(); });
-    $('[data-wipe]').addEventListener('click', () => {
-      if (!confirm('¿Borrar tu perfil, puntos, comentarios, guardadas y notificaciones de este dispositivo? No se puede deshacer.')) return;
+    $('[data-wipe]').addEventListener('click', async () => {
+      if (!(await ask('¿Borrar tu perfil, puntos, comentarios, guardadas y notificaciones de este dispositivo? No se puede deshacer.', { ok: 'Borrar todo', danger: true }))) return;
       try { Object.keys(localStorage).filter((k) => k.startsWith('nx-')).forEach((k) => localStorage.removeItem(k)); } catch { /* storage blocked */ }
       dispatchEvent(new CustomEvent('nx-notifs')); dispatchEvent(new Event('nx-saved-change'));
       render();

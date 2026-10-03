@@ -15,6 +15,7 @@ import { url } from '../lib/site';
     </div>
   </main>
   <script>
+    import { ask } from '../lib/dialogs';
     type Saved = { u: string; t: string; s: string; d: string; i: string; at: number };
     const list = document.querySelector<HTMLUListElement>('[data-list]')!;
     const empty = document.querySelector<HTMLElement>('[data-empty]')!;
@@ -47,7 +48,7 @@ import { url } from '../lib/site';
       empty.hidden = items.length > 0;
       clear.hidden = items.length === 0;
     };
-    clear.addEventListener('click', () => { if (confirm('¿Borrar todas las noticias guardadas?')) { write([]); render(); } });
+    clear.addEventListener('click', async () => { if (await ask('¿Borrar todas las noticias guardadas?', { ok: 'Borrar todas', danger: true })) { write([]); render(); } });
     render();
   </script>
 </Base>

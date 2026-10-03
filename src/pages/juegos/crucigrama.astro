@@ -27,6 +27,7 @@ import GameLayout from '../../components/GameLayout.astro';
     </GameLayout>
   </main>
   <script>
+    import { ask } from '../../lib/dialogs';
     import { award } from '../../lib/points';
     // Words without accents (the game ignores accents) and their clues
     const BANK: Array<[string, string]> = [
@@ -208,7 +209,7 @@ import GameLayout from '../../components/GameLayout.astro';
       setTimeout(() => cellEl.forEach((b) => b.classList.remove('bad')), 2500);
     });
     $('[data-reveal-word]').addEventListener('click', () => { if (!cur) return; cellsOf(cur).forEach((k) => (typed[k] = answer.get(k)!)); save(); paint(); });
-    $('[data-reset]').addEventListener('click', () => { if (confirm('¿Borrar todas las letras?')) { typed = {}; finished = false; $('[data-msg]').textContent = ''; save(); paint(); } });
+    $('[data-reset]').addEventListener('click', async () => { if (await ask('¿Borrar todas las letras?', { ok: 'Borrar', danger: true })) { typed = {}; finished = false; $('[data-msg]').textContent = ''; save(); paint(); } });
     // Timer
     const start = Date.now() - secs * 1000;
     const tick = () => { if (finished) return; secs = Math.floor((Date.now() - start) / 1000); $('[data-time]').textContent = `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`; };
