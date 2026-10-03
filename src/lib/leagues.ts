@@ -28,6 +28,8 @@ export const LEAGUES = [
     about: 'Los peloteros boricuas en las Grandes Ligas.' },
   { id: 'nba', youtube: 'UCWJ2lWNubArHWmf3FIHbfcQ', name: 'NBA', abbr: 'NBA', full: 'NBA', local: false, color: '#C8102E', logoBg: '#FFFFFF', logoShape: 'tall', photo: 'basketball',
     about: 'La NBA y los boricuas en el mejor baloncesto del mundo.' },
+  { id: 'nfl', name: 'NFL', abbr: 'NFL', full: 'NFL (fútbol americano)', local: false, color: '#013369', photo: 'football',
+    about: 'La NFL: resultados, posiciones y estadísticas del fútbol americano profesional de Estados Unidos.', url: 'https://www.nfl.com' },
 
   { id: 'lvsm', name: 'Voleibol M', abbr: 'LVSM', full: 'Liga de Voleibol Superior Masculino', local: true, color: '#0F8C8C', logoBg: '#FFFFFF', photo: 'volleyball',
     about: 'El voleibol superior masculino de Puerto Rico, organizado por la Federación Puertorriqueña de Voleibol.', url: 'https://fedpurvoli.com/lvsm/',
@@ -35,7 +37,7 @@ export const LEAGUES = [
   { id: 'lvsf', name: 'Voleibol F', abbr: 'LVSF', full: 'Liga de Voleibol Superior Femenino', local: true, color: '#B0306A', logoBg: '#FFFFFF', photo: 'volleyball',
     about: 'El voleibol superior femenino de Puerto Rico, organizado por la Federación Puertorriqueña de Voleibol.', url: 'https://fedpurvoli.com/lvsf/',
     season: 'Campeonas 2026: Cangrejeras de Santurce. La temporada 2027 arranca el 8 de enero de 2027.', starts: '2027-01-08T00:00:00-04:00' },] as const satisfies ReadonlyArray<{
-  id: string; name: string; abbr: string; full: string; local: boolean; color: string; about: string; url?: string; season?: string; starts?: string; logoBg?: string; logoShape?: 'tall' | 'full'; youtube?: string; photo?: 'basketball' | 'baseball' | 'volleyball' | 'boxing' | 'tennis';
+  id: string; name: string; abbr: string; full: string; local: boolean; color: string; about: string; url?: string; season?: string; starts?: string; logoBg?: string; logoShape?: 'tall' | 'full'; youtube?: string; photo?: 'basketball' | 'baseball' | 'volleyball' | 'boxing' | 'tennis' | 'football';
 }>;
 
 export const LEAGUE_IDS = LEAGUES.map((l) => l.id) as unknown as readonly [(typeof LEAGUES)[number]['id'], ...(typeof LEAGUES)[number]['id'][]];

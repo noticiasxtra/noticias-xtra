@@ -1,12 +1,12 @@
 ---
-// Home page "Marcadores locales": BSN, Doble A and La Pro, one tab each. Live games first, then the
+// Home page "Marcadores": the local leagues first (BSN, Doble A, La Pro), then MLB, NBA and NFL, one tab each. Live games first, then the
 // most recent results (upcoming games only when a league has nothing else). Each tab links to its league.
 import TeamLogo from './TeamLogo.astro';
 import LeagueBadge from './LeagueBadge.astro';
 import { scores, gameTime, type Game } from '../../lib/scores';
 import { league } from '../../lib/leagues';
 import { url } from '../../lib/site';
-const IDS = ['bsn', 'doble-a', 'invernal'] as const;
+const IDS = ['bsn', 'doble-a', 'invernal', 'mlb', 'nba', 'nfl'] as const;
 const tabs = IDS.map((id) => {
   const all = scores(id, 40);
   const live = all.filter((g) => g.status === 'en-vivo');
@@ -23,7 +23,7 @@ const day = (g: Game) => new Date(g.date).toLocaleDateString('es-PR', { day: 'nu
 {tabs.length > 0 && (
   <section class="ls" data-ls aria-labelledby="ls-h">
     <div class="ls-head">
-      <h2 id="ls-h">Marcadores locales</h2>
+      <h2 id="ls-h">Marcadores</h2>
       <div class="ls-tabs" role="tablist" aria-label="Ligas">
         {tabs.map((t, i) => (
           <button type="button" role="tab" id={`ls-tab-${t.id}`} aria-controls={`ls-panel-${t.id}`} aria-selected={String(i === first)} data-ls-tab={t.id}>
