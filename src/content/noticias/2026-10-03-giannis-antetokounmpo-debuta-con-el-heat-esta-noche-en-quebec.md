@@ -16,6 +16,8 @@ sources:
   - name: "https://www.nba.com/news/reports-heat-acquire-giannis-antetokounmpo-in-blockbust"
 ---
 
+<figure class="doc-card"><a class="doc-open" href="https://qzxdnjrsagmcvsatjyqr.supabase.co/storage/v1/object/public/noticias/a-musxr97k/doc-muszystr.pdf" target="_blank" rel="noopener" data-doc-title="2026-2027 NBA Regular Season"><span class="doc-ic"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg></span><span class="doc-tx"><b>2026-2027 NBA Regular Season</b><small>PDF · 30 páginas · 1.2 MB</small></span><span class="doc-go">Ver documento</span></a></figure>
+
 Giannis Antetokounmpo jugará esta noche su primer partido con el Heat de Miami. El equipo abre la pretemporada ante los Raptors de Toronto en el Videotron Centre de la ciudad de Quebec, en Canadá, a las 7:00 p.m., hora de Puerto Rico. NBA TV transmite el partido.
 
 Según la NBA, es el primer partido de la liga en ese estadio y el primero de su Serie de Canadá en la ciudad de Quebec.
