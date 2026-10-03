@@ -192,6 +192,8 @@ const holiday = F.holidayLogo && bar?.label !== 'ÚLTIMA HORA' ? holidayOn(today
         <div class="wrap"><b>{breaking.label}</b><a href={url(`noticia/${breaking.id}`)}>{breaking.text}</a></div>
       </div>
     )}
+    {/* Top banner (Valla digital / Banner exclusivo): appears only when an ad fills it */}
+    {!staff && <div class="wrap"><AdSlot size="leaderboard" class="ad-top" quiet /></div>}
 
     <slot />
 

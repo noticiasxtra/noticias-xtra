@@ -6,12 +6,14 @@
 // PREVIEW: until REQUESTS.url (src/lib/ads.ts) is set, it shows requests made on this device plus two examples.
 // The real version needs a login so only staff can open it.
 import { FORMATS } from '../lib/ads';
-const fmtInfo = FORMATS.map(({ id, name, slots, art }) => ({ id, name, slots, art }));
+import { url } from '../lib/site';
+const fmtInfo = FORMATS.map(({ id, name, slots, art, where }) => ({ id, name, slots, art, where }));
+const home = url();
 interface Props { embedded?: boolean } // inside the staff panel (/redaccion/): no page wrapper
 const { embedded = false } = Astro.props;
 const Tag = embedded ? 'section' : 'main';
 ---
-<Tag class:list={["apr", !embedded && "wrap"]} id={embedded ? undefined : "main"} data-apr data-formats={JSON.stringify(fmtInfo)}>
+<Tag class:list={["apr", !embedded && "wrap"]} id={embedded ? undefined : "main"} data-apr data-formats={JSON.stringify(fmtInfo)} data-home={home}>
   <p class="pf-demo"><span class="sp-demo">VISTA PREVIA</span> Página interna para quien aprueba los anuncios. Muestra las solicitudes hechas en este dispositivo y dos de ejemplo.</p>
   <header class="apr-head">
     <h1>Aprobar anuncios</h1>
@@ -30,7 +32,7 @@ const Tag = embedded ? 'section' : 'main';
   import { drawAd, THEMES } from '../lib/adcreative';
   import { listRequests, saveRequest, updateRequest, type AdRequest } from '../lib/adrequests';
   const page = document.querySelector<HTMLElement>('[data-apr]')!;
-  const FMT: Array<{ id: string; name: string; slots: string[]; art: number[][] }> = JSON.parse(page.dataset.formats!);
+  const FMT: Array<{ id: string; name: string; slots: string[]; art: number[][]; where: string }> = JSON.parse(page.dataset.formats!);
   const money = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
   const esc = (s = '') => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
   const toast = (m: string) => { const t = page.querySelector<HTMLElement>('[data-toast]')!; t.textContent = m; t.hidden = false; clearTimeout((t as any).tm); (t as any).tm = setTimeout(() => (t.hidden = true), 3500); };
@@ -101,6 +103,8 @@ const Tag = embedded ? 'section' : 'main';
           <div><h2>${esc(r.client.business)}</h2><p class="apn-small">${r.id} · ${ago(r.created)} · ${esc(r.client.name)} · <a href="mailto:${esc(r.client.email)}">${esc(r.client.email)}</a>${r.client.phone ? ` · ${esc(r.client.phone)}` : ''}</p></div>
           <div class="apr-badges"><span class="apn-st ${r.paid ? 'on' : 'wait'}">${r.paid ? `Pagado ${money(r.total)}` : `Sin pagar · ${money(r.total)}`}</span><span class="apn-st ${design ? 'wait' : ''}">${design ? 'Lo diseñamos nosotros' : 'Arte del cliente'}</span>${r.status === 'aprobada' ? '<span class="apn-st on">Aprobado</span>' : r.status === 'rechazada' ? '<span class="apn-st">Rechazado · reembolsar</span>' : ''}</div>
         </header>
+        <div class="apr-where"><b>Dónde sale:</b><ul>${FMT.filter((f) => r.formats.includes(f.id)).map((f) => `<li><b>${esc(f.name)}:</b> ${esc(f.where)}</li>`).join('')}</ul>
+          ${r.status === 'aprobada' ? `<p>✅ Ya puedes verlo en el sitio <b>en este dispositivo</b> (marcado “Vista previa”). <a href="${page.dataset.home}" target="_blank" rel="noopener">Abrir la portada ↗</a></p>` : ''}</div>
         <p class="apr-meta"><b>${FMT.filter((f) => r.formats.includes(f.id)).map((f) => f.name).join(', ')}</b> · ${esc(r.where)} · ${esc(r.duration)} desde el ${r.start}${r.link ? ` · <a href="${esc(r.link)}" target="_blank" rel="noopener">Abrir enlace ↗</a>` : ' · sin enlace'}</p>
         ${r.note ? `<p class="apr-notes">💬 ${esc(r.note)}</p>` : ''}
         ${art}

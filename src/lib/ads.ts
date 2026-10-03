@@ -8,19 +8,19 @@ export type AdSize = 'leaderboard' | 'rectangle' | 'halfpage' | 'infeed';
 // ---- Prices (launch prices, USD per month unless `per` says otherwise) ----
 // `art`: the image sizes (width × height) the client uploads, or that we create for them.
 export const FORMATS = [
-  { id: 'valla', name: 'Valla digital', size: 'Banner superior, rota con otras marcas', price: 29, per: 'mes', slots: ['leaderboard'] as AdSize[],
+  { id: 'valla', name: 'Valla digital', size: 'Banner superior, rota con otras marcas', price: 29, per: 'mes', slots: ['leaderboard'] as AdSize[], where: 'Banner de arriba y de abajo en todas las páginas, rotando con otras marcas.',
     about: 'Tu anuncio rota cada 8 segundos con hasta 3 marcas más. La forma más barata de empezar.', art: [[728, 90], [320, 100]], popular: false },
-  { id: 'rectangle', name: 'Rectángulo', size: '300 × 250', price: 49, per: 'mes', slots: ['rectangle'] as AdSize[],
+  { id: 'rectangle', name: 'Rectángulo', size: '300 × 250', price: 49, per: 'mes', slots: ['rectangle'] as AdSize[], where: 'Al lado de las noticias en computadora y entre el contenido en celular: portada, noticias, secciones, Deportes, juegos y foro.',
     about: 'Al lado de las noticias, Deportes y los juegos. Se ve igual en celular.', art: [[300, 250]], popular: true },
-  { id: 'infeed', name: 'Entre noticias', size: '728 × 90', price: 49, per: 'mes', slots: ['infeed'] as AdSize[],
+  { id: 'infeed', name: 'Entre noticias', size: '728 × 90', price: 49, per: 'mes', slots: ['infeed'] as AdSize[], where: 'Entre las noticias de la portada y de las secciones, y al final de cada noticia.',
     about: 'Entre las noticias de la portada y al final de cada noticia.', art: [[728, 90], [320, 100]], popular: false },
-  { id: 'leaderboard', name: 'Banner exclusivo', size: '728 × 90', price: 89, per: 'mes', slots: ['leaderboard'] as AdSize[],
+  { id: 'leaderboard', name: 'Banner exclusivo', size: '728 × 90', price: 89, per: 'mes', slots: ['leaderboard'] as AdSize[], where: 'Banner de arriba y de abajo en todas las páginas, solo tu marca.',
     about: 'El banner de arriba, solo para tu marca (sin rotar).', art: [[728, 90], [320, 100]], popular: false },
-  { id: 'halfpage', name: 'Media página', size: '300 × 600', price: 99, per: 'mes', slots: ['halfpage'] as AdSize[],
+  { id: 'halfpage', name: 'Media página', size: '300 × 600', price: 99, per: 'mes', slots: ['halfpage'] as AdSize[], where: 'Columna derecha de las noticias, Deportes y los juegos (solo en computadora).',
     about: 'El espacio más grande; se queda a la vista al bajar. Solo en computadora.', art: [[300, 600]], popular: false },
-  { id: 'patrocinio', name: 'Patrocinio de sección', size: 'Juegos, Deportes, Clima…', price: 149, per: 'mes', slots: [] as AdSize[],
+  { id: 'patrocinio', name: 'Patrocinio de sección', size: 'Juegos, Deportes, Clima…', price: 149, per: 'mes', slots: [] as AdSize[], where: 'Todos los espacios de anuncios, con “Presentado por” tu marca.',
     about: '“Presentado por” tu marca y todos los espacios de una sección.', art: [[300, 250], [728, 90]], popular: false },
-  { id: 'takeover', name: 'Toma de portada', size: 'Todo el sitio por un día', price: 99, per: 'día', slots: [] as AdSize[],
+  { id: 'takeover', name: 'Toma de portada', size: 'Todo el sitio por un día', price: 99, per: 'día', slots: [] as AdSize[], where: 'Todos los espacios del sitio durante ese día, solo tu marca.',
     about: 'Todos los espacios del sitio con tu marca durante 24 horas.', art: [[300, 250], [728, 90], [300, 600]], popular: false },
 ];
 export const DESIGN_FEE = 19; // we create the ad from the client's text and logo
@@ -68,7 +68,7 @@ export const AGENCY_COMMISSION = 15;
 // One entry per campaign. `regions`: 'all' | 'island' (readers in Puerto Rico) | 'diaspora'.
 // `takeover: true` gives that campaign every ad space while it runs (and `skin`, an optional page background).
 // Images go in public/anuncios/. Several creatives in one campaign rotate like a billboard.
-export type Creative = { img: string; url: string; alt: string };
+export type Creative = { img: string; url: string; alt: string; w?: number; h?: number }; // w/h: the image size (also read from names like ...-300x250.png)
 export type Campaign = {
   id: string; client: string; sizes: AdSize[]; start: string; end: string;
   regions?: 'all' | 'island' | 'diaspora'; creatives: Creative[]; weight?: number; takeover?: boolean; skin?: string;
