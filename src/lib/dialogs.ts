@@ -22,11 +22,14 @@ function open(message: string, o: Opts, withText: boolean): Promise<string | nul
     d.querySelector('.nx-ask-ok')!.textContent = o.ok ?? (withText ? 'Guardar' : 'Sí, seguir');
     const input = d.querySelector<HTMLInputElement | HTMLTextAreaElement>('.nx-ask-in');
     if (input) { input.value = o.value ?? ''; input.placeholder = o.placeholder ?? ''; }
-    let answer: string | null = null;
-    d.querySelector('form')!.addEventListener('submit', () => { answer = input ? input.value : 'ok'; });
-    d.querySelector('.nx-ask-no')!.addEventListener('click', () => d.close());
-    d.addEventListener('click', (e) => { if (e.target === d) d.close(); }); // click outside the box = cancel
-    d.addEventListener('close', () => { d.remove(); resolve(answer); });
+    // Answer right away on each action (the dialog's own "close" event is held back in background tabs)
+    let done = false;
+    const finish = (answer: string | null) => { if (done) return; done = true; if (d.open) d.close(); d.remove(); resolve(answer); };
+    d.querySelector('form')!.addEventListener('submit', (e) => { e.preventDefault(); finish(input ? input.value : 'ok'); });
+    d.querySelector('.nx-ask-no')!.addEventListener('click', () => finish(null));
+    d.addEventListener('click', (e) => { if (e.target === d) finish(null); }); // click outside the box = cancel
+    d.addEventListener('cancel', (e) => { e.preventDefault(); finish(null); }); // Esc key
+    d.addEventListener('close', () => finish(null));
     document.body.append(d);
     d.showModal();
     (input ?? d.querySelector<HTMLButtonElement>('.nx-ask-ok'))!.focus();

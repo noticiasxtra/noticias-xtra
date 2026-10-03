@@ -702,11 +702,26 @@ const TOOLS = [
     $('[data-wr-save]').addEventListener('click', async () => { if (await persist(cur?.status === 'published' ? 'published' : cur?.status === 'review' ? 'review' : 'draft')) toast('Borrador guardado.'); });
     const when = (d: string) => new Date(d).toLocaleString('es-PR', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
     /** Puts a saved article on the site: the "publicar" function saves its file in GitHub (shared database only). */
+    /** Only one story is pinned (📌) in the Portada: publishing a pinned story unpins the others for real. */
+    async function unpinOthers(a: Art): Promise<string[]> {
+      if (!a.pinned) return [];
+      const old = load().filter((x) => x.id !== a.id && x.pinned && (x.status === 'published' || x.status === 'scheduled'));
+      const done: string[] = [];
+      for (const o of old) {
+        const u: Art = { ...structuredClone(o), pinned: false, updated: Date.now() };
+        if (!(await store(u))) continue;
+        if (DB && u.slug) { const r = await publishArticle({ id: u.id, slug: u.slug, file: toFile(u), title: u.title, scheduled: u.status === 'scheduled' }); if (!r.ok) continue; }
+        done.push(u.title || 'Sin titular');
+      }
+      return done;
+    }
+    const unpinNote = (titles: string[]) => (titles.length ? ` Se desfijó “${titles.join('”, “')}”.` : '');
     async function goLive(a: Art): Promise<boolean> {
       const future = new Date(a.date).valueOf() > Date.now() + 60000;
       if (!DB) {
         a.status = future ? 'scheduled' : 'published'; a.updated = Date.now(); await store(a);
-        toast(future ? `Programada para el ${when(a.date)}. Vista previa: con Supabase, sale sola a esa hora.` : 'Publicada. Vista previa: con Supabase, aparece en el sitio en unos 2 minutos.');
+        const un = await unpinOthers(a);
+        toast((future ? `Programada para el ${when(a.date)}. Vista previa: con Supabase, sale sola a esa hora.` : 'Publicada. Vista previa: con Supabase, aparece en el sitio en unos 2 minutos.') + unpinNote(un));
         return true;
       }
       toast('Publicando…');
@@ -714,7 +729,9 @@ const TOOLS = [
       if (!r.ok) { toast(`No se publicó: ${r.error}`); return false; }
       a.status = future ? 'scheduled' : 'published'; a.slug = r.slug; a.updated = Date.now();
       await refresh();
-      toast(future ? `Programada: sale sola el ${when(a.date)}.` : 'Publicada. Aparece en el sitio en unos 2 minutos.');
+      const un = await unpinOthers(a);
+      if (un.length) await refresh();
+      toast((future ? `Programada: sale sola el ${when(a.date)}.` : 'Publicada. Aparece en el sitio en unos 2 minutos.') + unpinNote(un));
       return true;
     }
     const goBtn = $<HTMLButtonElement>('[data-wr-go]');
