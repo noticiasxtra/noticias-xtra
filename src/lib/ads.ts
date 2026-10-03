@@ -100,37 +100,89 @@ export const PAYMENTS = { stripeLink: '', athMovilToken: '' };
 export const REQUESTS = { url: '', key: '' };
 export const APPROVAL_HOURS = 24; // promise shown to clients
 
-// ---- Price quote: one place for the math, used by the Anúnciate page and the sales desk (/redaccion/) ----
+// ---- Price quote: one place for the math, used by the Anúnciate page and the sales desk (/redaccion/ → Ventas) ----
+// How a campaign is priced (the "rate card"):
+//  - Monthly formats: a campaign of `days` days. Shorter than a month is billed by the week: each week costs
+//    WEEK_SHARE of the monthly price, and from 3 weeks on you pay the month. A month or longer is prorated by day.
+//  - Per-day formats (takeover): price × days of takeover.
+//  - Discounts: length (DURATION_DISCOUNTS) or, for a first-time client, the launch discount on the first 3 months
+//    (never both on the same months); plus combo, prepaid, nonprofit; agencies get the agency commission plus volume.
+//    Together they never pass MAX_DISCOUNT.
+//  - Sales desk only: special requests (`custom` lines, each with its own discount) and a negotiated extra discount
+//    (% and/or $). Sales can give up to SALES_DISCOUNT_LIMIT % on their own; above that the admin approves.
+export const WEEK_SHARE = 0.4;
+export const SALES_DISCOUNT_LIMIT = 15;
+export const SPECIALS = [ // suggested prices for things clients and agencies ask for (sales can change them)
+  { name: 'Artículo patrocinado (escrito por la redacción, identificado como patrocinado)', price: 250 },
+  { name: 'Mención en el boletín', price: 40 },
+  { name: 'Publicación en nuestras redes sociales', price: 75 },
+  { name: 'Video patrocinado corto', price: 300 },
+  { name: 'Cobertura de un evento', price: 350 },
+  { name: 'Encuesta o concurso patrocinado', price: 200 },
+  { name: 'Diseño de campaña (varias piezas)', price: 60 },
+];
+export type CustomLine = { name: string; qty: number; price: number; pct: number };
 export type QuoteInput = {
-  formats: string[]; months: number; days: number; // days: for per-day formats (takeover), 1–14
+  formats: string[]; days: number; takeoverDays: number; // days: campaign length; takeoverDays: 1–14
   aud: 'all' | 'island' | 'diaspora' | 'regions'; regions: number; // number of regions picked when aud = 'regions'
   who: 'retail' | 'agency' | 'nonprofit'; prepay: boolean; founder: boolean; design: boolean;
+  custom?: CustomLine[]; extraPct?: number; extraAmt?: number; // sales desk only
 };
 export type Quote = {
-  lines: Array<[string, number]>; discounts: Array<[string, number]>; // [label, pct]
-  subtotal: number; launch: number; pctOff: number; off: number; design: number | null; total: number; monthly: number; factor: number;
+  lines: Array<[string, number]>; discounts: Array<[string, number]>; // [label, amount]
+  subtotal: number; off: number; capped: number; design: number | null; custom: Array<[string, number]>; customTotal: number;
+  extra: number; extraPct: number; needsApproval: boolean; total: number; monthly: number; factor: number; months: number;
 };
+/** Human label for a campaign length, e.g. "2 semanas", "1 mes", "45 días". */
+export function lengthLabel(days: number) {
+  if (days % 7 === 0 && days < 28) return days === 7 ? '1 semana' : `${days / 7} semanas`;
+  const m = Math.round(days / 30);
+  if (Math.abs(days - m * 30) <= 1 && m >= 1) return m === 1 ? '1 mes' : `${m} meses`;
+  return `${days} días`;
+}
+/** Price of a monthly format for a campaign of `days` days. */
+export const periodCost = (monthPrice: number, days: number) =>
+  days < 30 ? monthPrice * Math.min(1, Math.ceil(Math.max(1, days) / 7) * WEEK_SHARE) : monthPrice * (days / 30);
+
 export function quote(q: QuoteInput): Quote {
   const fmts = FORMATS.filter((f) => q.formats.includes(f.id));
-  const months = q.months, days = Math.max(1, Math.min(14, q.days || 1));
+  const days = Math.max(1, Math.round(q.days)), months = days / 30, tDays = Math.max(1, Math.min(14, q.takeoverDays || 1));
   const factor = q.aud === 'all' ? AUDIENCE.all : q.aud === 'island' ? AUDIENCE.island : q.aud === 'diaspora' ? AUDIENCE.diaspora : Math.min(AUDIENCE.island, q.regions * AUDIENCE.perRegion);
   const lines: Array<[string, number]> = [];
-  let monthly = 0, subtotal = 0;
+  let monthly = 0, subtotal = 0, monthlyCost = 0; // monthlyCost: what the monthly formats cost over the whole campaign
   for (const f of fmts) {
     const wide = f.per === 'día' || f.id === 'patrocinio'; // site-wide formats are not split by region
-    const cost = f.per === 'día' ? f.price * days : f.price * months * (wide ? 1 : factor);
-    if (f.per !== 'día') monthly += f.price * (wide ? 1 : factor);
-    lines.push([`${f.name}${f.per === 'día' ? ` · ${days} día${days > 1 ? 's' : ''}` : ''}`, cost]); subtotal += cost;
+    const month = f.price * (wide ? 1 : factor);
+    const cost = f.per === 'día' ? f.price * tDays : periodCost(month, days);
+    if (f.per !== 'día') { monthly += month; monthlyCost += cost; }
+    lines.push([`${f.name} · ${f.per === 'día' ? `${tDays} día${tDays > 1 ? 's' : ''}` : lengthLabel(days)}`, Math.round(cost * 100) / 100]); subtotal += cost;
   }
   const discounts: Array<[string, number]> = [];
-  const dur = [...DURATION_DISCOUNTS].reverse().find((x) => months >= x.months); if (dur) discounts.push([`${dur.months} meses`, dur.pct]);
-  if (fmts.length >= 2) discounts.push(['Más de un anuncio', OTHER_DISCOUNTS.find((x) => x.id === 'combo')!.pct]);
-  if (q.prepay) discounts.push(['Pago completo', OTHER_DISCOUNTS.find((x) => x.id === 'prepago')!.pct]);
-  if (q.who === 'nonprofit') discounts.push(['Sin fines de lucro', OTHER_DISCOUNTS.find((x) => x.id === 'nonprofit')!.pct]);
-  if (q.who === 'agency') { const v = [...VOLUME_TIERS].reverse().find((x) => subtotal >= x.from); if (v) discounts.push(['Volumen', v.pct]); }
-  const launch = q.founder ? monthly * Math.min(months, LAUNCH_DISCOUNT.months) * LAUNCH_DISCOUNT.pct / 100 : 0;
-  const pctOff = subtotal * Math.min(MAX_DISCOUNT, discounts.reduce((a, [, p]) => a + p, 0)) / 100;
-  const off = Math.min(subtotal * MAX_DISCOUNT / 100, pctOff + launch);
-  const design = q.design && fmts.length ? (months >= DESIGN_FREE_FROM_MONTHS ? 0 : DESIGN_FEE) : null;
-  return { lines, discounts, subtotal, launch, pctOff, off, design, total: Math.max(0, subtotal - off + (design ?? 0)), monthly, factor };
+  // First time: 40% on the first 3 months of the monthly formats; the length discount covers the rest
+  const launchBase = q.founder ? monthlyCost * Math.min(1, LAUNCH_DISCOUNT.months / months) : 0;
+  if (launchBase) discounts.push([`Primera vez (${LAUNCH_DISCOUNT.pct}%)`, launchBase * LAUNCH_DISCOUNT.pct / 100]);
+  const dur = [...DURATION_DISCOUNTS].reverse().find((x) => days >= x.months * 30 - 2);
+  if (dur && subtotal - launchBase > 0) discounts.push([`${dur.months} meses (${dur.pct}%)`, (subtotal - launchBase) * dur.pct / 100]);
+  const pct = (label: string, p: number) => discounts.push([`${label} (${p}%)`, subtotal * p / 100]);
+  if (fmts.length >= 2) pct('Más de un anuncio', OTHER_DISCOUNTS.find((x) => x.id === 'combo')!.pct);
+  if (q.prepay) pct('Pago completo', OTHER_DISCOUNTS.find((x) => x.id === 'prepago')!.pct);
+  if (q.who === 'nonprofit') pct('Sin fines de lucro', OTHER_DISCOUNTS.find((x) => x.id === 'nonprofit')!.pct);
+  if (q.who === 'agency') {
+    pct('Comisión de agencia', AGENCY_COMMISSION);
+    const v = [...VOLUME_TIERS].reverse().find((x) => subtotal >= x.from); if (v) pct('Volumen', v.pct);
+  }
+  const want = discounts.reduce((a, [, x]) => a + x, 0);
+  const off = Math.min(subtotal * MAX_DISCOUNT / 100, want);
+  const design = q.design && fmts.length ? (months >= DESIGN_FREE_FROM_MONTHS - 0.05 ? 0 : DESIGN_FEE) : null;
+  const standard = Math.max(0, subtotal - off + (design ?? 0));
+  // Sales desk: special requests and a negotiated discount
+  const custom: Array<[string, number]> = (q.custom ?? []).filter((c) => c.name && c.qty > 0).map((c) => [`${c.name}${c.qty > 1 ? ` × ${c.qty}` : ''}${c.pct ? ` (−${c.pct}%)` : ''}`, c.qty * c.price * (1 - Math.min(100, c.pct || 0) / 100)]);
+  const customTotal = custom.reduce((a, [, x]) => a + x, 0);
+  const extraPct = Math.max(0, Math.min(100, q.extraPct || 0));
+  const extra = Math.min(standard + customTotal, (standard + customTotal) * extraPct / 100 + Math.max(0, q.extraAmt || 0));
+  const total = Math.max(0, standard + customTotal - extra);
+  const listPrice = subtotal + (design ?? 0) + (q.custom ?? []).reduce((a, c) => a + c.qty * c.price, 0);
+  const negotiated = listPrice ? ((listPrice - total) - off) / listPrice * 100 : 0; // what sales gave on top of the standard discounts
+  return { lines, discounts, subtotal, off, capped: want - off, design, custom, customTotal, extra, extraPct, needsApproval: negotiated > SALES_DISCOUNT_LIMIT + 0.01,
+    total: Math.round(total * 100) / 100, monthly, factor, months };
 }

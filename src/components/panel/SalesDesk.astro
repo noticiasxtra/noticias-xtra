@@ -4,7 +4,7 @@
 // same rules as the Anúnciate page (quote() in src/lib/ads.ts), a takeover calendar that warns about taken days,
 // follow-up dates and notes, a printable proposal, and "convert to ad" once the client says yes.
 // PREVIEW: saved on this device (localStorage 'nx-leads'). With accounts it moves to Supabase and the whole team shares it.
-import { FORMATS, REGIONS, CAMPAIGNS } from '../../lib/ads';
+import { FORMATS, REGIONS, CAMPAIGNS, SPECIALS, SALES_DISCOUNT_LIMIT } from '../../lib/ads';
 const fmts = FORMATS.map(({ id, name, price, per }) => ({ id, name, price, per }));
 const booked = CAMPAIGNS.filter((c) => c.takeover).map((c) => ({ start: c.start, end: c.end, client: c.client }));
 ---
@@ -42,7 +42,8 @@ const booked = CAMPAIGNS.filter((c) => c.takeover).map((c) => ({ start: c.start,
             <div class="sd-fmts">{fmts.map((f) => <label class="sd-chk"><input type="checkbox" name="fmt" value={f.id} /><span>{f.name}<small>${f.price}/{f.per}</small></span></label>)}</div>
             <div class="sd-2">
               <label>Empieza<input name="start" type="date" /></label>
-              <label>Duración<select name="months"><option value="1">1 mes</option><option value="3">3 meses</option><option value="6">6 meses</option><option value="12">12 meses</option></select></label>
+              <label>Termina<input name="end" type="date" /></label>
+              <div class="sd-quick" role="group" aria-label="Duración rápida">{[[7, '1 sem'], [14, '2 sem'], [30, '1 mes'], [90, '3 meses'], [180, '6 meses'], [365, '12 meses']].map(([d, l]) => <button type="button" data-len={d}>{l}</button>)}</div>
               <label data-days-wrap hidden>Días de toma de portada<input name="days" type="number" min="1" max="14" value="1" /></label>
               <label>Dónde<select name="aud"><option value="all">Puerto Rico y la diáspora</option><option value="island">Solo Puerto Rico</option><option value="diaspora">Solo la diáspora</option><option value="regions">Regiones de Puerto Rico</option></select></label>
             </div>
@@ -52,14 +53,26 @@ const booked = CAMPAIGNS.filter((c) => c.takeover).map((c) => ({ start: c.start,
               <label class="adb-check"><input type="checkbox" name="prepay" /> Paga todo por adelantado</label>
               <label class="adb-check"><input type="checkbox" name="founder" checked /> Anunciante fundador (primera vez)</label>
             </div>
-            <label>Peticiones especiales<textarea name="requests" rows="3" maxlength="600" placeholder="ej. Solo en Deportes los días de juego del BSN; usar los colores de su marca; que salga el día de su gran apertura…"></textarea></label>
+ <label>Notas del cliente<textarea name="requests" rows="3" maxlength="600" placeholder="ej. Solo en Deportes los días de juego del BSN; usar los colores de su marca; que salga el día de su gran apertura…"></textarea></label>
+          </fieldset>
+          <fieldset><legend>Pedidos especiales</legend>
+            <p class="pnl-muted pnl-small">Lo que el cliente o la agencia pida fuera de los anuncios normales. Escoge de la lista o escribe lo que sea; el precio y el descuento de cada línea los decides tú.</p>
+            <datalist id="sd-specials">{SPECIALS.map((x) => <option value={x.name} data-price={x.price} />)}</datalist>
+            <div class="sd-custom" data-custom></div>
+            <button type="button" class="pnl-link" data-custom-add>+ Añadir pedido</button>
+          </fieldset>
+          <fieldset><legend>Descuento negociado</legend>
+            <div class="sd-2">
+              <label>Porcentaje sobre el total (%)<input name="extra" type="number" min="0" max="100" step="1" value="0" /></label>
+              <label>O una cantidad fija ($)<input name="extraAmt" type="number" min="0" step="1" value="0" /></label>
+            </div>
+            <p class="pnl-muted pnl-small">Puedes dar hasta {SALES_DISCOUNT_LIMIT}% por tu cuenta, además de los descuentos normales. Más que eso lo aprueba el administrador.</p>
           </fieldset>
           <fieldset><legend>Seguimiento</legend>
             <div class="sd-2">
               <label>Presupuesto que mencionó<input name="budget" inputmode="decimal" placeholder="$" maxlength="12" /></label>
               <label>Próximo seguimiento<input name="follow" type="date" /></label>
               <label>Etapa<select name="stage"><option value="new">Nueva</option><option value="talking">En conversación</option><option value="proposal">Propuesta enviada</option><option value="won">Ganada</option><option value="lost">Perdida</option></select></label>
-              <label>Descuento especial (%)<input name="extra" type="number" min="0" max="30" value="0" /></label>
             </div>
           </fieldset>
         </div>
@@ -69,7 +82,8 @@ const booked = CAMPAIGNS.filter((c) => c.takeover).map((c) => ({ start: c.start,
           <p class="sd-total"><span>Total</span><b data-q-total>$0</b></p>
           <p class="pnl-muted pnl-small" data-q-month></p>
           <p class="sd-warn" data-q-warn hidden></p>
-          <p class="pnl-muted pnl-small">Mismas reglas y descuentos de la página Anúnciate. El descuento especial lo aprueba el administrador.</p>
+          <p class="sd-warn" data-q-approve hidden></p>
+          <p class="pnl-muted pnl-small">Mismas reglas y descuentos de la página Anúnciate, más los pedidos especiales y tu descuento negociado.</p>
         </aside>
       </div>
       <p class="cm-err" data-sd-err hidden></p>
@@ -84,15 +98,16 @@ const booked = CAMPAIGNS.filter((c) => c.takeover).map((c) => ({ start: c.start,
 </section>
 
 <script>
-  import { quote, type QuoteInput } from '../../lib/ads';
+  import { quote, lengthLabel, SPECIALS, SALES_DISCOUNT_LIMIT, type QuoteInput, type CustomLine } from '../../lib/ads';
   import { saveRequest } from '../../lib/adrequests';
   const root = document.querySelector<HTMLElement>('[data-sd]');
   if (root) {
     type Fmt = { id: string; name: string; price: number; per: string };
     type Lead = {
       id: string; created: number; business: string; contact: string; phone: string; email: string; who: QuoteInput['who']; channel: string;
-      fmt: string[]; start: string; months: number; days: number; aud: QuoteInput['aud']; reg: string[]; design: boolean; prepay: boolean; founder: boolean;
-      requests: string; budget: string; follow: string; stage: 'new' | 'talking' | 'proposal' | 'won' | 'lost'; extra: number;
+      fmt: string[]; start: string; end: string; months?: number; days: number; aud: QuoteInput['aud']; reg: string[]; design: boolean; prepay: boolean; founder: boolean;
+      requests: string; budget: string; follow: string; stage: 'new' | 'talking' | 'proposal' | 'won' | 'lost'; extra: number; extraAmt: number;
+      custom: CustomLine[]; approved?: boolean;
       notes: Array<{ at: number; text: string }>; total: number; demo?: boolean; converted?: string;
     };
     const FMTS: Fmt[] = JSON.parse(root.dataset.fmts!);
@@ -112,10 +127,12 @@ const booked = CAMPAIGNS.filter((c) => c.takeover).map((c) => ({ start: c.start,
     const save = (l: Lead[]) => { try { localStorage.setItem(KEY, JSON.stringify(l)); } catch { /* storage blocked */ } dispatchEvent(new Event('nx-leads')); };
     const STAGES = { new: 'Nueva', talking: 'En conversación', proposal: 'Propuesta enviada', won: 'Ganada', lost: 'Perdida' };
 
-    const priceOf = (l: Pick<Lead, 'fmt' | 'months' | 'days' | 'aud' | 'reg' | 'who' | 'prepay' | 'founder' | 'design' | 'extra'>) => {
-      const q = quote({ formats: l.fmt, months: l.months, days: l.days, aud: l.aud, regions: l.reg.length, who: l.who, prepay: l.prepay, founder: l.founder, design: l.design });
-      const extra = Math.round(q.total * (Math.min(30, l.extra || 0) / 100));
-      return { q, extra, total: Math.max(0, q.total - extra) };
+    // Campaign length in days, from the start and end dates (older inquiries kept a number of months)
+    const lenOf = (l: Pick<Lead, 'start' | 'end' | 'months'>) => (l.start && l.end && l.end >= l.start ? Math.round((Date.parse(`${l.end}T12:00:00`) - Date.parse(`${l.start}T12:00:00`)) / 864e5) + 1 : (l.months || 1) * 30);
+    const priceOf = (l: Pick<Lead, 'fmt' | 'start' | 'end' | 'months' | 'days' | 'aud' | 'reg' | 'who' | 'prepay' | 'founder' | 'design' | 'extra' | 'extraAmt' | 'custom'>) => {
+      const q = quote({ formats: l.fmt, days: lenOf(l), takeoverDays: l.days, aud: l.aud, regions: l.reg.length, who: l.who, prepay: l.prepay, founder: l.founder, design: l.design,
+        custom: l.custom ?? [], extraPct: l.extra, extraAmt: l.extraAmt });
+      return { q, extra: q.extra, total: q.total };
     };
     // Takeover days a lead would use (start … start + days − 1)
     const takeoverDays = (l: Lead) => (l.fmt.includes('takeover') && l.start ? Array.from({ length: Math.max(1, l.days) }, (_, i) => addDays(l.start, i)) : []);
@@ -129,19 +146,44 @@ const booked = CAMPAIGNS.filter((c) => c.takeover).map((c) => ({ start: c.start,
     // Three example inquiries, added once
     if (!localStorage.getItem('nx-leads-seeded')) {
       try { localStorage.setItem('nx-leads-seeded', '1'); } catch { /* storage blocked */ }
-      const base = { contact: '', email: '', phone: '', who: 'retail' as const, months: 1, days: 1, aud: 'all' as const, reg: [] as string[], design: false, prepay: false, founder: true, extra: 0, notes: [] as Lead['notes'], demo: true };
+      const base = { contact: '', email: '', phone: '', who: 'retail' as const, end: '', days: 1, extraAmt: 0, custom: [] as CustomLine[], aud: 'all' as const, reg: [] as string[], design: false, prepay: false, founder: true, extra: 0, notes: [] as Lead['notes'], demo: true };
       const ex: Lead[] = [
-        { ...base, id: 'L-EJ1', created: Date.now() - 2 * 864e5, business: 'Mueblería Don Pepe', contact: 'Luis Rivera', phone: '787-555-0131', channel: 'Llamada', fmt: ['takeover'], start: addDays(today, 12), days: 2,
+        { ...base, id: 'L-EJ1', created: Date.now() - 2 * 864e5, business: 'Mueblería Don Pepe', contact: 'Luis Rivera', phone: '787-555-0131', channel: 'Llamada', fmt: ['takeover'], start: addDays(today, 12), end: addDays(today, 13), days: 2,
           requests: 'Quiere la portada completa el fin de semana de su venta de aniversario, con sus colores (rojo y amarillo).', budget: '$250', follow: today, stage: 'proposal', total: 0,
           notes: [{ at: Date.now() - 2 * 864e5, text: 'Llamó preguntando por la toma de portada. Le envié la propuesta.' }] },
-        { ...base, id: 'L-EJ2', created: Date.now() - 864e5, business: 'Gimnasio Fuerza Bayamón', contact: 'Carla Méndez', phone: '787-555-0177', email: 'carla@ejemplo.com', channel: 'WhatsApp', fmt: ['rectangle', 'patrocinio'], start: addDays(today, 7), months: 3, aud: 'regions', reg: ['metro'], design: true,
+        { ...base, id: 'L-EJ2', created: Date.now() - 864e5, business: 'Gimnasio Fuerza Bayamón', contact: 'Carla Méndez', phone: '787-555-0177', email: 'carla@ejemplo.com', channel: 'WhatsApp', fmt: ['rectangle', 'patrocinio'], start: addDays(today, 7), end: addDays(today, 96), aud: 'regions', reg: ['metro'], design: true,
           requests: 'Patrocinar la sección de Deportes. No tiene arte: hay que diseñarle el anuncio con su logo.', budget: '$400', follow: addDays(today, 1), stage: 'talking', total: 0 },
-        { ...base, id: 'L-EJ3', created: Date.now() - 4 * 36e5, business: 'Agencia Caribe Creativo', contact: 'Ana Torres', email: 'ana@ejemplo.com', who: 'agency', channel: 'Correo', fmt: ['halfpage', 'infeed'], start: addDays(today, 20), months: 6, prepay: true, founder: false,
+        { ...base, id: 'L-EJ3', created: Date.now() - 4 * 36e5, business: 'Agencia Caribe Creativo', contact: 'Ana Torres', email: 'ana@ejemplo.com', who: 'agency', channel: 'Correo', fmt: ['halfpage', 'infeed'], start: addDays(today, 20), end: addDays(today, 199), prepay: true, founder: false,
+          custom: [{ name: 'Artículo patrocinado (escrito por la redacción, identificado como patrocinado)', qty: 2, price: 250, pct: 10 }, { name: 'Mención en el boletín', qty: 8, price: 40, pct: 0 }], extra: 5,
           requests: 'Campaña para un banco cliente: solo en Economía y Puerto Rico, de lunes a viernes. Piden informe mensual de clics.', budget: '', follow: addDays(today, 2), stage: 'new', total: 0 },
       ];
       ex.forEach((l) => (l.total = priceOf(l).total));
       save([...ex, ...load()]);
     }
+
+    const isAdmin = () => { try { return JSON.parse(localStorage.getItem('nx-staff') || '{}').role === 'admin'; } catch { return false; } };
+    // Special requests: one row per item (what, how many, price each, % off)
+    function renderCustom(list: CustomLine[]) {
+      $('[data-custom]').innerHTML = list.map(crow).join('');
+    }
+    const crow = (c: Partial<CustomLine> = {}) => `<div class="sd-crow" data-crow>
+      <input data-c="name" list="sd-specials" placeholder="Qué piden (ej. Artículo patrocinado)" value="${esc(c.name ?? '')}" aria-label="Pedido" />
+      <input data-c="qty" type="number" min="1" value="${c.qty ?? 1}" aria-label="Cantidad" title="Cantidad" />
+      <input data-c="price" type="number" min="0" step="1" value="${c.price ?? ''}" placeholder="$" aria-label="Precio de cada uno" title="Precio de cada uno" />
+      <input data-c="pct" type="number" min="0" max="100" value="${c.pct ?? 0}" aria-label="Descuento %" title="Descuento %" />
+      <button type="button" class="sd-x sm" data-crow-rm aria-label="Quitar">✕</button></div>`;
+    root.querySelector('[data-custom-add]')!.addEventListener('click', () => { $('[data-custom]').insertAdjacentHTML('beforeend', crow()); updateQuote(); });
+    root.addEventListener('click', (e) => { const b = (e.target as HTMLElement).closest('[data-crow-rm]'); if (b) { b.closest('[data-crow]')!.remove(); updateQuote(); } });
+    root.addEventListener('change', (e) => { // picking a suggested item fills in its usual price
+      const n = (e.target as HTMLElement).closest<HTMLInputElement>('[data-c="name"]'); if (!n) return;
+      const sp = SPECIALS.find((x) => x.name === n.value); const pr = n.closest('[data-crow]')!.querySelector<HTMLInputElement>('[data-c="price"]')!;
+      if (sp && !pr.value) { pr.value = String(sp.price); updateQuote(); }
+    });
+    root.addEventListener('click', (e) => { // quick lengths set the end date from the start date
+      const b = (e.target as HTMLElement).closest<HTMLElement>('[data-len]'); if (!b) return;
+      const st = form.elements.namedItem('start') as HTMLInputElement; if (!st.value) st.value = addDays(today, 7);
+      (form.elements.namedItem('end') as HTMLInputElement).value = addDays(st.value, Number(b.dataset.len) - 1); updateQuote();
+    });
 
     let view = 'open', editing: Lead | null = null;
     function render() {
@@ -171,8 +213,10 @@ const booked = CAMPAIGNS.filter((c) => c.takeover).map((c) => ({ start: c.start,
         <header><div><h2>${esc(l.business)} ${l.demo ? '<span class="sp-demo">EJEMPLO</span>' : ''}</h2>
           <p class="pnl-muted">${esc(l.contact || 'Sin contacto')} · ${esc(l.channel)} · ${STAGES[l.stage]}</p></div>
           <b class="sd-amt">${money(l.total)}</b></header>
-        <p class="sd-what"><b>${esc(fm)}</b> · ${l.fmt.includes('takeover') ? `toma ${l.days} día${l.days > 1 ? 's' : ''} desde el ${fmtDate(l.start)}` : `${l.months} ${l.months === 1 ? 'mes' : 'meses'} desde el ${fmtDate(l.start)}`}${l.aud === 'regions' ? ` · ${l.reg.map((r) => REGIONS.find((x) => x.id === r)?.name).join(', ')}` : ''}${l.design ? ' · lo diseñamos' : ''}</p>
+        <p class="sd-what"><b>${esc(fm)}</b> · ${fmtDate(l.start)} al ${fmtDate(l.end || addDays(l.start, lenOf(l) - 1))} (${lengthLabel(lenOf(l))})${l.fmt.includes('takeover') ? ` · toma ${l.days} día${l.days > 1 ? 's' : ''}` : ''}${l.aud === 'regions' ? ` · ${l.reg.map((r) => REGIONS.find((x) => x.id === r)?.name).join(', ')}` : ''}${l.design ? ' · lo diseñamos' : ''}</p>
+        ${l.custom?.length ? `<p class="sd-what">Pedidos especiales: ${l.custom.map((c) => esc(c.name.split(' (')[0]) + (c.qty > 1 ? ` × ${c.qty}` : '')).join(', ')}</p>` : ''}
         ${l.requests ? `<p class="sd-req">“${esc(l.requests)}”</p>` : ''}
+        ${priceOf(l).q.needsApproval ? (l.approved ? `<p class="sd-ok">✓ Descuento aprobado por el administrador</p>` : `<p class="sd-warn">Necesita aprobación: el descuento negociado pasa de ${SALES_DISCOUNT_LIMIT}%. ${isAdmin() ? '<button type="button" class="pnl-link" data-a="approve">Aprobar descuento</button>' : 'El administrador lo verá aquí.'}</p>`) : ''}
         ${clash.length ? `<p class="sd-warn">⚠ Ya hay toma de portada el ${clash.map(fmtDate).join(', ')}: ${esc(taken.get(clash[0])!)}.</p>` : ''}
         <p class="sd-follow ${late ? 'late' : now ? 'now' : ''}">${l.follow ? `Seguimiento: ${late ? 'atrasado, ' : now ? 'hoy, ' : ''}${fmtDate(l.follow)}` : 'Sin fecha de seguimiento'}${l.budget ? ` · presupuesto ${esc(l.budget)}` : ''}</p>
         ${l.notes.length ? `<details class="sd-notes"><summary>Notas (${l.notes.length})</summary><ul>${l.notes.map((x) => `<li><small>${new Date(x.at).toLocaleDateString('es-PR', { day: 'numeric', month: 'short' })}</small> ${esc(x.text)}</li>`).join('')}</ul></details>` : ''}
@@ -181,7 +225,7 @@ const booked = CAMPAIGNS.filter((c) => c.takeover).map((c) => ({ start: c.start,
           ${l.email ? `<a class="sd-btn" href="mailto:${esc(l.email)}">Correo</a>` : ''}
           <button type="button" class="sd-btn" data-a="note">Añadir nota</button>
           <button type="button" class="sd-btn" data-a="edit">Editar</button>
-          <button type="button" class="sd-btn strong" data-a="proposal">Propuesta</button>
+          <button type="button" class="sd-btn strong" data-a="proposal" ${priceOf(l).q.needsApproval && !l.approved ? 'disabled title="Primero el administrador aprueba el descuento"' : ''}>Propuesta</button>
           ${l.stage === 'won' ? (l.converted ? `<span class="sd-done">Convertida en anuncio ✓</span>` : `<button type="button" class="sd-btn strong" data-a="convert">Convertir en anuncio</button>`) : ''}
         </div></article>`;
     }
@@ -203,9 +247,11 @@ const booked = CAMPAIGNS.filter((c) => c.takeover).map((c) => ({ start: c.start,
     const readForm = (): Omit<Lead, 'id' | 'created' | 'notes' | 'total'> => {
       const d = new FormData(form); const s = (k: string) => String(d.get(k) ?? '').trim();
       return { business: s('business'), contact: s('contact'), phone: s('phone'), email: s('email'), who: s('who') as Lead['who'], channel: s('channel'),
-        fmt: d.getAll('fmt').map(String), start: s('start'), months: Number(s('months')) || 1, days: Math.max(1, Math.min(14, Number(s('days')) || 1)),
+        fmt: d.getAll('fmt').map(String), start: s('start'), end: s('end'), days: Math.max(1, Math.min(14, Number(s('days')) || 1)),
         aud: s('aud') as Lead['aud'], reg: d.getAll('reg').map(String), design: !!d.get('design'), prepay: !!d.get('prepay'), founder: !!d.get('founder'),
-        requests: s('requests'), budget: s('budget'), follow: s('follow'), stage: s('stage') as Lead['stage'], extra: Number(s('extra')) || 0 };
+        requests: s('requests'), budget: s('budget'), follow: s('follow'), stage: s('stage') as Lead['stage'], extra: Number(s('extra')) || 0, extraAmt: Number(s('extraAmt')) || 0,
+        custom: $$<HTMLElement>('[data-crow]', form).map((r) => ({ name: (r.querySelector('[data-c="name"]') as HTMLInputElement).value.trim(), qty: Number((r.querySelector('[data-c="qty"]') as HTMLInputElement).value) || 1,
+          price: Number((r.querySelector('[data-c="price"]') as HTMLInputElement).value) || 0, pct: Number((r.querySelector('[data-c="pct"]') as HTMLInputElement).value) || 0 })).filter((c) => c.name) };
     };
     function updateQuote() {
       const v = readForm();
@@ -213,15 +259,17 @@ const booked = CAMPAIGNS.filter((c) => c.takeover).map((c) => ({ start: c.start,
       $('[data-regs]', form).hidden = v.aud !== 'regions';
       const { q, extra, total } = priceOf(v);
       const rows = q.lines.map(([n, c]) => `<li><span>${esc(n)}</span><b>${money(c)}</b></li>`);
-      if (!q.lines.length) rows.push('<li class="adb-empty">Escoge al menos un formato.</li>');
-      if (q.launch) rows.push(`<li class="adb-off"><span>Primera vez</span><b>−${money(q.launch)}</b></li>`);
-      q.discounts.forEach(([n, p]) => rows.push(`<li class="adb-off"><span>${n} (${p}%)</span><b>−${money(q.subtotal * p / 100)}</b></li>`));
-      if (q.off < q.pctOff + q.launch) rows.push(`<li class="adb-off"><span>Tope de descuento</span><b>+${money(q.pctOff + q.launch - q.off)}</b></li>`);
+      if (!q.lines.length && !q.custom.length) rows.push('<li class="adb-empty">Escoge un formato o añade un pedido especial.</li>');
+      q.discounts.forEach(([n, a]) => rows.push(`<li class="adb-off"><span>${esc(n)}</span><b>−${money(a)}</b></li>`));
+      if (q.capped > 0.5) rows.push(`<li class="adb-off"><span>Tope de descuento</span><b>+${money(q.capped)}</b></li>`);
       if (q.design !== null) rows.push(`<li><span>Diseño</span><b>${q.design ? money(q.design) : 'Gratis'}</b></li>`);
-      if (extra) rows.push(`<li class="adb-off"><span>Descuento especial (${v.extra}%)</span><b>−${money(extra)}</b></li>`);
+      q.custom.forEach(([n, c]) => rows.push(`<li><span>${esc(n)}</span><b>${money(c)}</b></li>`));
+      if (extra) rows.push(`<li class="adb-off"><span>Descuento negociado${v.extra ? ` (${v.extra}%)` : ''}${v.extraAmt ? ` ${v.extra ? '+ ' : ''}${money(v.extraAmt)}` : ''}</span><b>−${money(extra)}</b></li>`);
+      const ap = $('[data-q-approve]', form); ap.hidden = !q.needsApproval;
+      if (q.needsApproval) ap.textContent = isAdmin() ? `Este descuento pasa de ${SALES_DISCOUNT_LIMIT}%: como administrador, se aprueba al guardar.` : `Este descuento pasa de ${SALES_DISCOUNT_LIMIT}%: necesita aprobación del administrador antes de enviar la propuesta.`;
       $('[data-q-lines]', form).innerHTML = rows.join('');
       $('[data-q-total]', form).textContent = money(total);
-      $('[data-q-month]', form).textContent = v.months > 1 && total ? `Unos ${money(total / v.months)} al mes` : '';
+      const len = lenOf(v as Lead); $('[data-q-month]', form).textContent = `${lengthLabel(len)}${len >= 60 && total ? ` · unos ${money(total / (len / 30))} al mes` : ''}`;
       const lead = { ...v, id: editing?.id ?? '', created: 0, notes: [], total } as Lead;
       const taken = bookedDays(editing?.id); const clash = takeoverDays(lead).filter((d) => taken.has(d));
       const w = $('[data-q-warn]', form); w.hidden = !clash.length;
@@ -236,12 +284,15 @@ const booked = CAMPAIGNS.filter((c) => c.takeover).map((c) => ({ start: c.start,
       if (l) {
         const set = (k: string, v: string) => { const el = form.elements.namedItem(k) as HTMLInputElement | null; if (el) el.value = v; };
         (['business', 'contact', 'phone', 'email', 'who', 'channel', 'start', 'aud', 'requests', 'budget', 'follow', 'stage'] as const).forEach((k) => set(k, String(l[k] ?? '')));
-        set('months', String(l.months)); set('days', String(l.days)); set('extra', String(l.extra || 0));
+        set('end', l.end || addDays(l.start, lenOf(l) - 1)); set('days', String(l.days)); set('extra', String(l.extra || 0)); set('extraAmt', String(l.extraAmt || 0));
+        renderCustom(l.custom ?? []);
         $$<HTMLInputElement>('[name="fmt"]', form).forEach((c) => (c.checked = l.fmt.includes(c.value)));
         $$<HTMLInputElement>('[name="reg"]', form).forEach((c) => (c.checked = l.reg.includes(c.value)));
         (['design', 'prepay', 'founder'] as const).forEach((k) => ((form.elements.namedItem(k) as HTMLInputElement).checked = l[k]));
       } else {
         (form.elements.namedItem('start') as HTMLInputElement).value = addDays(today, 7);
+        (form.elements.namedItem('end') as HTMLInputElement).value = addDays(today, 36);
+        renderCustom([]);
         (form.elements.namedItem('follow') as HTMLInputElement).value = addDays(today, 1);
       }
       updateQuote(); dlg.showModal();
@@ -253,8 +304,9 @@ const booked = CAMPAIGNS.filter((c) => c.takeover).map((c) => ({ start: c.start,
       if (v.business.length < 2) { err.textContent = 'Escribe el nombre del negocio.'; err.hidden = false; return; }
       if (!v.phone && !v.email) { err.textContent = 'Añade un teléfono o un correo para darle seguimiento.'; err.hidden = false; return; }
       const all = load(); const total = priceOf(v).total;
-      if (editing) { const i = all.findIndex((x) => x.id === editing!.id); all[i] = { ...all[i], ...v, total }; }
-      else all.unshift({ ...v, id: `L-${Date.now().toString(36).toUpperCase()}`, created: Date.now(), notes: [], total });
+      const approved = priceOf(v).q.needsApproval ? isAdmin() || (editing?.approved && editing.extra === v.extra && editing.extraAmt === v.extraAmt) : undefined;
+      if (editing) { const i = all.findIndex((x) => x.id === editing!.id); all[i] = { ...all[i], ...v, total, approved }; }
+      else all.unshift({ ...v, id: `L-${Date.now().toString(36).toUpperCase()}`, created: Date.now(), notes: [], total, approved });
       save(all); dlg.close(); render(); toast(editing ? 'Consulta actualizada.' : 'Consulta guardada.');
     });
     $$('[data-sd-close]').forEach((b) => b.addEventListener('click', () => dlg.close()));
@@ -268,6 +320,7 @@ const booked = CAMPAIGNS.filter((c) => c.takeover).map((c) => ({ start: c.start,
       const rows = [...q.lines.map(([n, c]) => `<tr><td>${esc(n)}</td><td>${money(c)}</td></tr>`),
         ...(q.off ? [`<tr class="off"><td>Descuentos</td><td>−${money(q.off)}</td></tr>`] : []),
         ...(q.design !== null ? [`<tr><td>Diseño del anuncio</td><td>${q.design ? money(q.design) : 'Gratis'}</td></tr>`] : []),
+        ...q.custom.map(([n, c]) => `<tr><td>${esc(n)}</td><td>${money(c)}</td></tr>`),
         ...(extra ? [`<tr class="off"><td>Descuento especial</td><td>−${money(extra)}</td></tr>`] : [])].join('');
       w.document.write(`<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Propuesta para ${esc(l.business)} · Noticias Xtra</title>
         <style>body{font-family:system-ui,sans-serif;color:#16161D;max-width:720px;margin:40px auto;padding:0 24px;line-height:1.5}h1{color:#2B1185;margin:0}.k{color:#1F90DA;font-weight:800;letter-spacing:.08em;text-transform:uppercase;font-size:12px}
@@ -275,7 +328,7 @@ const booked = CAMPAIGNS.filter((c) => c.takeover).map((c) => ({ start: c.start,
         .box{background:#F3F3F8;border-radius:12px;padding:12px 16px}small{color:#5C5F6E}@media print{button{display:none}}</style></head><body>
         <p class="k">Noticias Xtra · Propuesta de publicidad</p><h1>${esc(l.business)}</h1>
         <p>${esc(l.contact)}${l.contact ? ' · ' : ''}${new Date().toLocaleDateString('es-PR', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
-        <div class="box"><b>Lo que pediste:</b> ${esc(l.fmt.map((id) => FMTS.find((f) => f.id === id)?.name).filter(Boolean).join(', '))}${l.fmt.includes('takeover') ? `, toma de portada ${l.days} día(s) desde el ${fmtDate(l.start)}` : `, ${l.months} mes(es) desde el ${fmtDate(l.start)}`}.${l.requests ? `<br>${esc(l.requests)}` : ''}</div>
+        <div class="box"><b>Lo que pediste:</b> ${esc(l.fmt.map((id) => FMTS.find((f) => f.id === id)?.name).filter(Boolean).join(', '))}${l.fmt.length ? `, del ${fmtDate(l.start)} al ${fmtDate(l.end || addDays(l.start, lenOf(l) - 1))} (${lengthLabel(lenOf(l))})` : ''}${l.fmt.includes('takeover') ? `, toma de portada ${l.days} día(s)` : ''}.${l.requests ? `<br>${esc(l.requests)}` : ''}</div>
         <table>${rows}<tr class="tot"><td>Total</td><td>${money(total)}</td></tr></table>
         <p>Pago con tarjeta o ATH Móvil. Los anuncios directos siempre salen antes que los de Google. Respondemos en menos de 24 horas.</p>
         <p><small>Precios válidos por 15 días. Propuesta ${esc(l.id)}.</small></p><button onclick="print()">Imprimir o guardar como PDF</button></body></html>`);
@@ -290,6 +343,7 @@ const booked = CAMPAIGNS.filter((c) => c.takeover).map((c) => ({ start: c.start,
       const a = t.closest<HTMLElement>('[data-a]'); if (!a) return;
       const id = t.closest<HTMLElement>('[data-id]')!.dataset.id!; const all = load(); const l = all.find((x) => x.id === id)!;
       if (a.dataset.a === 'edit') open(l);
+      if (a.dataset.a === 'approve') { l.approved = true; l.notes.unshift({ at: Date.now(), text: 'Descuento aprobado por el administrador.' }); save(all); render(); toast('Descuento aprobado.'); }
       if (a.dataset.a === 'note') { const text = prompt(`Nota sobre ${l.business}:`, ''); if (text?.trim()) { l.notes.unshift({ at: Date.now(), text: text.trim() }); save(all); render(); } }
       if (a.dataset.a === 'proposal') { proposal(l); if (l.stage === 'new' || l.stage === 'talking') { l.stage = 'proposal'; save(all); render(); } }
       if (a.dataset.a === 'convert') {
@@ -298,7 +352,7 @@ const booked = CAMPAIGNS.filter((c) => c.takeover).map((c) => ({ start: c.start,
         await saveRequest({ id: `NX-${l.id.slice(2)}`, created: new Date().toISOString(), status: l.design ? 'disenar' : 'revisar', paid: false,
           client: { name: l.contact || l.business, business: l.business, email: l.email, phone: l.phone, who: l.who },
           formats: l.fmt, where: l.aud === 'regions' ? l.reg.map((r) => REGIONS.find((x) => x.id === r)?.name).join(', ') : l.aud === 'island' ? 'Solo Puerto Rico' : l.aud === 'diaspora' ? 'Solo la diáspora' : 'Puerto Rico y la diáspora',
-          start: l.start || today, duration: l.fmt.includes('takeover') && fm.length === 1 ? `${l.days} día(s)` : `${l.months} ${l.months === 1 ? 'mes' : 'meses'}`,
+          start: l.start || today, duration: l.fmt.includes('takeover') && fm.length === 1 ? `${l.days} día(s)` : lengthLabel(lenOf(l)),
           total: l.total, lines: [`Venta directa (${l.id})`], note: l.requests,
           art: l.design ? { mode: 'design', files: [], title: l.business, msg: '', cta: '', theme: 'morado', notes: l.requests } : { mode: 'upload', files: [] }, link: '' });
         l.converted = new Date().toISOString(); save(all); render();

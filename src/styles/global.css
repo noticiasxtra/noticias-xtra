@@ -3701,3 +3701,14 @@ button.pnl-kpi:hover{border-color:var(--purple)}
 .wr-pop .wr-lay input{width:auto !important;flex:none}
 .wr-pop .wr-lay label{width:auto}
 .sd-form fieldset.wr-lay{display:flex;flex-wrap:wrap;gap:6px;padding:0;border:0}
+/* Sales desk: quick lengths, special-request rows, approvals */
+.sd-quick{grid-column:1 / -1;display:flex;flex-wrap:wrap;gap:6px}
+.sd-quick button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:6px 12px;font:inherit;font-size:13px;font-weight:700;cursor:pointer}
+.sd-quick button:hover{border-color:var(--purple);color:var(--purple)}
+.sd-custom{display:grid;gap:6px}
+.sd-crow{display:grid;grid-template-columns:minmax(0,1fr) 64px 90px 70px 32px;gap:6px;align-items:center}
+.sd-crow input{min-width:0}
+.sd-x.sm{width:32px;height:32px;font-size:13px}
+.sd-ok{margin:0;font-size:13.5px;font-weight:700;color:#1C7C3A}
+.sd-btn[disabled]{opacity:.5;cursor:not-allowed}
+@media (max-width:600px){ .sd-crow{grid-template-columns:minmax(0,1fr) 56px 76px;} .sd-crow [data-c="pct"]{grid-column:1 / 3} }
