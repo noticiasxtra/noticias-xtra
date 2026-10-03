@@ -28,7 +28,7 @@ export const LEAGUES = [
     about: 'Los peloteros boricuas en las Grandes Ligas.' },
   { id: 'nba', youtube: 'UCWJ2lWNubArHWmf3FIHbfcQ', name: 'NBA', abbr: 'NBA', full: 'NBA', local: false, color: '#C8102E', logoBg: '#FFFFFF', logoShape: 'tall', photo: 'basketball',
     about: 'La NBA y los boricuas en el mejor baloncesto del mundo.' },
-  { id: 'nfl', name: 'NFL', abbr: 'NFL', full: 'NFL (fútbol americano)', local: false, color: '#013369', photo: 'football',
+  { id: 'nfl', name: 'NFL', abbr: 'NFL', full: 'NFL (fútbol americano)', local: false, color: '#013369', logoBg: '#FFFFFF', photo: 'football',
     about: 'La NFL: resultados, posiciones y estadísticas del fútbol americano profesional de Estados Unidos.', url: 'https://www.nfl.com' },
 
   { id: 'lvsm', name: 'Voleibol M', abbr: 'LVSM', full: 'Liga de Voleibol Superior Masculino', local: true, color: '#0F8C8C', logoBg: '#FFFFFF', photo: 'volleyball',
