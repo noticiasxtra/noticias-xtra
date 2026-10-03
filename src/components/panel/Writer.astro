@@ -112,7 +112,7 @@ const TOOLS = [
         </div>
         <div class="pnl-card"><h2 class="pnl-h3">Fuentes</h2>
           <ul class="wr-srcs" data-srcs></ul>
-          <div class="wr-addsrc"><input data-src-name placeholder="Nombre (ej. Policía de PR)" maxlength="80" aria-label="Nombre de la fuente" /><input data-src-url type="url" placeholder="Enlace (opcional)" aria-label="Enlace de la fuente" /><button type="button" class="pnl-link" data-src-add>Añadir</button></div>
+          <div class="wr-addsrc"><input data-src-name placeholder="Nombre (ej. Policía de PR)" aria-label="Nombre de la fuente" /><input data-src-url type="url" placeholder="Enlace (opcional)" aria-label="Enlace de la fuente" /><button type="button" class="pnl-link" data-src-add>Añadir</button></div>
         </div>
         <div class="pnl-card"><h2 class="pnl-h3">Noticias relacionadas</h2>
           <select data-rel-pick aria-label="Añadir relacionada"><option value="">Escoge una noticia…</option>{recent.map((r) => <option value={r.id}>{r.title}</option>)}</select>
@@ -323,7 +323,8 @@ const TOOLS = [
         <p class="pnl-muted pnl-small"><span class="sp-demo">DEMO</span> Las vistas son de muestra. Con Google Analytics conectado, aquí salen las reales de cada noticia.</p></div>`;
       $('[data-wr-list]').innerHTML = head + (rows.map(({ p, st }) => {
         const open = openStats === p.id; const max = Math.max(1, ...st.byDay);
-        return `<article class="pnl-row wr-pub" data-pid="${esc(p.id)}">
+        const mineArt = load().some((a) => a.id === p.id);
+        return `<article class="pnl-row wr-pub" data-pid="${esc(p.id)}"${mineArt ? ` data-id="${esc(p.id)}"` : ''}>
           <span class="wr-pub-ic" title="Publicada" aria-label="Publicada">${LIVE}</span>
           <div class="wr-pub-main"><p class="pnl-muted">${esc(p.section)} · ${esc(p.author)} · ${new Date(p.date).toLocaleDateString('es-PR', { day: 'numeric', month: 'short', year: 'numeric' })}${p.ai ? ' · <span class="wr-ai">IA</span>' : ''}${p.local ? ' · <span class="wr-ai">desde el editor</span>' : ''}</p>
             <h2>${p.url ? `<a href="${p.url}" target="_blank" rel="noopener">${esc(p.title)}</a>` : esc(p.title)}</h2>
@@ -334,7 +335,7 @@ const TOOLS = [
               <div><h3 class="pnl-h4">Dónde están</h3>${bars(st.geo)}<p class="pnl-muted pnl-small">${st.phone}% en celular</p></div>
             </div>` : ''}
           </div>
-          <div class="pnl-row-acts">${p.url ? `<a class="adp-btn ghost-dark" href="${p.url}" target="_blank" rel="noopener">Ver en el sitio ↗</a>` : ''}<button type="button" class="adp-btn ${open ? '' : 'ghost-dark'}" data-pstats="${esc(p.id)}">${open ? 'Cerrar' : 'Estadísticas'}</button></div>
+          <div class="pnl-row-acts">${mineArt ? '<button type="button" class="adp-btn" data-la="edit">Editar o corregir</button>' : ''}${p.url ? `<a class="adp-btn ghost-dark" href="${p.url}" target="_blank" rel="noopener">Ver en el sitio ↗</a>` : ''}<button type="button" class="adp-btn ${open ? '' : 'ghost-dark'}" data-pstats="${esc(p.id)}">${open ? 'Cerrar' : 'Estadísticas'}</button></div>
         </article>`;
       }).join('') || '<p class="apr-empty">Todavía no hay noticias publicadas.</p>');
     }
@@ -490,8 +491,10 @@ const TOOLS = [
       const t = e.target as HTMLElement; if (!cur) return;
       if (t.closest('[data-src-add]')) {
         const n = $<HTMLInputElement>('[data-src-name]'), u = $<HTMLInputElement>('[data-src-url]');
-        if (n.value.trim().length < 2) { n.focus(); return; }
-        cur.sources.push({ name: n.value.trim(), ...(u.value.trim() ? { url: u.value.trim() } : {}) }); n.value = ''; u.value = ''; changed();
+        let name = n.value.trim(), link = u.value.trim();
+        if (name.length < 2) { n.focus(); return; }
+        if (/^https?:\/\/\S+$/i.test(name)) { if (!link) link = name; try { name = new URL(name).hostname.replace(/^www\./, ''); } catch { /* keep as typed */ } }
+        cur.sources.push({ name: name.slice(0, 80), ...(link ? { url: link } : {}) }); n.value = ''; u.value = ''; changed();
       }
       const sr = t.closest<HTMLElement>('[data-src-rm]'); if (sr) { cur.sources.splice(Number(sr.dataset.srcRm), 1); changed(); }
       const rr = t.closest<HTMLElement>('[data-rel-rm]'); if (rr) { cur.related.splice(Number(rr.dataset.relRm), 1); changed(); }
