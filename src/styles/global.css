@@ -585,6 +585,8 @@ a.sp-games-teams:hover span:first-child,a.sp-games-teams:hover span:last-child{c
   .hs-item:hover .hs-pop,.hs-item:focus-within .hs-pop{visibility:visible;opacity:1;transform:none;transition:opacity .15s,transform .15s}
   .hs-item:hover>.hs-card,.hs-item:focus-within>.hs-card{box-shadow:0 2px 10px rgba(22,22,29,.12)}
 }
+/* Phones and tablets never open these panels (hover only); leaving them in made the card row scroll up and down under a finger */
+@media not ((hover:hover) and (min-width:1000px)){.hs-pop{display:none}}
 @media (prefers-reduced-motion:reduce){.hs-pop{transition:none}}
 .hs-pop-h{display:flex;align-items:center;gap:6px;margin:0 0 8px;font-family:var(--head);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
 .hs-quote{margin:0 0 10px;font-family:var(--head);font-weight:600;font-size:16px;line-height:1.4;color:var(--ink)}
@@ -3823,6 +3825,8 @@ a,button,summary,label{-webkit-tap-highlight-color:transparent}
   /* Section menu: swipes only sideways (the current-section line made the row 3px taller, so the words slid up and down) */
   .nav .wrap{overflow-y:hidden;overscroll-behavior-x:contain}
   .nav-links>a{margin-bottom:0}
+  /* Every sideways row (cards, scores, league and section tabs, chips) only moves sideways under a finger */
+  .sc-track,.sc-filters,.ys-leagues,.lg-tabs,.tb-chips,.cx-tabs,.apn-tabs,.dn-chips,.pf-chips,.ls-tabs,.pnl-nav,.op-ppl-list,.lv-info .lv-srcs,.gt-tiles,.wx-hours{overflow-y:hidden;overscroll-behavior-x:contain}
   /* Current section: a white pill */
   .nav-links>a[aria-current="page"],.nav-links>a[aria-current="page"]:first-child{align-self:center;margin:6px 2px;padding:6px 12px;border-bottom:0;border-radius:999px;background:#fff;color:#2B1185;opacity:1}
   .nav-links>a:active{opacity:.6}
