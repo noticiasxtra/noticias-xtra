@@ -9,8 +9,9 @@
 // downloaded as its story file. With accounts, publishing commits the file through the secure helper.
 import { SECTIONS, PR_MUNICIPIOS, url } from '../../lib/site';
 import { LEAGUES } from '../../lib/leagues';
-interface Props { recent: Array<{ id: string; title: string }> }
-const { recent } = Astro.props;
+type Pub = { id: string; title: string; section: string; author: string; date: string; url: string; ai: boolean };
+interface Props { recent: Array<{ id: string; title: string }>; published: Pub[] }
+const { recent, published } = Astro.props;
 const secs = SECTIONS.map(({ id, name }) => ({ id, name }));
 const leagues = LEAGUES.map(({ id, name }) => ({ id, name }));
 const I = (d: string) => `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
@@ -30,7 +31,7 @@ const TOOLS = [
   ['clear', 'Quitar formato', '<path d="M6 5h12M12 5l-3 14M4 20L20 4"/>'],
 ];
 ---
-<section class="wr" data-wr data-secs={JSON.stringify(secs)} data-recent={JSON.stringify(recent)} data-base={url()}>
+<section class="wr" data-wr data-secs={JSON.stringify(secs)} data-recent={JSON.stringify(recent)} data-published={JSON.stringify(published)} data-base={url()}>
   <!-- List of my articles -->
   <div data-wr-list-view>
     <header class="sd-head">
@@ -125,9 +126,44 @@ const TOOLS = [
   </div>
 
   <!-- Attach a document -->
-  <dialog class="wr-docdlg" data-doc-dlg aria-labelledby="wr-doc-h">
-    <form method="dialog" class="sd-form" data-doc-form>
-      <header class="sd-dlg-h"><h2 id="wr-doc-h">Añadir documento</h2><button type="button" class="sd-x" data-doc-close aria-label="Cerrar">✕</button></header>
+  <!-- Insert panels: they open right next to the toolbar button (or the block being edited) -->
+  <dialog class="wr-pop" data-pop="link" aria-labelledby="wr-link-h">
+    <form class="sd-form" data-link-form>
+      <header class="sd-dlg-h"><h2 id="wr-link-h">Enlace</h2><button type="button" class="sd-x" data-pop-close aria-label="Cerrar">✕</button></header>
+      <label>Dirección<input type="url" name="url" required placeholder="https://…" /></label>
+      <label class="adb-check"><input type="checkbox" name="newtab" checked /> Abrir en otra pestaña</label>
+      <footer class="sd-dlg-f"><button type="button" class="pnl-link" data-unlink>Quitar enlace</button><button type="submit" class="adp-btn">Aplicar</button></footer>
+    </form>
+  </dialog>
+  <dialog class="wr-pop wide" data-pop="embed" aria-labelledby="wr-emb-h">
+    <form class="sd-form" data-embed-form>
+      <header class="sd-dlg-h"><h2 id="wr-emb-h" data-embed-h>Insertar video o publicación</h2><button type="button" class="sd-x" data-pop-close aria-label="Cerrar">✕</button></header>
+      <label>Enlace<input type="url" name="url" required placeholder="YouTube, X, Instagram, Facebook, TikTok, Spotify o Google Maps" /></label>
+      <div class="wr-emb-prev" data-embed-prev><p class="pnl-muted pnl-small">Pega el enlace y verás la publicación aquí.</p></div>
+      <fieldset class="wr-lay"><legend>Tamaño</legend><label><input type="radio" name="size" value="" checked /> Automático</label><label><input type="radio" name="size" value="s" /> Pequeño</label><label><input type="radio" name="size" value="m" /> Mediano</label><label><input type="radio" name="size" value="l" /> Grande</label></fieldset>
+        <fieldset class="wr-lay"><legend>Posición</legend><label><input type="radio" name="align" value="l" /> Izquierda</label><label><input type="radio" name="align" value="" checked /> Centro</label><label><input type="radio" name="align" value="r" /> Derecha</label></fieldset>
+        <p class="pnl-muted pnl-small">Izquierda o derecha: el texto lo rodea en computadora; en celular va a lo ancho.</p>
+      <p class="cm-err" data-embed-err hidden></p>
+      <footer class="sd-dlg-f"><button type="button" class="adp-btn ghost-dark" data-pop-close>Cancelar</button><button type="submit" class="adp-btn" data-embed-go>Insertar</button></footer>
+    </form>
+  </dialog>
+  <dialog class="wr-pop wide" data-pop="image" aria-labelledby="wr-img-h">
+    <form class="sd-form" data-img-form>
+      <header class="sd-dlg-h"><h2 id="wr-img-h" data-img-h>Insertar foto</h2><button type="button" class="sd-x" data-pop-close aria-label="Cerrar">✕</button></header>
+      <label data-img-file-wrap>Foto<input type="file" name="file" accept="image/*" /></label>
+      <img class="wr-img-prev" data-img-prev alt="" hidden />
+      <label>Pie de foto<input name="cap" maxlength="200" placeholder="Qué se ve en la foto" /></label>
+      <label>Crédito<input name="credit" maxlength="120" placeholder="Foto: Nombre / Noticias Xtra" /></label>
+      <fieldset class="wr-lay"><legend>Tamaño</legend><label><input type="radio" name="size" value="" checked /> Automático</label><label><input type="radio" name="size" value="s" /> Pequeño</label><label><input type="radio" name="size" value="m" /> Mediano</label><label><input type="radio" name="size" value="l" /> Grande</label></fieldset>
+        <fieldset class="wr-lay"><legend>Posición</legend><label><input type="radio" name="align" value="l" /> Izquierda</label><label><input type="radio" name="align" value="" checked /> Centro</label><label><input type="radio" name="align" value="r" /> Derecha</label></fieldset>
+        <p class="pnl-muted pnl-small">Izquierda o derecha: el texto lo rodea en computadora; en celular va a lo ancho.</p>
+      <p class="cm-err" data-img-err hidden></p>
+      <footer class="sd-dlg-f"><button type="button" class="adp-btn ghost-dark" data-pop-close>Cancelar</button><button type="submit" class="adp-btn" data-img-go>Insertar</button></footer>
+    </form>
+  </dialog>
+  <dialog class="wr-pop wide" data-pop="doc" data-doc-dlg aria-labelledby="wr-doc-h">
+    <form class="sd-form" data-doc-form>
+      <header class="sd-dlg-h"><h2 id="wr-doc-h">Añadir documento</h2><button type="button" class="sd-x" data-pop-close aria-label="Cerrar">✕</button></header>
       <p class="pnl-muted">En la noticia se ve como una tarjeta limpia; el lector toca “Ver documento” y lo lee completo.</p>
       <label>Título que verá el lector<input name="title" maxlength="120" required placeholder="ej. Informe de la Contralora sobre el municipio de Ponce" /></label>
       <label>Sube el PDF<input type="file" name="file" accept="application/pdf" /></label>
@@ -135,7 +171,7 @@ const TOOLS = [
       <label>Enlace<input type="url" name="url" placeholder="https://…/documento.pdf" /></label>
       <label>De dónde viene (opcional)<input name="source" maxlength="60" placeholder="ej. Oficina del Contralor" /></label>
       <p class="cm-err" data-doc-err hidden></p>
-      <footer class="sd-dlg-f"><button type="button" class="adp-btn ghost-dark" data-doc-close>Cancelar</button><button type="submit" class="adp-btn">Insertar</button></footer>
+      <footer class="sd-dlg-f"><button type="button" class="adp-btn ghost-dark" data-pop-close>Cancelar</button><button type="submit" class="adp-btn">Insertar</button></footer>
     </form>
   </dialog>
 
@@ -166,6 +202,8 @@ const TOOLS = [
     };
     const SECS: Array<{ id: string; name: string }> = JSON.parse(root.dataset.secs!);
     const RECENT: Array<{ id: string; title: string }> = JSON.parse(root.dataset.recent!);
+    type Pub = { id: string; title: string; section: string; author: string; date: string; url: string; ai: boolean; local?: boolean };
+    const PUBLISHED: Pub[] = JSON.parse(root.dataset.published!);
     const $ = <T extends Element = HTMLElement>(s: string, el: ParentNode = root) => el.querySelector<T>(s)!;
     const $$ = <T extends Element = HTMLElement>(s: string, el: ParentNode = root) => [...el.querySelectorAll<T>(s)];
     const esc = (s = '') => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
@@ -187,6 +225,9 @@ const TOOLS = [
     function renderList() {
       const s = me(); const all = load().filter((a) => canPublish() || a.owner === s?.name); // periodistas see their own
       (['draft', 'review', 'scheduled', 'published'] as const).forEach((k) => { const n = all.filter((a) => a.status === k).length; $(`[data-wn="${k}"]`).textContent = n ? String(n) : ''; });
+      const pubs = publishedList();
+      $('[data-wn="published"]').textContent = pubs.length ? String(pubs.length) : '';
+      if (tab === 'published') { renderPublished(pubs); return; }
       const list = all.filter((a) => a.status === tab).sort((a, b) => b.updated - a.updated);
       $('[data-wr-list]').innerHTML = list.map((a) => `<article class="pnl-row" data-id="${a.id}">
         <div><p class="pnl-muted">${STATUS[a.status]} · ${esc(SECS.find((x) => x.id === a.section)?.name ?? '')} · ${esc(a.author || a.owner)} · ${ago(a.updated)}${a.status === 'scheduled' ? ` · sale el ${new Date(a.date).toLocaleString('es-PR', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })}` : ''}</p>
@@ -199,6 +240,65 @@ const TOOLS = [
           <button type="button" class="apr-reject" data-la="del">Borrar</button>
         </div></article>`).join('') || `<p class="apr-empty">${tab === 'draft' ? 'No tienes borradores. Toca “Nueva noticia” para empezar.' : 'Nada aquí todavía.'}</p>`;
     }
+
+    // ---------- Publicadas: every published article with its numbers (DEMO until Google Analytics is connected) ----------
+    let pubSort: 'new' | 'views' = 'new'; let openStats = '';
+    function publishedList(): Pub[] {
+      const s = me(); const mine = (p: Pub) => canPublish() || p.author === s?.name;
+      const local = load().filter((a) => a.status === 'published').map((a) => ({ id: a.id, title: a.title || 'Sin titular', section: SECS.find((x) => x.id === a.section)?.name ?? '', author: a.author || a.owner,
+        date: new Date(a.date || a.updated).toISOString(), url: '', ai: false, local: true }));
+      return [...local, ...PUBLISHED].filter(mine);
+    }
+    // Stable sample numbers per article: they grow with its age and never change between visits
+    const hash = (t: string) => [...t].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
+    function statsOf(p: Pub) {
+      const h = hash(p.id), days = Math.max(0.2, (Date.now() - Date.parse(p.date)) / 864e5);
+      const peak = 600 + (h % 5200);
+      const views = Math.round(peak * (1 - Math.exp(-days / 1.6)) + (h % 90));
+      const byDay = Array.from({ length: 7 }, (_, i) => { const d = days - (6 - i); return d < 0 ? 0 : Math.round(peak * Math.exp(-Math.max(0, d) / 1.6) * 0.42 + ((h >> i) % 40)); });
+      const mins = 1 + (h % 3), secs = 10 + (h % 50);
+      const google = 30 + (h % 20), fb = 15 + ((h >> 3) % 18), wa = 8 + ((h >> 5) % 10), direct = 100 - google - fb - wa;
+      const pr = 62 + (h % 20), phone = 70 + ((h >> 2) % 15);
+      return { views, byDay, time: `${mins} min ${secs} s`, comments: (h >> 4) % 23, shares: Math.round(views / (40 + (h % 30))),
+        refs: [['Google', google], ['Facebook', fb], ['WhatsApp', wa], ['Directo y otros', direct]] as Array<[string, number]>,
+        geo: [['Puerto Rico', pr], ['Estados Unidos', 100 - pr - 3], ['Otros países', 3]] as Array<[string, number]>, phone };
+    }
+    const fmtN = (n: number) => n.toLocaleString('es-PR');
+    const EYE = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+    const LIVE = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>';
+    const bars = (rows: Array<[string, number]>) => `<ul class="pc-rows">${rows.map(([l, v]) => `<li><span class="pc-rl">${esc(l)}</span><span class="pc-rb"><i style="width:${v}%"></i></span><b>${v}%</b></li>`).join('')}</ul>`;
+    function renderPublished(pubs: Pub[]) {
+      const rows = pubs.map((p) => ({ p, st: statsOf(p) })).sort((a, b) => (pubSort === 'views' ? b.st.views - a.st.views : Date.parse(b.p.date) - Date.parse(a.p.date)));
+      const total = rows.reduce((a, r) => a + r.st.views, 0);
+      const top = rows.slice().sort((a, b) => b.st.views - a.st.views)[0];
+      const head = `<div class="wr-pub-head">
+        <div class="pnl-kpis"><div class="pnl-kpi"><span>Publicadas</span><b>${fmtN(rows.length)}</b></div><div class="pnl-kpi"><span>Vistas en total</span><b>${fmtN(total)}</b><small>DEMO</small></div>
+          <div class="pnl-kpi"><span>Promedio por noticia</span><b>${fmtN(Math.round(total / Math.max(1, rows.length)))}</b></div>
+          ${top ? `<div class="pnl-kpi"><span>La más leída</span><b class="wr-top-t">${esc(top.p.title)}</b><small>${fmtN(top.st.views)} vistas</small></div>` : ''}</div>
+        <div class="pnl-range" role="group" aria-label="Ordenar"><button type="button" data-psort="new" aria-pressed="${pubSort === 'new'}">Más recientes</button><button type="button" data-psort="views" aria-pressed="${pubSort === 'views'}">Más vistas</button></div>
+        <p class="pnl-muted pnl-small"><span class="sp-demo">DEMO</span> Las vistas son de muestra. Con Google Analytics conectado, aquí salen las reales de cada noticia.</p></div>`;
+      $('[data-wr-list]').innerHTML = head + (rows.map(({ p, st }) => {
+        const open = openStats === p.id; const max = Math.max(1, ...st.byDay);
+        return `<article class="pnl-row wr-pub" data-pid="${esc(p.id)}">
+          <span class="wr-pub-ic" title="Publicada" aria-label="Publicada">${LIVE}</span>
+          <div class="wr-pub-main"><p class="pnl-muted">${esc(p.section)} · ${esc(p.author)} · ${new Date(p.date).toLocaleDateString('es-PR', { day: 'numeric', month: 'short', year: 'numeric' })}${p.ai ? ' · <span class="wr-ai">IA</span>' : ''}${p.local ? ' · <span class="wr-ai">desde el editor</span>' : ''}</p>
+            <h2>${p.url ? `<a href="${p.url}" target="_blank" rel="noopener">${esc(p.title)}</a>` : esc(p.title)}</h2>
+            <p class="wr-pub-stats"><span class="wr-views">${EYE} <b>${fmtN(st.views)}</b> vistas</span><span>⏱ ${st.time}</span><span>💬 ${st.comments}</span><span>↗ ${fmtN(st.shares)} compartidas</span></p>
+            ${open ? `<div class="wr-pub-detail">
+              <div><h3 class="pnl-h4">Vistas en los últimos 7 días</h3><div class="wr-spark">${st.byDay.map((v, i) => `<span title="${fmtN(v)} vistas"><i style="height:${Math.round((v / max) * 100)}%"></i><small>${['L', 'M', 'M', 'J', 'V', 'S', 'D'][(new Date(Date.now() - (6 - i) * 864e5).getDay() + 6) % 7]}</small></span>`).join('')}</div></div>
+              <div><h3 class="pnl-h4">De dónde llegan</h3>${bars(st.refs)}</div>
+              <div><h3 class="pnl-h4">Dónde están</h3>${bars(st.geo)}<p class="pnl-muted pnl-small">${st.phone}% en celular</p></div>
+            </div>` : ''}
+          </div>
+          <div class="pnl-row-acts">${p.url ? `<a class="adp-btn ghost-dark" href="${p.url}" target="_blank" rel="noopener">Ver en el sitio ↗</a>` : ''}<button type="button" class="adp-btn ${open ? '' : 'ghost-dark'}" data-pstats="${esc(p.id)}">${open ? 'Cerrar' : 'Estadísticas'}</button></div>
+        </article>`;
+      }).join('') || '<p class="apr-empty">Todavía no hay noticias publicadas.</p>');
+    }
+    root.addEventListener('click', (e) => {
+      const t = e.target as HTMLElement;
+      const so = t.closest<HTMLElement>('[data-psort]'); if (so) { pubSort = so.dataset.psort as 'new' | 'views'; renderList(); return; }
+      const ps = t.closest<HTMLElement>('[data-pstats]'); if (ps) { openStats = openStats === ps.dataset.pstats ? '' : ps.dataset.pstats!; renderList(); }
+    });
 
     // ---------- editor ----------
     const body = $('[data-body]');
@@ -277,11 +377,20 @@ const TOOLS = [
     let savedRange: Range | null = null;
     body.addEventListener('blur', () => { const s = getSelection(); if (s?.rangeCount && body.contains(s.anchorNode)) savedRange = s.getRangeAt(0).cloneRange(); });
     const restore = () => { body.focus(); if (savedRange) { const s = getSelection()!; s.removeAllRanges(); s.addRange(savedRange); } };
-    const insertBlock = (html: string) => { restore(); document.execCommand('insertHTML', false, `${html}<p><br></p>`); body.querySelectorAll<HTMLElement>('figure.wr-embed:not([data-ready])').forEach(paintEmbed); changed(); };
+    const insertBlock = (html: string) => { restore(); document.execCommand('insertHTML', false, `${html}<p><br></p>`); body.querySelectorAll<HTMLElement>('figure.wr-embed:not([data-ready])').forEach(paintEmbed); body.querySelectorAll<HTMLElement>('figure.wr-img:not([data-ready])').forEach(paintImg); changed(); };
+    const LAY = { size: { '': '', s: 'Pequeño', m: 'Mediano', l: 'Grande' } as Record<string, string>, align: { '': '', l: 'Izquierda', r: 'Derecha' } as Record<string, string> };
+    const layClass = (f: HTMLElement) => `${f.dataset.size ? ` sz-${f.dataset.size}` : ''}${f.dataset.align ? ` al-${f.dataset.align}` : ''}`;
+    const layLabel = (f: HTMLElement) => [LAY.size[f.dataset.size || ''], LAY.align[f.dataset.align || '']].filter(Boolean).join(' · ');
     $<HTMLSelectElement>('[data-block]').addEventListener('change', (e) => { const v = (e.target as HTMLSelectElement).value; exec('formatBlock', v === 'p' ? 'P' : v.toUpperCase()); (e.target as HTMLSelectElement).value = 'p'; });
     function paintEmbed(fig: HTMLElement) {
       const u = fig.dataset.url!; fig.setAttribute('contenteditable', 'false'); fig.dataset.ready = '1';
-      fig.innerHTML = `${embedFor(u) ?? ''}<figcaption><span>${esc(u)}</span><button type="button" class="pnl-link" data-embed-rm>Quitar</button></figcaption>`;
+      fig.className = `wr-embed${layClass(fig)}`;
+      fig.innerHTML = `${embedFor(u) ?? ''}<figcaption><span>${esc(layLabel(fig) || u)}</span><span><button type="button" class="pnl-link" data-block-edit>Editar</button> <button type="button" class="pnl-link" data-embed-rm>Quitar</button></span></figcaption>`;
+    }
+    function paintImg(fig: HTMLElement) {
+      fig.setAttribute('contenteditable', 'false'); fig.dataset.ready = '1'; fig.className = `wr-img${layClass(fig)}`;
+      const cap = [fig.dataset.cap, fig.dataset.credit].filter(Boolean).join(' ');
+      fig.innerHTML = `<img src="${esc(fig.dataset.src!)}" alt="${esc(fig.dataset.cap || '')}"><figcaption><span>${esc(cap)}${layLabel(fig) ? ` <small>(${esc(layLabel(fig))})</small>` : ''}</span><span><button type="button" class="pnl-link" data-block-edit>Editar</button></span></figcaption><button type="button" class="wr-photo-x" data-img-rm aria-label="Quitar foto">✕</button>`;
     }
     root.addEventListener('click', (e) => {
       const rm = (e.target as HTMLElement).closest('[data-embed-rm],[data-img-rm]');
@@ -298,27 +407,14 @@ const TOOLS = [
       if (t === 'clear') { exec('removeFormat'); exec('formatBlock', 'P'); exec('unlink'); }
       if (t === 'link') {
         const sel = getSelection(); if (!sel || sel.isCollapsed) { toast('Primero selecciona las palabras que quieres convertir en enlace.'); return; }
-        const r = sel.getRangeAt(0).cloneRange();
-        const href = prompt('Pega el enlace (https://…):', 'https://'); if (!href || !/^https?:\/\/\S+\.\S+/.test(href)) return;
-        const s2 = getSelection()!; s2.removeAllRanges(); s2.addRange(r); exec('createLink', href);
+        linkRange = sel.getRangeAt(0).cloneRange();
+        const cur = (sel.anchorNode?.parentElement?.closest('a') as HTMLAnchorElement | null);
+        linkForm.reset(); (linkForm.elements.namedItem('url') as HTMLInputElement).value = cur?.getAttribute('href') ?? '';
+        openPop('link', b);
       }
-      if (t === 'doc') { docForm.reset(); $('[data-doc-err]').hidden = true; docDlg.showModal(); }
-      if (t === 'embed') {
-        const u = prompt('Pega el enlace del video o publicación (YouTube, X, Instagram, Facebook, TikTok, Spotify o Google Maps):', '');
-        if (!u) return;
-        if (!embedFor(u)) { toast('Ese enlace no se puede insertar. Prueba con un enlace de YouTube, X, Instagram, Facebook, TikTok, Spotify o Google Maps.'); return; }
-        insertBlock(`<figure class="wr-embed" data-url="${esc(u.trim())}"></figure>`);
-      }
-      if (t === 'image') {
-        const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*';
-        inp.onchange = async () => {
-          const f = inp.files?.[0]; if (!f) return;
-          const src = await shrink(f, 1200).catch(() => ''); if (!src) { toast('No pudimos leer esa imagen.'); return; }
-          const cap = prompt('Pie de foto y crédito (ej. "La plaza de Ponce. Foto: Ana Rivera / Noticias Xtra"):', '') ?? '';
-          insertBlock(`<figure class="wr-img" contenteditable="false"><img src="${src}" alt="${esc(cap.split('Foto:')[0].trim())}"><figcaption>${esc(cap)}</figcaption><button type="button" class="wr-photo-x" data-img-rm aria-label="Quitar foto">✕</button></figure>`);
-        };
-        inp.click();
-      }
+      if (t === 'doc') { docForm.reset(); $('[data-doc-err]').hidden = true; openPop('doc', b); }
+      if (t === 'embed') { editing = null; embedForm.reset(); $('[data-embed-h]').textContent = 'Insertar video o publicación'; $('[data-embed-go]').textContent = 'Insertar'; embedPrev(); openPop('embed', b); }
+      if (t === 'image') { editing = null; imgForm.reset(); imgData = ''; $('[data-img-prev]').hidden = true; $('[data-img-file-wrap]').hidden = false; $('[data-img-h]').textContent = 'Insertar foto'; $('[data-img-go]').textContent = 'Insertar'; openPop('image', b); }
     }));
     // Paste: plain text only (no stray styles from other sites); a lone supported link becomes an embed
     body.addEventListener('paste', (e) => {
@@ -378,13 +474,16 @@ const TOOLS = [
         if (n.nodeType === 3) return (n.textContent ?? '').trim() ? md.text(n.textContent!.trim()) : '';
         if (!(n instanceof HTMLElement)) return '';
         const tag = n.tagName, line = () => [...n.childNodes].map(md.inline).join('').trim();
-        if (n.classList.contains('wr-embed')) return n.dataset.url ?? '';
+        if (n.classList.contains('wr-embed')) return n.dataset.size || n.dataset.align ? embedFor(n.dataset.url!, { size: n.dataset.size, align: n.dataset.align }) ?? '' : n.dataset.url ?? '';
         if (n.classList.contains('wr-doc')) { // an uploaded PDF goes to public/documentos/ when published (with accounts)
           const d = docOf(n); if (d.src.startsWith('data:')) d.src = `${root.dataset.base!.replace(/\/$/, '')}/documentos/${(cur?.id ?? 'doc').toLowerCase()}-${d.title.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').slice(0, 40)}.pdf`;
           return docCard(d);
         }
-        if (n.classList.contains('wr-img')) { const img = n.querySelector('img')!; const cap = n.querySelector('figcaption')?.textContent?.trim() ?? '';
-          return `<figure><img src="${img.getAttribute('src')}" alt="${esc(img.alt)}" loading="lazy" />${cap ? `<figcaption>${esc(cap)}</figcaption>` : ''}</figure>`; }
+        if (n.classList.contains('wr-img')) {
+          const cap = [n.dataset.cap, n.dataset.credit].filter(Boolean).join(' ') || (n.querySelector('figcaption span')?.textContent ?? n.querySelector('figcaption')?.textContent ?? '').trim();
+          const src = n.dataset.src || n.querySelector('img')?.getAttribute('src') || '';
+          return `<figure class="${layClass(n).trim()}"><img src="${src}" alt="${esc(n.dataset.cap || '')}" loading="lazy" />${cap ? `<figcaption>${esc(cap)}</figcaption>` : ''}</figure>`;
+        }
         if (tag === 'H2') return `## ${line()}`;
         if (tag === 'H3' || tag === 'H4') return `### ${line()}`;
         if (tag === 'HR') return '---';
@@ -414,10 +513,97 @@ const TOOLS = [
       a.href = URL.createObjectURL(blob); a.download = `${slug(cur)}.md`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
     });
 
+    // ---------- insert panels, opened next to the button (or the block) that called them ----------
+    const pops = Object.fromEntries($$<HTMLDialogElement>('[data-pop]').map((d) => [d.dataset.pop!, d]));
+    let popAnchor: HTMLElement | null = null, editing: HTMLElement | null = null, linkRange: Range | null = null, imgData = '';
+    function placePop(d: HTMLDialogElement) {
+      if (!popAnchor) return;
+      if (innerWidth < 640) { d.style.left = '8px'; d.style.right = '8px'; d.style.top = 'auto'; d.style.bottom = '8px'; return; } // phones: a sheet at the bottom
+      const r = popAnchor.getBoundingClientRect(), w = d.offsetWidth, h = d.offsetHeight;
+      const left = Math.min(Math.max(8, r.left), innerWidth - w - 8);
+      const below = r.bottom + 8, top = below + h > innerHeight - 8 && r.top - h - 8 > 8 ? r.top - h - 8 : Math.min(below, innerHeight - h - 8);
+      Object.assign(d.style, { left: `${left}px`, top: `${Math.max(8, top)}px`, right: 'auto', bottom: 'auto' });
+    }
+    function openPop(name: string, anchor: HTMLElement) {
+      Object.values(pops).forEach((d) => d.open && d.close());
+      popAnchor = anchor; const d = pops[name];
+      d.show(); placePop(d);
+      d.querySelector<HTMLInputElement>('input:not([type=radio]):not([type=checkbox])')?.focus({ preventScroll: true });
+    }
+    const closePops = () => Object.values(pops).forEach((d) => d.open && d.close());
+    addEventListener('scroll', () => Object.values(pops).forEach((d) => d.open && placePop(d)), { passive: true });
+    addEventListener('resize', () => Object.values(pops).forEach((d) => d.open && placePop(d)));
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closePops(); });
+    document.addEventListener('mousedown', (e) => {
+      const t = e.target as Node;
+      if (Object.values(pops).some((d) => d.open && d.contains(t)) || (popAnchor && popAnchor.contains(t))) return;
+      closePops();
+    });
+    $$('[data-pop-close]').forEach((b) => b.addEventListener('click', closePops));
+    const radio = (f: HTMLFormElement, n: string, v: string) => $$<HTMLInputElement>(`input[name="${n}"]`, f).forEach((r) => (r.checked = r.value === v));
+    const val = (f: HTMLFormElement, n: string) => String(new FormData(f).get(n) ?? '').trim();
+
+    // Link
+    const linkForm = $<HTMLFormElement>('[data-link-form]');
+    linkForm.addEventListener('submit', (e) => {
+      e.preventDefault(); const href = val(linkForm, 'url'); if (!/^https?:\/\/\S+\.\S+/.test(href)) return;
+      closePops(); body.focus(); if (linkRange) { const s2 = getSelection()!; s2.removeAllRanges(); s2.addRange(linkRange); }
+      exec('createLink', href);
+      const a = getSelection()?.anchorNode?.parentElement?.closest('a'); if (a) { a.target = new FormData(linkForm).get('newtab') ? '_blank' : ''; if (a.target) a.rel = 'noopener'; else a.removeAttribute('target'); }
+    });
+    $('[data-unlink]').addEventListener('click', () => { closePops(); body.focus(); if (linkRange) { const s2 = getSelection()!; s2.removeAllRanges(); s2.addRange(linkRange); } exec('unlink'); });
+
+    // Video or post: live preview at the chosen size and position
+    const embedForm = $<HTMLFormElement>('[data-embed-form]');
+    function embedPrev() {
+      const u = val(embedForm, 'url'); const box = $('[data-embed-prev]'); $('[data-embed-err]').hidden = true;
+      const html = u ? embedFor(u, { size: val(embedForm, 'size'), align: val(embedForm, 'align') }) : null;
+      box.innerHTML = html ? `<div class="body wr-emb-body">${html}<p class="wr-lorem">El texto de la noticia sigue aquí y rodea la publicación cuando está a la izquierda o a la derecha.</p></div>` : `<p class="pnl-muted pnl-small">${u ? 'Ese enlace no se puede insertar.' : 'Pega el enlace y verás la publicación aquí.'}</p>`;
+      if (pops.embed.open) placePop(pops.embed);
+    }
+    embedForm.addEventListener('input', embedPrev); embedForm.addEventListener('change', embedPrev);
+    embedForm.addEventListener('submit', (e) => {
+      e.preventDefault(); const u = val(embedForm, 'url');
+      if (!embedFor(u)) { const er = $('[data-embed-err]'); er.textContent = 'Ese enlace no se puede insertar. Prueba con YouTube, X, Instagram, Facebook, TikTok, Spotify o Google Maps.'; er.hidden = false; return; }
+      const size = val(embedForm, 'size'), align = val(embedForm, 'align'); closePops();
+      if (editing) { Object.assign(editing.dataset, { url: u, size, align }); paintEmbed(editing); changed(); editing = null; return; }
+      insertBlock(`<figure class="wr-embed" data-url="${esc(u)}" data-size="${size}" data-align="${align}"></figure>`);
+    });
+
+    // Photo inside the story
+    const imgForm = $<HTMLFormElement>('[data-img-form]');
+    imgForm.addEventListener('change', async (e) => {
+      const inp = e.target as HTMLInputElement; if (inp.name !== 'file' || !inp.files?.[0]) return;
+      imgData = await shrink(inp.files[0], 1200).catch(() => ''); const pv = $<HTMLImageElement>('[data-img-prev]');
+      if (imgData) { pv.src = imgData; pv.hidden = false; } else toast('No pudimos leer esa imagen.');
+      placePop(pops.image);
+    });
+    imgForm.addEventListener('submit', (e) => {
+      e.preventDefault(); const cap = val(imgForm, 'cap'), credit = val(imgForm, 'credit'), size = val(imgForm, 'size'), align = val(imgForm, 'align');
+      if (editing) { Object.assign(editing.dataset, { cap, credit, size, align }); paintImg(editing); changed(); editing = null; closePops(); return; }
+      if (!imgData) { const er = $('[data-img-err]'); er.textContent = 'Escoge una foto.'; er.hidden = false; return; }
+      closePops();
+      insertBlock(`<figure class="wr-img" data-src="${imgData}" data-cap="${esc(cap)}" data-credit="${esc(credit)}" data-size="${size}" data-align="${align}"></figure>`);
+    });
+    // "Editar" on a video, post or photo already in the story: the same panel, next to it
+    body.addEventListener('click', (e) => {
+      const b = (e.target as HTMLElement).closest<HTMLElement>('[data-block-edit]'); if (!b) return;
+      const fig = b.closest<HTMLElement>('figure')!; editing = fig;
+      if (fig.classList.contains('wr-embed')) {
+        embedForm.reset(); (embedForm.elements.namedItem('url') as HTMLInputElement).value = fig.dataset.url!;
+        radio(embedForm, 'size', fig.dataset.size || ''); radio(embedForm, 'align', fig.dataset.align || '');
+        $('[data-embed-h]').textContent = 'Editar publicación'; $('[data-embed-go]').textContent = 'Guardar'; embedPrev(); openPop('embed', b);
+      } else {
+        imgForm.reset(); (imgForm.elements.namedItem('cap') as HTMLInputElement).value = fig.dataset.cap || ''; (imgForm.elements.namedItem('credit') as HTMLInputElement).value = fig.dataset.credit || '';
+        radio(imgForm, 'size', fig.dataset.size || ''); radio(imgForm, 'align', fig.dataset.align || '');
+        const pv = $<HTMLImageElement>('[data-img-prev]'); pv.src = fig.dataset.src!; pv.hidden = false; $('[data-img-file-wrap]').hidden = true;
+        $('[data-img-h]').textContent = 'Editar foto'; $('[data-img-go]').textContent = 'Guardar'; openPop('image', b);
+      }
+    });
+
     // ---------- documents (PDF) ----------
     const docDlg = $<HTMLDialogElement>('[data-doc-dlg]'); const docForm = $<HTMLFormElement>('[data-doc-form]');
     const docOf = (f: HTMLElement) => ({ src: f.dataset.src!, title: f.dataset.title!, pages: Number(f.dataset.pages) || 0, size: Number(f.dataset.size) || 0, source: f.dataset.source || '' });
-    $$('[data-doc-close]').forEach((b) => b.addEventListener('click', () => docDlg.close()));
     // Rough page count straight from the PDF file (counts its page objects)
     const pdfPages = (buf: ArrayBuffer) => (new TextDecoder('latin1').decode(buf).match(/\/Type\s*\/Page[^s]/g) || []).length;
     docForm.addEventListener('submit', async (e) => {

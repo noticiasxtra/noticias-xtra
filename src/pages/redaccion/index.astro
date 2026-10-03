@@ -15,6 +15,8 @@ import { getStories, url, SECTIONS, SITE } from '../../lib/site';
 import sources from '../../../scripts/sources.json';
 
 const stories = await getStories();
+// Everything on the site, for Escribir → Publicadas (with views once analytics is connected)
+const published = stories.map((s) => ({ id: s.id, title: s.data.title, section: SECTIONS.find((x) => x.id === s.data.section)?.name ?? '', author: s.data.author, date: s.data.date.toISOString(), url: url(`noticia/${s.id}/`), ai: s.data.aiAssisted }));
 const recent = stories.filter((s) => s.data.section !== 'opinion').slice(0, 12)
   .map((s) => ({ id: s.id, title: s.data.title, section: SECTIONS.find((x) => x.id === s.data.section)?.name ?? '', url: url(`noticia/${s.id}/`), date: s.data.date.toISOString() }));
 const srcs = (sources as Array<{ name: string; section: string; review?: string; enabled?: boolean }>).filter((s) => s.enabled !== false)
@@ -93,7 +95,7 @@ const TABS = [
 
         <!-- Escribir -->
         <section class="pnl-pane" data-pane="escribir" hidden>
-          <Writer recent={recent.map(({ id, title }) => ({ id, title }))} />
+          <Writer recent={recent.map(({ id, title }) => ({ id, title }))} published={published} />
         </section>
 
         <!-- Ventas -->

@@ -3,10 +3,14 @@
 // Used by stories written in the staff panel editor (/redaccion/ → Escribir) and by hand in src/content/noticias/.
 
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
-const frame = (src, cls, title) => `<figure class="embed ${cls}"><iframe src="${esc(src)}" title="${esc(title)}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>`;
+// Size and position chosen in the editor: size s | m | l (default: the post type's own size), align l | r (default center)
+let opts = {};
+const layout = () => `${opts.size ? ` sz-${opts.size}` : ''}${opts.align === 'l' || opts.align === 'r' ? ` al-${opts.align}` : ''}`;
+const frame = (src, cls, title) => `<figure class="embed ${cls}${layout()}"><iframe src="${esc(src)}" title="${esc(title)}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>`;
 
-export function embedFor(raw) {
-  let u; try { u = new URL(raw.trim()); } catch { return null; }
+export function embedFor(raw, layoutOpts = {}) {
+  opts = layoutOpts;
+  let u; try { u = new URL(String(raw).trim()); } catch { return null; }
   const h = u.hostname.replace(/^www\.|^m\./, '');
   let m;
   if (h === 'youtu.be' && (m = u.pathname.match(/^\/([\w-]{6,})/))) return frame(`https://www.youtube-nocookie.com/embed/${m[1]}`, 'video', 'Video de YouTube');
