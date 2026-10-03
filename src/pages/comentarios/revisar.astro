@@ -8,7 +8,7 @@ import Base from '../../layouts/Base.astro';
 import { getStories, url } from '../../lib/site';
 const stories = (await getStories()).slice(0, 3).map((s) => ({ id: s.id, title: s.data.title, url: url(`noticia/${s.id}/`) }));
 ---
-<Base title="Revisar comentarios" description="Cola de revisión de comentarios reportados en Noticias Xtra (uso interno).">
+<Base title="Revisar comentarios" description="Cola de revisión de comentarios reportados en Noticias Xtra (uso interno)." noindex>
   <main class="wrap apr" id="main" data-mod data-stories={JSON.stringify(stories)}>
     <p class="pf-demo"><span class="sp-demo">VISTA PREVIA</span> Página interna para quien modera. Muestra los reportes hechos en este dispositivo y cuatro de ejemplo. Con las cuentas, llegarán los reportes de todos los lectores.</p>
     <header class="apr-head">

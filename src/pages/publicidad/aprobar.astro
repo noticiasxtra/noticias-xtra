@@ -8,7 +8,7 @@ import Base from '../../layouts/Base.astro';
 import { FORMATS } from '../../lib/ads';
 const fmtInfo = FORMATS.map(({ id, name, slots, art }) => ({ id, name, slots, art }));
 ---
-<Base title="Aprobar anuncios" description="Cola de aprobación de anuncios de Noticias Xtra (uso interno).">
+<Base title="Aprobar anuncios" description="Cola de aprobación de anuncios de Noticias Xtra (uso interno)." noindex>
   <main class="wrap apr" id="main" data-apr data-formats={JSON.stringify(fmtInfo)}>
     <p class="pf-demo"><span class="sp-demo">VISTA PREVIA</span> Página interna para quien aprueba los anuncios. Muestra las solicitudes hechas en este dispositivo y dos de ejemplo.</p>
     <header class="apr-head">

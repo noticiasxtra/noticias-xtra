@@ -12,8 +12,9 @@ interface Props {
   active?: string; // nav item to highlight: 'home', a section id, or 'videos'
   image?: string;
   article?: { published: Date; section: string };
+  noindex?: boolean; // internal pages: ask search engines not to list them
 }
-const { title, description = SITE.description, active, image, article } = Astro.props;
+const { title, description = SITE.description, active, image, article, noindex } = Astro.props;
 const fullTitle = title ? `${title} | ${SITE.name}` : `${SITE.name} | ${SITE.tagline}`;
 const canonical = new URL(Astro.url.pathname, Astro.site).toString();
 // Local images ('images/x.jpg') need the base path; full URLs are used as-is
@@ -36,6 +37,7 @@ const holiday = F.holidayLogo && bar?.label !== 'ÚLTIMA HORA' ? holidayOn(today
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
     <link rel="canonical" href={canonical} />
     <meta name="theme-color" content="#2B1185" />
     <link rel="icon" type="image/svg+xml" href={url('favicon.svg')} />
