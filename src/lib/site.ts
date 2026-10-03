@@ -32,6 +32,8 @@ export const SITE = {
   },
   // GIPHY key for GIF search in comments (free account at developers.giphy.com). Empty = only our own animated GIFs Xtra.
   giphyKey: '',
+  // Set to true once the ANTHROPIC_API_KEY secret is added in GitHub (the staff panel's Salud tab reads it)
+  aiKeyConnected: false,
   // Official National Weather Service forecast for Puerto Rico
   forecastUrl: 'https://www.weather.gov/sju/',
 };

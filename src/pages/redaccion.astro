@@ -1,0 +1,541 @@
+---
+// Staff panel ("Panel de la redacción"): one login for everything waiting on the newsroom.
+// Tabs: Inicio, Noticias (approve AI drafts, quick look at published ones), Comentarios, Anuncios, Ingresos,
+// Analítica, Salud del sitio, Equipo. What each person sees depends on their role.
+// PREVIEW: there are no accounts yet, so login is a name + role kept on this device ('nx-staff'), the drafts,
+// analytics and revenue are examples (EJEMPLO / DEMO), and Salud reads the real public GitHub status.
+// The real version: Supabase login + roles, a Supabase Edge Function holding the GitHub token (approve = merge
+// the pull request), Google Analytics for visitors, and Stripe/ATH/Ad Manager for revenue.
+import Base from '../layouts/Base.astro';
+import AdQueue from '../components/AdQueue.astro';
+import CommentQueue from '../components/CommentQueue.astro';
+import { getStories, url, SECTIONS, SITE } from '../lib/site';
+import sources from '../../scripts/sources.json';
+
+const stories = await getStories();
+const recent = stories.filter((s) => s.data.section !== 'opinion').slice(0, 12)
+  .map((s) => ({ id: s.id, title: s.data.title, section: SECTIONS.find((x) => x.id === s.data.section)?.name ?? '', url: url(`noticia/${s.id}/`), date: s.data.date.toISOString() }));
+const srcs = (sources as Array<{ name: string; section: string; review?: string; enabled?: boolean }>).filter((s) => s.enabled !== false)
+  .map((s) => ({ name: s.name, section: s.section, review: s.review ?? 'always' }));
+const TABS = [
+  ['inicio', 'Inicio', '<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/>'],
+  ['noticias', 'Noticias', '<path d="M4 5h13v14H6a2 2 0 0 1-2-2zM17 9h3v8a2 2 0 0 1-2 2M8 9h5M8 13h5"/>'],
+  ['comentarios', 'Comentarios', '<path d="M4 5h16v11H9l-5 4z"/>'],
+  ['anuncios', 'Anuncios', '<path d="M3 11v2l13 5V6L3 11z"/><path d="M16 9a3 3 0 0 1 0 6"/>'],
+  ['ingresos', 'Ingresos', '<path d="M12 3v18M17 7H9.5a3 3 0 0 0 0 6h5a3 3 0 0 1 0 6H6"/>'],
+  ['analitica', 'Analítica', '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>'],
+  ['salud', 'Salud del sitio', '<path d="M3 12h4l2-5 4 10 2-5h6"/>'],
+  ['equipo', 'Equipo', '<circle cx="9" cy="8" r="3.5"/><path d="M2 20a7 7 0 0 1 14 0M16 4a3.5 3.5 0 0 1 0 7M22 20a7 7 0 0 0-4-6.3"/>'],
+];
+---
+<Base title="Panel de la redacción" description="Panel interno de Noticias Xtra (uso del personal)." noindex>
+  <main class="wrap pnl" id="main" data-pnl data-recent={JSON.stringify(recent)} data-sources={JSON.stringify(srcs)} data-base={url()} data-aikey={String(SITE.aiKeyConnected)}>
+    <form class="pnl-login" data-login hidden>
+      <p class="pnl-kicker">Noticias Xtra</p>
+      <h1>Panel de la redacción</h1>
+      <p class="pnl-muted">Todo lo que te espera en un solo lugar: noticias por aprobar, comentarios, anuncios, ingresos y analítica.</p>
+      <label for="pnl-name">Tu nombre</label>
+      <input id="pnl-name" maxlength="30" autocomplete="name" placeholder="ej. Alfredo" />
+      <label for="pnl-role">Rol</label>
+      <select id="pnl-role">
+        <option value="admin">Administrador: todo</option>
+        <option value="editor">Editor: noticias, comentarios y analítica</option>
+        <option value="ads">Anuncios: anuncios, ingresos y comentarios</option>
+        <option value="reporter">Periodista: sus noticias</option>
+      </select>
+      <p class="cm-err" data-err hidden></p>
+      <button type="submit" class="adp-btn">Entrar</button>
+      <p class="pnl-note"><span class="sp-demo">VISTA PREVIA</span> Sin contraseña por ahora. Con las cuentas, cada persona entra con su correo y su contraseña, y su rol lo asigna el administrador.</p>
+    </form>
+
+    <div class="pnl-app" data-app hidden>
+      <aside class="pnl-side">
+        <div class="pnl-me"><span class="pnl-av" data-av></span><span><b data-me></b><small data-role></small></span></div>
+        <nav class="pnl-nav" aria-label="Secciones del panel">
+          {TABS.map(([id, name, d]) => (
+            <button type="button" data-tab={id} aria-current="false">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><Fragment set:html={d} /></svg>
+              <span>{name}</span><b class="pnl-n" data-count={id}></b>
+            </button>
+          ))}
+        </nav>
+        <button type="button" class="pnl-out" data-logout>Salir</button>
+      </aside>
+
+      <div class="pnl-main">
+        <p class="pnl-banner"><span class="sp-demo">VISTA PREVIA</span> Los datos marcados EJEMPLO o DEMO son de muestra. Se vuelven reales cuando se conecten las cuentas (Supabase, Google Analytics, Stripe y ATH Móvil).</p>
+
+        <!-- Inicio -->
+        <section class="pnl-pane" data-pane="inicio">
+          <h1 class="pnl-h">Buenos días, <span data-me></span></h1>
+          <p class="pnl-muted" data-today></p>
+          <div class="pnl-kpis" data-kpis></div>
+          <h2 class="pnl-h2">Lo que te espera</h2>
+          <ul class="pnl-todo" data-todo></ul>
+        </section>
+
+        <!-- Noticias -->
+        <section class="pnl-pane" data-pane="noticias" hidden>
+          <h1 class="pnl-h">Noticias</h1>
+          <p class="pnl-muted">Las de rutina (tiempo, terremotos, resultados, avisos de agencias) ya se publicaron solas. Aquí aprueba las que esperan por ti y dale un vistazo a las publicadas.</p>
+          <p class="pnl-gh" data-gh-news></p>
+          <nav class="apn-tabs pnl-sub" role="tablist" aria-label="Noticias">
+            <button type="button" role="tab" aria-selected="true" data-nf="pending">Por aprobar <b data-nn="pending"></b></button>
+            <button type="button" role="tab" aria-selected="false" data-nf="check">Vistazo rápido <b data-nn="check"></b></button>
+            <button type="button" role="tab" aria-selected="false" data-nf="done">Resueltas <b data-nn="done"></b></button>
+          </nav>
+          <div class="pnl-list" data-news></div>
+        </section>
+
+        <!-- Comentarios -->
+        <section class="pnl-pane" data-pane="comentarios" hidden>
+          <CommentQueue embedded />
+          <h2 class="pnl-h2">Últimos comentarios en este dispositivo</h2>
+          <ul class="pnl-cmts" data-cmts></ul>
+        </section>
+
+        <!-- Anuncios -->
+        <section class="pnl-pane" data-pane="anuncios" hidden>
+          <AdQueue embedded />
+        </section>
+
+        <!-- Ingresos -->
+        <section class="pnl-pane" data-pane="ingresos" hidden>
+          <h1 class="pnl-h">Ingresos <span class="sp-demo">DEMO</span></h1>
+          <p class="pnl-muted">Lo que entra por anuncios directos y por Google, lo que falta por cobrar y lo que queda después de los costos del sitio.</p>
+          <div class="pnl-kpis" data-rev-kpis></div>
+          <div class="pnl-grid2">
+            <div class="pnl-card"><h2 class="pnl-h3">Ingresos por mes</h2><div class="pnl-chart" data-rev-chart></div></div>
+            <div class="pnl-card"><h2 class="pnl-h3">De dónde viene este mes</h2><div data-rev-mix></div></div>
+          </div>
+          <div class="pnl-grid2">
+            <div class="pnl-card"><h2 class="pnl-h3">Mejores clientes</h2><div data-rev-clients></div></div>
+            <div class="pnl-card"><h2 class="pnl-h3">Por cobrar y por renovar</h2><ul class="pnl-todo" data-rev-due></ul></div>
+          </div>
+          <div class="pnl-card"><h2 class="pnl-h3">Ganancia del mes</h2><div data-rev-net></div></div>
+        </section>
+
+        <!-- Analítica -->
+        <section class="pnl-pane" data-pane="analitica" hidden>
+          <h1 class="pnl-h">Analítica <span class="sp-demo">DEMO</span></h1>
+          <div class="pnl-range" role="group" aria-label="Período">
+            <button type="button" data-range="1">Hoy</button><button type="button" data-range="7">7 días</button><button type="button" data-range="30" aria-pressed="true">30 días</button>
+          </div>
+          <div class="pnl-kpis" data-an-kpis></div>
+          <div class="pnl-card"><h2 class="pnl-h3">Visitantes por día</h2><div class="pnl-chart" data-an-chart></div></div>
+          <div class="pnl-grid2">
+            <div class="pnl-card"><h2 class="pnl-h3">Más leídas</h2><ol class="pnl-top" data-an-top></ol></div>
+            <div class="pnl-card"><h2 class="pnl-h3">De dónde llegan</h2><div data-an-ref></div></div>
+          </div>
+          <div class="pnl-grid2">
+            <div class="pnl-card"><h2 class="pnl-h3">Dónde están</h2><div data-an-geo></div></div>
+            <div class="pnl-card"><h2 class="pnl-h3">Secciones y dispositivos</h2><div data-an-sec></div><div data-an-dev></div></div>
+          </div>
+        </section>
+
+        <!-- Salud -->
+        <section class="pnl-pane" data-pane="salud" hidden>
+          <h1 class="pnl-h">Salud del sitio</h1>
+          <p class="pnl-muted">Estado real, tomado de GitHub en este momento.</p>
+          <div class="pnl-kpis" data-health></div>
+          <div class="pnl-grid2">
+            <div class="pnl-card"><h2 class="pnl-h3">Cuentas y conexiones</h2><ul class="pnl-checks" data-accounts></ul></div>
+            <div class="pnl-card"><h2 class="pnl-h3">Fuentes de noticias <small data-src-n></small></h2><ul class="pnl-srcs" data-srcs></ul></div>
+          </div>
+        </section>
+
+        <!-- Equipo -->
+        <section class="pnl-pane" data-pane="equipo" hidden>
+          <h1 class="pnl-h">Equipo</h1>
+          <p class="pnl-muted">Quién entra al panel y qué puede hacer.</p>
+          <ul class="pnl-team" data-team></ul>
+          <form class="pnl-add" data-add>
+            <input placeholder="Nombre" data-add-name maxlength="30" aria-label="Nombre" />
+            <input type="email" placeholder="Correo" data-add-mail maxlength="60" aria-label="Correo" />
+            <select data-add-role aria-label="Rol"><option value="editor">Editor</option><option value="ads">Anuncios</option><option value="reporter">Periodista</option><option value="admin">Administrador</option></select>
+            <button type="submit" class="adp-btn">Añadir</button>
+          </form>
+          <h2 class="pnl-h2">Qué puede hacer cada rol</h2>
+          <div class="pnl-tablewrap" data-perms></div>
+        </section>
+      </div>
+    </div>
+    <div class="apn-toast" data-ptoast role="status" hidden></div>
+  </main>
+
+  <script>
+    import { getReports } from '../lib/moderation';
+    import { listRequests } from '../lib/adrequests';
+    const root = document.querySelector<HTMLElement>('[data-pnl]')!;
+    const RECENT: Array<{ id: string; title: string; section: string; url: string; date: string }> = JSON.parse(root.dataset.recent!);
+    const SOURCES: Array<{ name: string; section: string; review: string }> = JSON.parse(root.dataset.sources!);
+    const $ = <T extends Element = HTMLElement>(s: string, el: ParentNode = root) => el.querySelector<T>(s)!;
+    const $$ = <T extends Element = HTMLElement>(s: string, el: ParentNode = root) => [...el.querySelectorAll<T>(s)];
+    const esc = (s = '') => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
+    const get = <T,>(k: string, d: T): T => { try { return JSON.parse(localStorage.getItem(k) || 'null') ?? d; } catch { return d; } };
+    const set = (k: string, v: unknown) => { try { v === null ? localStorage.removeItem(k) : localStorage.setItem(k, JSON.stringify(v)); } catch { /* storage blocked */ } };
+    const money = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
+    const num = (n: number) => Math.round(n).toLocaleString('es-PR');
+    const ago = (t: number) => { const m = Math.round((Date.now() - t) / 60000); return m < 60 ? `hace ${Math.max(1, m)} min` : m < 1440 ? `hace ${Math.round(m / 60)} h` : `hace ${Math.round(m / 1440)} d`; };
+    const toast = (m: string) => { const t = $('[data-ptoast]'); t.textContent = m; t.hidden = false; clearTimeout((t as any).tm); (t as any).tm = setTimeout(() => (t.hidden = true), 3800); };
+
+    // ---------- login + roles ----------
+    type Staff = { name: string; role: 'admin' | 'editor' | 'ads' | 'reporter' };
+    const ROLE_NAME = { admin: 'Administrador', editor: 'Editor', ads: 'Anuncios', reporter: 'Periodista' };
+    const ROLE_TABS: Record<Staff['role'], string[]> = {
+      admin: ['inicio', 'noticias', 'comentarios', 'anuncios', 'ingresos', 'analitica', 'salud', 'equipo'],
+      editor: ['inicio', 'noticias', 'comentarios', 'analitica', 'salud'],
+      ads: ['inicio', 'anuncios', 'ingresos', 'comentarios'],
+      reporter: ['inicio', 'noticias'],
+    };
+    const me = () => get<Staff | null>('nx-staff', null);
+
+    // ---------- example news waiting for approval (EJEMPLO) ----------
+    type Draft = { id: string; title: string; source: string; sourceUrl: string; why: string[]; excerpt: string; body: string; section: string; at: number };
+    const now = Date.now();
+    const DRAFTS: Draft[] = [
+      { id: 'd1', section: 'Estados Unidos', title: 'Casa Blanca anuncia $2,000 millones para reparar puertos tras huracanes', source: 'La Casa Blanca', sourceUrl: 'https://www.whitehouse.gov/news/', at: now - 50 * 60000,
+        why: ['Fuente que siempre se aprueba', 'Tono de gobierno reescrito'],
+        excerpt: 'In a historic win for American workers, President announced today an unprecedented $2 billion investment, delivering on his unwavering commitment to rebuild hurricane-damaged ports across the nation…',
+        body: 'La Casa Blanca anunció $2,000 millones para reparar puertos dañados por huracanes en Estados Unidos y sus territorios.\n\nSegún el comunicado, el dinero se repartirá mediante solicitudes de los gobiernos estatales y territoriales. El anuncio no detalla cuánto le tocaría a Puerto Rico ni cuándo abre el proceso.\n\nLa Autoridad de los Puertos no había reaccionado al anuncio.' },
+      { id: 'd2', section: 'Puerto Rico', title: 'Acusan a dos personas de fraude con ayudas de FEMA tras el huracán Fiona', source: 'Departamento de Justicia de EE.UU.', sourceUrl: 'https://www.justice.gov/', at: now - 3 * 36e5,
+        why: ['Crimen o acusación', 'Fuente que siempre se aprueba'],
+        excerpt: 'A federal grand jury in San Juan returned an indictment charging two individuals with wire fraud and false claims related to FEMA Individual Assistance following Hurricane Fiona…',
+        body: 'Un gran jurado federal en San Juan acusó a dos personas de fraude electrónico y reclamaciones falsas a FEMA tras el huracán Fiona, según el Departamento de Justicia federal.\n\nLa acusación sostiene que pidieron ayudas por daños a residencias que no eran suyas. Las acusaciones no son prueba de culpa; toda persona se presume inocente hasta que se pruebe lo contrario.' },
+      { id: 'd3', section: 'Puerto Rico', title: 'LUMA programa interrupciones del servicio el sábado en Caguas y Gurabo', source: 'LUMA Energy', sourceUrl: 'https://lumapr.com/news/', at: now - 5 * 36e5,
+        why: ['La IA tiene una duda'],
+        excerpt: 'LUMA realizará trabajos de mejoras en la línea de 38 kV entre Caguas y Gurabo. Clientes de las urbanizaciones… estarán sin servicio desde las 7:00 a.m. hasta aproximadamente…',
+        body: 'LUMA anunció que el sábado habrá interrupciones del servicio eléctrico en sectores de Caguas y Gurabo por trabajos en una línea de transmisión.\n\nEl corte comenzará a las 7:00 a.m. El comunicado no indica con claridad a qué hora terminará.\n\nDuda de la IA: la hora de fin aparece cortada en el comunicado. Verifícala antes de publicar.' },
+    ];
+    type NewsState = Record<string, { status: 'approved' | 'rejected' | 'ok' | 'removed'; body?: string; at: number }>;
+    const news = () => get<NewsState>('nx-panel-news', {});
+    const setNews = (id: string, v: NewsState[string]) => { set('nx-panel-news', { ...news(), [id]: v }); };
+    const pendingDrafts = () => DRAFTS.filter((d) => !news()[d.id]);
+    const checkList = () => RECENT.slice(0, 6).filter((r) => !news()[`c-${r.id}`]);
+
+    // ---------- demo numbers (stable for a given day) ----------
+    let seed = Number(new Date().toISOString().slice(0, 10).replace(/-/g, ''));
+    const rnd = () => ((seed = (seed * 9301 + 49297) % 233280) / 233280);
+    const DAYS = 30;
+    const visits = Array.from({ length: DAYS }, (_, i) => {
+      const d = new Date(now - (DAYS - 1 - i) * 864e5); const wk = d.getDay() === 0 || d.getDay() === 6;
+      return { d, v: Math.round((wk ? 2600 : 4100) * (0.82 + rnd() * 0.36) * (1 + i * 0.012)) };
+    });
+    const revenue = [
+      { m: 'abr', direct: 420, google: 95, design: 38 }, { m: 'may', direct: 610, google: 130, design: 57 }, { m: 'jun', direct: 780, google: 168, design: 38 },
+      { m: 'jul', direct: 940, google: 205, design: 76 }, { m: 'ago', direct: 1120, google: 240, design: 57 }, { m: 'sep', direct: 1310, google: 286, design: 95 },
+    ];
+    { // October so far: September's pace, slightly up, up to today's date
+      const sep = revenue[revenue.length - 1]; const f = (1.06 * new Date().getDate()) / 31;
+      revenue.push({ m: 'oct', direct: Math.round(sep.direct * f), google: Math.round(sep.google * f), design: Math.round(sep.design * f) });
+    }
+    const COSTS = [['IA para noticias', 9], ['Datos deportivos', 50], ['Supabase', 25], ['Boletín', 0], ['Dominio', 1.5]] as const;
+
+    // ---------- small accessible charts (one series, recessive grid, hover tooltip, table view) ----------
+    const charts = new Map<HTMLElement, () => void>();
+    const ro = new ResizeObserver((es) => es.forEach((e) => { const el = e.target as HTMLElement; const w = Math.round(el.clientWidth); if (w && el.dataset.w !== String(w)) { el.dataset.w = String(w); charts.get(el)?.(); } }));
+    function barChart(el: HTMLElement, data: Array<{ label: string; value: number; tip: string }>, fmt: (n: number) => string) {
+      // Drawn at the box's real width so the labels stay readable on phones; redrawn when the box resizes
+      charts.set(el, () => barChart(el, data, fmt));
+      const W = Math.max(280, el.clientWidth || 640), H = W < 420 ? 180 : 220, padL = 44, padB = 26, padT = 10;
+      const every = Math.ceil(data.length / Math.max(3, Math.floor(W / 70))); // label every n-th bar
+      const max = Math.max(...data.map((d) => d.value)) * 1.1 || 1;
+      const step = Math.pow(10, Math.floor(Math.log10(max / 3))); const tick = Math.ceil(max / 3 / step) * step;
+      const bw = (W - padL) / data.length; const y = (v: number) => padT + (H - padT - padB) * (1 - v / max);
+      const grid = [0, 1, 2, 3].map((i) => i * tick).filter((v) => v <= max)
+        .map((v) => `<line x1="${padL}" x2="${W}" y1="${y(v)}" y2="${y(v)}" class="pc-grid"/><text x="${padL - 6}" y="${y(v) + 4}" class="pc-ax" text-anchor="end">${fmt(v)}</text>`).join('');
+      const bars = data.map((d, i) => {
+        const x = padL + i * bw + 1, w = Math.max(2, bw - 2), top = y(d.value), h = H - padB - top, r = Math.min(4, w / 2);
+        return `<g class="pc-bar" tabindex="0" data-tip="${esc(d.tip)}"><rect x="${x - 1}" y="${padT}" width="${bw}" height="${H - padB - padT}" class="pc-hit"/>`
+          + `<path d="M${x} ${H - padB}V${top + r}q0 -${r} ${r} -${r}h${w - 2 * r}q${r} 0 ${r} ${r}V${H - padB}z" class="pc-mark"/>`
+          + (i % every === 0 || i === data.length - 1 ? `<text x="${x + w / 2}" y="${H - 8}" class="pc-ax" text-anchor="middle">${esc(d.label)}</text>` : '') + '</g>';
+      }).join('');
+      ro.observe(el); el.dataset.w = String(Math.round(el.clientWidth));
+      el.innerHTML = `<div class="pc-wrap"><svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Gráfica de barras">${grid}<line x1="${padL}" x2="${W}" y1="${H - padB}" y2="${H - padB}" class="pc-base"/>${bars}</svg><div class="pc-tip" hidden></div></div>`
+        + `<details class="pc-table"><summary>Ver como tabla</summary><table><tbody>${data.map((d) => `<tr><th scope="row">${esc(d.label)}</th><td>${esc(d.tip)}</td></tr>`).join('')}</tbody></table></details>`;
+      const tip = $('.pc-tip', el), wrap = $('.pc-wrap', el);
+      const show = (g: Element) => { const r = g.getBoundingClientRect(), wr = wrap.getBoundingClientRect(); tip.textContent = (g as HTMLElement).dataset.tip!; tip.hidden = false;
+        tip.style.left = `${Math.min(wr.width - tip.offsetWidth, Math.max(0, r.left - wr.left + r.width / 2 - tip.offsetWidth / 2))}px`; };
+      $$('.pc-bar', el).forEach((g) => { g.addEventListener('mouseenter', () => show(g)); g.addEventListener('focus', () => show(g)); g.addEventListener('mouseleave', () => (tip.hidden = true)); g.addEventListener('blur', () => (tip.hidden = true)); });
+    }
+    // Ranked list with a bar per row (one hue; the label and value are always written out)
+    const rows = (items: Array<[string, number]>, fmt = (n: number) => `${n}%`) => {
+      const max = Math.max(...items.map((i) => i[1])) || 1;
+      return `<ul class="pc-rows">${items.map(([l, v]) => `<li><span class="pc-rl">${esc(l)}</span><span class="pc-rb"><i style="width:${(v / max) * 100}%"></i></span><b>${fmt(v)}</b></li>`).join('')}</ul>`;
+    };
+    const kpi = (label: string, value: string, sub = '', tab = '', tone = '') => `<${tab ? 'button type="button" data-go="' + tab + '"' : 'div'} class="pnl-kpi ${tone}"><span>${label}</span><b>${value}</b>${sub ? `<small>${sub}</small>` : ''}</${tab ? 'button' : 'div'}>`;
+
+    // ---------- counts ----------
+    const counts = () => {
+      const rep = getReports().filter((r) => r.status === 'review').length;
+      const ads = listRequests().filter((r) => r.status === 'revisar' || r.status === 'disenar').length;
+      return { noticias: pendingDrafts().length + checkList().length, pending: pendingDrafts().length, check: checkList().length, comentarios: rep, anuncios: ads };
+    };
+
+    // ---------- tabs ----------
+    let tab = 'inicio';
+    function showTab(t: string) {
+      const s = me(); if (!s) return;
+      const allowed = ROLE_TABS[s.role];
+      if (!allowed.includes(t)) t = 'inicio';
+      tab = t;
+      $$('[data-tab]').forEach((b) => { b.hidden = !allowed.includes(b.dataset.tab!); b.setAttribute('aria-current', String(b.dataset.tab === t)); });
+      $$('[data-pane]').forEach((p) => (p.hidden = p.dataset.pane !== t));
+      const nav = $('.pnl-nav'), cur = $(`[data-tab="${t}"]`); // phones: keep the current tab visible in the scrolling bar
+      if (nav.scrollWidth > nav.clientWidth) nav.scrollLeft = cur.offsetLeft - nav.clientWidth / 2 + cur.offsetWidth / 2;
+      if (location.hash.slice(1) !== t) history.replaceState(null, '', `#${t}`);
+      paint[t]?.();
+    }
+    root.addEventListener('click', (e) => {
+      const b = (e.target as HTMLElement).closest<HTMLElement>('[data-tab],[data-go]');
+      if (b) { showTab(b.dataset.tab || b.dataset.go!); scrollTo({ top: 0, behavior: 'smooth' }); }
+    });
+    addEventListener('hashchange', () => showTab(location.hash.slice(1)));
+
+    function paintCounts() {
+      const c = counts();
+      (Object.entries({ noticias: c.noticias, comentarios: c.comentarios, anuncios: c.anuncios }) as Array<[string, number]>)
+        .forEach(([k, n]) => { const el = $(`[data-count="${k}"]`); el.textContent = n ? String(n) : ''; });
+      set('nx-staff-pending', c.noticias + c.comentarios + c.anuncios); // for the profile menu badge
+      dispatchEvent(new Event('nx-staff-change'));
+    }
+
+    // ---------- panes ----------
+    const paint: Record<string, () => void> = {
+      inicio() {
+        const s = me()!; const c = counts(); const allowed = ROLE_TABS[s.role];
+        const h = new Date().getHours(); $$('[data-me]').forEach((e) => (e.textContent = s.name));
+        $('.pnl-h', $('[data-pane="inicio"]')).firstChild!.textContent = h < 12 ? 'Buenos días, ' : h < 19 ? 'Buenas tardes, ' : 'Buenas noches, ';
+        $('[data-today]').textContent = new Date().toLocaleDateString('es-PR', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'America/Puerto_Rico' });
+        const today = visits[visits.length - 1].v; const rev = revenue[revenue.length - 1];
+        $('[data-kpis]').innerHTML = [
+          allowed.includes('noticias') && kpi('Noticias por aprobar', String(c.pending), `${c.check} para vistazo rápido`, 'noticias', c.pending ? 'warn' : ''),
+          allowed.includes('comentarios') && kpi('Comentarios por revisar', String(c.comentarios), 'reportados por lectores', 'comentarios', c.comentarios ? 'warn' : ''),
+          allowed.includes('anuncios') && kpi('Anuncios por aprobar', String(c.anuncios), 'respuesta en 24 horas', 'anuncios', c.anuncios ? 'warn' : ''),
+          allowed.includes('analitica') && kpi('Visitantes hoy', num(today), 'DEMO', 'analitica'),
+          allowed.includes('ingresos') && kpi('Ingresos de octubre', money(rev.direct + rev.google + rev.design), 'DEMO · hasta hoy', 'ingresos'),
+        ].filter(Boolean).join('');
+        const todo: string[] = [];
+        if (allowed.includes('noticias') && c.pending) todo.push(`<li><span>📰 <b>${c.pending}</b> ${c.pending === 1 ? 'noticia espera' : 'noticias esperan'} tu aprobación.</span><button type="button" data-go="noticias">Revisar</button></li>`);
+        if (allowed.includes('noticias') && c.check) todo.push(`<li><span>👀 <b>${c.check}</b> publicadas para un vistazo rápido.</span><button type="button" data-go="noticias">Ver</button></li>`);
+        if (allowed.includes('comentarios') && c.comentarios) todo.push(`<li><span>💬 <b>${c.comentarios}</b> ${c.comentarios === 1 ? 'comentario reportado' : 'comentarios reportados'} por revisar.</span><button type="button" data-go="comentarios">Revisar</button></li>`);
+        if (allowed.includes('anuncios') && c.anuncios) todo.push(`<li><span>📣 <b>${c.anuncios}</b> ${c.anuncios === 1 ? 'anuncio espera' : 'anuncios esperan'}. Prometimos responder en 24 horas.</span><button type="button" data-go="anuncios">Abrir</button></li>`);
+        if (allowed.includes('salud')) todo.push(`<li><span>🔑 Falta conectar la clave de IA: la IA todavía no está redactando noticias.</span><button type="button" data-go="salud">Detalles</button></li>`);
+        $('[data-todo]').innerHTML = todo.join('') || '<li><span>🎉 No hay nada pendiente.</span></li>';
+      },
+
+      noticias() {
+        const c = counts(); const st = news();
+        $('[data-nn="pending"]').textContent = c.pending ? String(c.pending) : '';
+        $('[data-nn="check"]').textContent = c.check ? String(c.check) : '';
+        const done = Object.keys(st).length; $('[data-nn="done"]').textContent = done ? String(done) : '';
+        const box = $('[data-news]');
+        if (nf === 'pending') {
+          box.innerHTML = pendingDrafts().map((d) => `<article class="pnl-draft" data-id="${d.id}">
+            <header><div><p class="pnl-tags">${d.why.map((w) => `<span class="pnl-tag">${esc(w)}</span>`).join('')}<span class="sp-demo">EJEMPLO</span></p>
+              <h2>${esc(d.title)}</h2><p class="pnl-muted">${esc(d.section)} · ${ago(d.at)} · Fuente: <a href="${d.sourceUrl}" target="_blank" rel="noopener">${esc(d.source)} ↗</a></p></div></header>
+            <div class="pnl-cmp">
+              <div><p class="pnl-lbl">Lo que dice la fuente</p><blockquote>${esc(d.excerpt)}</blockquote></div>
+              <div><p class="pnl-lbl">Borrador de la IA</p><div class="pnl-body" data-body>${esc(d.body).split('\n\n').map((p) => `<p>${p}</p>`).join('')}</div>
+                <textarea data-edit hidden rows="8">${esc(d.body)}</textarea></div>
+            </div>
+            <div class="apr-acts">
+              <button type="button" class="adp-btn" data-act="approve">Aprobar y publicar</button>
+              <button type="button" class="adp-btn ghost-dark" data-act="edit">Editar</button>
+              <button type="button" class="apr-reject" data-act="reject">Rechazar</button>
+            </div></article>`).join('') || '<p class="apr-empty">🎉 No hay noticias esperando aprobación.</p>';
+        } else if (nf === 'check') {
+          box.innerHTML = checkList().map((r) => `<article class="pnl-row" data-id="c-${r.id}">
+            <div><p class="pnl-muted">${esc(r.section)} · publicada ${ago(Date.parse(r.date))}</p><h2><a href="${r.url}" target="_blank" rel="noopener">${esc(r.title)}</a></h2></div>
+            <div class="pnl-row-acts"><button type="button" class="adp-btn ghost-dark" data-act="ok">Se ve bien</button><button type="button" class="apr-reject" data-act="remove">Quitar del sitio</button></div></article>`).join('')
+            || '<p class="apr-empty">🎉 Ya le diste un vistazo a todo.</p>';
+        } else {
+          const label = { approved: 'Aprobada y publicada', rejected: 'Rechazada', ok: 'Revisada: se ve bien', removed: 'Quitada del sitio' };
+          const title = (id: string) => DRAFTS.find((d) => d.id === id)?.title ?? RECENT.find((r) => `c-${r.id}` === id)?.title ?? id;
+          box.innerHTML = Object.entries(st).sort((a, b) => b[1].at - a[1].at).map(([id, v]) => `<article class="pnl-row"><div><p class="pnl-muted">${label[v.status]} · ${ago(v.at)}</p><h2>${esc(title(id))}</h2></div><div class="pnl-row-acts"><button type="button" class="pnl-link" data-undo="${id}">Deshacer</button></div></article>`).join('')
+            || '<p class="apr-empty">Todavía no hay decisiones.</p>';
+        }
+      },
+
+      comentarios() {
+        const all: Array<{ t: string; at: number; story: string }> = [];
+        try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i)!; if (k.startsWith('nx-comments-')) get<Array<{ text: string; at: number }>>(k, []).forEach((c) => all.push({ t: c.text, at: c.at, story: k.slice(12) })); } } catch { /* storage blocked */ }
+        const base = root.dataset.base!.replace(/\/$/, '');
+        $('[data-cmts]').innerHTML = all.sort((a, b) => b.at - a.at).slice(0, 15).map((c) => `<li><span>${esc(c.t) || '(sticker o GIF)'}</span><small>${ago(c.at)} · <a href="${c.story.startsWith('juego-') ? `${base}/juegos/${c.story.slice(6)}/` : `${base}/noticia/${c.story}/`}#comentarios">ver</a></small></li>`).join('')
+          || '<li class="pnl-muted">Todavía no hay comentarios en este dispositivo. Con las cuentas, aquí verás los de todos los lectores.</li>';
+      },
+
+      ingresos() {
+        const m = revenue[revenue.length - 2]; const cur = revenue[revenue.length - 1];
+        const tot = (r: (typeof revenue)[number]) => r.direct + r.google + r.design;
+        const prev = revenue[revenue.length - 3]; const growth = Math.round(((tot(m) - tot(prev)) / tot(prev)) * 100);
+        const dayOfMonth = new Date().getDate(); const proj = (tot(cur) / Math.max(1, dayOfMonth)) * 31;
+        const fees = Math.round(m.direct * 0.029 + 9 * 0.3);
+        $('[data-rev-kpis]').innerHTML = [
+          kpi('Septiembre', money(tot(m)), `${growth >= 0 ? '▲' : '▼'} ${Math.abs(growth)}% vs. agosto`),
+          kpi('Octubre hasta hoy', money(tot(cur)), `proyección del mes: ${money(proj)}`),
+          kpi('Anuncios directos', money(m.direct), `${Math.round((m.direct / tot(m)) * 100)}% de septiembre`),
+          kpi('Google (AdSense)', money(m.google), 'llena los espacios sin cliente'),
+        ].join('');
+        barChart($('[data-rev-chart]'), revenue.map((r, i) => ({ label: r.m, value: tot(r),
+          tip: `${r.m}${i === revenue.length - 1 ? ' (en curso)' : ''}: ${money(tot(r))} · directos ${money(r.direct)} · Google ${money(r.google)} · diseño ${money(r.design)}` })), money);
+        $('[data-rev-mix]').innerHTML = rows([['Campañas directas', m.direct], ['Google AdSense', m.google], ['Diseño de anuncios', m.design]], money)
+          + `<p class="pnl-muted pnl-small">Los anuncios directos siempre salen primero; Google solo llena los espacios vacíos.</p>`;
+        const clients: Array<[string, number]> = [['Gomera El Pana', 336], ['Repostería Mari', 244], ['Ferretería Vega Alta', 198], ['Clínica Dental Sonrisa', 172], ['Colmado La Placita', 129]];
+        $('[data-rev-clients]').innerHTML = rows(clients, money) + `<p class="pnl-muted pnl-small">Septiembre. <span class="sp-demo">EJEMPLO</span></p>`;
+        $('[data-rev-due]').innerHTML = [
+          `<li><span>💳 <b>Colmado La Placita</b>: factura de ${money(129)} vence en 3 días (ATH Móvil).</span></li>`,
+          `<li><span>⏳ <b>Gomera El Pana</b>: su campaña termina el 15 de octubre. Ofrécele renovar con 10% de descuento.</span></li>`,
+          `<li><span>⏳ <b>Clínica Dental Sonrisa</b>: termina el 20 de octubre.</span></li>`,
+          `<li><span>🆕 ${listRequests().filter((r) => !r.paid).length || 0} solicitudes sin pagar en la cola de anuncios.</span><button type="button" data-go="anuncios">Ver</button></li>`,
+        ].join('');
+        const costs = COSTS.reduce((a, c) => a + c[1], 0);
+        const net = tot(m) - fees - costs;
+        $('[data-rev-net]').innerHTML = `<table class="pnl-table"><tbody>
+          <tr><th scope="row">Ingresos de septiembre</th><td>${money(tot(m))}</td></tr>
+          <tr><th scope="row">Comisiones de pago (Stripe 2.9% + 30¢; ATH Móvil por confirmar)</th><td>−${money(fees)}</td></tr>
+          ${COSTS.map(([k, v]) => `<tr><th scope="row">${k}</th><td>−${money(v)}</td></tr>`).join('')}
+          <tr class="pnl-total"><th scope="row">Ganancia (antes de salarios)</th><td>${money(net)}</td></tr></tbody></table>
+          <p class="pnl-muted pnl-small">No incluye EFE o AP ni salarios. Con las cuentas, los ingresos llegan solos de Stripe, ATH Móvil y Google Ad Manager.</p>`;
+      },
+
+      analitica() {
+        const r = Number($('[data-range][aria-pressed="true"]').dataset.range);
+        const slice = visits.slice(-r);
+        const total = slice.reduce((a, v) => a + v.v, 0); const prevTotal = visits.slice(-2 * r, -r).reduce((a, v) => a + v.v, 0) || total;
+        const ch = Math.round(((total - prevTotal) / prevTotal) * 100);
+        $('[data-an-kpis]').innerHTML = [
+          kpi('Visitantes', num(total), r === 1 ? 'hoy hasta ahora' : r === 7 ? `${ch >= 0 ? '▲' : '▼'} ${Math.abs(ch)}% vs. la semana anterior` : 'últimos 30 días'),
+          kpi('Páginas vistas', num(total * 2.4), '2.4 por visita'),
+          kpi('Tiempo promedio', '1 min 52 s', 'por visita'),
+          kpi('Regresan', '38%', 'visitantes que vuelven'),
+        ].join('');
+        barChart($('[data-an-chart]'), (r === 1 ? visits.slice(-7) : slice).map((v) => {
+          const l = v.d.toLocaleDateString('es-PR', { day: 'numeric', month: 'short' });
+          return { label: l, value: v.v, tip: `${l}: ${num(v.v)} visitantes` };
+        }), (n) => (n >= 1000 ? `${Math.round(n / 100) / 10}k` : String(n)));
+        const reads = [5200, 3900, 3100, 2650, 2200, 1800, 1500];
+        $('[data-an-top]').innerHTML = RECENT.slice(0, 7).map((s, i) => `<li><a href="${s.url}" target="_blank" rel="noopener">${esc(s.title)}</a><b>${num(reads[i] * (r / 30) + 40)}</b></li>`).join('');
+        $('[data-an-ref]').innerHTML = rows([['Google', 41], ['Facebook', 24], ['Directo (escriben la dirección)', 15], ['WhatsApp', 11], ['Instagram', 5], ['X (Twitter)', 4]]);
+        $('[data-an-geo]').innerHTML = rows([['Puerto Rico', 71], ['Florida', 12], ['Nueva York', 5], ['Texas', 3], ['Otros estados', 6], ['Otros países', 3]]);
+        $('[data-an-sec]').innerHTML = rows([['Puerto Rico', 31], ['Deportes', 18], ['Gobierno y Política', 16], ['Entretenimiento', 12], ['Clima', 9], ['Otras', 14]]);
+        $('[data-an-dev]').innerHTML = `<h3 class="pnl-h4">Dispositivos</h3>` + rows([['Celular', 78], ['Computadora', 18], ['Tableta', 4]]);
+      },
+
+      async salud() {
+        const box = $('[data-health]');
+        box.innerHTML = kpi('Actualización del sitio', 'Cargando…') + kpi('Redactor de noticias (IA)', 'Cargando…');
+        const api = 'https://api.github.com/repos/publisher-noticel/noticias-xtra';
+        try {
+          const [dep, ai, prs, iss] = await Promise.all([
+            fetch(`${api}/actions/workflows/deploy.yml/runs?per_page=1`).then((r) => r.json()),
+            fetch(`${api}/actions/workflows/daily-news.yml/runs?per_page=1`).then((r) => r.json()),
+            fetch(`${api}/pulls?state=open&per_page=50`).then((r) => r.json()),
+            fetch(`${api}/issues?state=open&per_page=50`).then((r) => r.json()),
+          ]);
+          const run = (x: any) => x?.workflow_runs?.[0];
+          const d = run(dep), a = run(ai);
+          const state = (r: any) => (!r ? ['Sin datos', ''] : r.status !== 'completed' ? ['Trabajando ahora', ''] : r.conclusion === 'success' ? ['Funciona ✓', 'good'] : ['Falló ✗', 'bad']);
+          const [ds, dt] = state(d); let [as, at] = state(a);
+          if (root.dataset.aikey !== 'true' && at === 'good') [as, at] = ['Sin clave ⚠', 'bad']; // runs, but writes nothing yet
+          const openPrs = Array.isArray(prs) ? prs.length : 0; const checks = Array.isArray(iss) ? iss.filter((i: any) => !i.pull_request && /Vistazo/.test(i.title)).length : 0;
+          box.innerHTML = [
+            kpi('Actualización del sitio', ds, d ? `cada 15 minutos · última ${ago(Date.parse(d.updated_at))}` : '', '', dt),
+            kpi('Redactor de noticias (IA)', as, root.dataset.aikey !== 'true' ? 'corre a las 7 a.m. y 5 p.m., pero no redacta hasta conectar la clave' : a ? `7 a.m. y 5 p.m. · última ${ago(Date.parse(a.updated_at))}` : '', '', at),
+            kpi('Esperan aprobación en GitHub', String(openPrs), 'noticias reales por aprobar'),
+            kpi('Vistazos rápidos abiertos', String(checks), 'avisos en GitHub'),
+          ].join('');
+          $('[data-gh-news]').textContent = `Datos reales de GitHub ahora mismo: ${openPrs} ${openPrs === 1 ? 'grupo' : 'grupos'} de noticias por aprobar y ${checks} vistazos rápidos abiertos. Las de abajo son ejemplos.`;
+        } catch { box.innerHTML = kpi('Estado', 'No se pudo consultar GitHub', 'intenta en unos minutos', '', 'bad'); }
+        const acc: Array<[string, boolean, string]> = [
+          ['Sitio publicado (GitHub Pages)', true, 'listo'], ['Actualización cada 15 minutos', true, 'listo'],
+          ['Clave de IA (Anthropic)', false, 'la IA no redacta hasta conectarla'], ['Cuentas y comentarios (Supabase)', false, 'login, comentarios reales, este panel real'],
+          ['Google Analytics', false, 'visitantes reales'], ['Stripe y ATH Móvil', false, 'cobros de anuncios'], ['Google Ad Manager / AdSense', false, 'anuncios de Google'],
+          ['Datos deportivos', false, 'marcadores'], ['EFE o AP', false, 'noticias de agencia'], ['Correo de ventas y boletín', false, 'avisos y boletín'],
+        ];
+        $('[data-accounts]').innerHTML = acc.map(([n, ok, why]) => `<li class="${ok ? 'ok' : ''}"><span>${ok ? '✓' : '○'} ${n}</span><small>${why}</small></li>`).join('');
+        const lv: Record<string, [string, string]> = { auto: ['Se publica sola', 'g'], check: ['Se publica + vistazo', 'y'], always: ['Espera aprobación', 'r'] };
+        $('[data-src-n]').textContent = `${SOURCES.length} fuentes oficiales`;
+        $('[data-srcs]').innerHTML = SOURCES.map((s) => `<li><span>${esc(s.name)}</span><span class="pnl-lv ${lv[s.review]?.[1] ?? 'r'}">${lv[s.review]?.[0] ?? 'Espera aprobación'}</span></li>`).join('');
+      },
+
+      equipo() {
+        const s = me()!;
+        const team = get<Array<{ name: string; mail: string; role: Staff['role'] }>>('nx-staff-team', [
+          { name: s.name, mail: 'tú', role: 'admin' }, { name: 'Editora (ejemplo)', mail: 'editora@ejemplo.com', role: 'editor' },
+          { name: 'Ventas (ejemplo)', mail: 'ventas@ejemplo.com', role: 'ads' }, { name: 'Periodista (ejemplo)', mail: 'periodista@ejemplo.com', role: 'reporter' },
+        ]);
+        $('[data-team]').innerHTML = team.map((m, i) => `<li><span class="pnl-av sm">${esc(m.name[0]?.toUpperCase() ?? '?')}</span><span><b>${esc(m.name)}</b><small>${esc(m.mail)}</small></span><span class="pnl-tag">${ROLE_NAME[m.role]}</span>${i ? `<button type="button" class="pnl-link" data-rm="${i}">Quitar</button>` : ''}</li>`).join('');
+        const can: Array<[string, boolean[]]> = [
+          ['Aprobar noticias', [true, true, false, false]], ['Escribir noticias', [true, true, false, true]], ['Moderar comentarios', [true, true, true, false]],
+          ['Aprobar anuncios', [true, false, true, false]], ['Ver ingresos', [true, false, true, false]], ['Ver analítica', [true, true, false, false]],
+          ['Salud del sitio', [true, true, false, false]], ['Manejar el equipo', [true, false, false, false]],
+        ];
+        $('[data-perms]').innerHTML = `<table class="pnl-table perms"><thead><tr><th></th><th>Admin</th><th>Editor</th><th>Anuncios</th><th>Periodista</th></tr></thead><tbody>${can.map(([k, v]) => `<tr><th scope="row">${k}</th>${v.map((x) => `<td>${x ? '✓' : '—'}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+      },
+    };
+
+    // ---------- actions ----------
+    let nf = 'pending';
+    root.addEventListener('click', (e) => {
+      const t = e.target as HTMLElement;
+      const sub = t.closest<HTMLElement>('[data-nf]');
+      if (sub) { nf = sub.dataset.nf!; $$('[data-nf]').forEach((b) => b.setAttribute('aria-selected', String(b === sub))); paint.noticias(); return; }
+      const undo = t.closest<HTMLElement>('[data-undo]');
+      if (undo) { const st = news(); delete st[undo.dataset.undo!]; set('nx-panel-news', st); paint.noticias(); paintCounts(); return; }
+      const rng = t.closest<HTMLElement>('[data-range]');
+      if (rng) { $$('[data-range]').forEach((b) => b.setAttribute('aria-pressed', String(b === rng))); paint.analitica(); return; }
+      const rm = t.closest<HTMLElement>('[data-rm]');
+      if (rm) { const team = get<unknown[]>('nx-staff-team', []); team.splice(Number(rm.dataset.rm), 1); set('nx-staff-team', team); paint.equipo(); return; }
+      const act = t.closest<HTMLElement>('[data-act]'); const card = t.closest<HTMLElement>('.pnl-draft,.pnl-row');
+      if (!act || !card || !card.closest('[data-news]')) return;
+      const id = card.dataset.id!; const a = act.dataset.act;
+      if (a === 'edit') {
+        const ta = $<HTMLTextAreaElement>('[data-edit]', card); const shown = $('[data-body]', card);
+        const editing = ta.hidden; ta.hidden = !editing; shown.hidden = editing; act.textContent = editing ? 'Ver como queda' : 'Editar';
+        if (!editing) shown.innerHTML = esc(ta.value).split('\n\n').map((p) => `<p>${p}</p>`).join('');
+        return;
+      }
+      if (a === 'approve') { setNews(id, { status: 'approved', body: card.querySelector<HTMLTextAreaElement>('[data-edit]')?.value, at: Date.now() }); toast('Aprobada. En la versión real se publica en el sitio en unos 2 minutos.'); }
+      if (a === 'reject') { if (!confirm('¿Rechazar esta noticia? No se publicará.')) return; setNews(id, { status: 'rejected', at: Date.now() }); toast('Rechazada.'); }
+      if (a === 'ok') { setNews(id, { status: 'ok', at: Date.now() }); toast('Marcada como revisada.'); }
+      if (a === 'remove') { if (!confirm('¿Quitar esta noticia del sitio? Podrás corregirla y volver a publicarla.')) return; setNews(id, { status: 'removed', at: Date.now() }); toast('Vista previa: en la versión real desaparece del sitio en unos minutos.'); }
+      card.classList.add('pnl-gone'); setTimeout(() => { paint.noticias(); paintCounts(); }, 250);
+    });
+    $<HTMLFormElement>('[data-add]').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = $<HTMLInputElement>('[data-add-name]').value.trim(), mail = $<HTMLInputElement>('[data-add-mail]').value.trim();
+      if (name.length < 2 || !/^\S+@\S+\.\S+$/.test(mail)) { toast('Escribe el nombre y un correo válido.'); return; }
+      const team = get<Array<{ name: string; mail: string; role: string }>>('nx-staff-team', []);
+      if (!team.length) { paint.equipo(); }
+      set('nx-staff-team', [...get<unknown[]>('nx-staff-team', []), { name, mail, role: $<HTMLSelectElement>('[data-add-role]').value }]);
+      (e.target as HTMLFormElement).reset(); paint.equipo();
+      toast(`Vista previa: con las cuentas, ${mail} recibirá una invitación por correo.`);
+    });
+    // Keep the team list saved once it's first shown, so adding works on top of the examples
+    const ensureTeam = () => { if (!localStorage.getItem('nx-staff-team')) { const s = me(); if (s) set('nx-staff-team', [{ name: s.name, mail: 'tú', role: 'admin' }, { name: 'Editora (ejemplo)', mail: 'editora@ejemplo.com', role: 'editor' }, { name: 'Ventas (ejemplo)', mail: 'ventas@ejemplo.com', role: 'ads' }, { name: 'Periodista (ejemplo)', mail: 'periodista@ejemplo.com', role: 'reporter' }]); } };
+
+    // ---------- start ----------
+    function start() {
+      const s = me();
+      $('[data-login]').hidden = !!s; $('[data-app]').hidden = !s;
+      if (!s) return;
+      ensureTeam();
+      $$('[data-me]').forEach((e) => (e.textContent = s.name));
+      $('[data-av]').textContent = s.name[0].toUpperCase();
+      $('[data-role]').textContent = ROLE_NAME[s.role];
+      paintCounts(); showTab(location.hash.slice(1) || 'inicio');
+    }
+    $<HTMLFormElement>('[data-login]').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = $<HTMLInputElement>('#pnl-name').value.trim();
+      if (name.length < 2) { const er = $('[data-err]'); er.textContent = 'Escribe tu nombre.'; er.hidden = false; return; }
+      set('nx-staff', { name, role: $<HTMLSelectElement>('#pnl-role').value });
+      start();
+    });
+    $('[data-logout]').addEventListener('click', () => { set('nx-staff', null); set('nx-staff-pending', null); dispatchEvent(new Event('nx-staff-change')); start(); });
+    // The comment and ad queues change counts when used
+    root.addEventListener('click', () => setTimeout(paintCounts, 50));
+    start();
+  </script>
+</Base>

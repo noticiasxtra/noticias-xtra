@@ -42,7 +42,10 @@ const BADGES = [
 
       <div class="pf-card" data-card hidden>
         <header class="pf-top">
-          <span class="pf-av" data-av></span>
+          <div class="pf-av-wrap">
+            <span class="pf-av" data-av></span>
+            <label class="pf-cam" title="Cambiar foto de perfil"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><span class="sr">Cambiar foto de perfil</span><input type="file" accept="image/*" data-photo class="sr" /></label>
+          </div>
           <div class="pf-who">
             <h1 data-name></h1>
             <p class="pf-tags"><span data-rep-badge></span><span class="pf-gtag" data-game-lvl></span></p>
@@ -113,7 +116,15 @@ const BADGES = [
           <form class="pf-edit" data-edit novalidate>
             <label for="pf-ename">Nombre de usuario</label>
             <input id="pf-ename" maxlength="24" autocomplete="nickname" />
-            <fieldset class="pf-colors"><legend>Color de tu avatar</legend>{COLORS.map((c, i) => <label><input type="radio" name="pf-ecolor" value={c} checked={i === 0} /><span style={`background:${c}`}></span><b class="sr">{c}</b></label>)}</fieldset>
+            <p class="pf-lbl">Foto de perfil</p>
+            <div class="pf-photo-row">
+              <span class="pf-av sm" data-av2></span>
+              <label class="adp-btn ghost-dark pf-up">Subir foto<input type="file" accept="image/*" data-photo class="sr" /></label>
+              <button type="button" class="pf-linkbtn red" data-photo-rm hidden>Quitar foto</button>
+            </div>
+            <p class="pf-note pf-photo-note">Usa una foto tuya o un dibujo. Nada ofensivo ni fotos de otras personas: con las cuentas, cada foto se revisa antes de mostrarse.</p>
+            <p class="cm-err" data-perr hidden></p>
+            <fieldset class="pf-colors"><legend>Color de tu avatar (si no tienes foto)</legend>{COLORS.map((c, i) => <label><input type="radio" name="pf-ecolor" value={c} checked={i === 0} /><span style={`background:${c}`}></span><b class="sr">{c}</b></label>)}</fieldset>
             <p class="cm-err" data-eerr hidden></p>
             <button type="submit" class="jg-btn">Guardar cambios</button>
           </form>
@@ -132,7 +143,8 @@ const BADGES = [
     import { getNotifs, markRead, getPrefs, setPrefs, ago, type NotifKind } from '../lib/notifications';
     import { renderNotifs } from '../lib/notif-view';
     import { BADGE } from '../lib/badges';
-    type Profile = { name?: string; color?: string };
+    import { squarePhoto, paintAvatar } from '../lib/avatar';
+    type Profile = { name?: string; color?: string; photo?: string };
     const get = <T,>(k: string, d: T): T => { try { return JSON.parse(localStorage.getItem(k) || '') ?? d; } catch { return d; } };
     const set = (k: string, v: unknown) => { try { v === null ? localStorage.removeItem(k) : localStorage.setItem(k, JSON.stringify(v)); } catch { /* storage blocked */ } };
     const esc = (s = '') => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
@@ -192,7 +204,8 @@ const BADGES = [
       dispatchEvent(new Event('nx-profile-change'));
       if (!p.name) return;
       const av = $('[data-av]');
-      av.textContent = p.name[0].toUpperCase(); av.style.background = p.color || '#2B1185';
+      paintAvatar(av, p); paintAvatar($('[data-av2]'), p);
+      $('[data-photo-rm]').hidden = !p.photo;
       $('[data-name]').textContent = p.name;
 
       // Comment reputation and level badge
@@ -259,7 +272,7 @@ const BADGES = [
       const name = cleanName($<HTMLInputElement>('#pf-ename').value);
       if (name.length < 3) { err.textContent = 'Escribe un nombre de al menos 3 letras.'; err.hidden = false; return; }
       err.hidden = true;
-      set('nx-profile', { name, color: card.querySelector<HTMLInputElement>('input[name="pf-ecolor"]:checked')?.value });
+      set('nx-profile', { ...get<Profile>('nx-profile', {}), name, color: card.querySelector<HTMLInputElement>('input[name="pf-ecolor"]:checked')?.value });
       render();
     });
     card.addEventListener('change', (e) => {
@@ -281,6 +294,20 @@ const BADGES = [
       dispatchEvent(new CustomEvent('nx-notifs')); dispatchEvent(new Event('nx-saved-change'));
       render();
     });
+    // Profile picture: cropped to a square in the browser and saved with the profile
+    card.querySelectorAll<HTMLInputElement>('[data-photo]').forEach((inp) => inp.addEventListener('change', async () => {
+      const f = inp.files?.[0]; inp.value = ''; if (!f) return;
+      const err = $('[data-perr]'); err.hidden = true;
+      try {
+        const photo = await squarePhoto(f);
+        set('nx-profile', { ...get<Profile>('nx-profile', {}), photo });
+        render();
+      } catch (e) {
+        err.textContent = (e as Error).message === 'size' ? 'La foto es muy grande (máximo 15 MB).' : 'No pudimos leer esa imagen. Prueba con una foto JPG o PNG.';
+        err.hidden = false; showTab('ajustes');
+      }
+    }));
+    $('[data-photo-rm]').addEventListener('click', () => { const p = get<Profile>('nx-profile', {}); delete p.photo; set('nx-profile', p); render(); });
     render(); showTab(location.hash.slice(1));
   </script>
 </Base>

@@ -119,7 +119,7 @@ const GIF_IMGS = [['gif-wepa', '¡Wepa! animado'], ['gif-coqui', 'Coquí saltand
     get: <T,>(k: string, d: T): T => { try { return JSON.parse(localStorage.getItem(k) || '') ?? d; } catch { return d; } },
     set: (k: string, v: unknown) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* storage blocked */ } },
   };
-  const profile = store.get<{ name?: string }>('nx-profile', {});
+  const profile = store.get<{ name?: string; photo?: string }>('nx-profile', {});
   const myName = profile.name || 'Tú';
   // Comment text with @mentions highlighted (built from text nodes, never HTML)
   const fillText = (el: Element, text: string) => {
@@ -138,7 +138,13 @@ const GIF_IMGS = [['gif-wepa', '¡Wepa! animado'], ['gif-coqui', 'Coquí saltand
     const ta = form.querySelector('textarea')!;
     const err = root.querySelector<HTMLElement>('[data-cm-err]')!;
     const count = root.querySelector<HTMLElement>('[data-cm-count]')!;
-    root.querySelector<HTMLElement>('[data-cm-me]')!.textContent = myName[0].toUpperCase();
+    // The reader's own avatar: their profile photo if they added one (/perfil), otherwise their initial
+    const myAvatar = (el: HTMLElement) => {
+      el.textContent = profile.photo ? '' : myName[0].toUpperCase();
+      el.style.backgroundImage = profile.photo ? `url("${profile.photo}")` : '';
+      el.classList.toggle('has-photo', !!profile.photo);
+    };
+    myAvatar(root.querySelector<HTMLElement>('[data-cm-me]')!);
     let replyTo: string | undefined;
     let warned = ''; // text that already got the "doubtful" warning once
 
@@ -175,7 +181,7 @@ const GIF_IMGS = [['gif-wepa', '¡Wepa! animado'], ['gif-coqui', 'Coquí saltand
         li.dataset.id = c.id; li.dataset.likes = '0';
         li.innerHTML = `<span class="cm-av me" aria-hidden="true"></span><div class="cm-body"><p><b></b> <span class="cm-text"></span></p><div class="cm-meta"><span></span><span data-likes-label></span><button type="button" data-reply>Responder</button><button type="button" data-del>Borrar</button></div></div><button type="button" class="cm-like" data-like aria-pressed="false" aria-label="Me gusta"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.5-9.2C1 8.3 3.2 4.5 7 4.5c2 0 3.4 1.1 5 3 1.6-1.9 3-3 5-3 3.8 0 6 3.8 4.5 7.3C19.5 16.4 12 21 12 21z" /></svg><span class="cm-like-n" data-like-n></span></button>`;
         if (c.media) { const im = document.createElement('img'); im.className = 'cm-media'; im.src = c.media.src; im.alt = c.media.kind === 'gif' ? 'GIF' : 'Sticker'; im.loading = 'lazy'; li.querySelector('.cm-body p')!.after(im); }
-        li.querySelector('.cm-av')!.textContent = c.name[0].toUpperCase();
+        myAvatar(li.querySelector<HTMLElement>('.cm-av')!);
         li.querySelector('b')!.textContent = c.name;
         const lv = levelOf(getRep());
         if (lv.index > 0) { const bd = document.createElement('span'); bd.className = `cm-badge cm-b-${lv.id}`; bd.innerHTML = `${JSON.parse(root.dataset.badges || '{}')[lv.id] ?? ''} `; bd.append(lv.name); li.querySelector('b')!.after(' ', bd); }

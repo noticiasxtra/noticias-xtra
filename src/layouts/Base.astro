@@ -110,6 +110,11 @@ const holiday = F.holidayLogo && bar?.label !== 'ÚLTIMA HORA' ? holidayOn(today
                   <ul class="nf-list" data-nf-list></ul>
                   <div class="nf-foot"><button type="button" data-nf-readall>Marcar como leídas</button><a href={`${url('perfil')}#notificaciones`}>Ver todas ›</a></div>
                 </div>
+                {/* Staff only: shown once someone has logged into the staff panel on this device */}
+                <a class="pf-menu-i pf-staff" href={url('redaccion')} data-staff-link hidden>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M3 9h18M8 14h3M8 17h6" /></svg>Panel de la redacción
+                  <span class="pf-badge red" data-staff-count hidden></span>
+                </a>
                 <a class="pf-menu-i" href={url('perfil')}>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></svg>Mi perfil
                 </a>
@@ -357,18 +362,24 @@ const holiday = F.holidayLogo && bar?.label !== 'ÚLTIMA HORA' ? holidayOn(today
       // Share buttons
       // Profile button: shows the reader's initial once they sign in (demo profile in localStorage 'nx-profile')
       const showProfile = () => {
-        let p: { name?: string; color?: string } = {};
+        let p: { name?: string; color?: string; photo?: string } = {};
         try { p = JSON.parse(localStorage.getItem('nx-profile') || '{}'); } catch { /* storage blocked */ }
         document.querySelectorAll<HTMLElement>('[data-pf-btn]').forEach((b) => {
           b.dataset.icon ??= b.innerHTML;
           b.classList.toggle('in', !!p.name);
           b.style.background = p.name ? p.color || '#2B1185' : '';
-          if (p.name) b.textContent = p.name[0].toUpperCase(); else b.innerHTML = b.dataset.icon;
+          b.style.backgroundImage = p.name && p.photo ? `url("${p.photo}")` : '';
+          b.classList.toggle('has-photo', !!(p.name && p.photo));
+          if (p.name) b.textContent = p.photo ? '' : p.name[0].toUpperCase(); else b.innerHTML = b.dataset.icon;
           b.title = p.name ? `Mi cuenta: ${p.name}` : 'Mi cuenta y ajustes';
         });
         const nm = document.querySelector<HTMLElement>('[data-pf-name]'), av = document.querySelector<HTMLElement>('[data-pf-av]');
         if (nm) nm.textContent = p.name || 'Mi cuenta';
-        if (av) { av.dataset.icon ??= av.innerHTML; av.style.background = p.name ? p.color || '#2B1185' : ''; av.style.color = p.name ? '#fff' : ''; if (p.name) av.textContent = p.name[0].toUpperCase(); else av.innerHTML = av.dataset.icon; }
+        if (av) {
+          av.dataset.icon ??= av.innerHTML; av.style.background = p.name ? p.color || '#2B1185' : ''; av.style.color = p.name ? '#fff' : '';
+          av.style.backgroundImage = p.name && p.photo ? `url("${p.photo}")` : ''; av.classList.toggle('has-photo', !!(p.name && p.photo));
+          if (p.name) av.textContent = p.photo ? '' : p.name[0].toUpperCase(); else av.innerHTML = av.dataset.icon;
+        }
       };
       showProfile();
       addEventListener('nx-profile-change', showProfile);
@@ -389,6 +400,16 @@ const holiday = F.holidayLogo && bar?.label !== 'ÚLTIMA HORA' ? holidayOn(today
       showSaved();
       addEventListener('nx-saved-change', showSaved);
       addEventListener('storage', (e) => e.key === 'nx-saved' && showSaved());
+      // Staff panel link: only for people who logged into /redaccion/ on this device (preview login, 'nx-staff')
+      const showStaff = () => {
+        let staff = false, n = 0;
+        try { staff = !!localStorage.getItem('nx-staff'); n = Number(localStorage.getItem('nx-staff-pending') || 0); } catch { /* storage blocked */ }
+        document.querySelectorAll<HTMLElement>('[data-staff-link]').forEach((a) => (a.hidden = !staff));
+        document.querySelectorAll<HTMLElement>('[data-staff-count]').forEach((b) => { b.textContent = String(n); b.hidden = !staff || !n; });
+      };
+      showStaff();
+      addEventListener('nx-staff-change', showStaff);
+      addEventListener('storage', (e) => (e.key === 'nx-staff' || e.key === 'nx-staff-pending') && showStaff());
       // Notifications: count on the profile icon, latest five in the profile menu, a toast when a new one arrives
       const nfPanel = document.querySelector<HTMLElement>('[data-nf-panel]');
       if (nfPanel) {
