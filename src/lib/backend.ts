@@ -105,13 +105,14 @@ export async function listArticles(): Promise<ArticleRow[] | null> {
   } catch { return null; }
 }
 /** Saves an article (updates it, or creates it the first time). */
-export async function putArticle(id: string, status: string, doc: unknown): Promise<boolean> {
+export async function putArticle(id: string, status: string, doc: unknown, slug?: string): Promise<boolean> {
   const token = await freshToken(); if (!token) return false;
   const body = JSON.stringify({ status, doc, updated_at: new Date().toISOString() });
   try {
     const up = await fetch(rest(`articles?id=eq.${encodeURIComponent(id)}`), { method: 'PATCH', headers: { ...head(token), Prefer: 'return=representation' }, body });
     if (up.ok && (await up.json()).length) return true;
-    const add = await fetch(rest('articles'), { method: 'POST', headers: head(token), body: JSON.stringify({ id, status, doc }) });
+    // New row; `slug` links it to a story already on the site, so publishing updates that same file
+    const add = await fetch(rest('articles'), { method: 'POST', headers: head(token), body: JSON.stringify({ id, status, doc, ...(slug ? { slug } : {}) }) });
     return add.ok;
   } catch { return false; }
 }

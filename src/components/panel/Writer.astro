@@ -207,6 +207,7 @@ const TOOLS = [
       title: string; description: string; section: string; league: string; place: string; author: string; date: string;
       image: string; imageUrl: string; imageCaption: string; imageCredit: string; breaking: boolean; trending: boolean; featured: boolean; live: boolean; pinned?: boolean; homeLead?: boolean; sectionLead?: boolean;
       sources: Src[]; related: string[]; correction: string; body: string; slug?: string;
+      aiAssisted?: boolean; fmExtra?: string; // kept from an existing story file: the AI label and fields the editor doesn't show
     };
     const SECS: Array<{ id: string; name: string }> = JSON.parse(root.dataset.secs!);
     const RECENT: Array<{ id: string; title: string }> = JSON.parse(root.dataset.recent!);
@@ -233,7 +234,7 @@ const TOOLS = [
       if (i >= 0) list[i] = a; else list.unshift(a);
       if (!DB) return saveLocal(list);
       const { status, ...doc } = a;
-      const ok = await putArticle(a.id, status, doc);
+      const ok = await putArticle(a.id, status, doc, a.slug);
       if (!ok) toast('No se pudo guardar en la base de datos. Revisa la conexión e intenta otra vez.');
       return ok;
     }
@@ -324,6 +325,7 @@ const TOOLS = [
       $('[data-wr-list]').innerHTML = head + (rows.map(({ p, st }) => {
         const open = openStats === p.id; const max = Math.max(1, ...st.byDay);
         const mineArt = load().some((a) => a.id === p.id);
+        const siteStory = !mineArt && !p.local && canPublish(); // a story already on the site (AI or older): editors and admins
         return `<article class="pnl-row wr-pub" data-pid="${esc(p.id)}"${mineArt ? ` data-id="${esc(p.id)}"` : ''}>
           <span class="wr-pub-ic" title="Publicada" aria-label="Publicada">${LIVE}</span>
           <div class="wr-pub-main"><p class="pnl-muted">${esc(p.section)} · ${esc(p.author)} · ${new Date(p.date).toLocaleDateString('es-PR', { day: 'numeric', month: 'short', year: 'numeric' })}${p.ai ? ' · <span class="wr-ai">IA</span>' : ''}${p.local ? ' · <span class="wr-ai">desde el editor</span>' : ''}</p>
@@ -335,7 +337,7 @@ const TOOLS = [
               <div><h3 class="pnl-h4">Dónde están</h3>${bars(st.geo)}<p class="pnl-muted pnl-small">${st.phone}% en celular</p></div>
             </div>` : ''}
           </div>
-          <div class="pnl-row-acts">${mineArt ? '<button type="button" class="adp-btn" data-la="edit">Editar o corregir</button>' : ''}${p.url ? `<a class="adp-btn ghost-dark" href="${p.url}" target="_blank" rel="noopener">Ver en el sitio ↗</a>` : ''}<button type="button" class="adp-btn ${open ? '' : 'ghost-dark'}" data-pstats="${esc(p.id)}">${open ? 'Cerrar' : 'Estadísticas'}</button></div>
+          <div class="pnl-row-acts">${mineArt ? '<button type="button" class="adp-btn" data-la="edit">Editar o corregir</button>' : siteStory ? `<button type="button" class="adp-btn" data-import="${esc(p.id)}">Editar o corregir</button>` : ''}${p.url ? `<a class="adp-btn ghost-dark" href="${p.url}" target="_blank" rel="noopener">Ver en el sitio ↗</a>` : ''}<button type="button" class="adp-btn ${open ? '' : 'ghost-dark'}" data-pstats="${esc(p.id)}">${open ? 'Cerrar' : 'Estadísticas'}</button></div>
         </article>`;
       }).join('') || '<p class="apr-empty">Todavía no hay noticias publicadas.</p>');
     }
@@ -393,7 +395,7 @@ const TOOLS = [
       $('[data-league-wrap]').hidden = cur.section !== 'deportes';
       const photo = cur.image || cur.imageUrl;
       $('[data-photo-empty]').hidden = !!photo; $('[data-photo-full]').hidden = !photo; $('[data-photo-meta]').hidden = !photo;
-      if (photo) $<HTMLImageElement>('[data-photo-img]').src = photo;
+      if (photo) $<HTMLImageElement>('[data-photo-img]').src = /^(https?:|data:)/.test(photo) ? photo : `${root.dataset.base!.replace(/\/$/, '')}/${photo}`;
       $('[data-srcs]').innerHTML = cur.sources.map((s, i) => `<li><span>${s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.name)}</a>` : esc(s.name)}</span><button type="button" class="pnl-link" data-src-rm="${i}" aria-label="Quitar">✕</button></li>`).join('');
       $('[data-rels]').innerHTML = cur.related.map((id, i) => `<li><span>${esc(RECENT.find((r) => r.id === id)?.title ?? id)}</span><button type="button" class="pnl-link" data-rel-rm="${i}" aria-label="Quitar">✕</button></li>`).join('');
       const future = new Date(cur.date).valueOf() > Date.now() + 60000;
@@ -522,6 +524,7 @@ const TOOLS = [
         if (n.nodeType === 3) return (n.textContent ?? '').trim() ? md.text(n.textContent!.trim()) : '';
         if (!(n instanceof HTMLElement)) return '';
         const tag = n.tagName, line = () => [...n.childNodes].map(md.inline).join('').trim();
+        if (n.classList.contains('wr-raw')) return decodeURIComponent(n.dataset.html || '');
         if (n.classList.contains('wr-embed')) return n.dataset.size || n.dataset.align ? embedFor(n.dataset.url!, { size: n.dataset.size, align: n.dataset.align }) ?? '' : n.dataset.url ?? '';
         if (n.classList.contains('wr-doc')) { // an uploaded PDF goes to public/documentos/ when published (with accounts)
           const d = docOf(n); if (d.src.startsWith('data:')) d.src = `${root.dataset.base!.replace(/\/$/, '')}/documentos/${(cur?.id ?? 'doc').toLowerCase()}-${d.title.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').slice(0, 40)}.pdf`;
@@ -542,13 +545,73 @@ const TOOLS = [
       body: (html: string) => { const d = document.createElement('div'); d.innerHTML = html; return [...d.childNodes].map(md.block).filter((b) => b.trim()).join('\n\n'); },
     };
     const y = (v: string) => JSON.stringify(v);
+
+    // ---------- open a story that is already on the site (AI or older) in the editor ----------
+    const RAW = 'https://raw.githubusercontent.com/publisher-noticel/noticias-xtra/main/src/content/noticias/';
+    const MANAGED = new Set(['title', 'description', 'section', 'league', 'place', 'date', 'author', 'image', 'imageCaption', 'imageCredit',
+      'breaking', 'trending', 'featured', 'live', 'pinned', 'homeLead', 'sectionLead', 'aiAssisted', 'draft', 'sources', 'related', 'correction']);
+    const unq = (v: string) => { v = v.trim(); try { return v.startsWith('"') ? JSON.parse(v) : v.replace(/^'(.*)'$/, '$1'); } catch { return v; } };
+    const inline = (t: string) => esc(t.replace(/\\([*_`[\]\\])/g, '$1'))
+      .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/(^|[^*])\*([^*\s][^*]*?)\*/g, '$1<i>$2</i>')
+      .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, '<a href="$2">$1</a>').replace(/ {2}\n/g, '<br>');
+    /** Markdown story body → the editor's HTML (blocks it can't edit are kept as they are). */
+    function mdToHtml(src: string) {
+      return src.trim().split(/\n{2,}/).map((b) => {
+        const t = b.trim();
+        if (t.startsWith('<')) return `<figure class="wr-raw" contenteditable="false" data-html="${encodeURIComponent(t)}">${t}</figure>`;
+        if (/^https?:\/\/\S+$/.test(t)) return `<figure class="wr-embed" contenteditable="false" data-url="${esc(t)}"></figure>`;
+        if (/^###\s/.test(t)) return `<h3>${inline(t.replace(/^###\s+/, ''))}</h3>`;
+        if (/^##\s/.test(t)) return `<h2>${inline(t.replace(/^##\s+/, ''))}</h2>`;
+        if (t === '---') return '<hr>';
+        if (/^>\s?/.test(t)) return `<blockquote>${inline(t.replace(/^>\s?/gm, ''))}</blockquote>`;
+        const lines = t.split('\n');
+        if (lines.every((l) => /^[-*]\s/.test(l))) return `<ul>${lines.map((l) => `<li>${inline(l.replace(/^[-*]\s+/, ''))}</li>`).join('')}</ul>`;
+        if (lines.every((l) => /^\d+\.\s/.test(l))) return `<ol>${lines.map((l) => `<li>${inline(l.replace(/^\d+\.\s+/, ''))}</li>`).join('')}</ol>`;
+        return `<p>${inline(t)}</p>`;
+      }).join('');
+    }
+    /** A story file from the site → an article in the editor that updates that same story when published. */
+    function fromFile(id: string, text: string): Art | null {
+      const m = text.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/); if (!m) return null;
+      const fm: Record<string, string> = {}; const sources: Src[] = []; const related: string[] = []; const extra: string[] = [];
+      let key = '';
+      for (const line of m[1].split('\n')) {
+        const top = line.match(/^([A-Za-z]\w*):\s*(.*)$/);
+        if (top) { key = top[1]; if (MANAGED.has(key)) fm[key] = top[2]; else extra.push(line); continue; }
+        if (!MANAGED.has(key)) { extra.push(line); continue; }
+        const nm = line.match(/^\s*-\s*name:\s*(.*)$/), ur = line.match(/^\s+url:\s*(.*)$/), li = line.match(/^\s*-\s*(.*)$/);
+        if (key === 'sources' && nm) sources.push({ name: unq(nm[1]) });
+        else if (key === 'sources' && ur && sources.length) sources[sources.length - 1].url = unq(ur[1]);
+        else if (key === 'related' && li) related.push(unq(li[1]));
+      }
+      const yes = (k: string) => fm[k] === 'true';
+      const d = new Date(unq(fm.date || '')); const local = isNaN(+d) ? localNow() : new Date(+d - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+      return { id: `A-${Date.now().toString(36)}`, status: 'published', updated: Date.now(), owner: me()?.name ?? '', slug: id,
+        title: unq(fm.title || ''), description: unq(fm.description || ''), section: unq(fm.section || 'puerto-rico'), league: unq(fm.league || ''),
+        place: unq(fm.place || ''), author: unq(fm.author || 'Noticias Xtra'), date: local, image: unq(fm.image || ''), imageUrl: '',
+        imageCaption: unq(fm.imageCaption || ''), imageCredit: unq(fm.imageCredit || ''),
+        breaking: yes('breaking'), trending: yes('trending'), featured: yes('featured'), live: yes('live'), pinned: yes('pinned'), homeLead: yes('homeLead'), sectionLead: yes('sectionLead'),
+        aiAssisted: fm.aiAssisted ? yes('aiAssisted') : true, fmExtra: extra.join('\n').trim() || undefined,
+        sources, related, correction: unq(fm.correction || ''), body: mdToHtml(m[2]) };
+    }
+    async function importStory(id: string) {
+      const have = load().find((a) => a.slug === id); if (have) { openEditor(have); return; }
+      toast('Abriendo la noticia…');
+      const r = await fetch(`${RAW}${encodeURIComponent(id)}.md?t=${Date.now()}`).catch(() => null);
+      const a = r?.ok ? fromFile(id, await r.text()) : null;
+      if (!a) { toast('No pudimos abrir esa noticia. Intenta otra vez en un minuto.'); return; }
+      if (!(await store(a))) return; // saved for the team, linked to the story on the site
+      openEditor(a); toast('Lista para editar. Al tocar “Actualizar”, se corrige la misma noticia en el sitio.');
+    }
+    root.addEventListener('click', (e) => { const b = (e.target as HTMLElement).closest<HTMLElement>('[data-import]'); if (b) void importStory(b.dataset.import!); });
+
     function toFile(a: Art) {
       const date = new Date(a.date || Date.now());
       return ['---', `title: ${y(a.title)}`, `description: ${y(a.description)}`, `section: ${a.section}`, ...(a.section === 'deportes' && a.league ? [`league: ${a.league}`] : []),
         `place: ${y(a.place || 'Puerto Rico')}`, `date: ${date.toISOString()}`, `author: ${y(a.author || 'Noticias Xtra')}`,
-        ...(a.image || a.imageUrl ? [`image: ${y(a.imageUrl || (/^https?:/.test(a.image) ? a.image : `imagenes/${a.id.toLowerCase()}.jpg`))}`, ...(a.imageCaption ? [`imageCaption: ${y(a.imageCaption)}`] : []), ...(a.imageCredit ? [`imageCredit: ${y(a.imageCredit)}`] : [])] : []),
+        ...(a.image || a.imageUrl ? [`image: ${y(a.imageUrl || (a.image.startsWith('data:') ? `imagenes/${a.id.toLowerCase()}.jpg` : a.image))}`, ...(a.imageCaption ? [`imageCaption: ${y(a.imageCaption)}`] : []), ...(a.imageCredit ? [`imageCredit: ${y(a.imageCredit)}`] : [])] : []),
         ...(['breaking', 'trending', 'featured', 'live', 'pinned', 'homeLead', 'sectionLead'] as const).filter((k) => a[k]).map((k) => `${k}: true`),
-        'aiAssisted: false', 'draft: false',
+        `aiAssisted: ${a.aiAssisted ?? false}`, 'draft: false', ...(a.fmExtra ? [a.fmExtra] : []),
         ...(a.sources.length ? ['sources:', ...a.sources.flatMap((s) => [`  - name: ${y(s.name)}`, ...(s.url ? [`    url: ${y(s.url)}`] : [])])] : []),
         ...(a.related.length ? ['related:', ...a.related.map((r) => `  - ${y(r)}`)] : []),
         ...(a.correction ? [`correction: ${y(a.correction)}`] : []),

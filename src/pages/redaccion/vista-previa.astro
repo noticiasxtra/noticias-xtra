@@ -79,7 +79,8 @@ const secs = Object.fromEntries(SECTIONS.map((s) => [s.id, { name: s.name, color
       const fallback = PHOTOS[a.section === 'deportes' && a.league ? `deportes:${a.league}` : a.section] ?? PHOTOS['puerto-rico'];
       const own = a.image || a.imageUrl;
       const ph = $('[data-vp-ph]'); ph.style.setProperty('--c', sec.color);
-      (root.querySelector('[data-vp-img]') as HTMLImageElement).src = own || fallback.src;
+      // The site's own photos have relative addresses ('images/…')
+      (root.querySelector('[data-vp-img]') as HTMLImageElement).src = own ? (/^(https?:|data:)/.test(own) ? own : `${base}/${own}`) : fallback.src;
       $('[data-vp-ph-place]').textContent = a.place || '';
       $('[data-vp-cap]').textContent = own ? `${a.imageCaption || `${a.place || 'Puerto Rico'}. Imagen de referencia.`} ${a.imageCredit || ''}` : `${fallback.caption} Imagen de archivo. ${fallback.credit}`;
       // Body: the editor's blocks, with embeds and photos exactly as the site shows them
@@ -101,6 +102,5 @@ const secs = Object.fromEntries(SECTIONS.map((s) => [s.id, { name: s.name, color
     }
     paint();
     addEventListener('storage', (e) => { if (e.key === 'nx-preview') paint(); }); // live while the editor types
-    void base;
   </script>
 </Base>

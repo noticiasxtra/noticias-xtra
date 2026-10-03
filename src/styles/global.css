@@ -3878,3 +3878,6 @@ a,button,summary,label{-webkit-tap-highlight-color:transparent}
 .nx-ask-ok{background:#2B1185;color:#fff}
 .nx-ask-ok.danger{background:#B71C30}
 @media (prefers-reduced-motion:reduce){.nx-ask[open]{animation:none}}
+/* Editor: a block from an existing story the editor can't change (embed, photo, document), kept as it is */
+.wr-raw{display:block;margin:14px 0;padding:6px;border:1px dashed var(--line);border-radius:10px}
+.wr-raw iframe{max-width:100%}
