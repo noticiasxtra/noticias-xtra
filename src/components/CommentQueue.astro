@@ -134,7 +134,7 @@ const Tag = embedded ? 'section' : 'main';
       author: { username: string } | null; why: Array<{ reason: string }> };
     let rows: C[] = [];
     async function load() {
-      const sel = 'id,story,url,body,media,status,flags,likes,reports,created_at,author:profiles(username),why:comment_reports(reason)';
+      const sel = 'id,story,url,body,media,status,flags,likes,reports,created_at,author:profiles!comments_user_id_fkey(username),why:comment_reports(reason)';
       const r = await staffApi(`comments?or=(status.eq.review,status.eq.removed,reports.gt.0)&select=${sel}&order=created_at.desc&limit=200`);
       if (!r?.ok) { page.querySelector('[data-list]')!.innerHTML = '<p class="apr-empty">No pudimos cargar los comentarios. Revisa que entraste al panel con tu cuenta.</p>'; return; }
       rows = await r.json(); paint();

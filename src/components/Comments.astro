@@ -385,11 +385,11 @@ const GIF_IMGS = [['gif-wepa', '¡Wepa! animado'], ['gif-coqui', 'Coquí saltand
     const need = (why: string) => { if (loggedIn()) return true; askLogin(why); return false; };
 
     async function load() {
-      const r = await api(`comments?story=eq.${encodeURIComponent(sid)}&select=id,parent,body,media,status,likes,created_at,user_id,author:profiles(username,photo)&order=created_at.asc&limit=400`, {}, false);
+      const r = await api(`comments?story=eq.${encodeURIComponent(sid)}&select=id,parent,body,media,status,likes,created_at,user_id,author:profiles!comments_user_id_fkey(username,photo)&order=created_at.asc&limit=400`, {}, false);
       rows = r?.ok ? await r.json() : [];
       // Logged in: also my own comments under review (the public read above only returns visible ones)
       if (loggedIn()) {
-        const mine = await api(`comments?story=eq.${encodeURIComponent(sid)}&user_id=eq.${myId()}&status=neq.visible&select=id,parent,body,media,status,likes,created_at,user_id,author:profiles(username,photo)`);
+        const mine = await api(`comments?story=eq.${encodeURIComponent(sid)}&user_id=eq.${myId()}&status=neq.visible&select=id,parent,body,media,status,likes,created_at,user_id,author:profiles!comments_user_id_fkey(username,photo)`);
         if (mine?.ok) rows = [...rows, ...(await mine.json())].sort((a, b) => Date.parse(a.created_at) - Date.parse(b.created_at));
         const ids = rows.map((x) => x.id);
         if (ids.length) {
