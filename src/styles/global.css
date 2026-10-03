@@ -3815,3 +3815,42 @@ button.pnl-kpi:hover{border-color:var(--purple)}
 .pnl-real,.pnl-prev{display:grid;gap:8px}
 .pnl-real[hidden],.pnl-prev[hidden],[data-prevlogin][hidden]{display:none}
 .pnl-real input{font:inherit;font-size:16px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--card);color:var(--ink)}
+
+/* ===== Phones: app feel (bottom tab bar, hiding logo bar, steady section menu, page fades) ===== */
+.tabbar{display:none}
+a,button,summary,label{-webkit-tap-highlight-color:transparent}
+@media (max-width:760px){
+  /* Section menu: swipes only sideways (the current-section line made the row 3px taller, so the words slid up and down) */
+  .nav .wrap{overflow-y:hidden;overscroll-behavior-x:contain}
+  .nav-links>a{margin-bottom:0}
+  /* Current section: a white pill */
+  .nav-links>a[aria-current="page"],.nav-links>a[aria-current="page"]:first-child{align-self:center;margin:6px 2px;padding:6px 12px;border-bottom:0;border-radius:999px;background:#fff;color:#2B1185;opacity:1}
+  .nav-links>a:active{opacity:.6}
+
+  /* Bottom tab bar */
+  .tabbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:40;padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px));background:color-mix(in srgb,var(--bg,#fff) 92%,transparent);-webkit-backdrop-filter:saturate(1.6) blur(14px);backdrop-filter:saturate(1.6) blur(14px);border-top:1px solid var(--line)}
+  .tabbar a{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 0;border-radius:12px;color:var(--muted);font-family:var(--head);font-size:11px;font-weight:600;transition:transform .12s}
+  .tabbar a:active{transform:scale(.9)}
+  .tabbar a[aria-current="page"]{color:var(--purple)}
+  .tabbar a[aria-current="page"] svg{stroke-width:2.4}
+  [data-theme="dark"] .tabbar a[aria-current="page"]{color:#fff}
+  body:not(.staff){padding-bottom:calc(64px + env(safe-area-inset-bottom,0px))}
+  .toast,.apn-toast{bottom:calc(80px + env(safe-area-inset-bottom,0px))}
+
+  /* Logo bar slides away while reading down; everything pinned under it moves up with it */
+  .masthead{transition:transform .25s ease}
+  .nav,.apn-tabs,.lv-player,.lv-reader-bar{transition:top .25s ease}
+  html.bars-up{--mh-h:0px !important}
+  html.bars-up .masthead{transform:translateY(-100%)}
+  html.bars-up .nav{box-shadow:0 4px 14px rgba(22,22,29,.12)}
+}
+@media (max-width:760px) and (prefers-reduced-motion:reduce){
+  .masthead,.nav,.apn-tabs,.lv-player,.lv-reader-bar,.tabbar a{transition:none}
+}
+/* Phones: pages fade into each other; the header, menu and tab bar stay put */
+@media (max-width:760px) and (prefers-reduced-motion:no-preference){
+  @view-transition{navigation:auto}
+  .masthead{view-transition-name:nx-mast}
+  .nav{view-transition-name:nx-nav}
+  .tabbar{view-transition-name:nx-tabs}
+}
