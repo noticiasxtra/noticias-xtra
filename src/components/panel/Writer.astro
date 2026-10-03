@@ -24,6 +24,7 @@ const TOOLS = [
   ['hr', 'Línea separadora', '<path d="M3 12h18"/>'],
   ['image', 'Foto', '<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="M21 16l-5-5-8 8"/>'],
   ['embed', 'Insertar video o publicación', '<path d="M8 8l-5 4 5 4M16 8l5 4-5 4M13.5 5l-3 14"/>'],
+  ['doc', 'Documento (PDF)', '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/>'],
   ['undo', 'Deshacer (Ctrl+Z)', '<path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/>'],
   ['redo', 'Rehacer', '<path d="M15 14l5-5-5-5"/><path d="M20 9H10a6 6 0 0 0 0 12h3"/>'],
   ['clear', 'Quitar formato', '<path d="M6 5h12M12 5l-3 14M4 20L20 4"/>'],
@@ -123,16 +124,37 @@ const TOOLS = [
     </div>
   </div>
 
+  <!-- Attach a document -->
+  <dialog class="wr-docdlg" data-doc-dlg aria-labelledby="wr-doc-h">
+    <form method="dialog" class="sd-form" data-doc-form>
+      <header class="sd-dlg-h"><h2 id="wr-doc-h">Añadir documento</h2><button type="button" class="sd-x" data-doc-close aria-label="Cerrar">✕</button></header>
+      <p class="pnl-muted">En la noticia se ve como una tarjeta limpia; el lector toca “Ver documento” y lo lee completo.</p>
+      <label>Título que verá el lector<input name="title" maxlength="120" required placeholder="ej. Informe de la Contralora sobre el municipio de Ponce" /></label>
+      <label>Sube el PDF<input type="file" name="file" accept="application/pdf" /></label>
+      <p class="pnl-muted pnl-small">o pega el enlace de un PDF público (por ejemplo, de una agencia o un tribunal):</p>
+      <label>Enlace<input type="url" name="url" placeholder="https://…/documento.pdf" /></label>
+      <label>De dónde viene (opcional)<input name="source" maxlength="60" placeholder="ej. Oficina del Contralor" /></label>
+      <p class="cm-err" data-doc-err hidden></p>
+      <footer class="sd-dlg-f"><button type="button" class="adp-btn ghost-dark" data-doc-close>Cancelar</button><button type="submit" class="adp-btn">Insertar</button></footer>
+    </form>
+  </dialog>
+
   <!-- Preview -->
   <dialog class="wr-prev" data-wr-prev aria-label="Vista previa">
-    <div class="wr-prev-bar"><span class="sp-demo">VISTA PREVIA</span><span>Así se verá la noticia</span><button type="button" class="adp-btn ghost-dark" data-prev-close>Cerrar</button></div>
-    <article class="wr-prev-art" data-prev-art></article>
+    <div class="wr-prev-bar">
+      <span class="sp-demo">VISTA PREVIA</span><span class="wr-prev-t">La página real del sitio con esta noticia</span>
+      <div class="pnl-range" role="group" aria-label="Pantalla"><button type="button" data-dev="desk" aria-pressed="true">Computadora</button><button type="button" data-dev="phone" aria-pressed="false">Celular</button></div>
+      <a class="pnl-link" href={url('redaccion/vista-previa')} target="_blank" rel="noopener">Abrir en otra pestaña ↗</a>
+      <button type="button" class="adp-btn ghost-dark" data-prev-close>Cerrar</button>
+    </div>
+    <div class="wr-prev-stage" data-prev-stage><iframe title="Vista previa de la noticia" data-prev-frame></iframe></div>
   </dialog>
   <div class="apn-toast" data-wr-toast role="status" hidden></div>
 </section>
 
 <script>
   import { embedFor } from '../../lib/embeds.mjs';
+  import { docCard } from '../../lib/doccard.mjs';
   const root = document.querySelector<HTMLElement>('[data-wr]');
   if (root) {
     type Src = { name: string; url?: string };
@@ -171,6 +193,7 @@ const TOOLS = [
           <h2>${esc(a.title || 'Sin titular')}</h2>${a.note ? `<p class="sd-warn">Nota del editor: ${esc(a.note)}</p>` : ''}</div>
         <div class="pnl-row-acts">
           ${a.status === 'review' && canPublish() ? '<button type="button" class="adp-btn" data-la="approve">Aprobar y publicar</button><button type="button" class="pnl-link" data-la="return">Devolver</button>' : ''}
+          <button type="button" class="adp-btn ghost-dark" data-la="preview">Vista previa</button>
           <button type="button" class="adp-btn ghost-dark" data-la="edit">${a.status === 'published' ? 'Editar o corregir' : 'Editar'}</button>
           <button type="button" class="pnl-link" data-la="dup">Duplicar</button>
           <button type="button" class="apr-reject" data-la="del">Borrar</button>
@@ -279,6 +302,7 @@ const TOOLS = [
         const href = prompt('Pega el enlace (https://…):', 'https://'); if (!href || !/^https?:\/\/\S+\.\S+/.test(href)) return;
         const s2 = getSelection()!; s2.removeAllRanges(); s2.addRange(r); exec('createLink', href);
       }
+      if (t === 'doc') { docForm.reset(); $('[data-doc-err]').hidden = true; docDlg.showModal(); }
       if (t === 'embed') {
         const u = prompt('Pega el enlace del video o publicación (YouTube, X, Instagram, Facebook, TikTok, Spotify o Google Maps):', '');
         if (!u) return;
@@ -355,6 +379,10 @@ const TOOLS = [
         if (!(n instanceof HTMLElement)) return '';
         const tag = n.tagName, line = () => [...n.childNodes].map(md.inline).join('').trim();
         if (n.classList.contains('wr-embed')) return n.dataset.url ?? '';
+        if (n.classList.contains('wr-doc')) { // an uploaded PDF goes to public/documentos/ when published (with accounts)
+          const d = docOf(n); if (d.src.startsWith('data:')) d.src = `${root.dataset.base!.replace(/\/$/, '')}/documentos/${(cur?.id ?? 'doc').toLowerCase()}-${d.title.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').slice(0, 40)}.pdf`;
+          return docCard(d);
+        }
         if (n.classList.contains('wr-img')) { const img = n.querySelector('img')!; const cap = n.querySelector('figcaption')?.textContent?.trim() ?? '';
           return `<figure><img src="${img.getAttribute('src')}" alt="${esc(img.alt)}" loading="lazy" />${cap ? `<figcaption>${esc(cap)}</figcaption>` : ''}</figure>`; }
         if (tag === 'H2') return `## ${line()}`;
@@ -386,25 +414,53 @@ const TOOLS = [
       a.href = URL.createObjectURL(blob); a.download = `${slug(cur)}.md`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
     });
 
-    // ---------- preview ----------
-    $('[data-wr-preview]').addEventListener('click', () => {
-      if (!cur) return; readEditor();
-      const photo = cur.image || cur.imageUrl;
-      const bodyHtml = [...body.childNodes].map((n) => {
-        if (n instanceof HTMLElement && n.classList.contains('wr-embed')) return embedFor(n.dataset.url!) ?? '';
-        if (n instanceof HTMLElement && n.classList.contains('wr-img')) { const c = n.cloneNode(true) as HTMLElement; c.querySelector('button')?.remove(); c.removeAttribute('contenteditable'); return c.outerHTML; }
-        return n instanceof HTMLElement ? n.outerHTML : esc(n.textContent ?? '');
-      }).join('');
-      $('[data-prev-art]').innerHTML = `<p class="wr-prev-sec">${esc(SECS.find((s) => s.id === cur!.section)?.name ?? '')}${cur.breaking ? ' · <span class="wr-brk">ÚLTIMA HORA</span>' : ''}</p>
-        <h1>${esc(cur.title || 'Sin titular')}</h1><p class="dek">${esc(cur.description)}</p>
-        <p class="wr-prev-by">Por ${esc(cur.author || 'Noticias Xtra')} · ${esc(cur.place || 'Puerto Rico')} · ${new Date(cur.date || Date.now()).toLocaleString('es-PR', { day: 'numeric', month: 'long', year: 'numeric', hour: 'numeric', minute: '2-digit' })}</p>
-        ${photo ? `<figure class="wr-prev-photo"><img src="${esc(photo)}" alt=""><figcaption>${esc(cur.imageCaption)} ${esc(cur.imageCredit)}</figcaption></figure>` : ''}
-        <div class="body">${bodyHtml}</div>
-        ${cur.sources.length ? `<p class="sources">Fuentes: ${cur.sources.map((s) => esc(s.name)).join(', ')}</p>` : ''}
-        ${cur.correction ? `<p class="sources"><strong>Corrección:</strong> ${esc(cur.correction)}</p>` : ''}`;
-      $<HTMLDialogElement>('[data-wr-prev]').showModal();
+    // ---------- documents (PDF) ----------
+    const docDlg = $<HTMLDialogElement>('[data-doc-dlg]'); const docForm = $<HTMLFormElement>('[data-doc-form]');
+    const docOf = (f: HTMLElement) => ({ src: f.dataset.src!, title: f.dataset.title!, pages: Number(f.dataset.pages) || 0, size: Number(f.dataset.size) || 0, source: f.dataset.source || '' });
+    $$('[data-doc-close]').forEach((b) => b.addEventListener('click', () => docDlg.close()));
+    // Rough page count straight from the PDF file (counts its page objects)
+    const pdfPages = (buf: ArrayBuffer) => (new TextDecoder('latin1').decode(buf).match(/\/Type\s*\/Page[^s]/g) || []).length;
+    docForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const d = new FormData(docForm); const err = $('[data-doc-err]');
+      const title = String(d.get('title') || '').trim(), link = String(d.get('url') || '').trim(), source = String(d.get('source') || '').trim();
+      const file = d.get('file') as File | null;
+      if (title.length < 4) { err.textContent = 'Escribe un título para el documento.'; err.hidden = false; return; }
+      let src = '', size = 0, pages = 0;
+      if (file && file.size) {
+        if (file.type !== 'application/pdf') { err.textContent = 'Sube el documento en PDF.'; err.hidden = false; return; }
+        if (file.size > 8 * 1048576) { err.textContent = 'El PDF pasa de 8 MB. Pega un enlace o comprímelo.'; err.hidden = false; return; }
+        const buf = await file.arrayBuffer(); pages = pdfPages(buf); size = file.size;
+        src = await new Promise<string>((r) => { const fr = new FileReader(); fr.onload = () => r(String(fr.result)); fr.readAsDataURL(file); });
+      } else if (/^https?:\/\/\S+$/.test(link)) src = link;
+      else { err.textContent = 'Sube un PDF o pega su enlace.'; err.hidden = false; return; }
+      docDlg.close();
+      insertBlock(`<figure class="wr-doc" contenteditable="false" data-src="${esc(src)}" data-title="${esc(title)}" data-pages="${pages}" data-size="${size}" data-source="${esc(source)}"></figure>`);
     });
-    $('[data-prev-close]').addEventListener('click', () => $<HTMLDialogElement>('[data-wr-prev]').close());
+    // In the editor the block shows the same card readers will see, plus a remove button
+    const paintDocs = () => body.querySelectorAll<HTMLElement>('figure.wr-doc:not([data-ready])').forEach((f) => {
+      f.dataset.ready = '1'; f.innerHTML = `${docCard(docOf(f)).replace(/^<figure class="doc-card">|<\/figure>$/g, '')}<button type="button" class="wr-photo-x" data-img-rm aria-label="Quitar documento">✕</button>`;
+    });
+    new MutationObserver(paintDocs).observe(body, { childList: true, subtree: true });
+    body.addEventListener('click', (e) => { if ((e.target as HTMLElement).closest('.doc-open')) e.preventDefault(); }); // no navigation while editing
+
+    // ---------- preview: the real story page (/redaccion/vista-previa/) in a frame, at computer or phone width ----------
+    const prevDlg = $<HTMLDialogElement>('[data-wr-prev]'); const frame = $<HTMLIFrameElement>('[data-prev-frame]');
+    const PREVIEW_URL = `${root.dataset.base!.replace(/\/$/, '')}/redaccion/vista-previa/`;
+    const sendPreview = (a: Art) => { try { localStorage.setItem('nx-preview', JSON.stringify(a)); } catch { toast('No se pudo preparar la vista previa: hay demasiadas fotos grandes.'); } };
+    function showPreview(a: Art) {
+      sendPreview(a);
+      if (!frame.src) frame.src = PREVIEW_URL; else frame.contentWindow?.location.reload();
+      prevDlg.showModal();
+    }
+    $('[data-wr-preview]').addEventListener('click', () => { if (!cur) return; readEditor(); showPreview(cur); });
+    $$<HTMLButtonElement>('[data-dev]').forEach((b) => b.addEventListener('click', () => {
+      $$('[data-dev]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      $('[data-prev-stage]').classList.toggle('phone', b.dataset.dev === 'phone');
+    }));
+    $('[data-prev-close]').addEventListener('click', () => prevDlg.close());
+    // While the preview is open in another tab, typing updates it
+    $('[data-wr-editor]').addEventListener('input', () => { if (cur) { clearTimeout((sendPreview as any).t); (sendPreview as any).t = setTimeout(() => { readEditor(); sendPreview(cur!); }, 600); } });
 
     // ---------- save / send / publish ----------
     $('[data-wr-save]').addEventListener('click', () => { if (persist(cur?.status === 'published' ? 'published' : 'draft')) toast('Borrador guardado.'); });
@@ -428,6 +484,7 @@ const TOOLS = [
       const la = t.closest<HTMLElement>('[data-la]'); if (!la) return;
       const id = t.closest<HTMLElement>('[data-id]')!.dataset.id!; const all = load(); const a = all.find((x) => x.id === id)!;
       if (la.dataset.la === 'edit') openEditor(a);
+      if (la.dataset.la === 'preview') showPreview(a);
       if (la.dataset.la === 'dup') { save([{ ...structuredClone(a), id: `A-${Date.now().toString(36)}`, status: 'draft', title: `${a.title} (copia)`, updated: Date.now(), owner: me()?.name ?? a.owner }, ...all]); renderList(); }
       if (la.dataset.la === 'del') { if (confirm(`¿Borrar “${a.title || 'Sin titular'}”?`)) { save(all.filter((x) => x.id !== id)); renderList(); } }
       if (la.dataset.la === 'approve') { a.status = new Date(a.date).valueOf() > Date.now() + 60000 ? 'scheduled' : 'published'; a.updated = Date.now(); save(all); renderList(); toast('Aprobada. Vista previa: con las cuentas, se publica sola.'); }

@@ -1,0 +1,102 @@
+---
+// Exact preview of an article from the staff editor (Escribir): the real story page (header, menu, story layout,
+// sidebar, "Te puede interesar"), filled with the article being written. The editor saves the article to this
+// browser ('nx-preview') and shows this page in a frame (computer or phone width); it updates live while typing.
+// Internal: hidden from search engines.
+import Base from '../../layouts/Base.astro';
+import Sidebar from '../../components/Sidebar.astro';
+import StoryCard from '../../components/StoryCard.astro';
+import DocViewer from '../../components/DocViewer.astro';
+import { getStories, SECTIONS, defaultPhoto, url } from '../../lib/site';
+import { LEAGUES } from '../../lib/leagues';
+
+const stories = await getStories();
+const more = stories.slice(0, 4);
+// Default photo for each section and league, for articles without their own photo
+const photos: Record<string, { src: string; caption: string; credit: string }> = {};
+for (const s of SECTIONS) { const p = defaultPhoto(s.id); photos[s.id] = { src: url(p.src), caption: p.caption, credit: p.credit }; }
+for (const l of LEAGUES) { const p = defaultPhoto('deportes', l.id); photos[`deportes:${l.id}`] = { src: url(p.src), caption: p.caption, credit: p.credit }; }
+const secs = Object.fromEntries(SECTIONS.map((s) => [s.id, { name: s.name, color: s.color }]));
+---
+<Base title="Vista previa" description="Vista previa interna de una noticia." noindex>
+  <div class="vp-flag" role="note"><span class="sp-demo">VISTA PREVIA</span> Así se verá la noticia en el sitio. Todavía no está publicada.</div>
+  <main class="wrap" id="main" data-vp data-photos={JSON.stringify(photos)} data-secs={JSON.stringify(secs)} data-base={url()}>
+    <div class="art-grid">
+      <article class="art">
+        <div class="crumbs"><a href={url()}>Portada</a> / <a href={url()} data-vp-crumb>Sección</a></div>
+        <span class="badge" data-vp-badge></span>
+        <h1 data-vp-title>Sin titular</h1>
+        <p class="dek" data-vp-dek></p>
+        <div class="byline">
+          <div class="by-who">
+            <strong data-vp-by>Por Noticias Xtra</strong>
+            <span><span data-vp-when></span>, <span class="notranslate" translate="no" data-vp-place>Puerto Rico</span> · <span data-vp-min>1</span> min de lectura</span>
+          </div>
+          <div class="by-actions" aria-hidden="true">
+            <span class="tool"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h12v18l-6-4-6 4z" /></svg> Guardar</span>
+            <span class="tool">A−</span><span class="tool">A+</span>
+          </div>
+        </div>
+        <div class="ph" data-vp-ph><img alt="" data-vp-img /><span class="place notranslate" translate="no" data-vp-ph-place></span></div>
+        <p class="caption" data-vp-cap></p>
+        <div class="body" data-vp-body></div>
+        <p class="sources" data-vp-corr hidden></p>
+        <p class="sources" data-vp-src hidden></p>
+        <div class="sec-h"><h2>Te puede interesar</h2></div>
+        <div class="grid2">{more.map((x) => <StoryCard story={x} />)}</div>
+      </article>
+      <Sidebar />
+    </div>
+  </main>
+  <DocViewer />
+  <script>
+    import { embedFor } from '../../lib/embeds.mjs';
+    import { docCard } from '../../lib/doccard.mjs';
+    const root = document.querySelector<HTMLElement>('[data-vp]')!;
+    const PHOTOS: Record<string, { src: string; caption: string; credit: string }> = JSON.parse(root.dataset.photos!);
+    const SECS: Record<string, { name: string; color: string }> = JSON.parse(root.dataset.secs!);
+    const base = root.dataset.base!.replace(/\/$/, '');
+    const $ = (s: string) => root.querySelector<HTMLElement>(s)!;
+    const esc = (s = '') => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
+    // Links in the preview must not leave it (the frame is inside the staff panel)
+    document.addEventListener('click', (e) => { const a = (e.target as HTMLElement).closest('a'); if (a && !a.classList.contains('doc-open')) e.preventDefault(); }, true);
+
+    function paint() {
+      let a: any = null;
+      try { a = JSON.parse(localStorage.getItem('nx-preview') || 'null'); } catch { /* storage blocked */ }
+      if (!a) { $('[data-vp-title]').textContent = 'Abre la vista previa desde el editor (Panel de la redacción → Escribir).'; return; }
+      const sec = SECS[a.section] ?? SECS['puerto-rico'];
+      document.title = `${a.title || 'Sin titular'} | Vista previa`;
+      $('[data-vp-crumb]').textContent = sec.name;
+      const badge = $('[data-vp-badge]'); badge.textContent = a.live ? 'EN VIVO' : sec.name; badge.className = a.live ? 'badge live' : 'badge';
+      $('[data-vp-title]').textContent = a.title || 'Sin titular';
+      $('[data-vp-dek]').textContent = a.description || '';
+      $('[data-vp-by]').textContent = `Por ${a.author || 'Noticias Xtra'}`;
+      const d = a.date ? new Date(a.date) : new Date();
+      $('[data-vp-when]').textContent = d.toLocaleDateString('es-PR', { day: 'numeric', month: 'long', year: 'numeric' });
+      $('[data-vp-place]').textContent = a.place || 'Puerto Rico';
+      // Photo: the article's own, or the same default the site would use for its section or league
+      const fallback = PHOTOS[a.section === 'deportes' && a.league ? `deportes:${a.league}` : a.section] ?? PHOTOS['puerto-rico'];
+      const own = a.image || a.imageUrl;
+      const ph = $('[data-vp-ph]'); ph.style.setProperty('--c', sec.color);
+      (root.querySelector('[data-vp-img]') as HTMLImageElement).src = own || fallback.src;
+      $('[data-vp-ph-place]').textContent = a.place || '';
+      $('[data-vp-cap]').textContent = own ? `${a.imageCaption || `${a.place || 'Puerto Rico'}. Imagen de referencia.`} ${a.imageCredit || ''}` : `${fallback.caption} Imagen de archivo. ${fallback.credit}`;
+      // Body: the editor's blocks, with embeds and photos exactly as the site shows them
+      const box = document.createElement('div'); box.innerHTML = a.body || '';
+      box.querySelectorAll<HTMLElement>('figure.wr-embed').forEach((f) => { const h = embedFor(f.dataset.url || ''); if (h) f.outerHTML = h; else f.remove(); });
+      box.querySelectorAll<HTMLElement>('figure.wr-doc').forEach((f) => { f.outerHTML = docCard({ src: f.dataset.src!, title: f.dataset.title!, pages: Number(f.dataset.pages) || 0, size: Number(f.dataset.size) || 0, source: f.dataset.source || '' }); });
+      box.querySelectorAll<HTMLElement>('figure.wr-img').forEach((f) => { f.removeAttribute('contenteditable'); f.className = ''; f.querySelector('button')?.remove(); });
+      box.querySelectorAll('[contenteditable]').forEach((x) => x.removeAttribute('contenteditable'));
+      $('[data-vp-body]').innerHTML = box.innerHTML;
+      const words = (box.textContent || '').trim().split(/\s+/).filter(Boolean).length;
+      $('[data-vp-min]').textContent = String(Math.max(1, Math.round(words / 200)));
+      const corr = $('[data-vp-corr]'); corr.hidden = !a.correction; corr.innerHTML = a.correction ? `<strong>Corrección:</strong> ${esc(a.correction)}` : '';
+      const src = $('[data-vp-src]'); src.hidden = !a.sources?.length;
+      src.innerHTML = a.sources?.length ? `Fuentes: ${a.sources.map((s: { name: string; url?: string }) => (s.url ? `<a href="${esc(s.url)}">${esc(s.name)}</a>` : esc(s.name))).join(', ')}` : '';
+    }
+    paint();
+    addEventListener('storage', (e) => { if (e.key === 'nx-preview') paint(); }); // live while the editor types
+    void base;
+  </script>
+</Base>

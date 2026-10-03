@@ -9,6 +9,7 @@ import Sidebar from '../../components/Sidebar.astro';
 import AdSlot from '../../components/AdSlot.astro';
 import Comments from '../../components/Comments.astro';
 import GamesTeaser from '../../components/GamesTeaser.astro';
+import DocViewer from '../../components/DocViewer.astro';
 import { getStories, section, url, defaultPhoto, type Story } from '../../lib/site';
 import { columnistOf } from '../../lib/columnists';
 
@@ -115,6 +116,7 @@ const columnist = d.section === 'opinion' ? columnistOf(d.author) : undefined;
       <Sidebar />
     </div>
   </main>
+  <DocViewer />
   <script>
     // Comment icon in the toolbar shows the same count as the comments section
     {

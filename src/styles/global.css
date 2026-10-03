@@ -3591,3 +3591,41 @@ button.pnl-kpi:hover{border-color:var(--purple)}
   .ls-tabs::-webkit-scrollbar{display:none}
   .ls-tabs button{flex:none}
 }
+/* Editor preview: the real story page in a frame, computer or phone width */
+.wr-prev{width:min(1440px,98vw);height:94vh;max-height:94vh;display:none;flex-direction:column}
+.wr-prev[open]{display:flex}
+.wr-prev-bar{flex-wrap:wrap}
+.wr-prev-bar .pnl-range{margin-left:auto}
+.wr-prev-bar .adp-btn{margin-left:0}
+.wr-prev-t{color:var(--muted)}
+.wr-prev-stage{flex:1;min-height:0;display:flex;justify-content:center;background:var(--soft);padding:12px;overflow:auto}
+.wr-prev-stage iframe{width:100%;height:100%;border:0;border-radius:10px;background:var(--bg);box-shadow:0 8px 30px rgba(0,0,0,.18);transition:width .2s}
+.wr-prev-stage.phone iframe{width:390px;max-width:100%;border:10px solid #16161D;border-radius:34px}
+/* The preview page itself */
+.vp-flag{position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:8px;justify-content:center;padding:6px 12px;background:#FFF5DB;color:#5C3A00;font-size:13px;font-weight:700}
+
+/* Documents in stories: a clean card; the whole PDF opens in a viewer */
+.body .doc-card,.doc-card{margin:24px 0}
+.doc-open{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:14px;border:1px solid var(--line);background:var(--card);color:var(--ink) !important;text-decoration:none !important;box-shadow:0 2px 10px rgba(22,22,29,.05);transition:border-color .15s,box-shadow .15s}
+.doc-open:hover{border-color:var(--purple);box-shadow:0 6px 20px rgba(43,17,133,.12)}
+.doc-ic{flex:none;display:grid;place-items:center;width:52px;height:60px;border-radius:8px;background:#FDECEE;color:var(--red)}
+.doc-tx{display:grid;gap:2px;min-width:0;flex:1}
+.doc-tx b{font-family:var(--head);font-size:16px;line-height:1.3;overflow-wrap:anywhere}
+.doc-tx small{font-size:13px;color:var(--muted)}
+.doc-go{flex:none;padding:8px 14px;border-radius:999px;background:var(--purple);color:#fff;font-family:var(--head);font-weight:700;font-size:14px}
+[data-theme="dark"] .doc-ic{background:#4A1820;color:#FBD3D9}
+.docv{width:min(1100px,96vw);height:92vh;max-height:92vh;padding:0;border:0;border-radius:16px;background:var(--card);color:var(--ink);overflow:hidden}
+.docv[open]{display:flex;flex-direction:column}
+.docv::backdrop{background:rgba(15,12,40,.65)}
+.docv-bar{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line)}
+.docv-bar b{flex:1;min-width:0;font-family:var(--head);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.docv-btn{flex:none;padding:7px 12px;border-radius:999px;border:1px solid var(--line);color:var(--ink);font-weight:700;font-size:13.5px}
+.docv-btn:hover{border-color:var(--purple);color:var(--purple)}
+.docv-x{flex:none;width:36px;height:36px;border:0;border-radius:50%;background:var(--soft);color:var(--ink);font-size:15px;cursor:pointer}
+.docv iframe{flex:1;width:100%;border:0;background:#525659}
+/* Editor: document block */
+.wr-body figure.wr-doc{position:relative;margin:18px 0}
+.wr-body figure.wr-doc .wr-photo-x{top:-10px;right:-10px;background:var(--red)}
+.wr-docdlg{width:min(560px,94vw);padding:0;border:0;border-radius:18px;background:var(--card);color:var(--ink)}
+.wr-docdlg::backdrop{background:rgba(15,12,40,.55)}
+@media (max-width:600px){ .doc-go{display:none} .doc-ic{width:44px;height:52px} }

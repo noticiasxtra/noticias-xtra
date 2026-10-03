@@ -6,13 +6,13 @@
 // analytics and revenue are examples (EJEMPLO / DEMO), and Salud reads the real public GitHub status.
 // The real version: Supabase login + roles, a Supabase Edge Function holding the GitHub token (approve = merge
 // the pull request), Google Analytics for visitors, and Stripe/ATH/Ad Manager for revenue.
-import Base from '../layouts/Base.astro';
-import AdQueue from '../components/AdQueue.astro';
-import CommentQueue from '../components/CommentQueue.astro';
-import SalesDesk from '../components/panel/SalesDesk.astro';
-import Writer from '../components/panel/Writer.astro';
-import { getStories, url, SECTIONS, SITE } from '../lib/site';
-import sources from '../../scripts/sources.json';
+import Base from '../../layouts/Base.astro';
+import AdQueue from '../../components/AdQueue.astro';
+import CommentQueue from '../../components/CommentQueue.astro';
+import SalesDesk from '../../components/panel/SalesDesk.astro';
+import Writer from '../../components/panel/Writer.astro';
+import { getStories, url, SECTIONS, SITE } from '../../lib/site';
+import sources from '../../../scripts/sources.json';
 
 const stories = await getStories();
 const recent = stories.filter((s) => s.data.section !== 'opinion').slice(0, 12)
@@ -178,8 +178,8 @@ const TABS = [
   </main>
 
   <script>
-    import { getReports } from '../lib/moderation';
-    import { listRequests } from '../lib/adrequests';
+    import { getReports } from '../../lib/moderation';
+    import { listRequests } from '../../lib/adrequests';
     const root = document.querySelector<HTMLElement>('[data-pnl]')!;
     const RECENT: Array<{ id: string; title: string; section: string; url: string; date: string }> = JSON.parse(root.dataset.recent!);
     const SOURCES: Array<{ name: string; section: string; review: string }> = JSON.parse(root.dataset.sources!);
