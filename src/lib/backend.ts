@@ -41,6 +41,18 @@ export async function campaignStats(ids: string[]): Promise<Record<string, { vie
 
 // ---- Staff login and publishing ----
 export const staffToken = () => { try { return JSON.parse(localStorage.getItem(SESSION) || 'null')?.access_token as string | undefined; } catch { return undefined; } };
+/** The login token, renewed first when it's about to expire (Supabase tokens last one hour; the refresh token keeps staff signed in). */
+export async function freshToken(): Promise<string | undefined> {
+  let s: any = null;
+  try { s = JSON.parse(localStorage.getItem(SESSION) || 'null'); } catch { /* storage blocked */ }
+  if (!s?.access_token) return undefined;
+  if (!s.expires_at || s.expires_at * 1000 > Date.now() + 60_000 || !s.refresh_token) return s.access_token;
+  const r = await fetch(`${BACKEND.url.replace(/\/$/, '')}/auth/v1/token?grant_type=refresh_token`, { method: 'POST', headers: head(), body: JSON.stringify({ refresh_token: s.refresh_token }) }).catch(() => null);
+  if (!r?.ok) return s.access_token;
+  const next = await r.json();
+  try { localStorage.setItem(SESSION, JSON.stringify(next)); } catch { /* storage blocked */ }
+  return next.access_token;
+}
 export async function staffLogin(email: string, password: string): Promise<boolean> {
   const r = await fetch(`${BACKEND.url.replace(/\/$/, '')}/auth/v1/token?grant_type=password`, { method: 'POST', headers: head(), body: JSON.stringify({ email, password }) });
   if (!r.ok) return false;
@@ -49,7 +61,7 @@ export async function staffLogin(email: string, password: string): Promise<boole
 }
 /** Name and role of the logged-in staff member (from the `staff` table), or null if they're not on the team. */
 export async function staffProfile(): Promise<{ name: string; role: string } | null> {
-  const token = staffToken(); if (!token) return null;
+  const token = await freshToken(); if (!token) return null;
   try {
     const r = await fetch(rest('staff?select=name,role'), { headers: head(token) });
     const row = (await r.json())[0];
@@ -68,7 +80,7 @@ async function uploadImage(name: string, dataUrl: string, token: string) {
 }
 /** Automatic publishing: approving an ad puts it live for every reader (no code, no rebuild). */
 export async function publishCampaign(c: Campaign): Promise<boolean> {
-  const token = staffToken(); if (!hasBackend() || !token) return false;
+  const token = await freshToken(); if (!hasBackend() || !token) return false;
   const creatives = await Promise.all(c.creatives.map(async (cr, i) => (/^data:/.test(cr.img) ? { ...cr, img: await uploadImage(`${c.id.toLowerCase()}-${cr.w}x${cr.h}-${i}.png`, cr.img, token) } : cr)));
   const row = { id: c.id, client: c.client, sizes: c.sizes, start_date: c.start, end_date: c.end, regions: c.regions ?? 'all', takeover: !!c.takeover, skin: c.skin ?? null,
     creatives, views: c.views ?? null, weight: c.weight ?? 1, status: 'active' };
@@ -77,7 +89,52 @@ export async function publishCampaign(c: Campaign): Promise<boolean> {
 }
 /** Pause or end a campaign early (staff). */
 export async function setCampaignStatus(id: string, status: 'active' | 'paused' | 'ended') {
-  const token = staffToken(); if (!hasBackend() || !token) return false;
+  const token = await freshToken(); if (!hasBackend() || !token) return false;
   const r = await fetch(rest(`ad_campaigns?id=eq.${encodeURIComponent(id)}`), { method: 'PATCH', headers: head(token), body: JSON.stringify({ status }) });
   return r.ok;
+}
+
+// ---- Staff articles (panel → Escribir): drafts shared by the team; publishing goes through the "publicar" Edge Function ----
+export type ArticleRow = { id: string; status: 'draft' | 'review' | 'scheduled' | 'published'; doc: any; slug: string | null; published_by: string | null; updated_at: string };
+/** Articles this person may see (reporters: their own; editors and admins: everyone's). null = couldn't reach the database. */
+export async function listArticles(): Promise<ArticleRow[] | null> {
+  const token = await freshToken(); if (!token) return null;
+  try {
+    const r = await fetch(rest('articles?select=id,status,doc,slug,published_by,updated_at&order=updated_at.desc'), { headers: head(token) });
+    return r.ok ? await r.json() : null;
+  } catch { return null; }
+}
+/** Saves an article (updates it, or creates it the first time). */
+export async function putArticle(id: string, status: string, doc: unknown): Promise<boolean> {
+  const token = await freshToken(); if (!token) return false;
+  const body = JSON.stringify({ status, doc, updated_at: new Date().toISOString() });
+  try {
+    const up = await fetch(rest(`articles?id=eq.${encodeURIComponent(id)}`), { method: 'PATCH', headers: { ...head(token), Prefer: 'return=representation' }, body });
+    if (up.ok && (await up.json()).length) return true;
+    const add = await fetch(rest('articles'), { method: 'POST', headers: head(token), body: JSON.stringify({ id, status, doc }) });
+    return add.ok;
+  } catch { return false; }
+}
+export async function deleteArticle(id: string): Promise<boolean> {
+  const token = await freshToken(); if (!token) return false;
+  const r = await fetch(rest(`articles?id=eq.${encodeURIComponent(id)}`), { method: 'DELETE', headers: head(token) }).catch(() => null);
+  return !!r?.ok;
+}
+/** Uploads a photo or PDF (data URL or file) to the public "noticias" bucket and returns its address, or null. */
+export async function uploadStoryFile(name: string, data: string | Blob): Promise<string | null> {
+  const token = await freshToken(); if (!token) return null;
+  const blob = typeof data === 'string' ? await (await fetch(data)).blob() : data;
+  const base = BACKEND.url.replace(/\/$/, '');
+  const r = await fetch(`${base}/storage/v1/object/noticias/${name}`, { method: 'POST', headers: { apikey: BACKEND.anonKey, Authorization: `Bearer ${token}`, 'x-upsert': 'true', 'Content-Type': blob.type || 'application/octet-stream' }, body: blob }).catch(() => null);
+  return r?.ok ? `${base}/storage/v1/object/public/noticias/${name}` : null;
+}
+/** Publishes (or schedules) an article: the Edge Function saves the story file in GitHub and the site rebuilds in about 2 minutes. */
+export async function publishArticle(a: { id: string; slug: string; file: string; title: string; scheduled: boolean }): Promise<{ ok?: boolean; slug?: string; error?: string }> {
+  const token = await freshToken(); if (!token) return { error: 'Tu sesión venció. Sal y vuelve a entrar al panel.' };
+  try {
+    const r = await fetch(`${BACKEND.url.replace(/\/$/, '')}/functions/v1/publicar`, { method: 'POST', headers: head(token), body: JSON.stringify(a) });
+    const out = await r.json().catch(() => ({}));
+    if (r.status === 404) return { error: 'Falta instalar la función "publicar" en Supabase.' };
+    return r.ok ? out : { error: out.error || out.message || `Error ${r.status}` };
+  } catch { return { error: 'No hay conexión. Intenta otra vez.' }; }
 }
