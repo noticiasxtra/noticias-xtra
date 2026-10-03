@@ -20,7 +20,7 @@ const BADGES = [
   ...SPECIALS.map((x) => ({ id: x.id, name: x.name, kind: 'special', means: x.means, how: x.how })),
 ];
 ---
-<Base title="Mi perfil" description="Tu perfil de lector en Noticias Xtra.">
+<Base title="Mi perfil" noindex description="Tu perfil de lector en Noticias Xtra.">
   <main class="wrap" id="main">
     <div class="pf" data-pf data-base={url()} data-titles={JSON.stringify(titles)} data-games={JSON.stringify(games)}>
       <p class="pf-demo"><span class="sp-demo">DEMO</span> Vista previa de las cuentas: tu perfil se guarda solo en este dispositivo. Muy pronto podrás crear una cuenta real.</p>
