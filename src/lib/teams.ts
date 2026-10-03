@@ -152,7 +152,7 @@ export const TEAMS: Record<string, Team> = {
   'nba:Memphis Grizzlies': { abbr: 'MEM', color: '#5D76A9' },
   'nba:New Orleans Pelicans': { abbr: 'NOP', color: '#0C2340' },
   'nba:San Antonio Spurs': { abbr: 'SAS', color: '#000000' },
-  // NFL (badges with each team's abbreviation and main color; no team logos)
+  // NFL (logos de nfl.com)
   'nfl:Buffalo Bills': { abbr: 'BUF', color: '#00338D' },
   'nfl:Miami Dolphins': { abbr: 'MIA', color: '#008E97' },
   'nfl:New England Patriots': { abbr: 'NE', color: '#002244' },
