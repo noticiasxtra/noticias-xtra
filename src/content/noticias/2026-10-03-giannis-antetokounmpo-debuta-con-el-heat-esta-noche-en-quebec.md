@@ -3,7 +3,7 @@ title: "Giannis Antetokounmpo debuta con el Heat esta noche en Quebec"
 description: "El dos veces Jugador Más Valioso juega su primer partido con Miami en la pretemporada ante Toronto. La temporada regular comienza el 21 de octubre contra Minnesota."
 section: deportes
 league: nba
-place: "Puerto Rico"
+place: "Miami"
 date: 2026-10-03T22:13:00.000Z
 author: "Noticias Xtra"
 image: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/Kaseya_Center_Downtown_Miami_FL%2C_5_April_2024.jpg/1280px-Kaseya_Center_Downtown_Miami_FL%2C_5_April_2024.jpg"
