@@ -11,6 +11,7 @@ export type AdRequest = {
   paid: boolean;
   client: { name: string; business: string; email: string; phone: string; who: string };
   formats: string[]; where: string; start: string; duration: string; total: number; lines: string[];
+  views?: number; // paid views (display ads): the campaign ends when they are delivered
   art: { mode: 'upload' | 'design'; files: ArtFile[]; logo?: string; title?: string; msg?: string; cta?: string; theme?: string; notes?: string };
   link: string; note?: string;
 };

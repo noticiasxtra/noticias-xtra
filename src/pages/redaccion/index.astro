@@ -41,6 +41,14 @@ const TABS = [
       <p class="pnl-kicker">Noticias Xtra</p>
       <h1>Panel de la redacción</h1>
       <p class="pnl-muted">Todo lo que te espera en un solo lugar: noticias por aprobar, comentarios, anuncios, ingresos y analítica.</p>
+      {/* With the database: email and password; the role comes from the staff list. Preview: name and role. */}
+      <div class="pnl-real" data-real hidden>
+        <label for="pnl-mail">Correo</label>
+        <input id="pnl-mail" type="email" autocomplete="username" />
+        <label for="pnl-pass">Contraseña</label>
+        <input id="pnl-pass" type="password" autocomplete="current-password" />
+      </div>
+      <div class="pnl-prev" data-prevlogin>
       <label for="pnl-name">Tu nombre</label>
       <input id="pnl-name" maxlength="30" autocomplete="name" placeholder="ej. Alfredo" />
       <label for="pnl-role">Rol</label>
@@ -50,9 +58,10 @@ const TABS = [
         <option value="ads">Ventas: clientes, anuncios e ingresos</option>
         <option value="reporter">Periodista: escribir sus noticias</option>
       </select>
+      </div>
       <p class="cm-err" data-err hidden></p>
       <button type="submit" class="adp-btn">Entrar</button>
-      <p class="pnl-note"><span class="sp-demo">VISTA PREVIA</span> Sin contraseña por ahora. Con las cuentas, cada persona entra con su correo y su contraseña, y su rol lo asigna el administrador.</p>
+      <p class="pnl-note" data-prevlogin><span class="sp-demo">VISTA PREVIA</span> Sin contraseña por ahora. Con las cuentas, cada persona entra con su correo y su contraseña, y su rol lo asigna el administrador.</p>
     </form>
 
     <div class="pnl-app" data-pnl-app hidden>
@@ -184,6 +193,7 @@ const TABS = [
   <script>
     import { getReports } from '../../lib/moderation';
     import { listRequests } from '../../lib/adrequests';
+    import { hasBackend, staffLogin, staffLogout, staffProfile } from '../../lib/backend';
     const root = document.querySelector<HTMLElement>('[data-pnl]')!;
     const RECENT: Array<{ id: string; title: string; section: string; url: string; date: string }> = JSON.parse(root.dataset.recent!);
     const SOURCES: Array<{ name: string; section: string; review: string }> = JSON.parse(root.dataset.sources!);
@@ -561,14 +571,23 @@ const TABS = [
       $('[data-role]').textContent = ROLE_NAME[s.role];
       paintCounts(); showTab(location.hash.slice(1) || 'inicio');
     }
-    $<HTMLFormElement>('[data-login]').addEventListener('submit', (e) => {
+    // Real login (once BACKEND is set in src/lib/backend.ts): Supabase email + password, role from the `staff` table
+    if (hasBackend()) { $('[data-real]').hidden = false; $$('[data-prevlogin]').forEach((e) => (e.hidden = true)); }
+    $<HTMLFormElement>('[data-login]').addEventListener('submit', async (e) => {
       e.preventDefault();
+      if (hasBackend()) {
+        const er = $('[data-err]'); er.hidden = true;
+        const ok = await staffLogin($<HTMLInputElement>('#pnl-mail').value.trim(), $<HTMLInputElement>('#pnl-pass').value);
+        const who = ok ? await staffProfile() : null;
+        if (!who) { er.textContent = ok ? 'Tu cuenta no está en el equipo. Pídele al administrador que te añada.' : 'Correo o contraseña incorrectos.'; er.hidden = false; return; }
+        set('nx-staff', who); start(); return;
+      }
       const name = $<HTMLInputElement>('#pnl-name').value.trim();
       if (name.length < 2) { const er = $('[data-err]'); er.textContent = 'Escribe tu nombre.'; er.hidden = false; return; }
       set('nx-staff', { name, role: $<HTMLSelectElement>('#pnl-role').value });
       start();
     });
-    $('[data-logout]').addEventListener('click', () => { set('nx-staff', null); set('nx-staff-pending', null); dispatchEvent(new Event('nx-staff-change')); start(); });
+    $('[data-logout]').addEventListener('click', () => { staffLogout(); set('nx-staff', null); set('nx-staff-pending', null); dispatchEvent(new Event('nx-staff-change')); start(); });
     // The comment and ad queues change counts when used
     root.addEventListener('click', () => setTimeout(paintCounts, 50));
     start();

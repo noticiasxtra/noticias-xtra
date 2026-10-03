@@ -5,12 +5,13 @@
 // Prices, discounts, payments and where requests are saved: src/lib/ads.ts. Everything else is folded into "Preguntas".
 import Base from '../layouts/Base.astro';
 import { SITE, url } from '../lib/site';
-import { FORMATS, REGIONS, AUDIENCE, LAUNCH_DISCOUNT, DURATION_DISCOUNTS, OTHER_DISCOUNTS, MAX_DISCOUNT, REWARDS, VOLUME_TIERS, AGENCY_COMMISSION, WEEK_SHARE, periodCost,
+import { FORMATS, REGIONS, AUDIENCE, LAUNCH_DISCOUNT, DURATION_DISCOUNTS, OTHER_DISCOUNTS, MAX_DISCOUNT, REWARDS, VOLUME_TIERS, AGENCY_COMMISSION, WEEK_SHARE, periodCost, VIEW_PACKS, VIEW_DISCOUNTS, LAUNCH_VIEWS,
   DESIGN_FEE, DESIGN_FREE_FROM_MONTHS, UPLOAD, PAYMENTS, APPROVAL_HOURS, ROTATE_SECONDS } from '../lib/ads';
 import { THEMES } from '../lib/adcreative';
 
 const money = (n: number) => `$${n.toLocaleString('en-US')}`;
-const cheapest = Math.min(...FORMATS.map((f) => f.price));
+// Cheapest way in: the smallest views package of the cheapest display ad
+const cheapest = Math.min(...FORMATS.filter((f) => 'cpm' in f).map((f) => ('cpm' in f ? f.cpm : 99) * (VIEW_PACKS[0] / 1000)));
 // Simplified map of Puerto Rico (viewBox 0 0 690 215): the island outline, cut into regions
 const ISLAND = 'M46 13L132 20L231 20L330 23L396 26L462 36L554 56L554 99L512 142L485 175L413 191L330 201L231 191L149 198L99 191L33 198L36 149L26 116L10 59Z';
 const CUTS: Record<string, string> = {
@@ -25,16 +26,16 @@ const DURATIONS = [
 ];
 // Rate card for the price table: week, month and 3 months (with the length discount) for each format
 const rate = (f: (typeof FORMATS)[number]) => f.per === 'día' ? null : { week: Math.round(periodCost(f.price, 7)), month: f.price, three: Math.round(f.price * 3 * (1 - (DURATION_DISCOUNTS[0]?.pct ?? 0) / 100)) };
-const cfg = { formats: FORMATS.map(({ id, name, price, per, art }) => ({ id, name, price, per, art })), audience: AUDIENCE, launch: LAUNCH_DISCOUNT, duration: DURATION_DISCOUNTS,
+const cfg = { formats: FORMATS.map((f) => ({ id: f.id, name: f.name, price: f.price, per: f.per, art: f.art, cpm: 'cpm' in f ? f.cpm : 0 })), audience: AUDIENCE, launch: LAUNCH_DISCOUNT, duration: DURATION_DISCOUNTS,
   other: OTHER_DISCOUNTS, max: MAX_DISCOUNT, rewards: REWARDS, volume: VOLUME_TIERS, design: DESIGN_FEE, designFree: DESIGN_FREE_FROM_MONTHS, upload: UPLOAD,
   pay: PAYMENTS, regions: REGIONS.map(({ id, name }) => ({ id, name })) };
 const CTAS = ['Llama hoy', 'Visítanos', 'Ordena ya', 'Escríbenos por WhatsApp', 'Ver ofertas'];
 ---
-<Base title="Anúnciate" description={`Anúnciate en Noticias Xtra desde ${money(cheapest)} al mes: crea tu anuncio en 4 pasos, paga en línea y sale en ${APPROVAL_HOURS} horas.`}>
+<Base title="Anúnciate" description={`Anúnciate en Noticias Xtra desde ${money(cheapest)} por ${VIEW_PACKS[0].toLocaleString('en-US')} vistas: crea tu anuncio en 4 pasos, paga en línea y sale en ${APPROVAL_HOURS} horas.`}>
   <main class="wrap ad-page" id="main">
     <section class="adp-hero adp-hero-s">
       <p class="adp-kicker">Publicidad en Noticias Xtra</p>
-      <h1>Anúnciate desde {money(cheapest)} al mes</h1>
+      <h1>Anúnciate desde {money(cheapest)} por {VIEW_PACKS[0].toLocaleString('en-US')} vistas</h1>
       <p class="adp-lead">Crea tu anuncio en 4 pasos, paga en línea y sale en {APPROVAL_HOURS} horas.</p>
       <div class="adp-ctas">
         <a class="adp-btn red" href="#campana">Crear mi anuncio</a>
@@ -68,7 +69,7 @@ const CTAS = ['Llama hoy', 'Visítanos', 'Ordena ya', 'Escríbenos por WhatsApp'
                 <input type="checkbox" name="fmt" value={f.id} checked={f.popular} />
                 {f.popular && <span class="wiz-pop">El más pedido</span>}
                 <b>{f.name}</b>
-                <span class="wiz-price">{money(f.price)}<small>/{f.per}</small></span>
+                <span class="wiz-price">{'cpm' in f ? <>{money(f.cpm)}<small>/1,000 vistas</small></> : <>{money(f.price)}<small>/{f.per}</small></>}</span>
                 <span class="wiz-about">{f.about}</span>
               </label>
             ))}
@@ -98,9 +99,18 @@ const CTAS = ['Llama hoy', 'Visítanos', 'Ordena ya', 'Escríbenos por WhatsApp'
             <div class="adb-regs">{REGIONS.map((r) => <button type="button" data-reg-btn={r.id} aria-pressed="false" title={r.towns}>{r.name}</button>)}</div>
             <p class="wiz-help" data-aud-hint></p>
           </div>
-          <p class="wiz-q">¿Por cuánto tiempo?</p>
+          <div data-views-wrap>
+            <p class="wiz-q">¿Cuántas vistas quieres?</p>
+            <div class="wiz-chips">
+              {VIEW_PACKS.map((v) => { const d = [...VIEW_DISCOUNTS].reverse().find((x) => v >= x.from); return <label><input type="radio" name="views" value={v} checked={v === 10000} /><span>{v.toLocaleString('en-US')}{d && <small> −{d.pct}%</small>}</span></label>; })}
+            </div>
+            <p class="wiz-help">Pagas por vistas reales: cuenta cuando tu anuncio aparece en la pantalla de un lector. Cuando se cumplen, tu anuncio termina solo y te avisamos.</p>
+          </div>
+          <div data-time-wrap>
+          <p class="wiz-q" data-time-q>¿Por cuánto tiempo?</p>
           <div class="wiz-chips">
             {DURATIONS.map((d) => <label><input type="radio" name="months" value={d.v} checked={d.v === '30'} /><span>{d.label}{d.off > 0 && <small> −{d.off}%</small>}</span></label>)}
+          </div>
           </div>
           <div class="wiz-row">
             <label>Empieza el<input type="date" name="start" data-start /></label>
@@ -243,18 +253,19 @@ const CTAS = ['Llama hoy', 'Visítanos', 'Ordena ya', 'Escríbenos por WhatsApp'
         <summary>Precios, descuentos y premios</summary>
         <div class="adp-prices">
           <table class="adp-table">
-            <thead><tr><th scope="col">Anuncio</th><th scope="col">1 semana</th><th scope="col">1 mes</th><th scope="col">3 meses</th></tr></thead>
-            <tbody>{FORMATS.map((f) => { const r = rate(f); return r
-              ? <tr><td>{f.name}<small>{f.size}</small></td><td>{money(r.week)}</td><td><b>{money(r.month)}</b></td><td>{money(r.three)}</td></tr>
-              : <tr><td>{f.name}<small>{f.size}</small></td><td colspan="3"><b>{money(f.price)}</b> por día</td></tr>; })}</tbody>
+            <thead><tr><th scope="col">Anuncio</th><th scope="col">Por 1,000 vistas</th><th scope="col">10,000 vistas</th><th scope="col">50,000 vistas</th></tr></thead>
+            <tbody>{FORMATS.map((f) => 'cpm' in f
+              ? <tr><td>{f.name}<small>{f.size}</small></td><td>{money(f.cpm)}</td><td><b>{money(f.cpm * 10)}</b></td><td>{money(Math.round(f.cpm * 50 * (1 - (VIEW_DISCOUNTS.find((d) => d.from === 50000)?.pct ?? 0) / 100)))}</td></tr>
+              : <tr><td>{f.name}<small>{f.size}</small></td><td colspan="3"><b>{money(f.price)}</b> por {f.per}{f.per === 'mes' && ` · ${money(rate(f)!.week)} por semana`}</td></tr>)}</tbody>
           </table>
           <div>
             <ul class="adp-disc">
-              <li><b>{LAUNCH_DISCOUNT.pct}%</b><span>Tu primera vez: los primeros {LAUNCH_DISCOUNT.months} meses</span></li>
-              {DURATION_DISCOUNTS.map((d) => <li><b>{d.pct}%</b><span>Campañas de {d.months} meses</span></li>)}
+              <li><b>{LAUNCH_DISCOUNT.pct}%</b><span>Tu primera vez: tus primeras {LAUNCH_VIEWS.toLocaleString('en-US')} vistas (o los primeros {LAUNCH_DISCOUNT.months} meses de un patrocinio)</span></li>
+              {VIEW_DISCOUNTS.map((d) => <li><b>{d.pct}%</b><span>Desde {d.from.toLocaleString('en-US')} vistas</span></li>)}
+              {DURATION_DISCOUNTS.map((d) => <li><b>{d.pct}%</b><span>Patrocinios de {d.months} meses</span></li>)}
               {OTHER_DISCOUNTS.map((d) => <li><b>{d.pct}%</b><span>{d.text}</span></li>)}
             </ul>
-            <p class="adb-fine">Campañas cortas: cada semana cuesta {Math.round(WEEK_SHARE * 100)}% del mes y desde 3 semanas pagas el mes. El descuento de primera vez cubre los primeros {LAUNCH_DISCOUNT.months} meses y el de duración, el resto. Los descuentos se suman hasta {MAX_DISCOUNT}%. Solo en tu región pagas {Math.round(AUDIENCE.perRegion * 100)}% del precio por región; solo la diáspora, {Math.round(AUDIENCE.diaspora * 100)}%.</p>
+            <p class="adb-fine">Los anuncios se pagan por vistas: una vista cuenta cuando tu anuncio aparece en la pantalla de un lector, y tu campaña termina sola al cumplirlas. Los patrocinios y la toma de portada se pagan por tiempo. Los descuentos se suman hasta {MAX_DISCOUNT}%. Solo en tu región pagas {Math.round(AUDIENCE.perRegion * 100)}% del precio por región; solo la diáspora, {Math.round(AUDIENCE.diaspora * 100)}%.</p>
             <p class="wiz-q">Premios: anuncios gratis según lo que inviertas</p>
             <ol class="adp-rewards">{REWARDS.map((r) => <li><b>{money(r.at)}</b><span>{r.gift}</span></li>)}</ol>
           </div>
@@ -328,7 +339,7 @@ const CTAS = ['Llama hoy', 'Visítanos', 'Ordena ya', 'Escríbenos por WhatsApp'
     });
 
     // ---- Step-by-step guide ----
-    type Fmt = { id: string; name: string; price: number; per: string; art: number[][] };
+    type Fmt = { id: string; name: string; price: number; per: string; art: number[][]; cpm: number };
     type Cfg = { formats: Fmt[]; audience: { all: number; island: number; diaspora: number; perRegion: number }; launch: { pct: number; months: number };
       duration: Array<{ months: number; pct: number }>; other: Array<{ id: string; pct: number }>; max: number; rewards: Array<{ at: number; gift: string }>;
       volume: Array<{ from: number; pct: number }>; design: number; designFree: number; upload: { maxMB: number; types: string[] };
@@ -338,7 +349,10 @@ const CTAS = ['Llama hoy', 'Visítanos', 'Ordena ya', 'Escríbenos por WhatsApp'
     const $ = <T extends HTMLElement = HTMLElement>(s: string) => wf.querySelector<T>(s)!;
     const val = (k: string) => String(new FormData(wf).get(k) ?? '').trim();
     const picked = () => cfg.formats.filter((f) => new FormData(wf).getAll('fmt').includes(f.id));
-    const durLabel = () => (wf.querySelector<HTMLInputElement>('[name="months"]:checked')!.nextElementSibling as HTMLElement).textContent!.replace(/\s*−\d+%/, '');
+    const timeLabel = () => (wf.querySelector<HTMLInputElement>('[name="months"]:checked')!.nextElementSibling as HTMLElement).textContent!.replace(/\s*−\d+%/, '');
+    const viewsPicked = () => (picked().some((f) => f.cpm > 0) ? Number(new FormData(wf).get('views')) || 10000 : 0);
+    // What the client bought: views for display ads, time for sponsorship, days for the takeover
+    const durLabel = () => [viewsPicked() ? `${viewsPicked().toLocaleString('en-US')} vistas` : '', picked().some((f) => f.id === 'patrocinio') ? timeLabel() : ''].filter(Boolean).join(' + ') || timeLabel();
     const regs = new Set<string>();
     let step = 1;
     let files: ArtFile[] = [];
@@ -366,6 +380,11 @@ const CTAS = ['Llama hoy', 'Visítanos', 'Ordena ya', 'Escríbenos por WhatsApp'
       lastAud = aud;
       $('[data-map-wrap]').hidden = aud !== 'regions';
       $('[data-days-wrap]').hidden = !fmts.some((f) => f.per === 'día');
+      // Display ads are bought by views; section sponsorship by time; the takeover by days
+      const byViews = fmts.some((f) => f.cpm > 0), byTime = fmts.some((f) => f.id === 'patrocinio');
+      $('[data-views-wrap]').hidden = !byViews && fmts.length > 0;
+      $('[data-time-wrap]').hidden = !byTime;
+      const views = byViews ? Number(d.get('views')) || 10000 : 0;
       wf.querySelectorAll<SVGElement>('.adb-reg').forEach((el) => el.classList.toggle('on', regs.has(el.dataset.reg!)));
       wf.querySelectorAll<SVGElement>('[data-lbl]').forEach((el) => el.classList.toggle('on', regs.has(el.dataset.lbl!)));
       wf.querySelectorAll<HTMLButtonElement>('[data-reg-btn]').forEach((b) => b.setAttribute('aria-pressed', String(regs.has(b.dataset.regBtn!))));
@@ -374,7 +393,7 @@ const CTAS = ['Llama hoy', 'Visítanos', 'Ordena ya', 'Escríbenos por WhatsApp'
       $('[data-aud-hint]').textContent = `Toca las regiones donde quieres salir. Pagas ${Math.round(factor * 100)}% del precio.`;
 
       // Price math lives in src/lib/ads.ts (quote), shared with the sales desk
-      const q = quote({ formats: fmts.map((f) => f.id), days: len, takeoverDays: days, aud: aud as QuoteInput['aud'], regions: regs.size,
+      const q = quote({ formats: fmts.map((f) => f.id), days: len, takeoverDays: days, views, aud: aud as QuoteInput['aud'], regions: regs.size,
         who: String(d.get('who') || 'retail') as QuoteInput['who'], prepay: !!d.get('prepay'), founder: !!d.get('founder'), design: d.get('mode') === 'design' });
       const { lines, off, design } = q;
       total = q.total;
@@ -388,7 +407,7 @@ const CTAS = ['Llama hoy', 'Visítanos', 'Ordena ya', 'Escríbenos por WhatsApp'
       rows.push(`<li class="adb-where"><span>${where || '—'} · ${durLabel()} desde el ${val('start') ? new Date(`${val('start')}T12:00:00`).toLocaleDateString('es-PR', { day: 'numeric', month: 'long' }) : '—'}</span></li>`);
       $('[data-lines]').innerHTML = rows.join('');
       $('[data-total]').textContent = money(total); $('[data-bar-total]').textContent = money(total);
-      $('[data-month]').textContent = off ? `Ahorras ${money(off)}${months > 1 ? ` · unos ${money(total / months)} al mes` : ''}` : '';
+      $('[data-month]').textContent = off ? `Ahorras ${money(off)}${views ? ` · ${money(total / (views / 1000))} por cada 1,000 vistas` : months > 1 ? ` · unos ${money(total / months)} al mes` : ''}` : '';
       const gift = [...cfg.rewards].reverse().find((r) => total >= r.at), next = cfg.rewards.find((r) => total < r.at);
       const g = $('[data-gift]'); g.hidden = !fmts.length;
       g.innerHTML = gift ? `🎁 Te ganas: <b>${gift.gift}</b>` : next ? `🎁 Te faltan ${money(next.at - total)} para ganarte ${next.gift.toLowerCase()}.` : '';
@@ -541,7 +560,7 @@ const CTAS = ['Llama hoy', 'Visítanos', 'Ordena ya', 'Escríbenos por WhatsApp'
       await saveRequest({
         id, created: new Date().toISOString(), status: mode === 'design' ? 'disenar' : 'revisar', paid: false,
         client: { name: val('nombre'), business: val('negocio'), email: val('correo'), phone: val('telefono'), who: val('who') },
-        formats: picked().map((f) => f.id), where, start: val('start'), duration: durLabel(), total: Math.round(total), lines: summary,
+        formats: picked().map((f) => f.id), where, start: val('start'), duration: durLabel(), views: viewsPicked() || undefined, total: Math.round(total), lines: summary,
         art: mode === 'upload' ? { mode, files } : { mode, files: designFiles, logo: logoData, title: val('title'), msg: val('msg'), cta: val('cta'), theme: val('theme'), notes: val('notes') },
         link: val('link'),
       });

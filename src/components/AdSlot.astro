@@ -24,6 +24,7 @@ const label: Record<AdSize, string> = { leaderboard: '728 × 90', rectangle: '30
 )}
 <script>
   import { CAMPAIGNS, GOOGLE, ROTATE_SECONDS, FORMATS, type AdSize, type Campaign, type Creative } from '../lib/ads';
+  import { hasBackend, liveCampaigns, countView, countClick } from '../lib/backend';
   const BASE = import.meta.env.BASE_URL.replace(/\/?$/, '/');
   // Readers in Puerto Rico vs the diaspora, from the device's time zone (no location permission needed)
   let where: 'island' | 'diaspora' = 'diaspora';
@@ -31,23 +32,35 @@ const label: Record<AdSize, string> = { leaderboard: '728 × 90', rectangle: '30
   const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Puerto_Rico' }); // YYYY-MM-DD
   // PREVIEW: ads approved in the staff panel on this device show here right away (with a "Vista previa" tag), so the
   // employee sees where they go. Everyone else sees them once they're published in CAMPAIGNS.
-  type Req = { id: string; status: string; formats: string[]; link?: string; client: { business: string }; art?: { files?: Array<{ data: string; w: number; h: number }> } };
+  type Req = { id: string; status: string; formats: string[]; link?: string; views?: number; start?: string; client: { business: string }; art?: { files?: Array<{ data: string; w: number; h: number }> } };
+  // Views counted on this device for preview campaigns (with the backend, views are counted for everyone)
+  const VIEWS_KEY = 'nx-ad-views';
+  const localViews = (): Record<string, number> => { try { return JSON.parse(localStorage.getItem(VIEWS_KEY) || '{}'); } catch { return {}; } };
+  const addLocalView = (id: string) => { const v = localViews(); v[id] = (v[id] ?? 0) + 1; try { localStorage.setItem(VIEWS_KEY, JSON.stringify(v)); } catch { /* storage blocked */ } };
   const approvedHere = (): Array<Campaign & { preview?: boolean }> => {
     let reqs: Req[] = []; try { reqs = JSON.parse(localStorage.getItem('nx-ad-requests') || '[]'); } catch { /* storage blocked */ }
     return reqs.filter((r) => r.status === 'aprobada' && r.art?.files?.length).map((r) => {
       const fmts = FORMATS.filter((f) => r.formats.includes(f.id));
-      return { id: r.id, client: r.client.business, start: '0000-00-00', end: '9999-12-31', preview: true, takeover: fmts.some((f) => f.id === 'takeover'),
+      return { id: r.id, client: r.client.business, start: '0000-00-00', end: '9999-12-31', preview: true, takeover: fmts.some((f) => f.id === 'takeover'), views: r.views,
         sizes: [...new Set(fmts.flatMap((f) => (f.slots.length ? f.slots : ['leaderboard', 'rectangle', 'halfpage', 'infeed'] as AdSize[])))],
         creatives: r.art!.files!.map((f) => ({ img: f.data, url: r.link || '#', alt: r.client.business, w: f.w, h: f.h })) };
     });
   };
-  const live = [...CAMPAIGNS, ...approvedHere()].filter((c) => c.start <= today && today <= c.end && c.creatives.length && (!c.regions || c.regions === 'all' || c.regions === where));
+  // Paid views already delivered → the campaign is done and leaves the rotation
+  const seenSoFar = localViews();
+  const notDone = (c: Campaign & { preview?: boolean; delivered?: number }) => !c.views || (c.delivered ?? (c.preview ? seenSoFar[c.id] ?? 0 : 0)) < c.views;
+  const remote = hasBackend() ? await liveCampaigns() : [];
+  const live = [...CAMPAIGNS, ...remote, ...approvedHere()].filter((c) => c.start <= today && today <= c.end && c.creatives.length && notDone(c) && (!c.regions || c.regions === 'all' || c.regions === where));
   // Each space only shows images of its shape (wide banners, 300×250, 300×600); if a campaign has none, it skips the space
   const RATIO: Record<AdSize, number[]> = { leaderboard: [728 / 90, 320 / 100], infeed: [728 / 90, 320 / 100], rectangle: [300 / 250], halfpage: [300 / 600] };
   const sizeOf = (cr: Creative) => (cr.w && cr.h ? [cr.w, cr.h] : (cr.img.match(/(\d+)x(\d+)\.\w+$/) ?? []).slice(1).map(Number));
   const fits = (cr: Creative, size: AdSize) => { const [w, h] = sizeOf(cr); return !w || !h || RATIO[size].some((r) => Math.abs(w / h - r) / r < 0.15); };
   const takeover = live.find((c) => c.takeover);
-  const track = (name: string, c: Campaign, size: string) => (window as any).gtag?.('event', name, { ad_campaign: c.id, ad_client: c.client, ad_size: size });
+  const track = (name: string, c: Campaign & { preview?: boolean }, size: string) => {
+    (window as any).gtag?.('event', name, { ad_campaign: c.id, ad_client: c.client, ad_size: size });
+    if (name === 'ad_impression') { if (c.preview) addLocalView(c.id); else countView(c.id); }
+    if (name === 'ad_click' && !c.preview) countClick(c.id);
+  };
   const src = (p: string) => (/^https?:/.test(p) ? p : BASE + p.replace(/^\//, ''));
 
   if (takeover?.skin && location.pathname.replace(/\/$/, '') === BASE.replace(/\/$/, '')) {

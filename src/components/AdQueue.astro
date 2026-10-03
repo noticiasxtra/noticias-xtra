@@ -31,6 +31,8 @@ const Tag = embedded ? 'section' : 'main';
 <script>
   import { drawAd, THEMES } from '../lib/adcreative';
   import { listRequests, saveRequest, updateRequest, type AdRequest } from '../lib/adrequests';
+  import { hasBackend, publishCampaign, campaignStats } from '../lib/backend';
+  import type { Campaign, AdSize } from '../lib/ads';
   const page = document.querySelector<HTMLElement>('[data-apr]')!;
   const FMT: Array<{ id: string; name: string; slots: string[]; art: number[][]; where: string }> = JSON.parse(page.dataset.formats!);
   const money = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
@@ -57,17 +59,33 @@ const Tag = embedded ? 'section' : 'main';
       link: 'https://example.com' });
   }
 
-  // Campaign entry for src/lib/ads.ts once approved
-  function campaign(r: AdRequest) {
+  // The campaign an approved request becomes. Paid by views → it runs until they're delivered (end date a year out
+  // as a safety stop); by time → it ends on its date.
+  function campaignOf(r: AdRequest): Campaign {
     const fmts = FMT.filter((f) => r.formats.includes(f.id));
-    const sizes = [...new Set(fmts.flatMap((f) => (f.slots.length ? f.slots : ['leaderboard', 'rectangle', 'halfpage', 'infeed'])))];
+    const sizes = [...new Set(fmts.flatMap((f) => (f.slots.length ? f.slots : ['leaderboard', 'rectangle', 'halfpage', 'infeed'])))] as AdSize[];
     const end = new Date(`${r.start}T12:00:00`);
-    const m = r.duration.match(/(\d+)\s*(semana|mes)/);
-    if (m && m[2] === 'semana') end.setDate(end.getDate() + 7 * Number(m[1]) - 1); else if (m) { end.setMonth(end.getMonth() + Number(m[1])); end.setDate(end.getDate() - 1); }
-    const regions = r.where === 'Solo Puerto Rico' || !/Todos|diáspora/i.test(r.where) ? 'island' : r.where === 'Solo la diáspora' ? 'diaspora' : 'all';
-    const creatives = r.art.files.map((f) => `{ img: 'anuncios/${r.id.toLowerCase()}-${f.w}x${f.h}.png', url: '${r.link || '#'}', alt: '${(r.client.business || '').replace(/'/g, "\\'")}' }`);
-    return `{ id: '${r.id.toLowerCase()}', client: '${r.client.business.replace(/'/g, "\\'")}', sizes: ${JSON.stringify(sizes).replace(/"/g, "'")}, start: '${r.start}', end: '${end.toISOString().slice(0, 10)}', regions: '${regions}',${fmts.some((f) => f.id === 'takeover') ? ' takeover: true,' : ''}\n  creatives: [${creatives.join(', ')}] },`;
+    const m = r.duration.match(/(\d+)\s*(semana|mes|día)/);
+    if (r.views) end.setFullYear(end.getFullYear() + 1);
+    else if (m && m[2] === 'semana') end.setDate(end.getDate() + 7 * Number(m[1]) - 1); else if (m && m[2] === 'día') end.setDate(end.getDate() + Number(m[1]) - 1); else if (m) { end.setMonth(end.getMonth() + Number(m[1])); end.setDate(end.getDate() - 1); }
+    const regions = r.where === 'Solo la diáspora' ? 'diaspora' : r.where === 'Puerto Rico y la diáspora' ? 'all' : 'island';
+    return { id: r.id.toLowerCase(), client: r.client.business, sizes, start: r.start, end: end.toISOString().slice(0, 10), regions, takeover: fmts.some((f) => f.id === 'takeover') || undefined,
+      views: r.views, creatives: r.art.files.map((f) => ({ img: f.data, url: r.link || '#', alt: r.client.business, w: f.w, h: f.h })) };
   }
+  // Campaign entry for src/lib/ads.ts (manual publishing, only while there's no database)
+  function campaign(r: AdRequest) {
+    const c = campaignOf(r);
+    const creatives = c.creatives.map((cr) => `{ img: 'anuncios/${r.id.toLowerCase()}-${cr.w}x${cr.h}.png', url: '${cr.url}', alt: '${c.client.replace(/'/g, "\\'")}' }`);
+    return `{ id: '${c.id}', client: '${c.client.replace(/'/g, "\\'")}', sizes: ${JSON.stringify(c.sizes).replace(/"/g, "'")}, start: '${c.start}', end: '${c.end}', regions: '${c.regions}',${c.takeover ? ' takeover: true,' : ''}${c.views ? ` views: ${c.views},` : ''}\n  creatives: [${creatives.join(', ')}] },`;
+  }
+  // Views delivered so far: for everyone with the database, on this device in the preview
+  let stats: Record<string, { views: number; clicks: number }> = {};
+  const delivered = (r: AdRequest) => (hasBackend() ? stats[r.id.toLowerCase()]?.views ?? 0 : (() => { try { return JSON.parse(localStorage.getItem('nx-ad-views') || '{}')[r.id] ?? 0; } catch { return 0; } })());
+  const progress = (r: AdRequest) => {
+    if (!r.views) return '';
+    const n = delivered(r), pct = Math.min(100, Math.round((n / r.views) * 100)), done = n >= r.views;
+    return `<div class="apr-views"><p><b>${done ? '✅ Vistas cumplidas: la campaña terminó sola.' : `Vistas: ${n.toLocaleString('es-PR')} de ${r.views.toLocaleString('es-PR')}`}</b>${hasBackend() ? '' : ' <small>(contadas en este dispositivo · vista previa)</small>'}</p><span class="pnl-bar"><i style="width:${pct}%"></i></span></div>`;
+  };
 
   let filter = 'revisar';
   function render() {
@@ -104,11 +122,12 @@ const Tag = embedded ? 'section' : 'main';
           <div class="apr-badges"><span class="apn-st ${r.paid ? 'on' : 'wait'}">${r.paid ? `Pagado ${money(r.total)}` : `Sin pagar · ${money(r.total)}`}</span><span class="apn-st ${design ? 'wait' : ''}">${design ? 'Lo diseñamos nosotros' : 'Arte del cliente'}</span>${r.status === 'aprobada' ? '<span class="apn-st on">Aprobado</span>' : r.status === 'rechazada' ? '<span class="apn-st">Rechazado · reembolsar</span>' : ''}</div>
         </header>
         <div class="apr-where"><b>Dónde sale:</b><ul>${FMT.filter((f) => r.formats.includes(f.id)).map((f) => `<li><b>${esc(f.name)}:</b> ${esc(f.where)}</li>`).join('')}</ul>
-          ${r.status === 'aprobada' ? `<p>✅ Ya puedes verlo en el sitio <b>en este dispositivo</b> (marcado “Vista previa”). <a href="${page.dataset.home}" target="_blank" rel="noopener">Abrir la portada ↗</a></p>` : ''}</div>
+          ${r.status === 'aprobada' && !(r.views && delivered(r) >= r.views) ? `<p>✅ Ya puedes verlo en el sitio <b>en este dispositivo</b> (marcado “Vista previa”). <a href="${page.dataset.home}" target="_blank" rel="noopener">Abrir la portada ↗</a></p>` : ''}</div>
         <p class="apr-meta"><b>${FMT.filter((f) => r.formats.includes(f.id)).map((f) => f.name).join(', ')}</b> · ${esc(r.where)} · ${esc(r.duration)} desde el ${r.start}${r.link ? ` · <a href="${esc(r.link)}" target="_blank" rel="noopener">Abrir enlace ↗</a>` : ' · sin enlace'}</p>
         ${r.note ? `<p class="apr-notes">💬 ${esc(r.note)}</p>` : ''}
         ${art}
-        ${done ? (r.status === 'aprobada' ? `<details class="apr-code"><summary>Código para publicarlo</summary><p class="apn-small">1) Descarga las imágenes y guárdalas en <code>public/anuncios/</code>. 2) Pega esto dentro de <code>CAMPAIGNS</code> en <code>src/lib/ads.ts</code>. (Cuando conectemos la base de datos, esto será automático.)</p><textarea readonly rows="4">${esc(campaign(r))}</textarea><button type="button" class="adp-btn ghost-dark" data-copy>Copiar</button></details>` : '')
+        ${r.status === 'aprobada' ? progress(r) : ''}
+        ${done ? (r.status === 'aprobada' && !hasBackend() ? `<details class="apr-code"><summary>Código para publicarlo</summary><p class="apn-small">1) Descarga las imágenes y guárdalas en <code>public/anuncios/</code>. 2) Pega esto dentro de <code>CAMPAIGNS</code> en <code>src/lib/ads.ts</code>. (Cuando conectemos la base de datos, esto será automático.)</p><textarea readonly rows="4">${esc(campaign(r))}</textarea><button type="button" class="adp-btn ghost-dark" data-copy>Copiar</button></details>` : '')
         : `<fieldset class="apr-checks"><legend>Antes de aprobar</legend>${CHECKS.map((c) => `<label class="adb-check"><input type="checkbox" data-chk /> ${c}</label>`).join('')}</fieldset>
         <div class="apr-acts">
           <button type="button" class="adp-btn" data-act="approve" disabled>Aprobar y publicar</button>
@@ -159,7 +178,10 @@ const Tag = embedded ? 'section' : 'main';
         patch.art = { ...r.art, title: v('title'), msg: v('msg'), cta: v('cta'), theme: v('theme'), files: [...d.querySelectorAll('canvas')].map((c) => ({ name: `${c.dataset.w}x${c.dataset.h}.png`, w: Number(c.dataset.w), h: Number(c.dataset.h), data: c.toDataURL('image/png') })) };
       }
       updateRequest(id, patch);
-      toast(`Aprobado. Se le avisará a ${r.client.email} (cuando el correo esté conectado).`);
+      if (hasBackend()) {
+        // Automatic publishing: live for every reader right away
+        publishCampaign(campaignOf({ ...r, ...patch } as AdRequest)).then((ok) => toast(ok ? `Aprobado y publicado: ya sale para todos los lectores.` : 'Se aprobó, pero no se pudo publicar. Revisa tu sesión e intenta otra vez.'));
+      } else toast(`Aprobado. Ya lo ves en el sitio en este dispositivo (vista previa). Con la base de datos conectada, sale para todos al instante.`);
     } else if (act === 'changes') {
       const msg = prompt('¿Qué cambios necesita el cliente?', 'Hola, ¿nos puedes enviar el anuncio en 300 × 250 píxeles?');
       if (!msg) return;
@@ -173,5 +195,5 @@ const Tag = embedded ? 'section' : 'main';
     render();
   });
 
-  seed().then(render);
+  seed().then(async () => { if (hasBackend()) stats = await campaignStats(listRequests().filter((x) => x.status === 'aprobada').map((x) => x.id.toLowerCase())); render(); });
 </script>
