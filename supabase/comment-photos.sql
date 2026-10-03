@@ -1,4 +1,4 @@
--- Noticias Xtra: photos in comments (shown small, open full size). Run once in Supabase → SQL Editor. Safe to run again.
+-- Noticias Xtra: photos in comments (shown small, like Instagram). Run once in Supabase → SQL Editor. Safe to run again.
 -- Each reader uploads only into their own folder (comentarios/<their id>/...); anyone can view them.
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values ('comentarios', 'comentarios', true, 3145728, array['image/jpeg', 'image/png', 'image/webp'])

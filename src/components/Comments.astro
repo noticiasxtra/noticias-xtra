@@ -144,17 +144,6 @@ const GIF_IMGS = [['gif-wepa', '¡Wepa! animado'], ['gif-coqui', 'Coquí saltand
       img.onerror = () => rej(new Error('read')); img.src = URL.createObjectURL(file);
     });
   }
-  // Tap a photo in a comment → it opens full size over the page
-  document.addEventListener('click', (e) => {
-    const im = (e.target as HTMLElement).closest<HTMLImageElement>('img.cm-media.photo'); if (!im) return;
-    const d = document.createElement('dialog'); d.className = 'cm-lightbox';
-    d.innerHTML = '<button type="button" aria-label="Cerrar">✕</button><img alt="Foto del comentario" />';
-    d.querySelector('img')!.src = im.src;
-    const close = () => { d.close(); d.remove(); };
-    d.addEventListener('click', close); d.addEventListener('cancel', (ev) => { ev.preventDefault(); close(); });
-    document.body.append(d); d.showModal();
-  });
-
   // Sticker/emoji/GIF picker and the growing text box (shared by preview and real comments)
   function setupPicker(root: HTMLElement) {
     const form = root.querySelector<HTMLFormElement>('[data-cm-form]')!;
