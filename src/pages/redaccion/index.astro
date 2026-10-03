@@ -18,6 +18,9 @@ import sources from '../../../scripts/sources.json';
 const stories = await getStories();
 // Everything on the site, for Escribir → Publicadas (with views once analytics is connected)
 const published = stories.map((s) => ({ id: s.id, title: s.data.title, section: SECTIONS.find((x) => x.id === s.data.section)?.name ?? '', author: s.data.author, date: s.data.date.toISOString(), url: url(`noticia/${s.id}/`), ai: s.data.aiAssisted }));
+// The story pinned (📌) in the home page's main spot, for the reminder on Inicio
+const pinnedStory = stories.filter((s) => s.data.pinned).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())[0];
+const pin = pinnedStory ? { title: pinnedStory.data.title, date: pinnedStory.data.date.toISOString(), url: url(`noticia/${pinnedStory.id}`) } : null;
 const recent = stories.filter((s) => s.data.section !== 'opinion').slice(0, 12)
   .map((s) => ({ id: s.id, title: s.data.title, section: SECTIONS.find((x) => x.id === s.data.section)?.name ?? '', url: url(`noticia/${s.id}/`), date: s.data.date.toISOString() }));
 const srcs = (sources as Array<{ name: string; section: string; review?: string; enabled?: boolean }>).filter((s) => s.enabled !== false)
@@ -36,7 +39,7 @@ const TABS = [
 ];
 ---
 <Base title="Panel de la redacción" description="Panel interno de Noticias Xtra (uso del personal)." noindex staff>
-  <main class="wrap pnl" id="main" data-pnl data-recent={JSON.stringify(recent)} data-sources={JSON.stringify(srcs)} data-base={url()} data-aikey={String(SITE.aiKeyConnected)}>
+  <main class="wrap pnl" id="main" data-pnl data-pin={JSON.stringify(pin)} data-recent={JSON.stringify(recent)} data-sources={JSON.stringify(srcs)} data-base={url()} data-aikey={String(SITE.aiKeyConnected)}>
     <form class="pnl-login" data-login hidden>
       <p class="pnl-kicker">Noticias Xtra</p>
       <h1>Panel de la redacción</h1>
@@ -198,6 +201,7 @@ const TABS = [
     const root = document.querySelector<HTMLElement>('[data-pnl]')!;
     const RECENT: Array<{ id: string; title: string; section: string; url: string; date: string }> = JSON.parse(root.dataset.recent!);
     const SOURCES: Array<{ name: string; section: string; review: string }> = JSON.parse(root.dataset.sources!);
+    const PIN: { title: string; date: string; url: string } | null = JSON.parse(root.dataset.pin || 'null');
     const $ = <T extends Element = HTMLElement>(s: string, el: ParentNode = root) => el.querySelector<T>(s)!;
     const $$ = <T extends Element = HTMLElement>(s: string, el: ParentNode = root) => [...el.querySelectorAll<T>(s)];
     const esc = (s = '') => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
@@ -358,6 +362,7 @@ const TABS = [
         const lateT = myTasks.filter((t) => t.due && t.due < td).length, todayT = myTasks.filter((t) => t.due === td).length;
         if (lateT) todo.push(`<li><span>⏰ <b>${lateT}</b> ${lateT === 1 ? 'tarea atrasada' : 'tareas atrasadas'}.</span><button type="button" data-tk-scroll>Ver</button></li>`);
         if (todayT) todo.push(`<li><span>📌 <b>${todayT}</b> ${todayT === 1 ? 'tarea vence' : 'tareas vencen'} hoy.</span><button type="button" data-tk-scroll>Ver</button></li>`);
+        if (PIN && ['admin', 'editor'].includes(s.role)) todo.push(`<li><span>📌 <b>${esc(PIN.title)}</b> está fijada arriba en la Portada (publicada ${ago(Date.parse(PIN.date))}). Para quitarla: ábrela en Escribir y desmarca 📌.</span><a href="${PIN.url}" target="_blank" rel="noopener">Ver</a></li>`);
         if (allowed.includes('noticias') && c.pending) todo.push(`<li><span>📰 <b>${c.pending}</b> ${c.pending === 1 ? 'noticia espera' : 'noticias esperan'} tu aprobación.</span><button type="button" data-go="noticias">Revisar</button></li>`);
         if (allowed.includes('noticias') && c.check) todo.push(`<li><span>👀 <b>${c.check}</b> publicadas para un vistazo rápido.</span><button type="button" data-go="noticias">Ver</button></li>`);
         if (allowed.includes('ventas') && c.ventas) todo.push(`<li><span>📞 <b>${c.ventas}</b> ${c.ventas === 1 ? 'cliente espera' : 'clientes esperan'} seguimiento hoy.</span><button type="button" data-go="ventas">Ver</button></li>`);

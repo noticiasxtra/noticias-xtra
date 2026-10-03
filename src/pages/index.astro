@@ -13,12 +13,12 @@ import HomeStrip from '../components/HomeStrip.astro';
 import AdSlot from '../components/AdSlot.astro';
 import LocalScores from '../components/deportes/LocalScores.astro';
 import GamesTeaser from '../components/GamesTeaser.astro';
-import { getStories, topOrder, pinFirst, url, SITE, SECTIONS, VIDEOS, VIDEO_SOURCES } from '../lib/site';
+import { getStories, topOrder, pinTop, url, SITE, SECTIONS, VIDEOS, VIDEO_SOURCES } from '../lib/site';
 
 const stories = await getStories();
 const F = SITE.features;
 // Top spots: Puerto Rico first, unless a U.S. or world story is trending (src/lib/site.ts topOrder)
-const ordered = pinFirst(topOrder(stories), 'homeLead'); // an editor's pick for the top story comes first
+const ordered = pinTop(topOrder(stories)); // a pinned story (📌) keeps the main spot; the editor's pick comes next
 const lead = ordered[0];
 const others = ordered.filter((s) => s.id !== lead?.id);
 const left = others.slice(0, 3);

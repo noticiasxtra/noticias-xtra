@@ -230,6 +230,14 @@ export function pinFirst(stories: Story[], key: 'homeLead' | 'sectionLead', hour
   return pick ? [pick, ...stories.filter((s) => s !== pick)] : stories;
 }
 
+/** Home page order: a pinned story (📌, newest pin wins) keeps the main spot with no time limit; the editor's
+ *  "Principal de la Portada" pick comes next (or first, when nothing is pinned). Use after topOrder. */
+export function pinTop(stories: Story[]): Story[] {
+  const pin = stories.filter((s) => s.data.pinned).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())[0];
+  const rest = pinFirst(stories.filter((s) => s !== pin), 'homeLead');
+  return pin ? [pin, ...rest] : rest;
+}
+
 /** Stories by view count would come from analytics later. For now: featured first, then newest. */
 export function mostRead(stories: Story[], n = 5): Story[] {
   return [...stories].sort((a, b) => Number(b.data.featured) - Number(a.data.featured) || Number(b.data.live) - Number(a.data.live)).slice(0, n);
