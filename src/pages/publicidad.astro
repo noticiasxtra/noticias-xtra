@@ -303,6 +303,7 @@ const CTAS = ['Llama hoy', 'Visítanos', 'Ordena ya', 'Escríbenos por WhatsApp'
   <script>
     import { drawAd, loadImage, THEMES } from '../lib/adcreative';
     import { saveRequest, updateRequest, shrink, type ArtFile } from '../lib/adrequests';
+    import { quote, type QuoteInput } from '../lib/ads';
 
     const money = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
     const emailOk = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
@@ -366,26 +367,11 @@ const CTAS = ['Llama hoy', 'Visítanos', 'Ordena ya', 'Escríbenos por WhatsApp'
       where = aud === 'all' ? 'Puerto Rico y la diáspora' : aud === 'island' ? 'Solo Puerto Rico' : aud === 'diaspora' ? 'Solo la diáspora' : cfg.regions.filter((r) => regs.has(r.id)).map((r) => r.name).join(', ');
       $('[data-aud-hint]').textContent = `Toca las regiones donde quieres salir. Pagas ${Math.round(factor * 100)}% del precio.`;
 
-      const lines: Array<[string, number]> = [];
-      let monthly = 0, subtotal = 0;
-      for (const f of fmts) {
-        const wide = f.per === 'día' || f.id === 'patrocinio'; // site-wide formats are not split by region
-        const cost = f.per === 'día' ? f.price * days : f.price * months * (wide ? 1 : factor);
-        if (f.per !== 'día') monthly += f.price * (wide ? 1 : factor);
-        lines.push([`${f.name}${f.per === 'día' ? ` · ${days} día${days > 1 ? 's' : ''}` : ''}`, cost]); subtotal += cost;
-      }
-      const who = String(d.get('who') || 'retail');
-      const pcts: Array<[string, number]> = [];
-      const dur = [...cfg.duration].reverse().find((x) => months >= x.months); if (dur) pcts.push([`${dur.months} meses`, dur.pct]);
-      if (fmts.length >= 2) pcts.push(['Más de un anuncio', cfg.other.find((x) => x.id === 'combo')!.pct]);
-      if (d.get('prepay')) pcts.push(['Pago completo', cfg.other.find((x) => x.id === 'prepago')!.pct]);
-      if (who === 'nonprofit') pcts.push(['Sin fines de lucro', cfg.other.find((x) => x.id === 'nonprofit')!.pct]);
-      if (who === 'agency') { const v = [...cfg.volume].reverse().find((x) => subtotal >= x.from); if (v) pcts.push(['Volumen', v.pct]); }
-      const launch = d.get('founder') ? monthly * Math.min(months, cfg.launch.months) * cfg.launch.pct / 100 : 0;
-      const pctOff = subtotal * Math.min(cfg.max, pcts.reduce((a, [, p]) => a + p, 0)) / 100;
-      const off = Math.min(subtotal * cfg.max / 100, pctOff + launch);
-      const design = d.get('mode') === 'design' && fmts.length ? (months >= cfg.designFree ? 0 : cfg.design) : null;
-      total = Math.max(0, subtotal - off + (design ?? 0));
+      // Price math lives in src/lib/ads.ts (quote), shared with the sales desk
+      const q = quote({ formats: fmts.map((f) => f.id), months, days, aud: aud as QuoteInput['aud'], regions: regs.size,
+        who: String(d.get('who') || 'retail') as QuoteInput['who'], prepay: !!d.get('prepay'), founder: !!d.get('founder'), design: d.get('mode') === 'design' });
+      const { lines, subtotal, launch, pctOff, off, design } = q; const pcts = q.discounts;
+      total = q.total;
       $('[data-design-price]').textContent = months >= cfg.designFree ? `Gratis en tu campaña de ${months} meses` : `${money(cfg.design)} · gratis en campañas de ${cfg.designFree} meses o más`;
 
       const rows = lines.map(([n, c]) => `<li><span>${n}</span><b>${money(c)}</b></li>`);

@@ -1,0 +1,439 @@
+---
+// Article editor (staff panel → Escribir), close to WordPress: title, subtitle, featured photo with caption and credit,
+// a formatted body (subheadings, bold, italic, links, lists, quotes, separators, photos, embeds from YouTube, X,
+// Instagram, Facebook, TikTok, Spotify and Google Maps), section, place, author, publish date and time (schedule),
+// labels for editors, sources, related stories and corrections; live preview and a pre-publish checklist.
+// The output is the same Markdown story file the site already uses (src/content/noticias/, see content.config.ts).
+// Periodistas send to review; editors and the admin publish or schedule.
+// PREVIEW: articles are kept on this device ('nx-articles') and "Publicar" doesn't reach the site yet; each one can be
+// downloaded as its story file. With accounts, publishing commits the file through the secure helper.
+import { SECTIONS, PR_MUNICIPIOS, url } from '../../lib/site';
+import { LEAGUES } from '../../lib/leagues';
+interface Props { recent: Array<{ id: string; title: string }> }
+const { recent } = Astro.props;
+const secs = SECTIONS.map(({ id, name }) => ({ id, name }));
+const leagues = LEAGUES.map(({ id, name }) => ({ id, name }));
+const I = (d: string) => `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const TOOLS = [
+  ['bold', 'Negrita (Ctrl+B)', '<path d="M7 5h6a3.5 3.5 0 0 1 0 7H7zM7 12h7a3.5 3.5 0 0 1 0 7H7z"/>'],
+  ['italic', 'Cursiva (Ctrl+I)', '<path d="M11 5h6M7 19h6M14 5l-4 14"/>'],
+  ['link', 'Enlace', '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>'],
+  ['ul', 'Lista', '<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/>'],
+  ['ol', 'Lista numerada', '<path d="M10 6h10M10 12h10M10 18h10M4 5l1.5-1V9M3.5 13.5a1.5 1.5 0 0 1 2.6 1L3.5 18h3"/>'],
+  ['quote', 'Cita', '<path d="M7 7h4v5c0 3-2 5-4 5M15 7h4v5c0 3-2 5-4 5"/>'],
+  ['hr', 'Línea separadora', '<path d="M3 12h18"/>'],
+  ['image', 'Foto', '<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="M21 16l-5-5-8 8"/>'],
+  ['embed', 'Insertar video o publicación', '<path d="M8 8l-5 4 5 4M16 8l5 4-5 4M13.5 5l-3 14"/>'],
+  ['undo', 'Deshacer (Ctrl+Z)', '<path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/>'],
+  ['redo', 'Rehacer', '<path d="M15 14l5-5-5-5"/><path d="M20 9H10a6 6 0 0 0 0 12h3"/>'],
+  ['clear', 'Quitar formato', '<path d="M6 5h12M12 5l-3 14M4 20L20 4"/>'],
+];
+---
+<section class="wr" data-wr data-secs={JSON.stringify(secs)} data-recent={JSON.stringify(recent)} data-base={url()}>
+  <!-- List of my articles -->
+  <div data-wr-list-view>
+    <header class="sd-head">
+      <div><h1 class="pnl-h">Escribir</h1><p class="pnl-muted">Escribe y edita noticias como en WordPress. Los periodistas las envían a revisión; los editores las publican o las programan.</p></div>
+      <button type="button" class="adp-btn" data-wr-new>+ Nueva noticia</button>
+    </header>
+    <nav class="apn-tabs pnl-sub" role="tablist" aria-label="Estado">
+      <button type="button" role="tab" aria-selected="true" data-ws="draft">Borradores <b data-wn="draft"></b></button>
+      <button type="button" role="tab" aria-selected="false" data-ws="review">En revisión <b data-wn="review"></b></button>
+      <button type="button" role="tab" aria-selected="false" data-ws="scheduled">Programadas <b data-wn="scheduled"></b></button>
+      <button type="button" role="tab" aria-selected="false" data-ws="published">Publicadas <b data-wn="published"></b></button>
+    </nav>
+    <div class="wr-list" data-wr-list></div>
+  </div>
+
+  <!-- Editor -->
+  <div class="wr-ed" data-wr-editor hidden>
+    <div class="wr-bar">
+      <button type="button" class="pnl-link" data-wr-back>← Mis noticias</button>
+      <span class="wr-state" data-wr-state></span>
+      <span class="wr-saved" data-wr-saved aria-live="polite"></span>
+      <span class="wr-bar-sp"></span>
+      <button type="button" class="adp-btn ghost-dark" data-wr-preview>Vista previa</button>
+      <button type="button" class="adp-btn ghost-dark" data-wr-save>Guardar borrador</button>
+      <button type="button" class="adp-btn" data-wr-go>Publicar</button>
+    </div>
+    <div class="wr-cols">
+      <div class="wr-main">
+        <textarea class="wr-title" data-f="title" rows="1" maxlength="140" placeholder="Titular" aria-label="Titular"></textarea>
+        <p class="wr-count" data-cnt="title"></p>
+        <textarea class="wr-sub" data-f="description" rows="2" maxlength="260" placeholder="Subtítulo o resumen: una o dos oraciones que expliquen la noticia" aria-label="Subtítulo"></textarea>
+        <p class="wr-count" data-cnt="description"></p>
+
+        <div class="wr-photo" data-wr-photo>
+          <div class="wr-photo-empty" data-photo-empty>
+            <label class="adp-btn ghost-dark">Subir foto principal<input type="file" accept="image/*" class="sr" data-photo-file /></label>
+            <span class="pnl-muted">o pega el enlace de una foto: <input type="url" data-f="imageUrl" placeholder="https://…" aria-label="Enlace de la foto" /></span>
+          </div>
+          <figure class="wr-photo-full" data-photo-full hidden>
+            <img alt="" data-photo-img />
+            <button type="button" class="wr-photo-x" data-photo-rm aria-label="Quitar foto">✕</button>
+          </figure>
+          <div class="wr-2" data-photo-meta hidden>
+            <label>Pie de foto<input data-f="imageCaption" maxlength="200" placeholder="Qué se ve en la foto" /></label>
+            <label>Crédito (obligatorio)<input data-f="imageCredit" maxlength="120" placeholder="Foto: Nombre / Noticias Xtra" /></label>
+          </div>
+        </div>
+
+        <div class="wr-tools" role="toolbar" aria-label="Formato">
+          <select data-block aria-label="Tipo de texto"><option value="p">Párrafo</option><option value="h2">Subtítulo grande</option><option value="h3">Subtítulo pequeño</option></select>
+          {TOOLS.map(([id, label, d]) => <button type="button" data-tool={id} title={label} aria-label={label}><Fragment set:html={I(d)} /></button>)}
+        </div>
+        <div class="wr-body body" data-body contenteditable="true" role="textbox" aria-multiline="true" aria-label="Texto de la noticia" data-ph="Escribe la noticia aquí. Pega un enlace de YouTube, X, Instagram, Facebook o TikTok en su propia línea y se inserta solo."></div>
+        <p class="wr-count" data-wcount></p>
+      </div>
+
+      <aside class="wr-side">
+        <div class="pnl-card"><h2 class="pnl-h3">Publicación</h2>
+          <label>Sección<select data-f="section">{secs.map((s) => <option value={s.id}>{s.name}</option>)}</select></label>
+          <label data-league-wrap hidden>Liga<select data-f="league"><option value="">—</option>{leagues.map((l) => <option value={l.id}>{l.name}</option>)}</select></label>
+          <label>Lugar<input data-f="place" list="wr-towns" maxlength="60" placeholder="San Juan" /></label>
+          <datalist id="wr-towns">{PR_MUNICIPIOS.map((t) => <option value={t} />)}<option value="Puerto Rico" /><option value="Washington" /><option value="Nueva York" /><option value="Orlando, Florida" /></datalist>
+          <label>Autor<input data-f="author" maxlength="60" /></label>
+          <label>Fecha y hora de publicación<input type="datetime-local" data-f="date" /></label>
+          <p class="pnl-muted pnl-small">Déjala en el pasado o ahora para publicar ya; ponla en el futuro para programarla.</p>
+        </div>
+        <div class="pnl-card" data-editor-only><h2 class="pnl-h3">Etiquetas</h2>
+          <label class="adb-check"><input type="checkbox" data-f="breaking" /> Última hora (barra roja)</label>
+          <label class="adb-check"><input type="checkbox" data-f="trending" /> Tendencia (puede ir arriba aunque no sea local)</label>
+          <label class="adb-check"><input type="checkbox" data-f="featured" /> Destacada en portada</label>
+          <label class="adb-check"><input type="checkbox" data-f="live" /> En vivo / en desarrollo</label>
+        </div>
+        <div class="pnl-card"><h2 class="pnl-h3">Fuentes</h2>
+          <ul class="wr-srcs" data-srcs></ul>
+          <div class="wr-addsrc"><input data-src-name placeholder="Nombre (ej. Policía de PR)" maxlength="80" aria-label="Nombre de la fuente" /><input data-src-url type="url" placeholder="Enlace (opcional)" aria-label="Enlace de la fuente" /><button type="button" class="pnl-link" data-src-add>Añadir</button></div>
+        </div>
+        <div class="pnl-card"><h2 class="pnl-h3">Noticias relacionadas</h2>
+          <select data-rel-pick aria-label="Añadir relacionada"><option value="">Escoge una noticia…</option>{recent.map((r) => <option value={r.id}>{r.title}</option>)}</select>
+          <ul class="wr-srcs" data-rels></ul>
+        </div>
+        <div class="pnl-card"><h2 class="pnl-h3">Corrección</h2>
+          <textarea data-f="correction" rows="2" maxlength="300" placeholder="Solo si corriges algo ya publicado: qué se corrigió y cuándo"></textarea>
+        </div>
+        <div class="pnl-card"><h2 class="pnl-h3">Antes de publicar</h2><ul class="pnl-checks" data-checks></ul></div>
+        <div class="pnl-card"><h2 class="pnl-h3">Archivo</h2>
+          <p class="pnl-muted pnl-small">La noticia como archivo del sitio (Markdown).</p>
+          <button type="button" class="pnl-link" data-dl>Descargar archivo</button>
+          <details class="wr-md"><summary>Ver el archivo</summary><textarea readonly rows="10" data-md></textarea></details>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- Preview -->
+  <dialog class="wr-prev" data-wr-prev aria-label="Vista previa">
+    <div class="wr-prev-bar"><span class="sp-demo">VISTA PREVIA</span><span>Así se verá la noticia</span><button type="button" class="adp-btn ghost-dark" data-prev-close>Cerrar</button></div>
+    <article class="wr-prev-art" data-prev-art></article>
+  </dialog>
+  <div class="apn-toast" data-wr-toast role="status" hidden></div>
+</section>
+
+<script>
+  import { embedFor } from '../../lib/embeds.mjs';
+  const root = document.querySelector<HTMLElement>('[data-wr]');
+  if (root) {
+    type Src = { name: string; url?: string };
+    type Art = {
+      id: string; status: 'draft' | 'review' | 'scheduled' | 'published'; updated: number; owner: string; note?: string;
+      title: string; description: string; section: string; league: string; place: string; author: string; date: string;
+      image: string; imageUrl: string; imageCaption: string; imageCredit: string; breaking: boolean; trending: boolean; featured: boolean; live: boolean;
+      sources: Src[]; related: string[]; correction: string; body: string;
+    };
+    const SECS: Array<{ id: string; name: string }> = JSON.parse(root.dataset.secs!);
+    const RECENT: Array<{ id: string; title: string }> = JSON.parse(root.dataset.recent!);
+    const $ = <T extends Element = HTMLElement>(s: string, el: ParentNode = root) => el.querySelector<T>(s)!;
+    const $$ = <T extends Element = HTMLElement>(s: string, el: ParentNode = root) => [...el.querySelectorAll<T>(s)];
+    const esc = (s = '') => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
+    const toast = (m: string) => { const t = $('[data-wr-toast]'); t.textContent = m; t.hidden = false; clearTimeout((t as any).tm); (t as any).tm = setTimeout(() => (t.hidden = true), 4000); };
+    const me = () => { try { return JSON.parse(localStorage.getItem('nx-staff') || 'null') as { name: string; role: string } | null; } catch { return null; } };
+    const canPublish = () => ['admin', 'editor'].includes(me()?.role ?? '');
+    const KEY = 'nx-articles';
+    const load = (): Art[] => { try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch { return []; } };
+    const save = (list: Art[]) => {
+      try { localStorage.setItem(KEY, JSON.stringify(list)); return true; }
+      catch { toast('No hay espacio en este dispositivo: usa fotos más pequeñas o borra borradores viejos.'); return false; }
+    };
+    const localNow = () => { const d = new Date(Date.now() - new Date().getTimezoneOffset() * 60000); return d.toISOString().slice(0, 16); };
+    const ago = (t: number) => { const m = Math.round((Date.now() - t) / 60000); return m < 1 ? 'ahora' : m < 60 ? `hace ${m} min` : m < 1440 ? `hace ${Math.round(m / 60)} h` : `hace ${Math.round(m / 1440)} d`; };
+    const STATUS = { draft: 'Borrador', review: 'En revisión', scheduled: 'Programada', published: 'Publicada' };
+
+    // ---------- list ----------
+    let tab: Art['status'] = 'draft';
+    function renderList() {
+      const s = me(); const all = load().filter((a) => canPublish() || a.owner === s?.name); // periodistas see their own
+      (['draft', 'review', 'scheduled', 'published'] as const).forEach((k) => { const n = all.filter((a) => a.status === k).length; $(`[data-wn="${k}"]`).textContent = n ? String(n) : ''; });
+      const list = all.filter((a) => a.status === tab).sort((a, b) => b.updated - a.updated);
+      $('[data-wr-list]').innerHTML = list.map((a) => `<article class="pnl-row" data-id="${a.id}">
+        <div><p class="pnl-muted">${STATUS[a.status]} · ${esc(SECS.find((x) => x.id === a.section)?.name ?? '')} · ${esc(a.author || a.owner)} · ${ago(a.updated)}${a.status === 'scheduled' ? ` · sale el ${new Date(a.date).toLocaleString('es-PR', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })}` : ''}</p>
+          <h2>${esc(a.title || 'Sin titular')}</h2>${a.note ? `<p class="sd-warn">Nota del editor: ${esc(a.note)}</p>` : ''}</div>
+        <div class="pnl-row-acts">
+          ${a.status === 'review' && canPublish() ? '<button type="button" class="adp-btn" data-la="approve">Aprobar y publicar</button><button type="button" class="pnl-link" data-la="return">Devolver</button>' : ''}
+          <button type="button" class="adp-btn ghost-dark" data-la="edit">${a.status === 'published' ? 'Editar o corregir' : 'Editar'}</button>
+          <button type="button" class="pnl-link" data-la="dup">Duplicar</button>
+          <button type="button" class="apr-reject" data-la="del">Borrar</button>
+        </div></article>`).join('') || `<p class="apr-empty">${tab === 'draft' ? 'No tienes borradores. Toca “Nueva noticia” para empezar.' : 'Nada aquí todavía.'}</p>`;
+    }
+
+    // ---------- editor ----------
+    const body = $('[data-body]');
+    let cur: Art | null = null, dirty = false, timer = 0;
+    const blank = (): Art => ({ id: `A-${Date.now().toString(36)}`, status: 'draft', updated: Date.now(), owner: me()?.name ?? '', title: '', description: '', section: 'puerto-rico', league: '',
+      place: '', author: me()?.name ?? 'Noticias Xtra', date: localNow(), image: '', imageUrl: '', imageCaption: '', imageCredit: '', breaking: false, trending: false, featured: false, live: false,
+      sources: [], related: [], correction: '', body: '' });
+    const field = (k: string) => $<HTMLInputElement>(`[data-f="${k}"]`);
+    function openEditor(a: Art) {
+      cur = structuredClone(a);
+      (['title', 'description', 'section', 'league', 'place', 'author', 'date', 'imageUrl', 'imageCaption', 'imageCredit', 'correction'] as const).forEach((k) => (field(k).value = String(cur![k] ?? '')));
+      (['breaking', 'trending', 'featured', 'live'] as const).forEach((k) => (field(k).checked = cur![k]));
+      body.innerHTML = cur.body || '<p><br></p>';
+      body.querySelectorAll<HTMLElement>('figure.wr-embed').forEach(paintEmbed);
+      $$('[data-editor-only]').forEach((e) => (e.hidden = !canPublish()));
+      $('[data-wr-list-view]').hidden = true; $('[data-wr-editor]').hidden = false;
+      sync(); dirty = false; $('[data-wr-saved]').textContent = ''; scrollTo({ top: 0 });
+      ($('[data-f="title"]') as HTMLTextAreaElement).focus();
+    }
+    function closeEditor() { if (dirty) persist(); cur = null; $('[data-wr-editor]').hidden = true; $('[data-wr-list-view]').hidden = false; renderList(); }
+    function readEditor() {
+      if (!cur) return;
+      (['title', 'description', 'section', 'league', 'place', 'author', 'date', 'imageUrl', 'imageCaption', 'imageCredit', 'correction'] as const).forEach((k) => ((cur as any)[k] = field(k).value.trim()));
+      (['breaking', 'trending', 'featured', 'live'] as const).forEach((k) => (cur![k] = field(k).checked));
+      cur.body = body.innerHTML;
+    }
+    function persist(status?: Art['status']) {
+      readEditor(); if (!cur) return false;
+      if (status) cur.status = status;
+      cur.updated = Date.now();
+      const all = load(); const i = all.findIndex((a) => a.id === cur!.id);
+      if (i >= 0) all[i] = cur; else all.unshift(cur);
+      if (!save(all)) return false;
+      dirty = false; $('[data-wr-saved]').textContent = `Guardado ${new Date().toLocaleTimeString('es-PR', { hour: 'numeric', minute: '2-digit' })}`;
+      return true;
+    }
+
+    // Everything that depends on the fields: counters, checklist, buttons, file
+    function sync() {
+      if (!cur) return;
+      readEditor();
+      const words = (body.innerText.trim().match(/\S+/g) || []).length;
+      $('[data-wcount]').textContent = `${words} palabras · ${Math.max(1, Math.round(words / 220))} min de lectura${words > 450 ? ' · nuestras noticias suelen tener 250 a 450 palabras' : ''}`;
+      $('[data-cnt="title"]').textContent = `${cur.title.length}/110 caracteres${cur.title.length > 110 ? ' · muy largo para Google y redes' : ''}`;
+      $('[data-cnt="description"]').textContent = `${cur.description.length}/200`;
+      $('[data-league-wrap]').hidden = cur.section !== 'deportes';
+      const photo = cur.image || cur.imageUrl;
+      $('[data-photo-empty]').hidden = !!photo; $('[data-photo-full]').hidden = !photo; $('[data-photo-meta]').hidden = !photo;
+      if (photo) $<HTMLImageElement>('[data-photo-img]').src = photo;
+      $('[data-srcs]').innerHTML = cur.sources.map((s, i) => `<li><span>${s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.name)}</a>` : esc(s.name)}</span><button type="button" class="pnl-link" data-src-rm="${i}" aria-label="Quitar">✕</button></li>`).join('');
+      $('[data-rels]').innerHTML = cur.related.map((id, i) => `<li><span>${esc(RECENT.find((r) => r.id === id)?.title ?? id)}</span><button type="button" class="pnl-link" data-rel-rm="${i}" aria-label="Quitar">✕</button></li>`).join('');
+      const future = new Date(cur.date).valueOf() > Date.now() + 60000;
+      const go = $<HTMLButtonElement>('[data-wr-go]');
+      go.textContent = !canPublish() ? 'Enviar a revisión' : future ? 'Programar' : cur.status === 'published' ? 'Actualizar' : 'Publicar';
+      $('[data-wr-state]').textContent = STATUS[cur.status];
+      $('[data-wr-state]').className = `wr-state ${cur.status}`;
+      const checks: Array<[boolean, string]> = [
+        [cur.title.length >= 20 && cur.title.length <= 110, 'Titular claro (20 a 110 caracteres)'],
+        [cur.description.length >= 40, 'Subtítulo de una o dos oraciones'],
+        [words >= 80, 'Al menos 80 palabras'],
+        [!!cur.place, 'Lugar'],
+        [!photo || !!cur.imageCredit, 'Crédito de la foto (si tiene foto)'],
+        [cur.sources.length > 0, 'Al menos una fuente'],
+      ];
+      $('[data-checks]').innerHTML = checks.map(([ok, t]) => `<li class="${ok ? 'ok' : ''}"><span>${ok ? '✓' : '○'} ${t}</span></li>`).join('');
+      $<HTMLTextAreaElement>('[data-md]').value = toFile(cur);
+      return checks.every(([ok]) => ok);
+    }
+    const changed = () => { dirty = true; $('[data-wr-saved]').textContent = 'Cambios sin guardar'; clearTimeout(timer); timer = window.setTimeout(() => { if (cur && dirty) persist(); }, 2500); sync(); };
+    $('[data-wr-editor]').addEventListener('input', changed);
+    $('[data-wr-editor]').addEventListener('change', changed);
+    $$<HTMLTextAreaElement>('.wr-title,.wr-sub').forEach((t) => t.addEventListener('input', () => { t.style.height = 'auto'; t.style.height = `${t.scrollHeight}px`; }));
+
+    // ---------- body: toolbar ----------
+    const exec = (cmd: string, val?: string) => { body.focus(); document.execCommand(cmd, false, val); changed(); };
+    let savedRange: Range | null = null;
+    body.addEventListener('blur', () => { const s = getSelection(); if (s?.rangeCount && body.contains(s.anchorNode)) savedRange = s.getRangeAt(0).cloneRange(); });
+    const restore = () => { body.focus(); if (savedRange) { const s = getSelection()!; s.removeAllRanges(); s.addRange(savedRange); } };
+    const insertBlock = (html: string) => { restore(); document.execCommand('insertHTML', false, `${html}<p><br></p>`); body.querySelectorAll<HTMLElement>('figure.wr-embed:not([data-ready])').forEach(paintEmbed); changed(); };
+    $<HTMLSelectElement>('[data-block]').addEventListener('change', (e) => { const v = (e.target as HTMLSelectElement).value; exec('formatBlock', v === 'p' ? 'P' : v.toUpperCase()); (e.target as HTMLSelectElement).value = 'p'; });
+    function paintEmbed(fig: HTMLElement) {
+      const u = fig.dataset.url!; fig.setAttribute('contenteditable', 'false'); fig.dataset.ready = '1';
+      fig.innerHTML = `${embedFor(u) ?? ''}<figcaption><span>${esc(u)}</span><button type="button" class="pnl-link" data-embed-rm>Quitar</button></figcaption>`;
+    }
+    root.addEventListener('click', (e) => {
+      const rm = (e.target as HTMLElement).closest('[data-embed-rm],[data-img-rm]');
+      if (rm) { rm.closest('figure')!.remove(); changed(); }
+    });
+    $$<HTMLButtonElement>('[data-tool]').forEach((b) => b.addEventListener('mousedown', (e) => e.preventDefault()));
+    $$<HTMLButtonElement>('[data-tool]').forEach((b) => b.addEventListener('click', async () => {
+      const t = b.dataset.tool;
+      if (t === 'bold') exec('bold'); if (t === 'italic') exec('italic');
+      if (t === 'ul') exec('insertUnorderedList'); if (t === 'ol') exec('insertOrderedList');
+      if (t === 'quote') exec('formatBlock', 'BLOCKQUOTE');
+      if (t === 'hr') { exec('insertHorizontalRule'); }
+      if (t === 'undo') exec('undo'); if (t === 'redo') exec('redo');
+      if (t === 'clear') { exec('removeFormat'); exec('formatBlock', 'P'); exec('unlink'); }
+      if (t === 'link') {
+        const sel = getSelection(); if (!sel || sel.isCollapsed) { toast('Primero selecciona las palabras que quieres convertir en enlace.'); return; }
+        const r = sel.getRangeAt(0).cloneRange();
+        const href = prompt('Pega el enlace (https://…):', 'https://'); if (!href || !/^https?:\/\/\S+\.\S+/.test(href)) return;
+        const s2 = getSelection()!; s2.removeAllRanges(); s2.addRange(r); exec('createLink', href);
+      }
+      if (t === 'embed') {
+        const u = prompt('Pega el enlace del video o publicación (YouTube, X, Instagram, Facebook, TikTok, Spotify o Google Maps):', '');
+        if (!u) return;
+        if (!embedFor(u)) { toast('Ese enlace no se puede insertar. Prueba con un enlace de YouTube, X, Instagram, Facebook, TikTok, Spotify o Google Maps.'); return; }
+        insertBlock(`<figure class="wr-embed" data-url="${esc(u.trim())}"></figure>`);
+      }
+      if (t === 'image') {
+        const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*';
+        inp.onchange = async () => {
+          const f = inp.files?.[0]; if (!f) return;
+          const src = await shrink(f, 1200).catch(() => ''); if (!src) { toast('No pudimos leer esa imagen.'); return; }
+          const cap = prompt('Pie de foto y crédito (ej. "La plaza de Ponce. Foto: Ana Rivera / Noticias Xtra"):', '') ?? '';
+          insertBlock(`<figure class="wr-img" contenteditable="false"><img src="${src}" alt="${esc(cap.split('Foto:')[0].trim())}"><figcaption>${esc(cap)}</figcaption><button type="button" class="wr-photo-x" data-img-rm aria-label="Quitar foto">✕</button></figure>`);
+        };
+        inp.click();
+      }
+    }));
+    // Paste: plain text only (no stray styles from other sites); a lone supported link becomes an embed
+    body.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const text = e.clipboardData?.getData('text/plain') ?? '';
+      if (/^https?:\/\/\S+$/.test(text.trim()) && embedFor(text.trim())) { insertBlock(`<figure class="wr-embed" data-url="${esc(text.trim())}"></figure>`); return; }
+      const html = text.split(/\n{2,}/).map((p) => `<p>${esc(p).replace(/\n/g, '<br>')}</p>`).join('');
+      document.execCommand('insertHTML', false, html); changed();
+    });
+
+    // ---------- photos ----------
+    function shrink(file: File, max: number): Promise<string> {
+      return new Promise((res, rej) => {
+        const img = new Image();
+        img.onload = () => { const k = Math.min(1, max / img.naturalWidth); const c = document.createElement('canvas'); c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
+          c.getContext('2d')!.drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(img.src); res(c.toDataURL('image/jpeg', 0.82)); };
+        img.onerror = () => rej(new Error('read')); img.src = URL.createObjectURL(file);
+      });
+    }
+    $<HTMLInputElement>('[data-photo-file]').addEventListener('change', async (e) => {
+      const f = (e.target as HTMLInputElement).files?.[0]; (e.target as HTMLInputElement).value = ''; if (!f || !cur) return;
+      try { cur.image = await shrink(f, 1400); cur.imageUrl = ''; field('imageUrl').value = ''; changed(); } catch { toast('No pudimos leer esa imagen.'); }
+    });
+    $('[data-photo-rm]').addEventListener('click', () => { if (!cur) return; cur.image = ''; field('imageUrl').value = ''; changed(); });
+
+    // ---------- sources and related ----------
+    root.addEventListener('click', (e) => {
+      const t = e.target as HTMLElement; if (!cur) return;
+      if (t.closest('[data-src-add]')) {
+        const n = $<HTMLInputElement>('[data-src-name]'), u = $<HTMLInputElement>('[data-src-url]');
+        if (n.value.trim().length < 2) { n.focus(); return; }
+        cur.sources.push({ name: n.value.trim(), ...(u.value.trim() ? { url: u.value.trim() } : {}) }); n.value = ''; u.value = ''; changed();
+      }
+      const sr = t.closest<HTMLElement>('[data-src-rm]'); if (sr) { cur.sources.splice(Number(sr.dataset.srcRm), 1); changed(); }
+      const rr = t.closest<HTMLElement>('[data-rel-rm]'); if (rr) { cur.related.splice(Number(rr.dataset.relRm), 1); changed(); }
+    });
+    $<HTMLSelectElement>('[data-rel-pick]').addEventListener('change', (e) => {
+      const v = (e.target as HTMLSelectElement).value; (e.target as HTMLSelectElement).value = '';
+      if (cur && v && !cur.related.includes(v) && cur.related.length < 3) { cur.related.push(v); changed(); }
+    });
+
+    // ---------- the story file (same shape as src/content.config.ts) ----------
+    const md = {
+      text: (s: string) => s.replace(/ /g, ' ').replace(/([*_`[\]\\])/g, '\\$1'),
+      inline(n: Node): string {
+        if (n.nodeType === 3) return md.text(n.textContent ?? '');
+        if (!(n instanceof HTMLElement)) return '';
+        const inner = [...n.childNodes].map(md.inline).join('');
+        const tag = n.tagName;
+        if (tag === 'STRONG' || tag === 'B') return inner.trim() ? `**${inner}**` : inner;
+        if (tag === 'EM' || tag === 'I') return inner.trim() ? `*${inner}*` : inner;
+        if (tag === 'A') return `[${inner}](${(n as HTMLAnchorElement).getAttribute('href')})`;
+        if (tag === 'BR') return '  \n';
+        return inner;
+      },
+      block(n: Node): string {
+        if (n.nodeType === 3) return (n.textContent ?? '').trim() ? md.text(n.textContent!.trim()) : '';
+        if (!(n instanceof HTMLElement)) return '';
+        const tag = n.tagName, line = () => [...n.childNodes].map(md.inline).join('').trim();
+        if (n.classList.contains('wr-embed')) return n.dataset.url ?? '';
+        if (n.classList.contains('wr-img')) { const img = n.querySelector('img')!; const cap = n.querySelector('figcaption')?.textContent?.trim() ?? '';
+          return `<figure><img src="${img.getAttribute('src')}" alt="${esc(img.alt)}" loading="lazy" />${cap ? `<figcaption>${esc(cap)}</figcaption>` : ''}</figure>`; }
+        if (tag === 'H2') return `## ${line()}`;
+        if (tag === 'H3' || tag === 'H4') return `### ${line()}`;
+        if (tag === 'HR') return '---';
+        if (tag === 'BLOCKQUOTE') return line().split('\n').map((l) => `> ${l}`).join('\n');
+        if (tag === 'UL' || tag === 'OL') return [...n.children].map((li, i) => `${tag === 'OL' ? `${i + 1}.` : '-'} ${[...li.childNodes].map(md.inline).join('').trim()}`).join('\n');
+        return line(); // P, DIV and anything else become a paragraph
+      },
+      body: () => [...body.childNodes].map(md.block).filter((b) => b.trim()).join('\n\n'),
+    };
+    const y = (v: string) => JSON.stringify(v);
+    function toFile(a: Art) {
+      const date = new Date(a.date || Date.now());
+      return ['---', `title: ${y(a.title)}`, `description: ${y(a.description)}`, `section: ${a.section}`, ...(a.section === 'deportes' && a.league ? [`league: ${a.league}`] : []),
+        `place: ${y(a.place || 'Puerto Rico')}`, `date: ${date.toISOString()}`, `author: ${y(a.author || 'Noticias Xtra')}`,
+        ...(a.image || a.imageUrl ? [`image: ${y(a.imageUrl || `imagenes/${a.id.toLowerCase()}.jpg`)}`, ...(a.imageCaption ? [`imageCaption: ${y(a.imageCaption)}`] : []), ...(a.imageCredit ? [`imageCredit: ${y(a.imageCredit)}`] : [])] : []),
+        ...(['breaking', 'trending', 'featured', 'live'] as const).filter((k) => a[k]).map((k) => `${k}: true`),
+        'aiAssisted: false', 'draft: false',
+        ...(a.sources.length ? ['sources:', ...a.sources.flatMap((s) => [`  - name: ${y(s.name)}`, ...(s.url ? [`    url: ${y(s.url)}`] : [])])] : []),
+        ...(a.related.length ? ['related:', ...a.related.map((r) => `  - ${y(r)}`)] : []),
+        ...(a.correction ? [`correction: ${y(a.correction)}`] : []),
+        '---', '', md.body(), ''].join('\n');
+    }
+    const slug = (a: Art) => `${new Date(a.date || Date.now()).toISOString().slice(0, 10)}-${a.title.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 70) || 'noticia'}`;
+    $('[data-dl]').addEventListener('click', () => {
+      if (!cur) return; readEditor();
+      const blob = new Blob([toFile(cur)], { type: 'text/markdown' }); const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob); a.download = `${slug(cur)}.md`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    });
+
+    // ---------- preview ----------
+    $('[data-wr-preview]').addEventListener('click', () => {
+      if (!cur) return; readEditor();
+      const photo = cur.image || cur.imageUrl;
+      const bodyHtml = [...body.childNodes].map((n) => {
+        if (n instanceof HTMLElement && n.classList.contains('wr-embed')) return embedFor(n.dataset.url!) ?? '';
+        if (n instanceof HTMLElement && n.classList.contains('wr-img')) { const c = n.cloneNode(true) as HTMLElement; c.querySelector('button')?.remove(); c.removeAttribute('contenteditable'); return c.outerHTML; }
+        return n instanceof HTMLElement ? n.outerHTML : esc(n.textContent ?? '');
+      }).join('');
+      $('[data-prev-art]').innerHTML = `<p class="wr-prev-sec">${esc(SECS.find((s) => s.id === cur!.section)?.name ?? '')}${cur.breaking ? ' · <span class="wr-brk">ÚLTIMA HORA</span>' : ''}</p>
+        <h1>${esc(cur.title || 'Sin titular')}</h1><p class="dek">${esc(cur.description)}</p>
+        <p class="wr-prev-by">Por ${esc(cur.author || 'Noticias Xtra')} · ${esc(cur.place || 'Puerto Rico')} · ${new Date(cur.date || Date.now()).toLocaleString('es-PR', { day: 'numeric', month: 'long', year: 'numeric', hour: 'numeric', minute: '2-digit' })}</p>
+        ${photo ? `<figure class="wr-prev-photo"><img src="${esc(photo)}" alt=""><figcaption>${esc(cur.imageCaption)} ${esc(cur.imageCredit)}</figcaption></figure>` : ''}
+        <div class="body">${bodyHtml}</div>
+        ${cur.sources.length ? `<p class="sources">Fuentes: ${cur.sources.map((s) => esc(s.name)).join(', ')}</p>` : ''}
+        ${cur.correction ? `<p class="sources"><strong>Corrección:</strong> ${esc(cur.correction)}</p>` : ''}`;
+      $<HTMLDialogElement>('[data-wr-prev]').showModal();
+    });
+    $('[data-prev-close]').addEventListener('click', () => $<HTMLDialogElement>('[data-wr-prev]').close());
+
+    // ---------- save / send / publish ----------
+    $('[data-wr-save]').addEventListener('click', () => { if (persist(cur?.status === 'published' ? 'published' : 'draft')) toast('Borrador guardado.'); });
+    $('[data-wr-go]').addEventListener('click', () => {
+      if (!cur) return;
+      const ok = sync();
+      if (!ok && !confirm('Faltan cosas en “Antes de publicar”. ¿Seguir de todos modos?')) return;
+      if (!canPublish()) { cur.note = ''; if (persist('review')) { toast('Enviada a revisión. Un editor la revisará.'); closeEditor(); } return; }
+      const future = new Date(cur.date).valueOf() > Date.now() + 60000;
+      if (persist(future ? 'scheduled' : 'published')) {
+        toast(future ? `Programada para el ${new Date(cur.date).toLocaleString('es-PR', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })}. Vista previa: con las cuentas, sale sola a esa hora.` : 'Publicada. Vista previa: con las cuentas, aparece en el sitio en unos 2 minutos.');
+        closeEditor();
+      }
+    });
+    $('[data-wr-back]').addEventListener('click', closeEditor);
+    $('[data-wr-new]').addEventListener('click', () => openEditor(blank()));
+    root.addEventListener('click', (e) => {
+      const t = e.target as HTMLElement;
+      const st = t.closest<HTMLElement>('[data-ws]');
+      if (st) { tab = st.dataset.ws as Art['status']; $$('[data-ws]').forEach((b) => b.setAttribute('aria-selected', String(b === st))); renderList(); return; }
+      const la = t.closest<HTMLElement>('[data-la]'); if (!la) return;
+      const id = t.closest<HTMLElement>('[data-id]')!.dataset.id!; const all = load(); const a = all.find((x) => x.id === id)!;
+      if (la.dataset.la === 'edit') openEditor(a);
+      if (la.dataset.la === 'dup') { save([{ ...structuredClone(a), id: `A-${Date.now().toString(36)}`, status: 'draft', title: `${a.title} (copia)`, updated: Date.now(), owner: me()?.name ?? a.owner }, ...all]); renderList(); }
+      if (la.dataset.la === 'del') { if (confirm(`¿Borrar “${a.title || 'Sin titular'}”?`)) { save(all.filter((x) => x.id !== id)); renderList(); } }
+      if (la.dataset.la === 'approve') { a.status = new Date(a.date).valueOf() > Date.now() + 60000 ? 'scheduled' : 'published'; a.updated = Date.now(); save(all); renderList(); toast('Aprobada. Vista previa: con las cuentas, se publica sola.'); }
+      if (la.dataset.la === 'return') { const n = prompt('¿Qué debe corregir el periodista?', ''); if (n === null) return; a.status = 'draft'; a.note = n; a.updated = Date.now(); save(all); renderList(); }
+    });
+    addEventListener('beforeunload', () => { if (cur && dirty) persist(); });
+    renderList();
+  }
+</script>

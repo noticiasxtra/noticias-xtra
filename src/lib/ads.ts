@@ -99,3 +99,38 @@ export const ROTATE_SECONDS = 8;
 export const PAYMENTS = { stripeLink: '', athMovilToken: '' };
 export const REQUESTS = { url: '', key: '' };
 export const APPROVAL_HOURS = 24; // promise shown to clients
+
+// ---- Price quote: one place for the math, used by the Anúnciate page and the sales desk (/redaccion/) ----
+export type QuoteInput = {
+  formats: string[]; months: number; days: number; // days: for per-day formats (takeover), 1–14
+  aud: 'all' | 'island' | 'diaspora' | 'regions'; regions: number; // number of regions picked when aud = 'regions'
+  who: 'retail' | 'agency' | 'nonprofit'; prepay: boolean; founder: boolean; design: boolean;
+};
+export type Quote = {
+  lines: Array<[string, number]>; discounts: Array<[string, number]>; // [label, pct]
+  subtotal: number; launch: number; pctOff: number; off: number; design: number | null; total: number; monthly: number; factor: number;
+};
+export function quote(q: QuoteInput): Quote {
+  const fmts = FORMATS.filter((f) => q.formats.includes(f.id));
+  const months = q.months, days = Math.max(1, Math.min(14, q.days || 1));
+  const factor = q.aud === 'all' ? AUDIENCE.all : q.aud === 'island' ? AUDIENCE.island : q.aud === 'diaspora' ? AUDIENCE.diaspora : Math.min(AUDIENCE.island, q.regions * AUDIENCE.perRegion);
+  const lines: Array<[string, number]> = [];
+  let monthly = 0, subtotal = 0;
+  for (const f of fmts) {
+    const wide = f.per === 'día' || f.id === 'patrocinio'; // site-wide formats are not split by region
+    const cost = f.per === 'día' ? f.price * days : f.price * months * (wide ? 1 : factor);
+    if (f.per !== 'día') monthly += f.price * (wide ? 1 : factor);
+    lines.push([`${f.name}${f.per === 'día' ? ` · ${days} día${days > 1 ? 's' : ''}` : ''}`, cost]); subtotal += cost;
+  }
+  const discounts: Array<[string, number]> = [];
+  const dur = [...DURATION_DISCOUNTS].reverse().find((x) => months >= x.months); if (dur) discounts.push([`${dur.months} meses`, dur.pct]);
+  if (fmts.length >= 2) discounts.push(['Más de un anuncio', OTHER_DISCOUNTS.find((x) => x.id === 'combo')!.pct]);
+  if (q.prepay) discounts.push(['Pago completo', OTHER_DISCOUNTS.find((x) => x.id === 'prepago')!.pct]);
+  if (q.who === 'nonprofit') discounts.push(['Sin fines de lucro', OTHER_DISCOUNTS.find((x) => x.id === 'nonprofit')!.pct]);
+  if (q.who === 'agency') { const v = [...VOLUME_TIERS].reverse().find((x) => subtotal >= x.from); if (v) discounts.push(['Volumen', v.pct]); }
+  const launch = q.founder ? monthly * Math.min(months, LAUNCH_DISCOUNT.months) * LAUNCH_DISCOUNT.pct / 100 : 0;
+  const pctOff = subtotal * Math.min(MAX_DISCOUNT, discounts.reduce((a, [, p]) => a + p, 0)) / 100;
+  const off = Math.min(subtotal * MAX_DISCOUNT / 100, pctOff + launch);
+  const design = q.design && fmts.length ? (months >= DESIGN_FREE_FROM_MONTHS ? 0 : DESIGN_FEE) : null;
+  return { lines, discounts, subtotal, launch, pctOff, off, design, total: Math.max(0, subtotal - off + (design ?? 0)), monthly, factor };
+}

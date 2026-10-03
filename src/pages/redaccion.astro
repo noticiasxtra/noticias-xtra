@@ -9,6 +9,8 @@
 import Base from '../layouts/Base.astro';
 import AdQueue from '../components/AdQueue.astro';
 import CommentQueue from '../components/CommentQueue.astro';
+import SalesDesk from '../components/panel/SalesDesk.astro';
+import Writer from '../components/panel/Writer.astro';
 import { getStories, url, SECTIONS, SITE } from '../lib/site';
 import sources from '../../scripts/sources.json';
 
@@ -20,7 +22,9 @@ const srcs = (sources as Array<{ name: string; section: string; review?: string;
 const TABS = [
   ['inicio', 'Inicio', '<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/>'],
   ['noticias', 'Noticias', '<path d="M4 5h13v14H6a2 2 0 0 1-2-2zM17 9h3v8a2 2 0 0 1-2 2M8 9h5M8 13h5"/>'],
+  ['escribir', 'Escribir', '<path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>'],
   ['comentarios', 'Comentarios', '<path d="M4 5h16v11H9l-5 4z"/>'],
+  ['ventas', 'Ventas', '<path d="M3 7h18l-2 12H5z"/><path d="M8 7a4 4 0 0 1 8 0"/>'],
   ['anuncios', 'Anuncios', '<path d="M3 11v2l13 5V6L3 11z"/><path d="M16 9a3 3 0 0 1 0 6"/>'],
   ['ingresos', 'Ingresos', '<path d="M12 3v18M17 7H9.5a3 3 0 0 0 0 6h5a3 3 0 0 1 0 6H6"/>'],
   ['analitica', 'Analítica', '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>'],
@@ -40,8 +44,8 @@ const TABS = [
       <select id="pnl-role">
         <option value="admin">Administrador: todo</option>
         <option value="editor">Editor: noticias, comentarios y analítica</option>
-        <option value="ads">Anuncios: anuncios, ingresos y comentarios</option>
-        <option value="reporter">Periodista: sus noticias</option>
+        <option value="ads">Ventas: clientes, anuncios e ingresos</option>
+        <option value="reporter">Periodista: escribir sus noticias</option>
       </select>
       <p class="cm-err" data-err hidden></p>
       <button type="submit" class="adp-btn">Entrar</button>
@@ -85,6 +89,16 @@ const TABS = [
             <button type="button" role="tab" aria-selected="false" data-nf="done">Resueltas <b data-nn="done"></b></button>
           </nav>
           <div class="pnl-list" data-news></div>
+        </section>
+
+        <!-- Escribir -->
+        <section class="pnl-pane" data-pane="escribir" hidden>
+          <Writer recent={recent.map(({ id, title }) => ({ id, title }))} />
+        </section>
+
+        <!-- Ventas -->
+        <section class="pnl-pane" data-pane="ventas" hidden>
+          <SalesDesk />
         </section>
 
         <!-- Comentarios -->
@@ -152,7 +166,7 @@ const TABS = [
           <form class="pnl-add" data-add>
             <input placeholder="Nombre" data-add-name maxlength="30" aria-label="Nombre" />
             <input type="email" placeholder="Correo" data-add-mail maxlength="60" aria-label="Correo" />
-            <select data-add-role aria-label="Rol"><option value="editor">Editor</option><option value="ads">Anuncios</option><option value="reporter">Periodista</option><option value="admin">Administrador</option></select>
+            <select data-add-role aria-label="Rol"><option value="editor">Editor</option><option value="ads">Ventas</option><option value="reporter">Periodista</option><option value="admin">Administrador</option></select>
             <button type="submit" class="adp-btn">Añadir</button>
           </form>
           <h2 class="pnl-h2">Qué puede hacer cada rol</h2>
@@ -181,12 +195,12 @@ const TABS = [
 
     // ---------- login + roles ----------
     type Staff = { name: string; role: 'admin' | 'editor' | 'ads' | 'reporter' };
-    const ROLE_NAME = { admin: 'Administrador', editor: 'Editor', ads: 'Anuncios', reporter: 'Periodista' };
+    const ROLE_NAME = { admin: 'Administrador', editor: 'Editor', ads: 'Ventas', reporter: 'Periodista' };
     const ROLE_TABS: Record<Staff['role'], string[]> = {
-      admin: ['inicio', 'noticias', 'comentarios', 'anuncios', 'ingresos', 'analitica', 'salud', 'equipo'],
-      editor: ['inicio', 'noticias', 'comentarios', 'analitica', 'salud'],
-      ads: ['inicio', 'anuncios', 'ingresos', 'comentarios'],
-      reporter: ['inicio', 'noticias'],
+      admin: ['inicio', 'noticias', 'escribir', 'ventas', 'comentarios', 'anuncios', 'ingresos', 'analitica', 'salud', 'equipo'],
+      editor: ['inicio', 'noticias', 'escribir', 'comentarios', 'analitica', 'salud'],
+      ads: ['inicio', 'ventas', 'anuncios', 'ingresos', 'comentarios'],
+      reporter: ['inicio', 'escribir'],
     };
     const me = () => get<Staff | null>('nx-staff', null);
 
@@ -269,7 +283,10 @@ const TABS = [
     const counts = () => {
       const rep = getReports().filter((r) => r.status === 'review').length;
       const ads = listRequests().filter((r) => r.status === 'revisar' || r.status === 'disenar').length;
-      return { noticias: pendingDrafts().length + checkList().length, pending: pendingDrafts().length, check: checkList().length, comentarios: rep, anuncios: ads };
+      const td = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Puerto_Rico' });
+      const leads = get<Array<{ stage: string; follow: string }>>('nx-leads', []).filter((l) => !['won', 'lost'].includes(l.stage) && l.follow && l.follow <= td).length;
+      const review = get<Array<{ status: string }>>('nx-articles', []).filter((a) => a.status === 'review').length;
+      return { noticias: pendingDrafts().length + checkList().length, pending: pendingDrafts().length, check: checkList().length, comentarios: rep, anuncios: ads, ventas: leads, escribir: review };
     };
 
     // ---------- tabs ----------
@@ -291,12 +308,14 @@ const TABS = [
       if (b) { showTab(b.dataset.tab || b.dataset.go!); scrollTo({ top: 0, behavior: 'smooth' }); }
     });
     addEventListener('hashchange', () => showTab(location.hash.slice(1)));
+    addEventListener('nx-leads', () => paintCounts());
 
     function paintCounts() {
       const c = counts();
-      (Object.entries({ noticias: c.noticias, comentarios: c.comentarios, anuncios: c.anuncios }) as Array<[string, number]>)
+      (Object.entries({ noticias: c.noticias, comentarios: c.comentarios, anuncios: c.anuncios, ventas: c.ventas, escribir: c.escribir }) as Array<[string, number]>)
         .forEach(([k, n]) => { const el = $(`[data-count="${k}"]`); el.textContent = n ? String(n) : ''; });
-      set('nx-staff-pending', c.noticias + c.comentarios + c.anuncios); // for the profile menu badge
+      const r = me()?.role ?? 'admin'; const mine = ROLE_TABS[r as Staff['role']];
+      set('nx-staff-pending', (['noticias', 'comentarios', 'anuncios', 'ventas', 'escribir'] as const).filter((k) => mine.includes(k)).reduce((a, k) => a + c[k], 0)); // profile menu badge
       dispatchEvent(new Event('nx-staff-change'));
     }
 
@@ -318,6 +337,9 @@ const TABS = [
         const todo: string[] = [];
         if (allowed.includes('noticias') && c.pending) todo.push(`<li><span>📰 <b>${c.pending}</b> ${c.pending === 1 ? 'noticia espera' : 'noticias esperan'} tu aprobación.</span><button type="button" data-go="noticias">Revisar</button></li>`);
         if (allowed.includes('noticias') && c.check) todo.push(`<li><span>👀 <b>${c.check}</b> publicadas para un vistazo rápido.</span><button type="button" data-go="noticias">Ver</button></li>`);
+        if (allowed.includes('ventas') && c.ventas) todo.push(`<li><span>📞 <b>${c.ventas}</b> ${c.ventas === 1 ? 'cliente espera' : 'clientes esperan'} seguimiento hoy.</span><button type="button" data-go="ventas">Ver</button></li>`);
+        if (allowed.includes('escribir') && c.escribir && s.role !== 'reporter') todo.push(`<li><span>✍️ <b>${c.escribir}</b> ${c.escribir === 1 ? 'noticia de periodista espera' : 'noticias de periodistas esperan'} revisión.</span><button type="button" data-go="escribir">Revisar</button></li>`);
+        if (s.role === 'reporter') todo.push(`<li><span>✍️ Escribe una noticia nueva o sigue un borrador.</span><button type="button" data-go="escribir">Escribir</button></li>`);
         if (allowed.includes('comentarios') && c.comentarios) todo.push(`<li><span>💬 <b>${c.comentarios}</b> ${c.comentarios === 1 ? 'comentario reportado' : 'comentarios reportados'} por revisar.</span><button type="button" data-go="comentarios">Revisar</button></li>`);
         if (allowed.includes('anuncios') && c.anuncios) todo.push(`<li><span>📣 <b>${c.anuncios}</b> ${c.anuncios === 1 ? 'anuncio espera' : 'anuncios esperan'}. Prometimos responder en 24 horas.</span><button type="button" data-go="anuncios">Abrir</button></li>`);
         if (allowed.includes('salud')) todo.push(`<li><span>🔑 Falta conectar la clave de IA: la IA todavía no está redactando noticias.</span><button type="button" data-go="salud">Detalles</button></li>`);
@@ -467,11 +489,12 @@ const TABS = [
         ]);
         $('[data-team]').innerHTML = team.map((m, i) => `<li><span class="pnl-av sm">${esc(m.name[0]?.toUpperCase() ?? '?')}</span><span><b>${esc(m.name)}</b><small>${esc(m.mail)}</small></span><span class="pnl-tag">${ROLE_NAME[m.role]}</span>${i ? `<button type="button" class="pnl-link" data-rm="${i}">Quitar</button>` : ''}</li>`).join('');
         const can: Array<[string, boolean[]]> = [
-          ['Aprobar noticias', [true, true, false, false]], ['Escribir noticias', [true, true, false, true]], ['Moderar comentarios', [true, true, true, false]],
+          ['Aprobar noticias', [true, true, false, false]], ['Escribir noticias', [true, true, false, true]], ['Publicar o programar', [true, true, false, false]],
+          ['Clientes y propuestas', [true, false, true, false]], ['Moderar comentarios', [true, true, true, false]],
           ['Aprobar anuncios', [true, false, true, false]], ['Ver ingresos', [true, false, true, false]], ['Ver analítica', [true, true, false, false]],
           ['Salud del sitio', [true, true, false, false]], ['Manejar el equipo', [true, false, false, false]],
         ];
-        $('[data-perms]').innerHTML = `<table class="pnl-table perms"><thead><tr><th></th><th>Admin</th><th>Editor</th><th>Anuncios</th><th>Periodista</th></tr></thead><tbody>${can.map(([k, v]) => `<tr><th scope="row">${k}</th>${v.map((x) => `<td>${x ? '✓' : '—'}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+        $('[data-perms]').innerHTML = `<table class="pnl-table perms"><thead><tr><th></th><th>Admin</th><th>Editor</th><th>Ventas</th><th>Periodista</th></tr></thead><tbody>${can.map(([k, v]) => `<tr><th scope="row">${k}</th>${v.map((x) => `<td>${x ? '✓' : '—'}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
       },
     };
 

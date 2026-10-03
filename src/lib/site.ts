@@ -182,20 +182,23 @@ export type Story = CollectionEntry<'noticias'>;
 
 /** All published stories, newest first. */
 export async function getStories(): Promise<Story[]> {
-  const all = await getCollection('noticias', ({ data }) => !data.draft);
+  // Scheduled stories (date in the future) stay hidden until then; the site rebuilds every 15 minutes
+  const now = Date.now() + 5 * 60e3;
+  const all = await getCollection('noticias', ({ data }) => !data.draft && data.date.valueOf() <= now);
   return all.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 }
 
-// Puerto Rico's 78 municipalities (accents removed, lowercase), to recognize local stories by their "place".
-// Florida is left out: "Florida" on its own almost always means the U.S. state.
-const PR_TOWNS = new Set(['adjuntas', 'aguada', 'aguadilla', 'aguas buenas', 'aibonito', 'anasco', 'arecibo', 'arroyo', 'barceloneta', 'barranquitas',
-  'bayamon', 'cabo rojo', 'caguas', 'camuy', 'canovanas', 'carolina', 'catano', 'cayey', 'ceiba', 'ciales', 'cidra', 'coamo', 'comerio', 'corozal',
-  'culebra', 'dorado', 'fajardo', 'guanica', 'guayama', 'guayanilla', 'guaynabo', 'gurabo', 'hatillo', 'hormigueros', 'humacao', 'isabela',
-  'jayuya', 'juana diaz', 'juncos', 'lajas', 'lares', 'las marias', 'las piedras', 'loiza', 'luquillo', 'manati', 'maricao', 'maunabo', 'mayaguez',
-  'moca', 'morovis', 'naguabo', 'naranjito', 'orocovis', 'patillas', 'penuelas', 'ponce', 'quebradillas', 'rincon', 'rio grande', 'sabana grande',
-  'salinas', 'san german', 'san juan', 'san lorenzo', 'san sebastian', 'santa isabel', 'toa alta', 'toa baja', 'trujillo alto', 'utuado',
-  'vega alta', 'vega baja', 'vieques', 'villalba', 'yabucoa', 'yauco']);
+// Puerto Rico's 78 municipalities (the editor's "Lugar" list; isLocal() compares them without accents).
+export const PR_MUNICIPIOS = ['Adjuntas', 'Aguada', 'Aguadilla', 'Aguas Buenas', 'Aibonito', 'Añasco', 'Arecibo', 'Arroyo', 'Barceloneta', 'Barranquitas',
+  'Bayamón', 'Cabo Rojo', 'Caguas', 'Camuy', 'Canóvanas', 'Carolina', 'Cataño', 'Cayey', 'Ceiba', 'Ciales', 'Cidra', 'Coamo', 'Comerío', 'Corozal',
+  'Culebra', 'Dorado', 'Fajardo', 'Florida', 'Guánica', 'Guayama', 'Guayanilla', 'Guaynabo', 'Gurabo', 'Hatillo', 'Hormigueros', 'Humacao', 'Isabela',
+  'Jayuya', 'Juana Díaz', 'Juncos', 'Lajas', 'Lares', 'Las Marías', 'Las Piedras', 'Loíza', 'Luquillo', 'Manatí', 'Maricao', 'Maunabo', 'Mayagüez',
+  'Moca', 'Morovis', 'Naguabo', 'Naranjito', 'Orocovis', 'Patillas', 'Peñuelas', 'Ponce', 'Quebradillas', 'Rincón', 'Río Grande', 'Sabana Grande',
+  'Salinas', 'San Germán', 'San Juan', 'San Lorenzo', 'San Sebastián', 'Santa Isabel', 'Toa Alta', 'Toa Baja', 'Trujillo Alto', 'Utuado',
+  'Vega Alta', 'Vega Baja', 'Vieques', 'Villalba', 'Yabucoa', 'Yauco'];
 const plain = (t: string) => t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+// "Florida" is left out: on its own it almost always means the U.S. state.
+const PR_TOWNS = new Set(PR_MUNICIPIOS.filter((t) => t !== 'Florida').map(plain));
 
 /** A Puerto Rico story: a local section, a local league, a Puerto Rico place, or Puerto Rico in the headline. */
 export function isLocal(s: Story): boolean {
