@@ -4,6 +4,7 @@
     "type": "nws-alerts",
     "url": "https://api.weather.gov/alerts/active?area=PR",
     "section": "clima",
+    "review": "auto",
     "place": "Puerto Rico",
     "breaking": true
   },
@@ -12,6 +13,7 @@
     "type": "rss",
     "url": "https://www.nhc.noaa.gov/index-at.xml",
     "section": "clima",
+    "review": "auto",
     "place": "Atlántico",
     "maxPerRun": 1
   },
@@ -20,6 +22,7 @@
     "type": "rss",
     "url": "https://oversightboard.pr.gov/feed/",
     "section": "economia",
+    "review": "always",
     "place": "Puerto Rico",
     "fullText": true
   },
@@ -28,6 +31,7 @@
     "type": "rss",
     "url": "https://lumapr.com/news/feed/",
     "section": "puerto-rico",
+    "review": "check",
     "place": "Puerto Rico",
     "fullText": true
   },
@@ -37,6 +41,7 @@
     "url": "https://www.salud.pr.gov/",
     "linkPattern": "^/CMS/\\d{3,}$",
     "section": "salud",
+    "review": "check",
     "place": "Puerto Rico"
   },
   {
@@ -45,6 +50,7 @@
     "url": "https://wp.bsnpr.com",
     "linkBase": "https://www.bsnpr.com/noticias/",
     "section": "deportes",
+    "review": "auto",
     "league": "bsn",
     "place": "Puerto Rico",
     "enabled": false,
@@ -56,6 +62,7 @@
     "url": "https://www.ligapr.com/noticias",
     "linkPattern": "^https://www\\.ligapr\\.com/noticias/[a-z0-9-]+$",
     "section": "deportes",
+    "review": "auto",
     "league": "invernal",
     "place": "Puerto Rico"
   },
@@ -64,6 +71,7 @@
     "type": "rss",
     "url": "https://beisboldobleapr.com/feed/",
     "section": "deportes",
+    "review": "auto",
     "league": "doble-a",
     "place": "Puerto Rico",
     "fullText": true,
@@ -74,6 +82,7 @@
     "type": "rss",
     "url": "https://fedpurvoli.com/feed/",
     "section": "deportes",
+    "review": "auto",
     "place": "Puerto Rico",
     "fullText": true,
     "maxPerRun": 2,
@@ -84,6 +93,7 @@
     "type": "rss",
     "url": "https://www.justice.gov/news/rss?type=press_release&m=1",
     "section": "puerto-rico",
+    "review": "always",
     "place": "Puerto Rico",
     "keywords": [
       "Puerto Rico"
@@ -95,6 +105,7 @@
     "type": "rss",
     "url": "https://www.fema.gov/feeds/news.rss",
     "section": "puerto-rico",
+    "review": "check",
     "place": "Puerto Rico",
     "keywords": [
       "Puerto Rico",
@@ -107,6 +118,7 @@
     "type": "rss",
     "url": "https://news.va.gov/feed/",
     "section": "puerto-rico",
+    "review": "check",
     "place": "Puerto Rico",
     "keywords": [
       "Puerto Rico"
@@ -117,6 +129,7 @@
     "type": "rss",
     "url": "https://www.whitehouse.gov/news/feed/",
     "section": "estados-unidos",
+    "review": "always",
     "place": "Washington D.C.",
     "fullText": true
   },
@@ -125,6 +138,7 @@
     "type": "rss",
     "url": "https://www.war.gov/DesktopModules/ArticleCS/RSS.ashx?ContentType=1&Site=945&max=10",
     "section": "estados-unidos",
+    "review": "always",
     "place": "Washington D.C.",
     "keywords": [
       "Puerto Rico",
@@ -142,6 +156,7 @@
     "type": "rss",
     "url": "https://www.fda.gov/about-fda/contact-fda/stay-informed/rss-feeds/press-releases/rss.xml",
     "section": "salud",
+    "review": "check",
     "place": "Estados Unidos",
     "fullText": true,
     "maxPerRun": 1
@@ -151,6 +166,7 @@
     "type": "rss",
     "url": "https://www.fda.gov/about-fda/contact-fda/stay-informed/rss-feeds/recalls/rss.xml",
     "section": "salud",
+    "review": "auto",
     "place": "Estados Unidos",
     "keywords": [
       "Puerto Rico",
@@ -163,6 +179,7 @@
     "type": "rss",
     "url": "https://www.nasa.gov/news-release/feed/",
     "section": "estados-unidos",
+    "review": "check",
     "place": "Estados Unidos",
     "maxPerRun": 1
   },
@@ -171,6 +188,7 @@
     "type": "rss",
     "url": "https://ec.europa.eu/commission/presscorner/api/rss?language=es",
     "section": "mundo",
+    "review": "always",
     "place": "Bruselas, Bélgica",
     "fullText": true,
     "maxPerRun": 1
@@ -180,6 +198,7 @@
     "type": "rss",
     "url": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_week.atom",
     "section": "mundo",
+    "review": "auto",
     "place": "Mundo",
     "maxPerRun": 1
   },
@@ -188,6 +207,7 @@
     "type": "rss",
     "url": "https://news.un.org/feed/subscribe/es/news/all/rss.xml",
     "section": "mundo",
+    "review": "check",
     "place": "Mundo",
     "enabled": false,
     "_nota": "Desactivada hasta confirmar que las condiciones de uso de la ONU permiten reescribir su contenido."

@@ -1,5 +1,8 @@
-# Twice a day: the AI checks the sources in scripts/sources.json, drafts new stories,
-# and opens a pull request. An editor reviews it and clicks Merge to publish.
+# Twice a day: the AI checks the sources in scripts/sources.json and drafts new stories.
+# Each source has a review level ("review" in sources.json):
+#   auto / check -> published right away; "check" stories are also listed in an issue for a quick look
+#   always       -> a pull request the editor approves (political, legal, crime, sensitive, low confidence)
+# The repository owner is assigned to both, so GitHub sends an email and a phone notification.
 #
 # Setup (one time):
 #  1. Settings > Secrets and variables > Actions > New repository secret: ANTHROPIC_API_KEY
@@ -16,6 +19,8 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  issues: write
+  actions: write # to start the site rebuild right after publishing
 
 concurrency:
   group: daily-news
@@ -36,29 +41,42 @@ jobs:
           MAX_ARTICLES: ${{ vars.MAX_ARTICLES }}
         run: node scripts/fetch-news.mjs
 
-      - name: Save progress and open a pull request for editor review
+      - name: Publish, open the review pull request and the quick-look issue
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COUNT: ${{ steps.fetch.outputs.count }}
+          REVIEW: ${{ steps.fetch.outputs.review }}
+          CHECK: ${{ steps.fetch.outputs.check }}
+          AUTO: ${{ steps.fetch.outputs.auto }}
+          OWNER: ${{ github.repository_owner }}
         run: |
           git config user.name "noticias-xtra-ia"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          WHEN="$(TZ=America/Puerto_Rico date +'%d/%m %I:%M %p')"
 
-          # 1) Remember which source items were already checked (goes straight to main)
-          if ! git diff --quiet scripts/seen.json; then
-            git add scripts/seen.json
-            git commit -m "IA: actualizar fuentes revisadas"
+          # 1) Checked sources, plus the stories that publish right away, go straight to main
+          git add scripts/seen.json
+          if [ "${AUTO:-0}" != "0" ]; then xargs -a ai-auto.txt git add --; fi
+          if ! git diff --cached --quiet; then
+            git commit -m "IA: ${AUTO:-0} noticias publicadas y fuentes revisadas"
             git push origin HEAD:main
+            # Pushes made with GITHUB_TOKEN don't start other workflows, so start the rebuild directly
+            if [ "${AUTO:-0}" != "0" ]; then gh workflow run deploy.yml --ref main; fi
           fi
 
-          # 2) New stories go to a separate branch + pull request for the editor
-          if [ "$COUNT" != "0" ]; then
+          # 2) Routine stories already published: an issue for a quick look
+          if [ "${CHECK:-0}" != "0" ]; then
+            gh issue create --title "Vistazo rápido: $CHECK publicadas ($WHEN)" --body-file check-body.md --assignee "$OWNER"
+          fi
+
+          # 3) Stories that wait for approval: a separate branch + pull request
+          if [ "${REVIEW:-0}" != "0" ]; then
             BRANCH="ia/noticias-$(date -u +%Y%m%d-%H%M)"
             git checkout -b "$BRANCH"
             git add src/content/noticias
-            git commit -m "IA: $COUNT noticias para revisión"
+            git commit -m "IA: $REVIEW noticias para revisión"
             git push origin "$BRANCH"
             gh pr create --base main --head "$BRANCH" \
-              --title "Noticias para revisar: $COUNT ($(TZ=America/Puerto_Rico date +'%d/%m %I:%M %p'))" \
-              --body-file pr-body.md
+              --title "Noticias para aprobar: $REVIEW ($WHEN)" \
+              --body-file pr-body.md --assignee "$OWNER"
           fi

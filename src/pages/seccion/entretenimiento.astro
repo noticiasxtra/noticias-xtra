@@ -5,12 +5,12 @@ import Base from '../../layouts/Base.astro';
 import Ph from '../../components/Ph.astro';
 import Time from '../../components/Time.astro';
 import AdSlot from '../../components/AdSlot.astro';
-import { getStories, url } from '../../lib/site';
+import { getStories, topOrder, url } from '../../lib/site';
 import { SIGNS, horoscope, signOfTheDay, triviaOfTheDay, todayLong } from '../../lib/daily';
 import { upcomingEvents, dateTile, dateLong, calendarLink } from '../../lib/events';
 
 const stories = (await getStories()).filter((s) => s.data.section === 'entretenimiento');
-const [lead, ...rest] = stories;
+const [lead, ...rest] = topOrder(stories);
 const side = rest.slice(0, 2);
 const mosaic = rest.slice(2);
 const buzz = stories.slice(0, 5);

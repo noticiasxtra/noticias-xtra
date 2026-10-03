@@ -10,8 +10,8 @@
  * Run locally:   ANTHROPIC_API_KEY=sk-... node scripts/fetch-news.mjs
  * Test without AI or saving:  DRY_RUN=1 node scripts/fetch-news.mjs
  *
- * In GitHub Actions (.github/workflows/daily-news.yml) the new files are sent to a
- * pull request so an editor approves them before they go live.
+ * In GitHub Actions (.github/workflows/daily-news.yml) routine stories publish right away (review "auto"/"check")
+ * and the rest go to a pull request so an editor approves them first. See levelFor() below.
  */
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -21,7 +21,20 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SOURCES_FILE = path.join(ROOT, 'scripts/sources.json');
 const SEEN_FILE = path.join(ROOT, 'scripts/seen.json');
 const OUT_DIR = path.join(ROOT, 'src/content/noticias');
-const PR_BODY = path.join(ROOT, 'pr-body.md');
+const PR_BODY = path.join(ROOT, 'pr-body.md'); // pull request: stories that wait for approval
+const CHECK_BODY = path.join(ROOT, 'check-body.md'); // issue: published stories for a quick look afterwards
+const AUTO_LIST = path.join(ROOT, 'ai-auto.txt'); // files published right away (one path per line)
+
+/* Review levels (each source has "review" in sources.json):
+   auto   = publish right away (weather, earthquakes, recalls, league results)
+   check  = publish right away, then an editor takes a quick look (routine agency notices)
+   always = wait for approval (political, legal, crime). Any story the AI marks as sensitive or
+            low-confidence, and anything in Política or Gobierno, waits for approval no matter the source. */
+function levelFor(story, src, section) {
+  if (story.needsHumanCheck || story.confidence !== 'alta') return 'always';
+  if (section === 'politica' || section === 'gobierno') return 'always';
+  return ['auto', 'check'].includes(src.review) ? src.review : 'always';
+}
 
 const API_KEY = process.env.ANTHROPIC_API_KEY;
 // Model can be changed with a repository variable named ANTHROPIC_MODEL.
@@ -175,16 +188,33 @@ Lenguaje sencillo:
 Tono:
 - Informativo, serio y respetuoso. Sin opiniones propias, sin sensacionalismo y sin adjetivos cargados.
 
+Comunicados de gobierno o de promoción (muy importante):
+- Muchos comunicados oficiales usan un tono positivo o de propaganda ("histórico", "logro sin precedentes", "gracias al liderazgo de", "compromiso inquebrantable"). Nunca copies ese tono.
+- Reescribe todo como hechos verificables y neutrales: qué se anunció, cuánto dinero, para quién, desde cuándo, qué falta por hacer.
+- Elimina los elogios, los adjetivos de celebración y las frases de agradecimiento a funcionarios.
+- Toda afirmación de logro o de beneficio va atribuida: "según el comunicado de La Fortaleza", "afirmó la agencia".
+- Si el comunicado no trae hechos concretos más allá de elogios o propaganda, descártalo (skip: true).
+
+Largo:
+- Breve y al grano: entre 250 y 400 palabras en total, nunca más de 450. Es unos dos tercios de una noticia típica de otros medios.
+- 3 a 5 párrafos cortos. Si la fuente da para menos, escribe menos; no rellenes.
+
 Cuándo descartar (skip: true):
 - La fuente no tiene suficiente información para una noticia útil.
 - Es publicidad, un anuncio interno, un evento menor o un trámite administrativo sin impacto para el público.
 - Es un asunto local de un estado o país sin importancia nacional o mundial y sin relación con Puerto Rico.
 
 Revisión humana (needsHumanCheck: true):
-- Crímenes, arrestos, accidentes con víctimas, menores de edad o acusaciones contra personas.
+- Crímenes, arrestos, accidentes con víctimas, muertes, menores de edad o acusaciones contra personas.
+- Personas particulares (no funcionarios ni figuras públicas).
+- Política partidista, elecciones o declaraciones de políticos.
+
+Confianza (confidence):
+- "alta" solo si todos los datos están claros en la fuente y no tuviste que interpretar nada importante.
+- "baja" si algún dato es confuso, la fuente es ambigua, hay cifras difíciles de leer o dudas de traducción. Explica la duda en editorNote.
 
 Responde SOLO con un objeto JSON válido, sin texto adicional, con esta forma:
-{"skip": false, "skipReason": "", "title": "titular de máximo 110 caracteres", "description": "resumen de 1 o 2 oraciones", "section": "una de: ${SECTIONS.join(', ')}", "place": "pueblo de Puerto Rico, ciudad y estado de EE.UU. o ciudad y país; si no se sabe, 'Puerto Rico', 'Estados Unidos' o el país", "body": "3 a 6 párrafos separados por una línea en blanco", "league": "solo si la sección es deportes: una de ${LEAGUES.join(', ')}, o vacío si no aplica", "needsHumanCheck": false, "editorNote": "dudas o datos que el editor debe verificar"}`;
+{"skip": false, "skipReason": "", "title": "titular de máximo 110 caracteres", "description": "resumen de 1 o 2 oraciones", "section": "una de: ${SECTIONS.join(', ')}", "place": "pueblo de Puerto Rico, ciudad y estado de EE.UU. o ciudad y país; si no se sabe, 'Puerto Rico', 'Estados Unidos' o el país", "body": "3 a 5 párrafos cortos separados por una línea en blanco, 250 a 400 palabras en total", "league": "solo si la sección es deportes: una de ${LEAGUES.join(', ')}, o vacío si no aplica", "needsHumanCheck": false, "confidence": "alta o baja", "editorNote": "dudas o datos que el editor debe verificar"}`;
 
 async function draftWithClaude(item, src) {
   const prompt = `Fuente: ${src.name}
@@ -201,11 +231,14 @@ ${item.text.slice(0, 9000)}
   const res = await fetch(API_URL, {
     method: 'POST',
     headers: { 'x-api-key': API_KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
-    body: JSON.stringify({ model: MODEL, max_tokens: 1500, system: SYSTEM, messages: [{ role: 'user', content: prompt }] }),
+    // Room for the model's thinking plus a ~400-word story; medium effort keeps cost and time down
+    body: JSON.stringify({ model: MODEL, max_tokens: 8000, output_config: { effort: 'medium' }, system: SYSTEM, messages: [{ role: 'user', content: prompt }] }),
     signal: AbortSignal.timeout(90000),
   });
   if (!res.ok) throw new Error(`Claude API ${res.status}: ${(await res.text()).slice(0, 300)}`);
   const data = await res.json();
+  if (data.stop_reason === 'refusal') throw new Error('la IA no quiso redactar esta fuente');
+  if (data.stop_reason === 'max_tokens') throw new Error('la respuesta quedó cortada');
   const text = (data.content || []).filter((c) => c.type === 'text').map((c) => c.text).join('');
   const json = text.replace(/```json|```/g, '').trim();
   return JSON.parse(json.slice(json.indexOf('{'), json.lastIndexOf('}') + 1));
@@ -235,6 +268,7 @@ async function saveStory(story, item, src) {
     `place: ${yaml(story.place || src.place || 'Puerto Rico')}`,
     `date: ${date.toISOString()}`,
     'aiAssisted: true',
+    'draft: false', // set to true to take the story off the site
     ...(src.breaking ? ['breaking: true'] : []), // e.g. weather alerts can go in the red ÚLTIMA HORA bar
     'sources:',
     ...sources,
@@ -316,7 +350,9 @@ async function main() {
         if (story.skip) { skipped.push(`${item.title} (${story.skipReason || 'descartada por la IA'})`); continue; }
         const file = await saveStory(story, item, src);
         fromThis++;
-        created.push({ file, title: story.title, source: src.name, link: item.link, note: story.editorNote });
+        const section = SECTIONS.includes(story.section) ? story.section : src.section || 'puerto-rico';
+        const level = levelFor(story, src, section);
+        created.push({ file, level, title: story.title, source: src.name, link: item.link, note: story.editorNote });
         if (story.needsHumanCheck) flagged.push(story.title);
         console.log(`  ✓ ${story.title}`);
       } catch (e) {
@@ -328,21 +364,40 @@ async function main() {
 
   if (!DRY_RUN) await fs.writeFile(SEEN_FILE, JSON.stringify([...seen].slice(-3000), null, 2) + '\n');
 
-  // Pull request description for the editor
+  const review = created.filter((c) => c.level === 'always');
+  const check = created.filter((c) => c.level === 'check');
+  const auto = created.filter((c) => c.level !== 'always');
+  const line = (c) => `- **${c.title}**  \n  Fuente: ${c.link ? `[${c.source}](${c.link})` : c.source}  \n  Archivo: \`${c.file}\`${c.note ? `  \n  Nota para el editor: ${c.note}` : ''}`;
+
+  // Pull request: stories that wait for approval
   const body = [
-    `La IA preparó **${created.length}** ${created.length === 1 ? 'noticia' : 'noticias'} para revisión.`,
+    `La IA preparó **${review.length}** ${review.length === 1 ? 'noticia que necesita' : 'noticias que necesitan'} tu aprobación.`,
     '',
     'Revisa cada una contra su fuente. Para publicar, aprueba y haz **Merge**. Para corregir, edita el archivo en esta misma pull request.',
     '',
     ...(flagged.length ? ['### ⚠️ Revisar con cuidado', ...flagged.map((t) => `- ${t}`), ''] : []),
     '### Noticias',
-    ...created.map((c) => `- **${c.title}**  \n  Fuente: ${c.link ? `[${c.source}](${c.link})` : c.source}  \n  Archivo: \`${c.file}\`${c.note ? `  \n  Nota para el editor: ${c.note}` : ''}`),
+    ...review.map(line),
     ...(skipped.length ? ['', '<details><summary>Descartadas</summary>', '', ...skipped.map((s) => `- ${s}`), '', '</details>'] : []),
   ].join('\n');
-  if (!DRY_RUN) await fs.writeFile(PR_BODY, body);
+  // Issue: already published, for a quick look. To take one down, set "draft: true" in its file (or delete it).
+  const checkBody = [
+    `Se publicaron **${check.length}** ${check.length === 1 ? 'noticia' : 'noticias'} de fuentes oficiales de rutina. Dales un vistazo cuando puedas.`,
+    '',
+    'Si algo está mal: abre el archivo, cambia `draft: false` por `draft: true` (o añade esa línea) y guarda. La noticia desaparece del sitio en unos minutos. Luego corrige y vuelve a ponerla en `false`.',
+    '',
+    ...check.map(line),
+    '',
+    'Cierra este aviso cuando termines.',
+  ].join('\n');
+  if (!DRY_RUN) {
+    await fs.writeFile(PR_BODY, body);
+    await fs.writeFile(CHECK_BODY, checkBody);
+    await fs.writeFile(AUTO_LIST, auto.map((c) => c.file).join('\n') + (auto.length ? '\n' : ''));
+  }
 
   console.log(`\nListo: ${created.length} creadas, ${skipped.length} descartadas, ${aiCalls} consultas a la IA.`);
-  if (process.env.GITHUB_OUTPUT) await fs.appendFile(process.env.GITHUB_OUTPUT, `count=${created.length}\n`);
+  if (process.env.GITHUB_OUTPUT) await fs.appendFile(process.env.GITHUB_OUTPUT, `count=${created.length}\nreview=${review.length}\ncheck=${check.length}\nauto=${auto.length}\n`);
 }
 
 main().catch((e) => { console.error(e); process.exit(1); });

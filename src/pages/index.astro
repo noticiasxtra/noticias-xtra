@@ -13,12 +13,14 @@ import HomeStrip from '../components/HomeStrip.astro';
 import AdSlot from '../components/AdSlot.astro';
 import LocalScores from '../components/deportes/LocalScores.astro';
 import GamesTeaser from '../components/GamesTeaser.astro';
-import { getStories, url, SITE, SECTIONS, VIDEOS, VIDEO_SOURCES } from '../lib/site';
+import { getStories, topOrder, url, SITE, SECTIONS, VIDEOS, VIDEO_SOURCES } from '../lib/site';
 
 const stories = await getStories();
 const F = SITE.features;
-const lead = stories.find((s) => s.data.featured) ?? stories[0];
-const others = stories.filter((s) => s.id !== lead?.id);
+// Top spots: Puerto Rico first, unless a U.S. or world story is trending (src/lib/site.ts topOrder)
+const ordered = topOrder(stories);
+const lead = ordered[0];
+const others = ordered.filter((s) => s.id !== lead?.id);
 const left = others.slice(0, 3);
 const row = others.slice(3, 6);
 const more = others.slice(6, 11);

@@ -17,4 +17,10 @@ Noticias Xtra is a Spanish-language (Puerto Rico) news site built with Astro 7, 
 
 ## Editorial rules for the AI pipeline
 - Only primary/official sources in `scripts/sources.json`. Do not add other news outlets as sources.
-- AI drafts always go through a pull request for human review; never auto-merge stories about crime, accidents, minors, or private individuals.
+- Review levels (approved by the user on 2026-10-02), set per source with `"review"` in `scripts/sources.json`:
+  - `auto`: publish right away. Weather and hurricane alerts, earthquakes, product recalls, league results.
+  - `check`: publish right away, and list the story in a "Vistazo rápido" GitHub issue for an editor.
+  - `always`: pull request for approval. Political, legal and court sources.
+- Whatever the source, a story waits for approval if the AI marks it sensitive (crime, accidents, deaths, minors, private individuals, partisan politics) or low-confidence, or if its section is Política or Gobierno. Never auto-publish those.
+- Government press releases are rewritten as neutral facts: no promotional tone, and claims attributed. Stories run 250–400 words, about 2/3 of a typical Puerto Rico outlet's story.
+- Top spots on every page favor Puerto Rico stories (`topOrder` in `src/lib/site.ts`), unless a U.S. or world story is trending (`trending`, `breaking`, `live` or `featured`).

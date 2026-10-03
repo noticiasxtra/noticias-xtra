@@ -5,7 +5,7 @@ import VideoCard from '../../components/VideoCard.astro';
 import Sidebar from '../../components/Sidebar.astro';
 import AdSlot from '../../components/AdSlot.astro';
 import GamesTeaser from '../../components/GamesTeaser.astro';
-import { getStories, SECTIONS, SITE, VIDEOS, url, SECTION_LIVE } from '../../lib/site';
+import { getStories, topOrder, SECTIONS, SITE, VIDEOS, url, SECTION_LIVE } from '../../lib/site';
 
 export function getStaticPaths() {
   // Deportes, Entretenimiento, Clima, Economía and Opinión have their own pages in this folder
@@ -13,7 +13,7 @@ export function getStaticPaths() {
 }
 const { sec } = Astro.props;
 const all = await getStories();
-const list = all.filter((s) => s.data.section === sec.id);
+const list = topOrder(all.filter((s) => s.data.section === sec.id));
 const vids = SITE.features.videos ? VIDEOS.filter((v) => v.section === sec.id) : [];
 ---
 <Base title={sec.name} active={sec.id} description={`Noticias de ${sec.name} en ${SITE.name}.`}>

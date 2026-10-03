@@ -184,6 +184,38 @@ export async function getStories(): Promise<Story[]> {
   return all.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 }
 
+// Puerto Rico's 78 municipalities (accents removed, lowercase), to recognize local stories by their "place".
+// Florida is left out: "Florida" on its own almost always means the U.S. state.
+const PR_TOWNS = new Set(['adjuntas', 'aguada', 'aguadilla', 'aguas buenas', 'aibonito', 'anasco', 'arecibo', 'arroyo', 'barceloneta', 'barranquitas',
+  'bayamon', 'cabo rojo', 'caguas', 'camuy', 'canovanas', 'carolina', 'catano', 'cayey', 'ceiba', 'ciales', 'cidra', 'coamo', 'comerio', 'corozal',
+  'culebra', 'dorado', 'fajardo', 'guanica', 'guayama', 'guayanilla', 'guaynabo', 'gurabo', 'hatillo', 'hormigueros', 'humacao', 'isabela',
+  'jayuya', 'juana diaz', 'juncos', 'lajas', 'lares', 'las marias', 'las piedras', 'loiza', 'luquillo', 'manati', 'maricao', 'maunabo', 'mayaguez',
+  'moca', 'morovis', 'naguabo', 'naranjito', 'orocovis', 'patillas', 'penuelas', 'ponce', 'quebradillas', 'rincon', 'rio grande', 'sabana grande',
+  'salinas', 'san german', 'san juan', 'san lorenzo', 'san sebastian', 'santa isabel', 'toa alta', 'toa baja', 'trujillo alto', 'utuado',
+  'vega alta', 'vega baja', 'vieques', 'villalba', 'yabucoa', 'yauco']);
+const plain = (t: string) => t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+
+/** A Puerto Rico story: a local section, a local league, a Puerto Rico place, or Puerto Rico in the headline. */
+export function isLocal(s: Story): boolean {
+  const d = s.data;
+  if (d.section === 'opinion') return false; // columns are not news; they never take the top spots this way
+  if (d.section === 'puerto-rico' || d.section === 'gobierno' || d.section === 'politica') return true;
+  if (d.league) return league(d.league)?.local ?? false;
+  const place = plain(d.place);
+  if (place.includes('puerto rico') || PR_TOWNS.has(place.split(',')[0].trim())) return true;
+  return /puerto rico|boricua|puertorrique/i.test(`${d.title} ${d.description}`);
+}
+/** Big enough to lead even if it isn't local: breaking, live, an editor's pick or marked "trending". */
+export const isTrending = (s: Story) => s.data.trending || s.data.breaking || s.data.live || s.data.featured;
+
+/** Order for the top spots of every page: among the last `hours` hours, trending first, then Puerto Rico,
+ *  then the rest; older stories after, newest first. Chronological lists ("Últimas noticias") don't use it. */
+export function topOrder(stories: Story[], hours = 36): Story[] {
+  const now = Date.now();
+  const rank = (s: Story) => (now - s.data.date.valueOf() > hours * 36e5 ? 3 : isTrending(s) ? 0 : isLocal(s) ? 1 : 2);
+  return [...stories].sort((a, b) => rank(a) - rank(b) || b.data.date.valueOf() - a.data.date.valueOf());
+}
+
 /** Stories by view count would come from analytics later. For now: featured first, then newest. */
 export function mostRead(stories: Story[], n = 5): Story[] {
   return [...stories].sort((a, b) => Number(b.data.featured) - Number(a.data.featured) || Number(b.data.live) - Number(a.data.live)).slice(0, n);

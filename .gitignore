@@ -5,3 +5,5 @@ dist/
 .DS_Store
 pr-body.md
 .claude/
+check-body.md
+ai-auto.txt
