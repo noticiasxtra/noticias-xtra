@@ -3975,3 +3975,12 @@ a,button,summary,label{-webkit-tap-highlight-color:transparent}
 .cm-login{border:0;background:none;padding:0;color:var(--purple);font:inherit;font-weight:700;text-decoration:underline;cursor:pointer}
 .cm-empty{list-style:none;padding:14px 0;color:var(--muted)}
 .auth [hidden]{display:none!important} /* the form labels are grid boxes; hidden ones must stay hidden */
+/* Photos in comments: small rounded thumbnail (like Instagram/TikTok), full size on tap */
+.cm-photo-btn{display:inline-flex;align-items:center;gap:5px;height:30px;padding:0 10px;border:1px solid var(--line);border-radius:999px;background:var(--card);color:var(--ink);font-size:12px;font-weight:800;cursor:pointer}
+.cm-photo-btn:hover,.cm-photo-btn:focus-within{border-color:var(--purple);color:var(--purple)}
+.cm-media.photo{width:auto;height:auto;max-width:150px;max-height:150px;object-fit:cover;border-radius:12px;cursor:zoom-in;box-shadow:0 1px 4px rgba(22,22,29,.15)}
+.cm-media-prev img[src^="data:image/jpeg"]{object-fit:cover}
+.cm-lightbox{max-width:96vw;max-height:94vh;padding:0;border:0;background:transparent;overflow:visible}
+.cm-lightbox::backdrop{background:rgba(10,10,18,.88)}
+.cm-lightbox img{display:block;max-width:96vw;max-height:90vh;border-radius:10px;object-fit:contain}
+.cm-lightbox button{position:fixed;top:14px;right:14px;width:40px;height:40px;border:0;border-radius:50%;background:rgba(255,255,255,.15);color:#fff;font-size:18px;cursor:pointer}

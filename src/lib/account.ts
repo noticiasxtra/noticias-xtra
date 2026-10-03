@@ -129,3 +129,12 @@ export async function api(path: string, init: RequestInit = {}, auth = true): Pr
 }
 /** Opens the "Entrar / Crear cuenta" box (src/components/AuthDialog.astro). */
 export const askLogin = (why?: string) => dispatchEvent(new CustomEvent('nx-auth-open', { detail: { why } }));
+
+/** A photo for a comment (data URL, already shrunk) → uploaded to the "comentarios" bucket; returns its address. */
+export async function uploadCommentPhoto(dataUrl: string): Promise<string | null> {
+  const id = userId(); const t = await token(); if (!id || !t) return null;
+  const blob = await (await fetch(dataUrl)).blob();
+  const name = `${id}/${Date.now().toString(36)}.jpg`;
+  const r = await fetch(`${base()}/storage/v1/object/comentarios/${name}`, { method: 'POST', headers: { apikey: BACKEND.anonKey, Authorization: `Bearer ${t}`, 'Content-Type': 'image/jpeg' }, body: blob }).catch(() => null);
+  return r?.ok ? `${base()}/storage/v1/object/public/comentarios/${name}` : null;
+}
