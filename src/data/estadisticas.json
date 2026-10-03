@@ -129,5 +129,105 @@
         ]
       }
     ]
+  },
+  "nfl": {
+    "columns": [
+      "PTS/J",
+      "PC/J",
+      "DIF",
+      "J"
+    ],
+    "rows": [
+      {
+        "team": "Buffalo Bills",
+        "values": [
+          "33.7",
+          "26.0",
+          "+23",
+          "3"
+        ]
+      },
+      {
+        "team": "San Francisco 49ers",
+        "values": [
+          "32.7",
+          "16.7",
+          "+48",
+          "3"
+        ]
+      },
+      {
+        "team": "Detroit Lions",
+        "values": [
+          "31.0",
+          "31.7",
+          "-2",
+          "3"
+        ]
+      },
+      {
+        "team": "Baltimore Ravens",
+        "values": [
+          "30.7",
+          "26.0",
+          "+14",
+          "3"
+        ]
+      },
+      {
+        "team": "Chicago Bears",
+        "values": [
+          "29.7",
+          "17.7",
+          "+36",
+          "3"
+        ]
+      },
+      {
+        "team": "Carolina Panthers",
+        "values": [
+          "29.7",
+          "27.7",
+          "+6",
+          "3"
+        ]
+      },
+      {
+        "team": "Kansas City Chiefs",
+        "values": [
+          "29.3",
+          "16.7",
+          "+38",
+          "3"
+        ]
+      },
+      {
+        "team": "Las Vegas Raiders",
+        "values": [
+          "29.3",
+          "18.0",
+          "+34",
+          "3"
+        ]
+      },
+      {
+        "team": "Dallas Cowboys",
+        "values": [
+          "29.3",
+          "27.3",
+          "+6",
+          "3"
+        ]
+      },
+      {
+        "team": "Jacksonville Jaguars",
+        "values": [
+          "27.3",
+          "12.0",
+          "+46",
+          "3"
+        ]
+      }
+    ]
   }
 }

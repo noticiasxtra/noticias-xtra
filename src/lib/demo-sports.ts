@@ -128,34 +128,6 @@ export const DEMO_GAMES: Game[] = [
     date: at(1, '22:30'), away: 'Golden State Warriors', home: 'Los Angeles Lakers', awayRecord: '2-1', homeRecord: '2-2',
     venue: 'Crypto.com Arena, Los Ángeles',
   },
-  // NFL: real teams and stadiums, invented results
-  {
-    id: 'demo-nfl-1', demo: true, league: 'nfl', status: 'en-vivo', note: '3er cuarto · 8:41',
-    date: at(0, '13:00'), away: 'Dallas Cowboys', home: 'Philadelphia Eagles', awayScore: 17, homeScore: 20,
-    venue: 'Lincoln Financial Field, Filadelfia', awayRecord: '2-2', homeRecord: '3-1',
-    linescore: { labels: ['1', '2', '3', '4'], away: [7, 10, 0, ''], home: [10, 7, 3, ''], totals: ['T'], awayTotals: [17], homeTotals: [20] },
-    stats: [
-      { label: 'Yardas totales', away: '268', home: '301' }, { label: 'Yardas por pase', away: '191', home: '176' },
-      { label: 'Yardas por carrera', away: '77', home: '125' }, { label: 'Primeros intentos', away: '15', home: '18' },
-      { label: 'Pérdidas de balón', away: '1', home: '0' }, { label: 'Tiempo de posesión', away: '19:02', home: '20:17' },
-    ],
-  },
-  {
-    id: 'demo-nfl-2', demo: true, league: 'nfl', status: 'final',
-    date: at(-1, '20:20'), away: 'Kansas City Chiefs', home: 'Buffalo Bills', awayScore: 27, homeScore: 24,
-    venue: 'Highmark Stadium, Orchard Park', awayRecord: '3-1', homeRecord: '3-1',
-    linescore: { labels: ['1', '2', '3', '4'], away: [3, 14, 0, 10], home: [7, 7, 7, 3], totals: ['T'], awayTotals: [27], homeTotals: [24] },
-    stats: [
-      { label: 'Yardas totales', away: '389', home: '362' }, { label: 'Yardas por pase', away: '287', home: '241' },
-      { label: 'Yardas por carrera', away: '102', home: '121' }, { label: 'Primeros intentos', away: '22', home: '20' },
-      { label: 'Pérdidas de balón', away: '1', home: '2' }, { label: 'Tiempo de posesión', away: '31:10', home: '28:50' },
-    ],
-  },
-  {
-    id: 'demo-nfl-3', demo: true, league: 'nfl', status: 'programado',
-    date: at(1, '20:15'), away: 'Miami Dolphins', home: 'New York Jets', awayRecord: '2-2', homeRecord: '1-3',
-    venue: 'MetLife Stadium, East Rutherford',
-  },
   // Voleibol: real teams, invented results (the score is sets won)
   {
     id: 'demo-lvsm-1', demo: true, league: 'lvsm', status: 'en-vivo', note: '4to set',
@@ -212,18 +184,6 @@ export const DEMO_STANDINGS: Record<string, Standings> = {
       { name: 'Conferencia Oeste', columns: ['ÚLT. 10', 'RACHA'], rows: [s('Oklahoma City Thunder', 4, 0, '—', '4-0', 'G1'), s('Denver Nuggets', 3, 1, '1.0', '3-1', 'G1'), s('Minnesota Timberwolves', 3, 1, '1.0', '3-1', 'G1'), s('Los Angeles Lakers', 2, 2, '2.0', '2-2', 'G1'), s('Golden State Warriors', 2, 1, '1.5', '2-1', 'G1'), s('Houston Rockets', 2, 2, '2.0', '2-2', 'G1'), s('Dallas Mavericks', 2, 2, '2.0', '2-2', 'G1'), s('LA Clippers', 2, 2, '2.0', '2-2', 'G1'), s('Memphis Grizzlies', 2, 2, '2.0', '2-2', 'G1'), s('Phoenix Suns', 1, 3, '3.0', '1-3', 'P1'), s('Sacramento Kings', 1, 3, '3.0', '1-3', 'P1'), s('San Antonio Spurs', 1, 3, '3.0', '1-3', 'P1'), s('New Orleans Pelicans', 1, 3, '3.0', '1-3', 'P1'), s('Portland Trail Blazers', 0, 4, '4.0', '0-4', 'P1'), s('Utah Jazz', 0, 3, '3.5', '0-3', 'P1')] },
     ],
   },
-  nfl: {
-    groups: [
-      { name: 'AFC Este', columns: ['DIV', 'RACHA'], rows: [s('Buffalo Bills', 3, 1, '—', '1-0', 'P1'), s('Miami Dolphins', 2, 2, '1.0', '0-1', 'G1'), s('New England Patriots', 2, 2, '1.0', '1-0', 'P1'), s('New York Jets', 1, 3, '2.0', '0-1', 'P2')] },
-      { name: 'AFC Norte', columns: ['DIV', 'RACHA'], rows: [s('Baltimore Ravens', 3, 1, '—', '1-0', 'G2'), s('Pittsburgh Steelers', 3, 1, '—', '1-0', 'G1'), s('Cincinnati Bengals', 2, 2, '1.0', '0-1', 'P1'), s('Cleveland Browns', 0, 4, '3.0', '0-1', 'P4')] },
-      { name: 'AFC Sur', columns: ['DIV', 'RACHA'], rows: [s('Houston Texans', 3, 1, '—', '1-0', 'G3'), s('Indianapolis Colts', 2, 2, '1.0', '1-0', 'P1'), s('Jacksonville Jaguars', 1, 3, '2.0', '0-1', 'G1'), s('Tennessee Titans', 1, 3, '2.0', '0-1', 'P2')] },
-      { name: 'AFC Oeste', columns: ['DIV', 'RACHA'], rows: [s('Kansas City Chiefs', 3, 1, '—', '1-0', 'G2'), s('Los Angeles Chargers', 3, 1, '—', '0-0', 'G1'), s('Denver Broncos', 2, 2, '1.0', '0-1', 'P1'), s('Las Vegas Raiders', 1, 3, '2.0', '0-0', 'P2')] },
-      { name: 'NFC Este', columns: ['DIV', 'RACHA'], rows: [s('Philadelphia Eagles', 3, 1, '—', '1-0', 'G2'), s('Washington Commanders', 2, 2, '1.0', '0-0', 'G1'), s('Dallas Cowboys', 2, 2, '1.0', '0-1', 'P1'), s('New York Giants', 1, 3, '2.0', '0-0', 'P1')] },
-      { name: 'NFC Norte', columns: ['DIV', 'RACHA'], rows: [s('Detroit Lions', 4, 0, '—', '1-0', 'G4'), s('Green Bay Packers', 3, 1, '1.0', '0-0', 'G2'), s('Minnesota Vikings', 2, 2, '2.0', '0-1', 'P1'), s('Chicago Bears', 1, 3, '3.0', '0-0', 'P2')] },
-      { name: 'NFC Sur', columns: ['DIV', 'RACHA'], rows: [s('Tampa Bay Buccaneers', 3, 1, '—', '1-0', 'G1'), s('Atlanta Falcons', 2, 2, '1.0', '0-1', 'P1'), s('New Orleans Saints', 1, 3, '2.0', '0-0', 'P2'), s('Carolina Panthers', 1, 3, '2.0', '0-0', 'G1')] },
-      { name: 'NFC Oeste', columns: ['DIV', 'RACHA'], rows: [s('San Francisco 49ers', 3, 1, '—', '1-0', 'G1'), s('Los Angeles Rams', 2, 2, '1.0', '0-0', 'P1'), s('Seattle Seahawks', 2, 2, '1.0', '0-1', 'G1'), s('Arizona Cardinals', 1, 3, '2.0', '0-0', 'P3')] },
-    ],
-  },
   lvsm: {
     groups: [{ columns: ['ÚLT. 10', 'RACHA'], rows: [
       s('Cafeteros de Yauco', 4, 0, '—', '4-0', 'G4'), s('Patriotas de Lares', 3, 1, '1.0', '3-1', 'G2'),
@@ -248,11 +208,6 @@ export const DEMO_STATS: Record<string, TeamStats> = {
     { team: 'Boston Celtics', values: ['118.5', '46.2', '27.1', '48.8'] }, { team: 'Oklahoma City Thunder', values: ['117.9', '44.8', '26.4', '49.2'] },
     { team: 'Denver Nuggets', values: ['116.2', '45.5', '29.0', '50.1'] }, { team: 'New York Knicks', values: ['114.0', '47.1', '24.3', '47.4'] },
     { team: 'Orlando Magic', values: ['110.8', '45.9', '23.8', '46.2'] }, { team: 'Miami Heat', values: ['108.3', '42.7', '25.6', '45.9'] },
-  ] },
-  nfl: { columns: ['PTS/J', 'YDS/J', 'PASE/J', 'CARR/J'], rows: [
-    { team: 'Detroit Lions', values: ['31.5', '398.2', '262.0', '136.2'] }, { team: 'Kansas City Chiefs', values: ['27.8', '371.5', '268.3', '103.2'] },
-    { team: 'Philadelphia Eagles', values: ['27.3', '366.0', '221.5', '144.5'] }, { team: 'Baltimore Ravens', values: ['26.9', '402.7', '228.4', '174.3'] },
-    { team: 'Buffalo Bills', values: ['26.0', '358.9', '239.6', '119.3'] }, { team: 'San Francisco 49ers', values: ['24.8', '381.4', '251.1', '130.3'] },
   ] },
   lvsm: { columns: ['ATAQUE %', 'BLOQUEOS', 'ACES', 'SETS G-P'], rows: [
     { team: 'Cafeteros de Yauco', values: ['48.1', '38', '22', '12-3'] }, { team: 'Patriotas de Lares', values: ['45.6', '33', '19', '10-6'] },

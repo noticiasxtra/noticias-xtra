@@ -950,5 +950,482 @@
         ]
       }
     ]
+  },
+  "nfl": {
+    "updated": "2 de octubre de 2026 (después del jueves de la semana 4). Fuente: NFL.com",
+    "groups": [
+      {
+        "name": "AFC Este",
+        "columns": [
+          "PF",
+          "PC",
+          "DIV",
+          "RACHA"
+        ],
+        "rows": [
+          {
+            "team": "Buffalo Bills",
+            "w": 3,
+            "l": 0,
+            "gb": "—",
+            "extra": [
+              "101",
+              "78",
+              "0-0",
+              "G3"
+            ]
+          },
+          {
+            "team": "New York Jets",
+            "w": 1,
+            "l": 2,
+            "gb": "2.0",
+            "extra": [
+              "64",
+              "61",
+              "0-0",
+              "P2"
+            ]
+          },
+          {
+            "team": "New England Patriots",
+            "w": 1,
+            "l": 2,
+            "gb": "2.0",
+            "extra": [
+              "36",
+              "51",
+              "0-0",
+              "P1"
+            ]
+          },
+          {
+            "team": "Miami Dolphins",
+            "w": 0,
+            "l": 3,
+            "gb": "3.0",
+            "extra": [
+              "36",
+              "86",
+              "0-0",
+              "P3"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "AFC Norte",
+        "columns": [
+          "PF",
+          "PC",
+          "DIV",
+          "RACHA"
+        ],
+        "rows": [
+          {
+            "team": "Cleveland Browns",
+            "w": 3,
+            "l": 1,
+            "gb": "—",
+            "extra": [
+              "81",
+              "95",
+              "1-0",
+              "G3"
+            ]
+          },
+          {
+            "team": "Baltimore Ravens",
+            "w": 2,
+            "l": 1,
+            "gb": "0.5",
+            "extra": [
+              "92",
+              "78",
+              "0-0",
+              "G1"
+            ]
+          },
+          {
+            "team": "Cincinnati Bengals",
+            "w": 2,
+            "l": 1,
+            "gb": "0.5",
+            "extra": [
+              "80",
+              "63",
+              "0-1",
+              "P1"
+            ]
+          },
+          {
+            "team": "Pittsburgh Steelers",
+            "w": 2,
+            "l": 2,
+            "gb": "1.0",
+            "extra": [
+              "77",
+              "87",
+              "1-1",
+              "P1"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "AFC Sur",
+        "columns": [
+          "PF",
+          "PC",
+          "DIV",
+          "RACHA"
+        ],
+        "rows": [
+          {
+            "team": "Jacksonville Jaguars",
+            "w": 2,
+            "l": 1,
+            "gb": "—",
+            "extra": [
+              "82",
+              "36",
+              "0-0",
+              "G1"
+            ]
+          },
+          {
+            "team": "Indianapolis Colts",
+            "w": 1,
+            "l": 2,
+            "gb": "1.0",
+            "extra": [
+              "72",
+              "91",
+              "1-0",
+              "G1"
+            ]
+          },
+          {
+            "team": "Tennessee Titans",
+            "w": 0,
+            "l": 3,
+            "gb": "2.0",
+            "extra": [
+              "37",
+              "59",
+              "0-0",
+              "P3"
+            ]
+          },
+          {
+            "team": "Houston Texans",
+            "w": 0,
+            "l": 3,
+            "gb": "2.0",
+            "extra": [
+              "54",
+              "75",
+              "0-1",
+              "P3"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "AFC Oeste",
+        "columns": [
+          "PF",
+          "PC",
+          "DIV",
+          "RACHA"
+        ],
+        "rows": [
+          {
+            "team": "Kansas City Chiefs",
+            "w": 3,
+            "l": 0,
+            "gb": "—",
+            "extra": [
+              "88",
+              "50",
+              "1-0",
+              "G3"
+            ]
+          },
+          {
+            "team": "Las Vegas Raiders",
+            "w": 3,
+            "l": 0,
+            "gb": "—",
+            "extra": [
+              "88",
+              "54",
+              "1-0",
+              "G3"
+            ]
+          },
+          {
+            "team": "Denver Broncos",
+            "w": 2,
+            "l": 1,
+            "gb": "1.0",
+            "extra": [
+              "60",
+              "70",
+              "0-1",
+              "G2"
+            ]
+          },
+          {
+            "team": "Los Angeles Chargers",
+            "w": 0,
+            "l": 3,
+            "gb": "3.0",
+            "extra": [
+              "44",
+              "76",
+              "0-1",
+              "P3"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "NFC Este",
+        "columns": [
+          "PF",
+          "PC",
+          "DIV",
+          "RACHA"
+        ],
+        "rows": [
+          {
+            "team": "Philadelphia Eagles",
+            "w": 2,
+            "l": 1,
+            "gb": "—",
+            "extra": [
+              "55",
+              "69",
+              "1-0",
+              "P1"
+            ]
+          },
+          {
+            "team": "New York Giants",
+            "w": 2,
+            "l": 1,
+            "gb": "—",
+            "extra": [
+              "46",
+              "55",
+              "1-0",
+              "G1"
+            ]
+          },
+          {
+            "team": "Dallas Cowboys",
+            "w": 1,
+            "l": 2,
+            "gb": "1.0",
+            "extra": [
+              "88",
+              "82",
+              "1-1",
+              "P1"
+            ]
+          },
+          {
+            "team": "Washington Commanders",
+            "w": 1,
+            "l": 2,
+            "gb": "1.0",
+            "extra": [
+              "75",
+              "92",
+              "0-2",
+              "G1"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "NFC Norte",
+        "columns": [
+          "PF",
+          "PC",
+          "DIV",
+          "RACHA"
+        ],
+        "rows": [
+          {
+            "team": "Minnesota Vikings",
+            "w": 3,
+            "l": 0,
+            "gb": "—",
+            "extra": [
+              "71",
+              "41",
+              "2-0",
+              "G3"
+            ]
+          },
+          {
+            "team": "Detroit Lions",
+            "w": 2,
+            "l": 1,
+            "gb": "1.0",
+            "extra": [
+              "93",
+              "95",
+              "0-0",
+              "G1"
+            ]
+          },
+          {
+            "team": "Chicago Bears",
+            "w": 2,
+            "l": 1,
+            "gb": "1.0",
+            "extra": [
+              "89",
+              "53",
+              "0-1",
+              "G1"
+            ]
+          },
+          {
+            "team": "Green Bay Packers",
+            "w": 1,
+            "l": 2,
+            "gb": "2.0",
+            "extra": [
+              "56",
+              "91",
+              "0-1",
+              "P1"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "NFC Sur",
+        "columns": [
+          "PF",
+          "PC",
+          "DIV",
+          "RACHA"
+        ],
+        "rows": [
+          {
+            "team": "Carolina Panthers",
+            "w": 1,
+            "l": 2,
+            "gb": "—",
+            "extra": [
+              "89",
+              "83",
+              "1-0",
+              "P1"
+            ]
+          },
+          {
+            "team": "New Orleans Saints",
+            "w": 1,
+            "l": 2,
+            "gb": "—",
+            "extra": [
+              "81",
+              "83",
+              "0-0",
+              "P1"
+            ]
+          },
+          {
+            "team": "Atlanta Falcons",
+            "w": 1,
+            "l": 2,
+            "gb": "—",
+            "extra": [
+              "51",
+              "68",
+              "0-1",
+              "G1"
+            ]
+          },
+          {
+            "team": "Tampa Bay Buccaneers",
+            "w": 0,
+            "l": 3,
+            "gb": "1.0",
+            "extra": [
+              "62",
+              "79",
+              "0-0",
+              "P3"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "NFC Oeste",
+        "columns": [
+          "PF",
+          "PC",
+          "DIV",
+          "RACHA"
+        ],
+        "rows": [
+          {
+            "team": "San Francisco 49ers",
+            "w": 3,
+            "l": 0,
+            "gb": "—",
+            "extra": [
+              "98",
+              "50",
+              "2-0",
+              "G3"
+            ]
+          },
+          {
+            "team": "Seattle Seahawks",
+            "w": 2,
+            "l": 1,
+            "gb": "1.0",
+            "extra": [
+              "75",
+              "50",
+              "1-0",
+              "P1"
+            ]
+          },
+          {
+            "team": "Los Angeles Rams",
+            "w": 1,
+            "l": 2,
+            "gb": "2.0",
+            "extra": [
+              "61",
+              "63",
+              "0-1",
+              "P1"
+            ]
+          },
+          {
+            "team": "Arizona Cardinals",
+            "w": 1,
+            "l": 2,
+            "gb": "2.0",
+            "extra": [
+              "63",
+              "81",
+              "0-2",
+              "P2"
+            ]
+          }
+        ]
+      }
+    ]
   }
 }
