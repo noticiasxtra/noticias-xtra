@@ -24,6 +24,8 @@ const noticias = defineCollection({
     imageCreditUrl: z.string().optional(), // link to the photo's license page
     breaking: z.boolean().default(false), // eligible for the red ÚLTIMA HORA bar for 12 hours
     trending: z.boolean().default(false), // editor's "tendencia": a U.S. or world story big enough to lead over local news
+    homeLead: z.boolean().default(false), // editor's pick for the big top story of the home page (topOrder + pinFirst in src/lib/site.ts)
+    sectionLead: z.boolean().default(false), // editor's pick for the top story of its section page
     aiAssisted: z.boolean().default(true),
     sources: z.array(z.object({ name: z.string(), url: z.string().optional() })).default([]),
     related: z.array(z.string()).default([]),

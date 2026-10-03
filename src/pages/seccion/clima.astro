@@ -5,9 +5,9 @@
 // Layout: phones: news, radar, temperature, forecast, towns · computers: radar + forecast + temperature | news | towns.
 import Base from '../../layouts/Base.astro';
 import StoryCard from '../../components/StoryCard.astro';
-import { getStories, topOrder, url } from '../../lib/site';
+import { getStories, topOrder, pinFirst, url } from '../../lib/site';
 
-const news = topOrder((await getStories()).filter((s) => s.data.section === 'clima'));
+const news = pinFirst(topOrder((await getStories()).filter((s) => s.data.section === 'clima')), 'sectionLead');
 // Towns: name, latitude, longitude
 const TOWNS: Array<[string, number, number]> = [
   ['San Juan', 18.4655, -66.1057], ['Ponce', 18.0111, -66.6141], ['Mayagüez', 18.2013, -67.1397], ['Arecibo', 18.4724, -66.7157],

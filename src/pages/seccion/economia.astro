@@ -7,9 +7,9 @@ import Sidebar from '../../components/Sidebar.astro';
 import AdSlot from '../../components/AdSlot.astro';
 import GamesTeaser from '../../components/GamesTeaser.astro';
 import Markets from '../../components/economia/Markets.astro';
-import { getStories, topOrder, SITE, url } from '../../lib/site';
+import { getStories, topOrder, pinFirst, SITE, url } from '../../lib/site';
 
-const list = topOrder((await getStories()).filter((s) => s.data.section === 'economia'));
+const list = pinFirst(topOrder((await getStories()).filter((s) => s.data.section === 'economia')), 'sectionLead');
 ---
 <Base title="Economía" active="economia" description={`Economía de Puerto Rico en ${SITE.name}: negocios, empleos, tu bolsillo y los mercados (Popular, FirstBank, petróleo, oro y cripto).`}>
   <main class="wrap eco" id="main">

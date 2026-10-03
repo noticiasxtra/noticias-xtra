@@ -222,6 +222,14 @@ export function topOrder(stories: Story[], hours = 36): Story[] {
   return [...stories].sort((a, b) => rank(a) - rank(b) || b.data.date.valueOf() - a.data.date.valueOf());
 }
 
+/** An editor's pick (homeLead or sectionLead, set in the panel's editor) goes first: the newest pick from the last
+ *  `hours` hours wins, so a pick never stays on top for days. Use after topOrder. */
+export function pinFirst(stories: Story[], key: 'homeLead' | 'sectionLead', hours = 48): Story[] {
+  const now = Date.now();
+  const pick = stories.filter((s) => s.data[key] && now - s.data.date.valueOf() < hours * 36e5).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())[0];
+  return pick ? [pick, ...stories.filter((s) => s !== pick)] : stories;
+}
+
 /** Stories by view count would come from analytics later. For now: featured first, then newest. */
 export function mostRead(stories: Story[], n = 5): Story[] {
   return [...stories].sort((a, b) => Number(b.data.featured) - Number(a.data.featured) || Number(b.data.live) - Number(a.data.live)).slice(0, n);

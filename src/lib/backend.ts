@@ -125,7 +125,8 @@ export async function uploadStoryFile(name: string, data: string | Blob): Promis
   const token = await freshToken(); if (!token) return null;
   const blob = typeof data === 'string' ? await (await fetch(data)).blob() : data;
   const base = BACKEND.url.replace(/\/$/, '');
-  const r = await fetch(`${base}/storage/v1/object/noticias/${name}`, { method: 'POST', headers: { apikey: BACKEND.anonKey, Authorization: `Bearer ${token}`, 'x-upsert': 'true', 'Content-Type': blob.type || 'application/octet-stream' }, body: blob }).catch(() => null);
+  // Names are unique (timestamped), so no overwrite ("x-upsert"), which would also need read permission on storage
+  const r = await fetch(`${base}/storage/v1/object/noticias/${name}`, { method: 'POST', headers: { apikey: BACKEND.anonKey, Authorization: `Bearer ${token}`, 'Content-Type': blob.type || 'application/octet-stream' }, body: blob }).catch(() => null);
   return r?.ok ? `${base}/storage/v1/object/public/noticias/${name}` : null;
 }
 /** Publishes (or schedules) an article: the Edge Function saves the story file in GitHub and the site rebuilds in about 2 minutes. */

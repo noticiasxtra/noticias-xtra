@@ -104,6 +104,9 @@ const TOOLS = [
           <label class="adb-check"><input type="checkbox" data-f="breaking" /> Última hora (barra roja)</label>
           <label class="adb-check"><input type="checkbox" data-f="trending" /> Tendencia (puede ir arriba aunque no sea local)</label>
           <label class="adb-check"><input type="checkbox" data-f="featured" /> Destacada en portada</label>
+          <p class="pnl-muted pnl-small wr-lead-h">Noticia principal (dura hasta 2 días o hasta que marques otra):</p>
+          <label class="adb-check"><input type="checkbox" data-f="homeLead" /> Principal de la Portada</label>
+          <label class="adb-check"><input type="checkbox" data-f="sectionLead" /> Principal de su sección</label>
           <label class="adb-check"><input type="checkbox" data-f="live" /> En vivo / en desarrollo</label>
         </div>
         <div class="pnl-card"><h2 class="pnl-h3">Fuentes</h2>
@@ -200,7 +203,7 @@ const TOOLS = [
     type Art = {
       id: string; status: 'draft' | 'review' | 'scheduled' | 'published'; updated: number; owner: string; note?: string;
       title: string; description: string; section: string; league: string; place: string; author: string; date: string;
-      image: string; imageUrl: string; imageCaption: string; imageCredit: string; breaking: boolean; trending: boolean; featured: boolean; live: boolean;
+      image: string; imageUrl: string; imageCaption: string; imageCredit: string; breaking: boolean; trending: boolean; featured: boolean; live: boolean; homeLead?: boolean; sectionLead?: boolean;
       sources: Src[]; related: string[]; correction: string; body: string; slug?: string;
     };
     const SECS: Array<{ id: string; name: string }> = JSON.parse(root.dataset.secs!);
@@ -343,13 +346,13 @@ const TOOLS = [
     const body = $('[data-body]');
     let cur: Art | null = null, dirty = false, timer = 0;
     const blank = (): Art => ({ id: `A-${Date.now().toString(36)}`, status: 'draft', updated: Date.now(), owner: me()?.name ?? '', title: '', description: '', section: 'puerto-rico', league: '',
-      place: '', author: me()?.name ?? 'Noticias Xtra', date: localNow(), image: '', imageUrl: '', imageCaption: '', imageCredit: '', breaking: false, trending: false, featured: false, live: false,
+      place: '', author: me()?.name ?? 'Noticias Xtra', date: localNow(), image: '', imageUrl: '', imageCaption: '', imageCredit: '', breaking: false, trending: false, featured: false, live: false, homeLead: false, sectionLead: false,
       sources: [], related: [], correction: '', body: '' });
     const field = (k: string) => $<HTMLInputElement>(`[data-f="${k}"]`);
     function openEditor(a: Art) {
       cur = structuredClone(a);
       (['title', 'description', 'section', 'league', 'place', 'author', 'date', 'imageUrl', 'imageCaption', 'imageCredit', 'correction'] as const).forEach((k) => (field(k).value = String(cur![k] ?? '')));
-      (['breaking', 'trending', 'featured', 'live'] as const).forEach((k) => (field(k).checked = cur![k]));
+      (['breaking', 'trending', 'featured', 'live', 'homeLead', 'sectionLead'] as const).forEach((k) => (field(k).checked = !!cur![k]));
       body.innerHTML = cur.body || '<p><br></p>';
       body.querySelectorAll<HTMLElement>('figure.wr-embed').forEach(paintEmbed);
       $$('[data-editor-only]').forEach((e) => (e.hidden = !canPublish()));
@@ -361,7 +364,7 @@ const TOOLS = [
     function readEditor() {
       if (!cur) return;
       (['title', 'description', 'section', 'league', 'place', 'author', 'date', 'imageUrl', 'imageCaption', 'imageCredit', 'correction'] as const).forEach((k) => ((cur as any)[k] = field(k).value.trim()));
-      (['breaking', 'trending', 'featured', 'live'] as const).forEach((k) => (cur![k] = field(k).checked));
+      (['breaking', 'trending', 'featured', 'live', 'homeLead', 'sectionLead'] as const).forEach((k) => (cur![k] = field(k).checked));
       cur.body = body.innerHTML;
     }
     async function persist(status?: Art['status']) {
@@ -539,7 +542,7 @@ const TOOLS = [
       return ['---', `title: ${y(a.title)}`, `description: ${y(a.description)}`, `section: ${a.section}`, ...(a.section === 'deportes' && a.league ? [`league: ${a.league}`] : []),
         `place: ${y(a.place || 'Puerto Rico')}`, `date: ${date.toISOString()}`, `author: ${y(a.author || 'Noticias Xtra')}`,
         ...(a.image || a.imageUrl ? [`image: ${y(a.imageUrl || (/^https?:/.test(a.image) ? a.image : `imagenes/${a.id.toLowerCase()}.jpg`))}`, ...(a.imageCaption ? [`imageCaption: ${y(a.imageCaption)}`] : []), ...(a.imageCredit ? [`imageCredit: ${y(a.imageCredit)}`] : [])] : []),
-        ...(['breaking', 'trending', 'featured', 'live'] as const).filter((k) => a[k]).map((k) => `${k}: true`),
+        ...(['breaking', 'trending', 'featured', 'live', 'homeLead', 'sectionLead'] as const).filter((k) => a[k]).map((k) => `${k}: true`),
         'aiAssisted: false', 'draft: false',
         ...(a.sources.length ? ['sources:', ...a.sources.flatMap((s) => [`  - name: ${y(s.name)}`, ...(s.url ? [`    url: ${y(s.url)}`] : [])])] : []),
         ...(a.related.length ? ['related:', ...a.related.map((r) => `  - ${y(r)}`)] : []),
@@ -659,7 +662,10 @@ const TOOLS = [
         if (file.size > 8 * 1048576) { err.textContent = 'El PDF pasa de 8 MB. Pega un enlace o comprímelo.'; err.hidden = false; return; }
         const buf = await file.arrayBuffer(); pages = pdfPages(buf); size = file.size;
         src = await new Promise<string>((r) => { const fr = new FileReader(); fr.onload = () => r(String(fr.result)); fr.readAsDataURL(file); });
-        src = await upload(src, 'doc', 'pdf'); if (!src) return;
+        err.textContent = 'Subiendo el PDF…'; err.hidden = false;
+        src = await upload(src, 'doc', 'pdf');
+        if (!src) { err.textContent = 'No se pudo subir el PDF. Revisa tu conexión, o pega el enlace del documento.'; return; }
+        err.hidden = true;
       } else if (/^https?:\/\/\S+$/.test(link)) src = link;
       else { err.textContent = 'Sube un PDF o pega su enlace.'; err.hidden = false; return; }
       docDlg.close();

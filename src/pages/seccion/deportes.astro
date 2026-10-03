@@ -12,11 +12,11 @@ import AdSlot from '../../components/AdSlot.astro';
 import GamesTeaser from '../../components/GamesTeaser.astro';
 import TeamLogo from '../../components/deportes/TeamLogo.astro';
 import { scores, gameTime } from '../../lib/scores';
-import { getStories, topOrder, url, type Story } from '../../lib/site';
+import { getStories, topOrder, pinFirst, url, type Story } from '../../lib/site';
 import { LEAGUES, league } from '../../lib/leagues';
 
 const stories = (await getStories()).filter((s) => s.data.section === 'deportes');
-const lead = topOrder(stories)[0]; // local leagues first, unless an MLB/NBA story is trending
+const lead = pinFirst(topOrder(stories), 'sectionLead')[0]; // local leagues first, unless an MLB/NBA story is trending
 const rest = stories.filter((s) => s !== lead);
 const related = lead ? rest.filter((s) => s.data.league && s.data.league === lead.data.league).slice(0, 2) : [];
 const row = rest.slice(0, 3);
