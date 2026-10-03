@@ -6,7 +6,11 @@
 //   3. Add each staff member in Supabase → Authentication → Users, and their role in the `staff` table.
 import type { Campaign } from './ads';
 
-export const BACKEND = { url: '', anonKey: '' };
+// Public values (safe in a website): project URL and the "anon" key. Never put the secret/service_role key here.
+export const BACKEND = {
+  url: 'https://qzxdnjrsagmcvsatjyqr.supabase.co',
+  anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6eGRuanJzYWdtY3ZzYXRqeXFyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEwNTgyNTEsImV4cCI6MjEwNjYzNDI1MX0.-5nbtQWF3X1CnCQnk6liF6aQfHNRnRmYe4fnK9UgV2k',
+};
 export const hasBackend = () => !!(BACKEND.url && BACKEND.anonKey);
 
 const SESSION = 'nx-staff-session'; // staff login token (only when the backend exists)
