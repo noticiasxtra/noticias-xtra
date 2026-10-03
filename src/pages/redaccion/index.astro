@@ -11,6 +11,7 @@ import AdQueue from '../../components/AdQueue.astro';
 import CommentQueue from '../../components/CommentQueue.astro';
 import SalesDesk from '../../components/panel/SalesDesk.astro';
 import Writer from '../../components/panel/Writer.astro';
+import Tasks from '../../components/panel/Tasks.astro';
 import { getStories, url, SECTIONS, SITE } from '../../lib/site';
 import sources from '../../../scripts/sources.json';
 
@@ -34,7 +35,7 @@ const TABS = [
   ['equipo', 'Equipo', '<circle cx="9" cy="8" r="3.5"/><path d="M2 20a7 7 0 0 1 14 0M16 4a3.5 3.5 0 0 1 0 7M22 20a7 7 0 0 0-4-6.3"/>'],
 ];
 ---
-<Base title="Panel de la redacción" description="Panel interno de Noticias Xtra (uso del personal)." noindex>
+<Base title="Panel de la redacción" description="Panel interno de Noticias Xtra (uso del personal)." noindex staff>
   <main class="wrap pnl" id="main" data-pnl data-recent={JSON.stringify(recent)} data-sources={JSON.stringify(srcs)} data-base={url()} data-aikey={String(SITE.aiKeyConnected)}>
     <form class="pnl-login" data-login hidden>
       <p class="pnl-kicker">Noticias Xtra</p>
@@ -54,7 +55,7 @@ const TABS = [
       <p class="pnl-note"><span class="sp-demo">VISTA PREVIA</span> Sin contraseña por ahora. Con las cuentas, cada persona entra con su correo y su contraseña, y su rol lo asigna el administrador.</p>
     </form>
 
-    <div class="pnl-app" data-app hidden>
+    <div class="pnl-app" data-pnl-app hidden>
       <aside class="pnl-side">
         <div class="pnl-me"><span class="pnl-av" data-av></span><span><b data-me></b><small data-role></small></span></div>
         <nav class="pnl-nav" aria-label="Secciones del panel">
@@ -78,6 +79,7 @@ const TABS = [
           <div class="pnl-kpis" data-kpis></div>
           <h2 class="pnl-h2">Lo que te espera</h2>
           <ul class="pnl-todo" data-todo></ul>
+          <Tasks />
         </section>
 
         <!-- Noticias -->
@@ -311,6 +313,8 @@ const TABS = [
     });
     addEventListener('hashchange', () => showTab(location.hash.slice(1)));
     addEventListener('nx-leads', () => paintCounts());
+    addEventListener('nx-tasks', () => { if (tab === 'inicio') paint.inicio(); });
+    root.addEventListener('click', (e) => { if ((e.target as HTMLElement).closest('[data-tk-scroll]')) document.querySelector('[data-tk]')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
 
     function paintCounts() {
       const c = counts();
@@ -337,6 +341,12 @@ const TABS = [
           allowed.includes('ingresos') && kpi('Ingresos de octubre', money(rev.direct + rev.google + rev.design), 'DEMO · hasta hoy', 'ingresos'),
         ].filter(Boolean).join('');
         const todo: string[] = [];
+        // Team tasks (Tareas, below): mine that are late or due today
+        const td = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Puerto_Rico' });
+        const myTasks = get<Array<{ owner: string; mates: string[]; status: string; due: string }>>('nx-tasks', []).filter((t) => t.status !== 'done' && (t.owner === s.name || t.mates.includes(s.name)));
+        const lateT = myTasks.filter((t) => t.due && t.due < td).length, todayT = myTasks.filter((t) => t.due === td).length;
+        if (lateT) todo.push(`<li><span>⏰ <b>${lateT}</b> ${lateT === 1 ? 'tarea atrasada' : 'tareas atrasadas'}.</span><button type="button" data-tk-scroll>Ver</button></li>`);
+        if (todayT) todo.push(`<li><span>📌 <b>${todayT}</b> ${todayT === 1 ? 'tarea vence' : 'tareas vencen'} hoy.</span><button type="button" data-tk-scroll>Ver</button></li>`);
         if (allowed.includes('noticias') && c.pending) todo.push(`<li><span>📰 <b>${c.pending}</b> ${c.pending === 1 ? 'noticia espera' : 'noticias esperan'} tu aprobación.</span><button type="button" data-go="noticias">Revisar</button></li>`);
         if (allowed.includes('noticias') && c.check) todo.push(`<li><span>👀 <b>${c.check}</b> publicadas para un vistazo rápido.</span><button type="button" data-go="noticias">Ver</button></li>`);
         if (allowed.includes('ventas') && c.ventas) todo.push(`<li><span>📞 <b>${c.ventas}</b> ${c.ventas === 1 ? 'cliente espera' : 'clientes esperan'} seguimiento hoy.</span><button type="button" data-go="ventas">Ver</button></li>`);
@@ -543,7 +553,7 @@ const TABS = [
     // ---------- start ----------
     function start() {
       const s = me();
-      $('[data-login]').hidden = !!s; $('[data-app]').hidden = !s;
+      $('[data-login]').hidden = !!s; $('[data-pnl-app]').hidden = !s;
       if (!s) return;
       ensureTeam();
       $$('[data-me]').forEach((e) => (e.textContent = s.name));

@@ -13,8 +13,9 @@ interface Props {
   image?: string;
   article?: { published: Date; section: string };
   noindex?: boolean; // internal pages: ask search engines not to list them
+  staff?: boolean; // staff panel pages: compact header, no section menu, news bar, ads or big footer
 }
-const { title, description = SITE.description, active, image, article, noindex } = Astro.props;
+const { title, description = SITE.description, active, image, article, noindex, staff = false } = Astro.props;
 const fullTitle = title ? `${title} | ${SITE.name}` : `${SITE.name} | ${SITE.tagline}`;
 const canonical = new URL(Astro.url.pathname, Astro.site).toString();
 // Local images ('images/x.jpg') need the base path; full URLs are used as-is
@@ -71,14 +72,14 @@ const holiday = F.holidayLogo && bar?.label !== 'ÚLTIMA HORA' ? holidayOn(today
       try { var f = [0.9, 1, 1.12, 1.25, 1.4][JSON.parse(localStorage.getItem('nx-font') || '1')]; if (f) document.documentElement.style.setProperty('--read-scale', f); } catch (e) {}
     </script>
   </head>
-  <body data-base={url()}>
+  <body data-base={url()} class:list={{ staff }}>
     {SITE.demoMode && <div class="demo">Sitio de demostración. Las noticias que aparecen son ejemplos.</div>}
     <header class="masthead">
       <div class="wrap">
         <Logo holiday={holiday} />
         {/* Today's date beside the logo (wide screens; phones see it in the profile menu) */}
-        <time class="mh-date" datetime={new Date().toLocaleDateString('en-CA', { timeZone: 'America/Puerto_Rico' })}>{todayCap}</time>
-        <form class="search" role="search" action={url('buscar')} method="get">
+        {staff ? <a class="mh-staff" href={url('redaccion')}>Panel de la redacción</a> : <time class="mh-date" datetime={new Date().toLocaleDateString('en-CA', { timeZone: 'America/Puerto_Rico' })}>{todayCap}</time>}
+        <form class="search" role="search" action={url('buscar')} method="get" hidden={staff}>
           <label for="q" class="sr">Buscar noticias</label>
           <input id="q" name="q" type="search" placeholder="Buscar noticias" />
           <button type="submit" aria-label="Buscar">
@@ -87,7 +88,8 @@ const holiday = F.holidayLogo && bar?.label !== 'ÚLTIMA HORA' ? holidayOn(today
         </form>
         <div class="mh-right">
           {/* Live button, then two icons: search (phones) and the profile menu with every reader setting */}
-          {F.live && <a href={url('en-vivo')} class="live-btn" aria-current={active === 'en-vivo' ? 'page' : undefined}><span class="dot" aria-hidden="true"></span>En vivo</a>}
+ {staff && <a class="mh-site" href={url()}>Ver el sitio ↗</a>}
+          {F.live && !staff && <a href={url('en-vivo')} class="live-btn" aria-current={active === 'en-vivo' ? 'page' : undefined}><span class="dot" aria-hidden="true"></span>En vivo</a>}
           <div class="mh-icons">
             <a href={url('buscar')} class="mh-ico search-btn" aria-label="Buscar noticias">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M20 20l-4-4" /></svg>
@@ -148,12 +150,12 @@ const holiday = F.holidayLogo && bar?.label !== 'ÚLTIMA HORA' ? holidayOn(today
               </div>
             </div>
           </div>
-          <a class="mh-ad-btn" href={url('publicidad')}>Anúnciate</a>
+          {!staff && <a class="mh-ad-btn" href={url('publicidad')}>Anúnciate</a>}
         </div>
       </div>
     </header>
 
-    <nav class="nav" aria-label="Secciones">
+    {!staff && <nav class="nav" aria-label="Secciones">
       <div class="wrap">
         <a href={url()} class="nav-logo" tabindex="-1" aria-hidden="true"><img src={url('logo.svg')} alt="" width="80" height="30" /></a>
         <div class="nav-links">
@@ -164,7 +166,7 @@ const holiday = F.holidayLogo && bar?.label !== 'ÚLTIMA HORA' ? holidayOn(today
           ))}
         </div>
       </div>
-    </nav>
+    </nav>}
     <script is:inline>
       // Phones: the section menu scrolls sideways. Keep it where the reader left it when they open another section,
       // and make sure the current section is in view (runs right away so the menu doesn't jump).
@@ -185,7 +187,7 @@ const holiday = F.holidayLogo && bar?.label !== 'ÚLTIMA HORA' ? holidayOn(today
       })();
     </script>
 
-    {breaking && (
+    {breaking && !staff && (
       <div class="breaking">
         <div class="wrap"><b>{breaking.label}</b><a href={url(`noticia/${breaking.id}`)}>{breaking.text}</a></div>
       </div>
@@ -193,8 +195,8 @@ const holiday = F.holidayLogo && bar?.label !== 'ÚLTIMA HORA' ? holidayOn(today
 
     <slot />
 
-    <div class="wrap"><AdSlot size="leaderboard" class="ad-bottom" /></div>
-    <footer>
+    {!staff && <div class="wrap"><AdSlot size="leaderboard" class="ad-bottom" /></div>}
+    <footer hidden={staff}>
       <div class="wrap">
         <div>
           <a href={url()} class="flogo" aria-label={SITE.name}><img src={url('logo.svg')} alt="" /></a>
