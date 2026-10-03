@@ -708,7 +708,7 @@ const TOOLS = [
       const old = load().filter((x) => x.id !== a.id && x.pinned && (x.status === 'published' || x.status === 'scheduled'));
       const done: string[] = [];
       for (const o of old) {
-        const u: Art = { ...structuredClone(o), pinned: false, updated: Date.now() };
+        const u: Art = { ...structuredClone(o), pinned: false, homeLead: true, updated: Date.now() }; // moves to the first spot under the new main story
         if (!(await store(u))) continue;
         if (DB && u.slug) { const r = await publishArticle({ id: u.id, slug: u.slug, file: toFile(u), title: u.title, scheduled: u.status === 'scheduled' }); if (!r.ok) continue; }
         done.push(u.title || 'Sin titular');

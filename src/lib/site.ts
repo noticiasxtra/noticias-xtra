@@ -222,12 +222,12 @@ export function topOrder(stories: Story[], hours = 36): Story[] {
   return [...stories].sort((a, b) => rank(a) - rank(b) || b.data.date.valueOf() - a.data.date.valueOf());
 }
 
-/** An editor's pick (homeLead or sectionLead, set in the panel's editor) goes first: the newest pick from the last
- *  `hours` hours wins, so a pick never stays on top for days. Use after topOrder. */
+/** Editors' picks (homeLead or sectionLead, set in the panel's editor) go first, newest first, in the top spots.
+ *  A pick counts for `hours` hours after the story's date, so it never stays on top for days. Use after topOrder. */
 export function pinFirst(stories: Story[], key: 'homeLead' | 'sectionLead', hours = 48): Story[] {
   const now = Date.now();
-  const pick = stories.filter((s) => s.data[key] && now - s.data.date.valueOf() < hours * 36e5).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())[0];
-  return pick ? [pick, ...stories.filter((s) => s !== pick)] : stories;
+  const picks = stories.filter((s) => s.data[key] && now - s.data.date.valueOf() < hours * 36e5).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+  return [...picks, ...stories.filter((s) => !picks.includes(s))];
 }
 
 /** Home page order: a pinned story (📌, newest pin wins) keeps the main spot with no time limit; the editor's

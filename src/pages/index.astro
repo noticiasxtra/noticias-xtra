@@ -20,24 +20,30 @@ const F = SITE.features;
 // Top spots: Puerto Rico first, unless a U.S. or world story is trending (src/lib/site.ts topOrder)
 const ordered = pinTop(topOrder(stories)); // a pinned story (📌) keeps the main spot; the editor's pick comes next
 const lead = ordered[0];
-const others = ordered.filter((s) => s.id !== lead?.id);
-const left = others.slice(0, 3);
-const row = others.slice(3, 6);
-const more = others.slice(6, 11);
-// Two more headlines under the main story (not shown anywhere else near the top)
-const extra = others.slice(11).filter((s) => !(lead?.data.related ?? []).includes(s.id)).slice(0, 2);
-const related = (lead?.data.related ?? []).map((id) => stories.find((s) => s.id === id)).filter((s) => s !== undefined);
-const leadRelated = related.length ? related : others.slice(0, 3);
+// Each story appears once in the top area. Spots are filled in order of importance: the headlines under the main
+// story (the editor's related stories, or else the next stories in line), the left column, the row of cards, the
+// block, then two more under the main story. Editors' picks ("Principal") are first in line after the main story.
+const related = (lead?.data.related ?? []).map((id) => stories.find((s) => s.id === id)).filter((s) => s !== undefined && s.id !== lead?.id);
+const inLine = ordered.filter((s) => s.id !== lead?.id && !related.includes(s));
+const take = (n: number) => inLine.splice(0, n);
+const leadRelated = related.length ? related : take(3);
+const left = take(3);
+const row = take(3);
+const more = take(5);
+const extra = take(2);
+// Section boxes further down skip what's already in the top area
+const topIds = new Set([lead, ...leadRelated, ...left, ...row, ...more, ...extra].filter(Boolean).map((s) => s!.id));
+const restStories = stories.filter((s) => !topIds.has(s.id));
 // Section blocks in the order a Puerto Rico reader cares about: island news first (government,
 // politics, sports, the economy and bills, entertainment, health, weather), then the United States,
 // the world and opinion. Only sections with stories appear (Puerto Rico news is already up top).
 const HOME_ORDER = ['gobierno', 'politica', 'deportes', 'economia', 'entretenimiento', 'salud', 'clima', 'estados-unidos', 'mundo', 'opinion'] as const;
 const sectionIds = [...HOME_ORDER, ...SECTIONS.map((s) => s.id).filter((id) => id !== 'puerto-rico' && !(HOME_ORDER as readonly string[]).includes(id))]
-  .filter((id) => stories.some((s) => s.data.section === id)) as Array<(typeof SECTIONS)[number]['id']>;
+  .filter((id) => restStories.some((s) => s.data.section === id)) as Array<(typeof SECTIONS)[number]['id']>;
 // Section boxes sit side by side in pairs. To avoid blank space under a shorter box, each section is
 // paired with the next one (in priority order) that shows the same number of stories (a box shows up to 4).
 // A section with no match gets a full-width row of its own.
-const shown = (id: string) => Math.min(4, stories.filter((s) => s.data.section === id).length);
+const shown = (id: string) => Math.min(4, restStories.filter((s) => s.data.section === id).length);
 const rows: Array<typeof sectionIds> = [];
 const queue = [...sectionIds];
 while (queue.length) {
@@ -113,7 +119,7 @@ while (queue.length) {
       <div class="home-sections">
         {rows.map((row, i) => (
           <>
-            {row.map((id) => <div class:list={{ 'sec-wide': row.length === 1 }}><SectionBlock sectionId={id} stories={stories} /></div>)}
+            {row.map((id) => <div class:list={{ 'sec-wide': row.length === 1 }}><SectionBlock sectionId={id} stories={restStories} /></div>)}
             {i === 1 && i < rows.length - 1 && <AdSlot size="infeed" class="ad-span" />}
             {i === 3 && i < rows.length - 1 && <div class="ad-span"><GamesTeaser /></div>}
           </>
