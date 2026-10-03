@@ -145,6 +145,7 @@ const BADGES = [
     import { renderNotifs } from '../lib/notif-view';
     import { BADGE } from '../lib/badges';
     import { squarePhoto, paintAvatar } from '../lib/avatar';
+    import { accountsOn, loggedIn, askLogin, signOut, updateProfile } from '../lib/account';
     type Profile = { name?: string; color?: string; photo?: string };
     const get = <T,>(k: string, d: T): T => { try { return JSON.parse(localStorage.getItem(k) || '') ?? d; } catch { return d; } };
     const set = (k: string, v: unknown) => { try { v === null ? localStorage.removeItem(k) : localStorage.setItem(k, JSON.stringify(v)); } catch { /* storage blocked */ } };
@@ -199,9 +200,22 @@ const BADGES = [
       $('[data-nf-full]').innerHTML = renderNotifs(list) || '<li class="nf-empty">No hay notificaciones aquí.</li>';
     }
 
+    // Real accounts (Supabase): log in through the "Entrar / Crear cuenta" box; username and photo are saved to the account
+    const ACC = accountsOn();
+    if (ACC) {
+      document.querySelector<HTMLElement>('.pf-demo')!.hidden = true;
+      login.querySelectorAll<HTMLElement>('label[for="pf-name"], #pf-name, .pf-colors').forEach((e) => (e.hidden = true));
+      login.querySelector<HTMLButtonElement>('button[type="submit"]')!.textContent = 'Entrar o crear cuenta';
+      $('[data-logout]').textContent = 'Salir de mi cuenta';
+      addEventListener('nx-account', () => render());
+      addEventListener('nx-profile-change', () => { if (!rendering) render(); });
+    }
+    let rendering = false;
     function render() {
-      const p = get<Profile>('nx-profile', {});
+      let p = get<Profile>('nx-profile', {});
+      if (ACC && !loggedIn()) p = {};
       login.hidden = !!p.name; card.hidden = !p.name;
+      rendering = true; dispatchEvent(new Event('nx-profile-change')); rendering = false;
       dispatchEvent(new Event('nx-profile-change'));
       if (!p.name) return;
       const av = $('[data-av]');
@@ -260,6 +274,7 @@ const BADGES = [
     const cleanName = (v: string) => v.trim().replace(/\s+/g, '_');
     login.addEventListener('submit', (e) => {
       e.preventDefault();
+      if (ACC) { askLogin(); return; }
       const err = login.querySelector<HTMLElement>('[data-err]')!;
       const name = cleanName((login.querySelector('#pf-name') as HTMLInputElement).value);
       if (name.length < 3) { err.textContent = 'Escribe un nombre de al menos 3 letras.'; err.hidden = false; return; }
@@ -267,13 +282,22 @@ const BADGES = [
       set('nx-profile', { name, color });
       render(); showTab(location.hash.slice(1));
     });
-    $<HTMLFormElement>('[data-edit]').addEventListener('submit', (e) => {
+    $<HTMLFormElement>('[data-edit]').addEventListener('submit', async (e) => {
       e.preventDefault();
       const err = $('[data-eerr]');
       const name = cleanName($<HTMLInputElement>('#pf-ename').value);
       if (name.length < 3) { err.textContent = 'Escribe un nombre de al menos 3 letras.'; err.hidden = false; return; }
       err.hidden = true;
-      set('nx-profile', { ...get<Profile>('nx-profile', {}), name, color: card.querySelector<HTMLInputElement>('input[name="pf-ecolor"]:checked')?.value });
+      const color = card.querySelector<HTMLInputElement>('input[name="pf-ecolor"]:checked')?.value;
+      if (ACC) {
+        const username = name.toLowerCase().replace(/[^a-z0-9._]/g, '');
+        if (username !== get<Profile>('nx-profile', {}).name) {
+          const r = await updateProfile({ username });
+          if (r.error) { err.textContent = r.error; err.hidden = false; return; }
+        }
+        set('nx-profile', { ...get<Profile>('nx-profile', {}), color }); render(); return;
+      }
+      set('nx-profile', { ...get<Profile>('nx-profile', {}), name, color });
       render();
     });
     card.addEventListener('change', (e) => {
@@ -288,7 +312,7 @@ const BADGES = [
     $('[data-nf-all]').addEventListener('click', () => markRead());
     $('[data-nf-full]').addEventListener('click', (e) => { const a = (e.target as HTMLElement).closest<HTMLElement>('[data-nf-id]'); if (a) markRead(a.dataset.nfId); });
     addEventListener('nx-notifs', paintNotifs);
-    $('[data-logout]').addEventListener('click', () => { set('nx-profile', null); render(); });
+    $('[data-logout]').addEventListener('click', async () => { if (ACC) { await signOut(); render(); return; } set('nx-profile', null); render(); });
     $('[data-wipe]').addEventListener('click', async () => {
       if (!(await ask('¿Borrar tu perfil, puntos, comentarios, guardadas y notificaciones de este dispositivo? No se puede deshacer.', { ok: 'Borrar todo', danger: true }))) return;
       try { Object.keys(localStorage).filter((k) => k.startsWith('nx-')).forEach((k) => localStorage.removeItem(k)); } catch { /* storage blocked */ }
@@ -301,14 +325,19 @@ const BADGES = [
       const err = $('[data-perr]'); err.hidden = true;
       try {
         const photo = await squarePhoto(f);
+        if (ACC) { const r = await updateProfile({ photo }); if (r.error) throw new Error(r.error); render(); return; }
         set('nx-profile', { ...get<Profile>('nx-profile', {}), photo });
         render();
       } catch (e) {
-        err.textContent = (e as Error).message === 'size' ? 'La foto es muy grande (máximo 15 MB).' : 'No pudimos leer esa imagen. Prueba con una foto JPG o PNG.';
+        const m = (e as Error).message;
+        err.textContent = m === 'size' ? 'La foto es muy grande (máximo 15 MB).' : m.startsWith('No ') ? m : 'No pudimos leer esa imagen. Prueba con una foto JPG o PNG.';
         err.hidden = false; showTab('ajustes');
       }
     }));
-    $('[data-photo-rm]').addEventListener('click', () => { const p = get<Profile>('nx-profile', {}); delete p.photo; set('nx-profile', p); render(); });
+    $('[data-photo-rm]').addEventListener('click', async () => {
+      if (ACC) { await updateProfile({ photo: null }); render(); return; }
+      const p = get<Profile>('nx-profile', {}); delete p.photo; set('nx-profile', p); render();
+    });
     render(); showTab(location.hash.slice(1));
   </script>
 </Base>

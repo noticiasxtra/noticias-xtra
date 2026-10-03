@@ -140,3 +140,9 @@ export async function publishArticle(a: { id: string; slug: string; file: string
     return r.ok ? out : { error: out.error || out.message || `Error ${r.status}` };
   } catch { return { error: 'No hay conexión. Intenta otra vez.' }; }
 }
+
+/** Staff request to any table (the newsroom's comment queue): uses the staff login, renewed as needed. */
+export async function staffApi(path: string, init: RequestInit = {}): Promise<Response | null> {
+  const token = await freshToken(); if (!hasBackend() || !token) return null;
+  return fetch(rest(path), { ...init, headers: { ...head(token), ...(init.headers || {}) } }).catch(() => null);
+}

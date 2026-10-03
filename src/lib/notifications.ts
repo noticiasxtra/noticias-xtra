@@ -1,7 +1,9 @@
 // Reader notifications: someone tagged you (@name), liked or replied to your comment, you earned a badge or level,
 // or the newsroom decided on a comment of yours. Shown as a dot on the profile icon, in the profile menu and on /perfil.
-// PREVIEW: kept in this browser (localStorage 'nx-notifs'). Notifications that come from other readers need accounts
-// (Supabase); until then badges, levels and moderation notices are real, and other readers' are examples (EJEMPLO).
+// Kept in this browser (localStorage 'nx-notifs'). With reader accounts (Supabase), notifications from other readers
+// (replies, mentions, likes, the newsroom's decisions) come from the `notifications` table: syncNotifs() merges them in
+// as 'db-<id>' and marking them read updates the table. In preview mode other readers' are examples (EJEMPLO).
+import { api, loggedIn, accountsOn } from './account';
 
 export type NotifKind = 'mention' | 'reply' | 'like' | 'badge' | 'mod';
 export type Notif = { id: string; at: number; kind: NotifKind; who?: string; text: string; quote?: string; url?: string; read?: boolean; demo?: boolean };
@@ -37,6 +39,25 @@ export function notify(n: Omit<Notif, 'at'> & { at?: number }) {
 export function markRead(id?: string) {
   write(KEY, getNotifs().map((n) => (!id || n.id === id ? { ...n, read: true } : n)));
   changed();
+  if (accountsOn() && loggedIn() && (!id || id.startsWith('db-'))) {
+    void api(id ? `notifications?id=eq.${id.slice(3)}` : 'notifications?read=eq.false', { method: 'PATCH', body: JSON.stringify({ read: true }) });
+  }
+}
+
+/** Brings in the logged-in reader's notifications from the server (newest 40). */
+export async function syncNotifs() {
+  if (!accountsOn()) return;
+  if (!loggedIn()) { write(KEY, getNotifs().filter((n) => !n.id.startsWith('db-'))); changed(); return; }
+  const r = await api('notifications?select=id,kind,actor,text,quote,url,read,created_at&order=created_at.desc&limit=40');
+  if (!r?.ok) return;
+  const rows: Array<{ id: number; kind: NotifKind; actor: string | null; text: string; quote: string | null; url: string | null; read: boolean; created_at: string }> = await r.json();
+  const prefs = getPrefs();
+  const local = getNotifs().filter((n) => !n.id.startsWith('db-') && !n.demo);
+  const known = new Set(getNotifs().map((n) => n.id));
+  const fresh = rows.filter((x) => prefs[x.kind]).map((x): Notif => ({ id: `db-${x.id}`, at: Date.parse(x.created_at), kind: x.kind, who: x.actor ?? undefined, text: x.text, quote: x.quote ?? undefined, url: x.url ?? undefined, read: x.read }));
+  write(KEY, [...fresh, ...local].sort((a, b) => b.at - a.at).slice(0, 60));
+  const added = fresh.find((n) => !known.has(n.id) && !n.read);
+  changed(added);
 }
 export function clearNotifs() { write(KEY, []); changed(); }
 

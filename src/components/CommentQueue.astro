@@ -33,6 +33,7 @@ const Tag = embedded ? 'section' : 'main';
   import { getReports, saveReports, upsertReport, assess, isHidden, reasonName, myReports, saveMyReports, HIDE_AFTER_REPORTS, type Report } from '../lib/moderation';
   import { penalize, RULES } from '../lib/reputation';
   import { notify } from '../lib/notifications';
+  import { hasBackend, staffApi } from '../lib/backend';
   const page = document.querySelector<HTMLElement>('[data-mod]')!;
   const STORIES: Array<{ id: string; title: string; url: string }> = JSON.parse(page.dataset.stories!);
   const esc = (s = '') => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
@@ -40,6 +41,7 @@ const Tag = embedded ? 'section' : 'main';
   const ago = (t: number) => { const m = Math.round((Date.now() - t) / 60000); return m < 1 ? 'ahora' : m < 60 ? `hace ${m} min` : m < 1440 ? `hace ${Math.round(m / 60)} h` : `hace ${Math.round(m / 1440)} días`; };
 
   // Four example reports, added once so the queue isn't empty in the preview
+  function demo() {
   function seed() {
     try { if (localStorage.getItem('nx-mod-seeded')) return; localStorage.setItem('nx-mod-seeded', '1'); } catch { return; }
     const now = Date.now();
@@ -116,4 +118,54 @@ const Tag = embedded ? 'section' : 'main';
   });
 
   seed(); render();
+  }
+
+  // ---------- Real queue (Supabase, supabase/comments.sql) ----------
+  // Por revisar: comments the automatic check flagged when posted, or that 3 readers reported (hidden until you decide).
+  // Reportados: still public, with 1 or 2 reports. Resueltos: removed by the newsroom.
+  function liveQueue() {
+    page.querySelector('.pf-demo')?.remove();
+    const tabs = page.querySelectorAll<HTMLElement>('[data-f]');
+    const LABEL: Record<string, string> = { review: 'Por revisar', auto: 'Reportados', done: 'Quitados' };
+    tabs.forEach((b) => (b.firstChild!.textContent = `${LABEL[b.dataset.f!]} `));
+    page.querySelector('.apn-sub')!.textContent = 'Aquí llega lo que el filtro automático marcó al publicarse y lo que reportan los lectores. Con 3 reportes, un comentario se oculta solo hasta que decidas.';
+    let tab = 'review';
+    type C = { id: string; story: string; url: string; body: string; media: { src: string } | null; status: string; flags: string[]; likes: number; reports: number; created_at: string;
+      author: { username: string } | null; why: Array<{ reason: string }> };
+    let rows: C[] = [];
+    async function load() {
+      const sel = 'id,story,url,body,media,status,flags,likes,reports,created_at,author:profiles(username),why:comment_reports(reason)';
+      const r = await staffApi(`comments?or=(status.eq.review,status.eq.removed,reports.gt.0)&select=${sel}&order=created_at.desc&limit=200`);
+      if (!r?.ok) { page.querySelector('[data-list]')!.innerHTML = '<p class="apr-empty">No pudimos cargar los comentarios. Revisa que entraste al panel con tu cuenta.</p>'; return; }
+      rows = await r.json(); paint();
+    }
+    const group = (c: C) => (c.status === 'review' ? 'review' : c.status === 'removed' ? 'done' : 'auto');
+    function paint() {
+      ['review', 'auto', 'done'].forEach((g) => { const n = rows.filter((c) => group(c) === g).length; page.querySelector(`[data-n="${g}"]`)!.textContent = n ? String(n) : ''; });
+      const list = rows.filter((c) => group(c) === tab);
+      page.querySelector('[data-list]')!.innerHTML = list.map((c) => {
+        const why = [...new Set(c.why.map((w) => reasonName(w.reason)))];
+        const flags = c.flags.length ? `Filtro automático: ${c.flags.join(', ')}` : '';
+        return `<article class="apr-card mod-card" data-id="${c.id}">
+          <p class="apr-meta"><b>@${esc(c.author?.username ?? 'lector')}</b> · ${ago(Date.parse(c.created_at))} · <a href="${esc(c.url)}" target="_blank" rel="noopener">Ver en la noticia ↗</a></p>
+          <blockquote class="mod-text">${esc(c.body) || '<i>(sticker o GIF)</i>'}${c.media ? `<img class="cm-media" src="${esc(c.media.src)}" alt="" />` : ''}</blockquote>
+          <p class="apr-meta">${c.reports ? `🚩 ${c.reports} ${c.reports === 1 ? 'reporte' : 'reportes'}${why.length ? `: ${esc(why.join(', '))}` : ''}` : ''}${c.reports && flags ? ' · ' : ''}${esc(flags)}</p>
+          <div class="apr-acts">${c.status === 'removed'
+            ? '<button type="button" class="adp-btn ghost-dark" data-act="keep">Restaurar: fue un error</button>'
+            : `<button type="button" class="adp-btn" data-act="keep">${c.status === 'review' ? 'Publicar: está bien' : 'Está bien, quitar los reportes'}</button><button type="button" class="apr-reject" data-act="remove">Quitar comentario</button>`}</div>
+        </article>`;
+      }).join('') || `<p class="apr-empty">${tab === 'review' ? 'No hay comentarios por revisar. 🎉' : 'Nada aquí.'}</p>`;
+    }
+    tabs.forEach((b) => b.addEventListener('click', () => { tab = b.dataset.f!; tabs.forEach((x) => x.setAttribute('aria-selected', String(x === b))); paint(); }));
+    page.addEventListener('click', async (e) => {
+      const btn = (e.target as HTMLElement).closest<HTMLElement>('[data-act]'); if (!btn) return;
+      const id = btn.closest<HTMLElement>('[data-id]')!.dataset.id!;
+      const patch = btn.dataset.act === 'remove' ? { status: 'removed' } : { status: 'visible', reports: 0 };
+      const r = await staffApi(`comments?id=eq.${id}`, { method: 'PATCH', body: JSON.stringify(patch) });
+      toast(!r?.ok ? 'No se pudo guardar. Intenta otra vez.' : btn.dataset.act === 'remove' ? 'Quitado. Su autor recibe un aviso.' : 'Listo: el comentario queda publicado.');
+      void load();
+    });
+    void load();
+  }
+  if (hasBackend()) liveQueue(); else demo();
 </script>

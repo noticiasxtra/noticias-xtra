@@ -4,6 +4,7 @@ import { SITE, SECTIONS, url } from '../lib/site';
 import { getBreaking } from '../lib/breaking';
 import AdSlot from '../components/AdSlot.astro';
 import Logo from '../components/Logo.astro';
+import AuthDialog from '../components/AuthDialog.astro';
 import { holidayOn, todayPR } from '../lib/holidays';
 
 interface Props {
@@ -113,6 +114,10 @@ const TABS = [
                   <span class="pf-menu-av" data-pf-av aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></svg></span>
                   <span><b data-pf-name>Mi cuenta</b><small>{todayCap}</small></span>
                 </div>
+                {/* Reader accounts (src/lib/account.ts): shown only once Supabase is connected */}
+                <button type="button" class="pf-menu-i pf-auth-in" data-auth-open hidden>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3" /></svg>Entrar o crear cuenta
+                </button>
                 <button type="button" class="pf-menu-i" data-nf-toggle aria-expanded="false" aria-controls="nf-panel">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z" /><path d="M10 21h4" /></svg>Notificaciones
                   <span class="pf-badge red" data-nf-count hidden></span>
@@ -156,6 +161,9 @@ const TABS = [
                 <a class="pf-menu-i" href={url('publicidad')}>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 11v2l13 5V6L3 11z" /><path d="M16 9a3 3 0 0 1 0 6" /></svg>Anúnciate
                 </a>
+                <button type="button" class="pf-menu-i" data-auth-out hidden>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" /></svg>Salir de mi cuenta
+                </button>
               </div>
             </div>
           </div>
@@ -236,6 +244,7 @@ const TABS = [
       <div class="legal"><div class="wrap">© {new Date().getFullYear()} {SITE.name}.{SITE.demoMode && ' Sitio de demostración con contenido de ejemplo.'} <a class="legal-staff" href={url('redaccion')}>Acceso de la redacción</a></div></div>
     </footer>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    {!staff && <AuthDialog />}
 
     {!staff && (
       <nav class="tabbar" aria-label="Accesos rápidos">
@@ -278,7 +287,8 @@ const TABS = [
     </script>
 
     <script>
-      import { seedExamples, unreadCount, getNotifs, markRead, type Notif } from '../lib/notifications';
+      import { seedExamples, unreadCount, getNotifs, markRead, syncNotifs, type Notif } from '../lib/notifications';
+      import { accountsOn, loggedIn, signOut, askLogin } from '../lib/account';
       import { renderNotifs, sentence } from '../lib/notif-view';
       // Profile menu: every reader setting in one place, opens over the page (Escape or a tap outside closes it)
       const pfBtn = document.querySelector<HTMLButtonElement>('[data-pf-toggle]');
@@ -417,6 +427,10 @@ const TABS = [
       const showProfile = () => {
         let p: { name?: string; color?: string; photo?: string } = {};
         try { p = JSON.parse(localStorage.getItem('nx-profile') || '{}'); } catch { /* storage blocked */ }
+        // With real accounts, only a logged-in reader counts as signed in (not an old preview profile)
+        if (accountsOn() && !loggedIn()) p = { color: p.color };
+        document.querySelectorAll<HTMLElement>('[data-auth-open]').forEach((b) => (b.hidden = !accountsOn() || loggedIn()));
+        document.querySelectorAll<HTMLElement>('[data-auth-out]').forEach((b) => (b.hidden = !accountsOn() || !loggedIn()));
         document.querySelectorAll<HTMLElement>('[data-pf-btn]').forEach((b) => {
           b.dataset.icon ??= b.innerHTML;
           b.classList.toggle('in', !!p.name);
@@ -436,6 +450,10 @@ const TABS = [
       };
       showProfile();
       addEventListener('nx-profile-change', showProfile);
+      addEventListener('nx-account', () => { showProfile(); void syncNotifs(); });
+      document.querySelectorAll<HTMLElement>('[data-auth-open]').forEach((b) => b.addEventListener('click', () => askLogin()));
+      document.querySelectorAll<HTMLElement>('[data-auth-out]').forEach((b) => b.addEventListener('click', async () => { await signOut(); toast('Saliste de tu cuenta.'); }));
+      addEventListener('nx-toast', (e) => toast(String((e as CustomEvent).detail)));
       // Juegos Xtra points: total in the profile menu, and a "+N puntos" toast when a game awards points
       const showPts = () => {
         let t = 0; try { t = JSON.parse(localStorage.getItem('nx-points') || '{}').total || 0; } catch { /* storage blocked */ }
@@ -470,7 +488,8 @@ const TABS = [
       // Notifications: count on the profile icon, latest five in the profile menu, a toast when a new one arrives
       const nfPanel = document.querySelector<HTMLElement>('[data-nf-panel]');
       if (nfPanel) {
-        seedExamples(nfPanel.dataset.storyUrl!, nfPanel.dataset.gameUrl!);
+        if (!accountsOn()) seedExamples(nfPanel.dataset.storyUrl!, nfPanel.dataset.gameUrl!); // examples only in preview mode
+        void syncNotifs(); // real notifications from other readers (logged in)
         const nfBtn = document.querySelector<HTMLButtonElement>('[data-nf-toggle]')!;
         const showNotifs = () => {
           const n = unreadCount();
