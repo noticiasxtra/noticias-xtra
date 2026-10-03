@@ -23,6 +23,10 @@ const { story, stories } = Astro.props;
 const d = story.data;
 const s = section(d.section);
 const { Content } = await render(story);
+// Documents (PDF cards) are attached at the end of the story, in their own area, wherever the editor put them
+const DOC = /<figure class="doc-card">[\s\S]*?<\/figure>/g;
+const bodyHtml = story.rendered?.html;
+const docs = bodyHtml?.match(DOC) ?? [];
 // Photo caption and credit: the story's own photo, or its section's default photo
 const fallback = defaultPhoto(d.section, d.league);
 const caption = d.image ? d.imageCaption ?? `${d.place}. Imagen de referencia.` : `${fallback.caption} Imagen de archivo.`;
@@ -83,12 +87,16 @@ const columnist = d.section === 'opinion' ? columnistOf(d.author) : undefined;
               <button type="button" class="tool icon" data-share="copy" aria-label="Copiar enlace" title="Copiar enlace">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7" /></svg>
               </button>
+              <button type="button" class="tool icon" data-share="more" aria-label="Enviar por otra aplicación" title="Enviar" aria-haspopup="true" aria-expanded="false">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z" /></svg>
+              </button>
             </span>
           </div>
         </div>
         <Ph sectionId={d.section} image={d.image} place={d.place} alt={caption} league={d.league} sizes="(max-width:760px) 100vw, 760px" priority />
         <p class="caption">{caption}{credit && <> {creditUrl ? <a href={creditUrl} rel="noopener" target="_blank">{credit}</a> : credit}</>}</p>
-        <div class="body"><Content /></div>
+        <div class="body">{bodyHtml !== undefined ? <Fragment set:html={bodyHtml.replace(DOC, '')} /> : <Content />}</div>
+        {docs.length > 0 && <section class="doc-attach" aria-label="Documentos"><h2 class="doc-attach-h">{docs.length === 1 ? 'Documento' : 'Documentos'}</h2><Fragment set:html={docs.join('')} /></section>}
         <AdSlot size="infeed" />
 
         {d.correction && <p class="sources"><strong>Corrección:</strong> {d.correction} <a href={url('normas-editoriales')}>Nuestra política de correcciones</a></p>}
@@ -155,14 +163,31 @@ const columnist = d.section === 'opinion' ? columnistOf(d.author) : undefined;
         saveBtn.setAttribute('aria-pressed', String(on));
         saveBtn.querySelector('[data-save-label]')!.textContent = on ? 'Guardada' : 'Guardar';
       };
-      saveBtn.addEventListener('click', () => {
-        const list = store.get<Saved[]>('nx-saved', []);
-        const next = list.some((x) => x.u === me)
-          ? list.filter((x) => x.u !== me)
-          : [{ u: me, t: art.dataset.title!, s: art.dataset.readSection!, d: art.dataset.date!, i: art.dataset.image!, at: Date.now() }, ...list].slice(0, 100);
-        store.set('nx-saved', next);
+      const entry = (): Saved => ({ u: me, t: art.dataset.title!, s: art.dataset.readSection!, d: art.dataset.date!, i: art.dataset.image!, at: Date.now() });
+      const setSaved = (on: boolean) => {
+        const list = store.get<Saved[]>('nx-saved', []).filter((x) => x.u !== me);
+        store.set('nx-saved', on ? [entry(), ...list].slice(0, 100) : list);
         dispatchEvent(new Event('nx-saved-change'));
         paint();
+      };
+      // A small card under the button: what happened, a link to the list and "Deshacer" (fades away by itself)
+      let tip: HTMLElement | null = null, tipTimer = 0;
+      const showTip = (on: boolean) => {
+        tip?.remove(); clearTimeout(tipTimer);
+        tip = document.createElement('div'); tip.className = 'save-tip'; tip.setAttribute('role', 'status');
+        tip.innerHTML = `<span>${on ? '🔖 Guardada en tu lista' : 'Quitada de tus guardadas'}</span>${on ? `<a href="${document.body.dataset.base}guardadas/">Ver guardadas →</a>` : ''}<button type="button">Deshacer</button>`;
+        tip.querySelector('button')!.addEventListener('click', () => { setSaved(!on); tip?.remove(); });
+        // Placed on the byline (the button row scrolls sideways on narrow screens and would cut the card off)
+        const host = saveBtn.closest<HTMLElement>('.byline') ?? saveBtn.parentElement!; host.append(tip);
+        const b = saveBtn.getBoundingClientRect(), h = host.getBoundingClientRect();
+        tip.style.left = `${Math.max(0, b.left - h.left)}px`; tip.style.top = `${b.bottom - h.top + 8}px`;
+        tipTimer = window.setTimeout(() => { tip?.classList.add('out'); setTimeout(() => tip?.remove(), 250); }, 4500);
+      };
+      saveBtn.addEventListener('click', () => {
+        const on = !store.get<Saved[]>('nx-saved', []).some((x) => x.u === me);
+        setSaved(on);
+        saveBtn.classList.remove('pop', 'unpop'); void saveBtn.offsetWidth; saveBtn.classList.add(on ? 'pop' : 'unpop');
+        showTip(on);
       });
       paint();
     }

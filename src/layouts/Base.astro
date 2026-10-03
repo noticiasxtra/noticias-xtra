@@ -448,7 +448,11 @@ const TABS = [
       const showSaved = () => {
         let n = 0;
         try { n = JSON.parse(localStorage.getItem('nx-saved') || '[]').length; } catch { /* storage blocked */ }
-        document.querySelectorAll<HTMLElement>('[data-saved-count]').forEach((el) => { el.textContent = String(n); el.hidden = !n; });
+        document.querySelectorAll<HTMLElement>('[data-saved-count]').forEach((el) => {
+          const grew = n > Number(el.textContent || 0);
+          el.textContent = String(n); el.hidden = !n;
+          if (grew) { el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); } // a little bounce when a story is saved
+        });
       };
       showSaved();
       addEventListener('nx-saved-change', showSaved);
@@ -496,6 +500,38 @@ const TABS = [
           }
           if (kind === 'facebook') window.open(`https://www.facebook.com/sharer/sharer.php?u=${u}`, '_blank', 'noopener');
           if (kind === 'whatsapp') window.open(`https://wa.me/?text=${t}%20${u}`, '_blank', 'noopener');
+          if (kind === 'more') {
+            // Phones (and most browsers): the device's own share menu, so people send it with any app they have
+            const title = document.title.replace(/ \| Noticias Xtra$/, '');
+            if (navigator.share) {
+              try { await navigator.share({ title, text: title, url: location.href }); } catch { /* closed without sharing */ }
+              return;
+            }
+            // Otherwise a small menu with the usual ways to send it
+            // Placed on the byline: the button row scrolls sideways on narrow screens and would cut the menu off
+            const host = b.closest<HTMLElement>('.byline') ?? b.parentElement!;
+            let menu = host.querySelector<HTMLElement>('.share-menu');
+            if (!menu) {
+              menu = document.createElement('div'); menu.className = 'share-menu'; menu.setAttribute('role', 'menu');
+              const tt = encodeURIComponent(title);
+              const opts: Array<[string, string]> = [
+                ['X', `https://x.com/intent/post?text=${tt}&url=${u}`],
+                ['Telegram', `https://t.me/share/url?url=${u}&text=${tt}`],
+                ['LinkedIn', `https://www.linkedin.com/sharing/share-offsite/?url=${u}`],
+                ['Correo', `mailto:?subject=${tt}&body=${tt}%0A%0A${u}`],
+              ];
+              menu.innerHTML = opts.map(([n, h]) => `<a role="menuitem" href="${h}" target="_blank" rel="noopener">${n}</a>`).join('') + '<button type="button" role="menuitem" data-share-copy>Copiar enlace</button>';
+              menu.querySelector('[data-share-copy]')!.addEventListener('click', async () => {
+                try { await navigator.clipboard.writeText(location.href); toast('Enlace copiado'); } catch { toast('Copia el enlace desde la barra del navegador'); }
+                menu!.hidden = true; b.setAttribute('aria-expanded', 'false');
+              });
+              host.append(menu);
+              document.addEventListener('click', (e) => { if (!menu!.hidden && !menu!.contains(e.target as Node) && !b.contains(e.target as Node)) { menu!.hidden = true; b.setAttribute('aria-expanded', 'false'); } });
+              menu.hidden = true;
+            }
+            menu.hidden = !menu.hidden; b.setAttribute('aria-expanded', String(!menu.hidden));
+            if (!menu.hidden) { const r = b.getBoundingClientRect(), h = host.getBoundingClientRect(); menu.style.top = `${r.bottom - h.top + 8}px`; menu.style.right = `${Math.max(0, h.right - r.right)}px`; }
+          }
         }),
       );
 

@@ -3881,3 +3881,52 @@ a,button,summary,label{-webkit-tap-highlight-color:transparent}
 /* Editor: a block from an existing story the editor can't change (embed, photo, document), kept as it is */
 .wr-raw{display:block;margin:14px 0;padding:6px;border:1px dashed var(--line);border-radius:10px}
 .wr-raw iframe{max-width:100%}
+
+/* Document viewer drawn page by page (src/components/DocViewer.astro, PDF.js) */
+.docv-pages{flex:1;overflow:auto;display:flex;flex-direction:column;align-items:center;gap:14px;padding:16px;background:#E9EAF0;outline:none;overscroll-behavior:contain}
+[data-theme="dark"] .docv-pages{background:#0B0C16}
+.docv-page{flex:none;max-width:none;background:#fff;border-radius:4px;box-shadow:0 2px 10px rgba(22,22,29,.18)}
+.docv-page canvas{display:block;border-radius:4px}
+.docv-load{margin:auto;color:var(--muted);font-weight:600}
+.docv-pg{flex:none;font-size:13px;color:var(--muted);white-space:nowrap}
+.docv-zoom{flex:none;display:flex;gap:4px}
+.docv-zoom button{width:34px;height:34px;border:1px solid var(--line);border-radius:50%;background:var(--card);color:var(--ink);font-size:18px;font-weight:700;cursor:pointer}
+.docv-msg{margin:auto;padding:24px;text-align:center;display:grid;gap:14px;justify-items:center;color:var(--ink)}
+.docv[open] iframe[hidden],.docv [hidden]{display:none}
+@media (max-width:760px){
+  .docv{width:100vw;height:100dvh;max-height:100dvh;max-width:100vw;border-radius:0}
+  .docv-bar{flex-wrap:wrap;gap:8px;padding:10px 12px;padding-top:calc(10px + env(safe-area-inset-top,0px))}
+  .docv-bar b{flex-basis:calc(100% - 70px)}
+  .docv-tab{display:none}
+  .docv-pages{padding:10px;gap:10px}
+}
+/* Documents attached to a story: their own area after the text */
+.doc-attach{margin:26px 0 8px}
+.doc-attach-h{margin:0 0 10px;font-family:var(--head);font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--purple)}
+.doc-attach .doc-card{margin:0 0 10px}
+/* "Enviar" menu next to the share buttons (computers without a built-in share menu) */
+.share{position:relative}
+.share-menu{position:absolute;z-index:30;display:grid;min-width:180px;padding:6px;border-radius:14px;background:var(--card);border:1px solid var(--line);box-shadow:0 14px 34px rgba(22,22,29,.18)}
+.share-menu[hidden]{display:none}
+.share-menu a,.share-menu button{display:block;width:100%;padding:10px 12px;border:0;border-radius:10px;background:none;color:var(--ink);font:inherit;font-weight:600;font-size:14px;text-align:left;cursor:pointer}
+.share-menu a:hover,.share-menu button:hover{background:var(--soft);color:var(--purple)}
+/* "Guardar" on a story: soft purple when saved, a pop when saving, and a small card with "Ver guardadas" and "Deshacer" */
+.tool[data-save]{position:relative}
+.tool[data-save][aria-pressed="true"]{background:color-mix(in srgb,var(--purple) 12%,transparent);border-color:var(--purple);color:var(--purple)}
+.tool[data-save][aria-pressed="true"] svg{fill:currentColor}
+.tool[data-save].pop svg{animation:save-pop .5s cubic-bezier(.3,1.7,.5,1)}
+.tool[data-save].pop::after{content:"";position:absolute;inset:-3px;border-radius:inherit;border:2px solid var(--purple);pointer-events:none;animation:save-ring .55s ease-out forwards}
+.tool[data-save].unpop svg{animation:save-unpop .3s ease-out}
+@keyframes save-pop{0%{transform:scale(1)}35%{transform:scale(1.5) rotate(-10deg)}70%{transform:scale(.92)}100%{transform:scale(1)}}
+@keyframes save-ring{from{opacity:.9;transform:scale(1)}to{opacity:0;transform:scale(1.35)}}
+@keyframes save-unpop{50%{transform:scale(.7)}}
+.byline{position:relative}
+.save-tip{position:absolute;z-index:25;display:flex;align-items:center;gap:12px;white-space:nowrap;padding:10px 12px 10px 14px;border-radius:14px;background:var(--card);color:var(--ink);border:1px solid var(--line);box-shadow:0 14px 34px rgba(22,22,29,.18);font-size:14px;font-weight:600;animation:tip-in .22s ease-out}
+.save-tip a{color:var(--purple);font-weight:800}
+.save-tip button{border:0;background:var(--soft);color:var(--ink);border-radius:999px;padding:6px 12px;font:inherit;font-size:13px;font-weight:700;cursor:pointer}
+.save-tip.out{opacity:0;transform:translateY(-4px);transition:opacity .25s,transform .25s}
+@keyframes tip-in{from{transform:translateY(-6px)}} /* motion only: the card is visible even if animations are paused */
+@media (max-width:760px){.save-tip{left:0!important;right:0;white-space:normal;justify-content:space-between}}
+.bump{animation:badge-bump .45s cubic-bezier(.3,1.7,.5,1)}
+@keyframes badge-bump{40%{transform:scale(1.5)}}
+@media (prefers-reduced-motion:reduce){.tool[data-save].pop svg,.tool[data-save].pop::after,.tool[data-save].unpop svg,.save-tip,.bump{animation:none}}
