@@ -14,7 +14,7 @@ const live = src ? await checkLive(src.channel) : null;
       <h2>{src.name}</h2>
     </div>
     <div class="lg-video-frame">
-      <iframe src={embedFor(src.channel, live)} title={live ? `En vivo: ${live.title}` : `Último video de ${src.name}`} loading="lazy"
+      <iframe data-src={embedFor(src.channel, live)} title={live ? `En vivo: ${live.title}` : `Último video de ${src.name}`} loading="lazy"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
     </div>
     <p class="lvbox-f">

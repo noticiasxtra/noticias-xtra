@@ -34,7 +34,7 @@ const hhmm = (d: Date) => d.toLocaleTimeString('es-PR', { hour: 'numeric', minut
         {top.map((s, i) => (
           <li>
             <a href={url(`noticia/${s.id}`)}>
-              <span class="tr-pic"><Ph sectionId={s.data.section} image={s.data.image} league={s.data.league} /><b>{i + 1}</b></span>
+              <span class="tr-pic"><Ph sectionId={s.data.section} image={s.data.image} league={s.data.league} sizes="120px" /><b>{i + 1}</b></span>
               <span class="tr-text"><span class="tr-title">{s.data.title}</span>{isNew(s.data.date) && <span class="tr-new">Nuevo</span>}</span>
             </a>
           </li>

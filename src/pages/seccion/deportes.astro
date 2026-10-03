@@ -75,7 +75,7 @@ const ago = (d: Date) => { const m = Math.round((Date.now() - d.valueOf()) / 600
         <div class="ys-main">
           {lead ? (
             <article class="ys-card ys-hero">
-              <a href={href(lead)} tabindex="-1" aria-hidden="true"><Ph sectionId="deportes" image={lead.data.image} league={lead.data.league} /></a>
+              <a href={href(lead)} tabindex="-1" aria-hidden="true"><Ph sectionId="deportes" image={lead.data.image} league={lead.data.league} sizes="(max-width:760px) 100vw, 760px" priority /></a>
               <div class="ys-hero-meta"><LeaguePill id={lead.data.league} link /><Time date={lead.data.date} /></div>
               <a href={href(lead)}><h2 class="hl">{lead.data.title}</h2></a>
               <p>{lead.data.description}</p>
@@ -182,7 +182,7 @@ const ago = (d: Date) => { const m = Math.round((Date.now() - d.valueOf()) / 600
             <section class="ys-card lg-video">
               <div class="ys-card-h"><h2>Video del BSN</h2><a href={`https://www.youtube.com/channel/${bsnYT.youtube}`} rel="noopener" target="_blank">Canal ↗</a></div>
               <div class="lg-video-frame">
-                <iframe src={`https://www.youtube-nocookie.com/embed/videoseries?list=UU${bsnYT.youtube.slice(2)}&autoplay=1&mute=1&rel=0&playsinline=1`} title="Último video del BSN en YouTube" loading="lazy"
+                <iframe data-src={`https://www.youtube-nocookie.com/embed/videoseries?list=UU${bsnYT.youtube.slice(2)}&autoplay=1&mute=1&rel=0&playsinline=1`} title="Último video del BSN en YouTube" loading="lazy"
                   referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
               </div>
             </section>

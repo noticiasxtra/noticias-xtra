@@ -101,7 +101,7 @@ const tabs: Array<[keyof typeof ICON, string]> = individual ? [['noticias', 'Not
         <main class="lg-main">
           {top ? (
             <article class="ys-card lg-top" id="noticias">
-              <a href={url(`noticia/${top.id}`)} tabindex="-1" aria-hidden="true"><Ph sectionId="deportes" image={top.data.image} league={top.data.league} /></a>
+              <a href={url(`noticia/${top.id}`)} tabindex="-1" aria-hidden="true"><Ph sectionId="deportes" image={top.data.image} league={top.data.league} sizes="(max-width:760px) 100vw, 760px" priority /></a>
               <a href={url(`noticia/${top.id}`)}><h2 class="hl">{top.data.title}</h2></a>
               <p>{top.data.description}</p>
               <Time date={top.data.date} />
@@ -145,7 +145,7 @@ const tabs: Array<[keyof typeof ICON, string]> = individual ? [['noticias', 'Not
             <section class="ys-card lg-video" id="videos">
               <div class="ys-card-h"><h2>Videos</h2><a href={`https://www.youtube.com/channel/${yt}`} rel="noopener" target="_blank">Canal oficial ↗</a></div>
               <div class="lg-video-frame">
-                <iframe src={`https://www.youtube-nocookie.com/embed/videoseries?list=UU${yt.slice(2)}&autoplay=1&mute=1&rel=0&playsinline=1`}
+                <iframe data-src={`https://www.youtube-nocookie.com/embed/videoseries?list=UU${yt.slice(2)}&autoplay=1&mute=1&rel=0&playsinline=1`}
                   title={`Último video de ${l.name} en YouTube`} loading="lazy" referrerpolicy="strict-origin-when-cross-origin"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
               </div>

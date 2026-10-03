@@ -59,7 +59,7 @@ const spans = mosaic.map((_, i) => {
       {lead ? (
         <div class="tb-top">
           <a class="tb-lead" href={href(lead)}>
-            <Ph sectionId="entretenimiento" image={lead.data.image} />
+            <Ph sectionId="entretenimiento" image={lead.data.image} sizes="(max-width:760px) 100vw, 760px" priority />
             <span class="tb-flag">Exclusiva Xtra</span>
             <div class="tb-lead-text"><h2>{lead.data.title}</h2><p>{lead.data.description}</p></div>
           </a>

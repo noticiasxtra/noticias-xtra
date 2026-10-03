@@ -248,13 +248,27 @@ const TABS = [
       </nav>
     )}
     <script is:inline>
+      // Autoplaying YouTube players (iframe data-src) load only when the reader gets near them, so they don't slow down the page
+      (function () {
+        var frames = document.querySelectorAll('iframe[data-src]');
+        var load = function (f) { if (f.dataset.src) { f.src = f.dataset.src; f.removeAttribute('data-src'); } };
+        if (!('IntersectionObserver' in window)) { frames.forEach(load); return; }
+        var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { load(e.target); io.unobserve(e.target); } }); }, { rootMargin: '0px 0px 300px 0px' });
+        frames.forEach(function (f) { io.observe(f); });
+      })();
+    </script>
+    <script is:inline>
       // Phones: the logo bar slides away while reading down and comes back on any scroll up (like a news app)
       (function () {
         if (document.body.classList.contains('staff')) return;
         var root = document.documentElement, mast = document.querySelector('.masthead'), last = scrollY, phone = matchMedia('(max-width:760px)');
+        // Only scrolling done by the reader (finger, wheel, keys) moves the bars, never scrolling done by a script
+        var touched = 0, mark = function () { touched = Date.now(); };
+        ['touchmove', 'wheel', 'keydown'].forEach(function (t) { addEventListener(t, mark, { passive: true }); });
         addEventListener('scroll', function () {
           var y = scrollY, d = y - last;
           if (Math.abs(d) < 8) return;
+          if (Date.now() - touched > 1200) { last = y; return; }
           // Keep it on screen at the top, or while something in it is open (search, profile menu)
           var busy = mast && (mast.contains(document.activeElement) && document.activeElement !== document.body || mast.querySelector('[aria-expanded="true"]'));
           root.classList.toggle('bars-up', phone.matches && d > 0 && y > 160 && !busy);

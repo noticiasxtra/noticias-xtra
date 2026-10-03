@@ -40,7 +40,7 @@ const TOWNS: Array<[string, number, number]> = [
       <div class="sec-h"><h2 id="cx-news-h">Noticias del tiempo</h2></div>
       {news.length > 0 ? (
         <>
-          <StoryCard story={news[0]} variant="big" />
+          <StoryCard story={news[0]} variant="big" priority />
           {news.length > 1 && <div class="cx-news-list">{news.slice(1, 6).map((s) => <StoryCard story={s} variant="item" />)}</div>}
         </>
       ) : (
@@ -58,7 +58,7 @@ const TOWNS: Array<[string, number, number]> = [
         <button type="button" role="tab" aria-selected="false" data-map="t7">Trópico 7 días</button>
       </div>
       <figure class="cx-map">
-        <img data-map-img src="https://radar.weather.gov/ridge/standard/TJUA_loop.gif" alt="Radar Doppler de Puerto Rico, última hora" />
+        <img data-map-img loading="lazy" src="https://radar.weather.gov/ridge/standard/TJUA_loop.gif" alt="Radar Doppler de Puerto Rico, última hora" />
         <figcaption data-map-cap>Radar Doppler de Cayey (TJUA), animación de la última hora. Fuente: NWS.</figcaption>
       </figure>
     </section>

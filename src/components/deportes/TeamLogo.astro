@@ -8,7 +8,9 @@ import { url } from '../../lib/site';
 interface Props { league: string; name: string; size?: number }
 const { league, name, size = 28 } = Astro.props;
 const t = team(league, name);
-const file = ['svg', 'png', 'webp'].map((e) => `logos/teams/${league}-${t.abbr.toLowerCase()}.${e}`).find((f) => fs.existsSync(path.join(process.cwd(), 'public', f)));
+const slug = `${league}-${t.abbr.toLowerCase()}`;
+// A light copy from scripts/optimize-images.mjs (logos/opt/teams/) when the original is heavy
+const file = [`logos/opt/teams/${slug}.webp`, ...['svg', 'png', 'webp'].map((e) => `logos/teams/${slug}.${e}`)].find((f) => fs.existsSync(path.join(process.cwd(), 'public', f)));
 ---
 <span class:list={['tm-logo', { 'has-img': file }]} style={`--c:${t.color};--s:${size}px`} title={name}>
   {file ? <img src={url(file)} alt="" loading="lazy" /> : <b>{t.abbr}</b>}

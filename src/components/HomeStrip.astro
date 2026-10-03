@@ -64,7 +64,7 @@ const mkt = MKT_KEYS.map((k) => mktAll.find((q) => q.key === k)).filter((q): q i
         <div class="hs-item">
           <a class="hs-card" href={url(`noticia/${trend.id}`)}>
             <div class="hs-text"><span class="hs-label hs-hot">{trend.label === 'TENDENCIA' ? 'Tendencia' : trend.label === 'ÚLTIMA HORA' ? 'Última hora' : 'Lo último'}</span><strong>{trend.text}</strong></div>
-            {trendStory && <span class="hs-thumb"><Ph sectionId={trendStory.data.section} image={trendStory.data.image} league={trendStory.data.league} /></span>}
+            {trendStory && <span class="hs-thumb"><Ph sectionId={trendStory.data.section} image={trendStory.data.image} league={trendStory.data.league} sizes="120px" /></span>}
           </a>
           <div class="hs-pop">
             <p class="hs-pop-h">Más noticias destacadas</p>
@@ -77,7 +77,7 @@ const mkt = MKT_KEYS.map((k) => mktAll.find((q) => q.key === k)).filter((q): q i
         <div class="hs-item" data-foryou={url('search-index.json')}>
           <a class="hs-card" href={url(`noticia/${forYou.id}`)}>
             <div class="hs-text"><span class="hs-label">Para ti · <em data-fy-section>{section(forYou.data.section).name}</em></span><strong data-fy-title>{forYou.data.title}</strong></div>
-            <span class="hs-thumb" data-fy-thumb><Ph sectionId={forYou.data.section} image={forYou.data.image} league={forYou.data.league} /></span>
+            <span class="hs-thumb" data-fy-thumb><Ph sectionId={forYou.data.section} image={forYou.data.image} league={forYou.data.league} sizes="120px" /></span>
           </a>
           <div class="hs-pop">
             <p class="hs-pop-h">Más de <span data-fy-section2>{section(forYou.data.section).name}</span></p>

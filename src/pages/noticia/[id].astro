@@ -86,7 +86,7 @@ const columnist = d.section === 'opinion' ? columnistOf(d.author) : undefined;
             </span>
           </div>
         </div>
-        <Ph sectionId={d.section} image={d.image} place={d.place} alt={caption} league={d.league} />
+        <Ph sectionId={d.section} image={d.image} place={d.place} alt={caption} league={d.league} sizes="(max-width:760px) 100vw, 760px" priority />
         <p class="caption">{caption}{credit && <> {creditUrl ? <a href={creditUrl} rel="noopener" target="_blank">{credit}</a> : credit}</>}</p>
         <div class="body"><Content /></div>
         <AdSlot size="infeed" />

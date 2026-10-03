@@ -24,7 +24,8 @@ const vids = SITE.features.videos ? VIDEOS.filter((v) => v.section === sec.id) :
         {list.length > 0 ? (
           <>
             <div class="block">
-              <StoryCard story={list[0]} variant="big" />
+              <h2 class="sr">Últimas noticias</h2>
+            <StoryCard story={list[0]} variant="big" priority />
               <div class="list">{list.slice(1, 5).map((s) => <StoryCard story={s} variant="item" />)}</div>
             </div>
             {list.length > 5 && (

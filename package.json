@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "node scripts/optimize-images.mjs && astro build",
     "preview": "astro preview",
     "news": "node scripts/fetch-news.mjs"
   },

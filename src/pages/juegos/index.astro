@@ -38,16 +38,16 @@ const rest = GAMES.filter((g) => g.id !== featured.id);
           <p><b data-jp-level>Novato</b><span data-jp-next></span></p>
           <div class="jp-bar"><span data-jp-bar></span></div>
         </div>
-        <p class="jp-streak" data-jp-streak></p>
+        <p class="jp-streak" data-jp-streak>Juega hoy para empezar tu racha 🔥</p>
       </div>
       <div class="jp-body">
         <div>
           <h3>Por juego</h3>
-          <ul class="jp-games" data-jp-games></ul>
+          <ul class="jp-games" data-jp-games>{GAMES.map((g) => <li><a href={url(`juegos/${g.id}`)}><img src={url(`images/juegos/${g.id}.svg`)} alt="" loading="lazy" /><span>{g.name}</span><b>0</b></a></li>)}</ul>
         </div>
         <div>
           <h3>Lo último</h3>
-          <ul class="jp-log" data-jp-log></ul>
+          <ul class="jp-log" data-jp-log><li class="jp-empty">Todavía no tienes puntos. ¡Juega cualquier juego para empezar!</li></ul>
           <details class="jp-rules">
             <summary>¿Cómo gano puntos?</summary>
             <ul>{GAMES.map((g) => RULES[g.id] && <li><b>{g.name}:</b> {RULES[g.id]}</li>)}</ul>

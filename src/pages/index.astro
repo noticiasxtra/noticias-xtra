@@ -56,7 +56,7 @@ while (queue.length) {
           <article class="lead">
             {/* Headline sits on the photo so it is visible without scrolling */}
             <a class="lead-media" href={url(`noticia/${lead.id}`)}>
-              <Ph sectionId={lead.data.section} image={lead.data.image} place={lead.data.place} league={lead.data.league} />
+              <Ph sectionId={lead.data.section} image={lead.data.image} place={lead.data.place} league={lead.data.league} sizes="(max-width:760px) 100vw, 640px" priority />
               <div class="lead-over"><Label story={lead} /><h1>{lead.data.title}</h1></div>
             </a>
             <p class="dek">{lead.data.description}</p>
@@ -64,7 +64,7 @@ while (queue.length) {
             {/* Fills the space under the main story (the left column is taller): two more headlines and an ad */}
             {extra.length > 0 && (
               <div class="lead-extra">
-                <p class="lead-extra-h">Más titulares</p>
+                <h2 class="lead-extra-h">Más titulares</h2>
                 <div class="lead-extra-grid">{extra.map((s) => <StoryCard story={s} variant="item" />)}</div>
               </div>
             )}
@@ -98,7 +98,7 @@ while (queue.length) {
           <div class="vx-home">
             <div class="vx-player">
               <div class="lg-video-frame">
-                <iframe src={`https://www.youtube-nocookie.com/embed/videoseries?list=UU${VIDEO_SOURCES.noticel.channel.slice(2)}&autoplay=1&mute=1&rel=0&playsinline=1`} title="Lo más reciente de NotiCel en YouTube" loading="lazy"
+                <iframe data-src={`https://www.youtube-nocookie.com/embed/videoseries?list=UU${VIDEO_SOURCES.noticel.channel.slice(2)}&autoplay=1&mute=1&rel=0&playsinline=1`} title="Lo más reciente de NotiCel en YouTube" loading="lazy"
                   referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
               </div>
               <p class="vsrc">Lo más reciente de <a href={VIDEO_SOURCES.noticel.url} rel="noopener" target="_blank">NotiCel en YouTube</a></p>
