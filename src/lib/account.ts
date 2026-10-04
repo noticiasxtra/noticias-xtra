@@ -35,6 +35,7 @@ const SPANISH: Record<string, string> = {
   email_not_confirmed: 'Confirma tu correo: te enviamos un enlace.',
   signup_disabled: 'Por ahora no se pueden crear cuentas nuevas.',
   over_email_send_rate_limit: 'Demasiados intentos. Espera unos minutos.',
+  same_password: 'Escoge una contraseña distinta a la anterior.',
   validation_failed: 'Revisa el correo y la contraseña.',
 };
 const why = async (r: Response) => { const e = await r.json().catch(() => ({})); return SPANISH[e.error_code || e.code] || e.msg || e.error_description || 'No se pudo. Intenta otra vez.'; };
@@ -74,17 +75,26 @@ export function signInWithGoogle() {
   try { sessionStorage.setItem('nx-auth-back', location.href); } catch { /* storage blocked */ }
   location.href = `${base()}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(location.origin + location.pathname)}`;
 }
-/** Back from Google (or an email link): the login arrives in the address (#access_token=…). */
-export async function finishRedirect(): Promise<boolean> {
+/** Back from Google (or an email link): the login arrives in the address (#access_token=…).
+ *  Returns 'recovery' when it's a password-reset link (the reader then picks a new password). */
+export async function finishRedirect(): Promise<false | 'login' | 'recovery'> {
   if (!location.hash.includes('access_token=')) return false;
   const p = new URLSearchParams(location.hash.slice(1));
+  const kind = p.get('type') === 'recovery' ? 'recovery' : 'login';
   const s = { access_token: p.get('access_token'), refresh_token: p.get('refresh_token'), expires_at: Number(p.get('expires_at')) || Math.floor(Date.now() / 1000) + Number(p.get('expires_in') || 3600), user: null as any };
   const u = await fetch(`${base()}/auth/v1/user`, { headers: head(s.access_token!) }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
   if (!u) return false;
   s.user = u; write(SESSION, s);
   history.replaceState(null, '', location.pathname + location.search);
   await syncProfile(); changed();
-  return true;
+  return kind;
+}
+/** New password (after a reset link, or from the profile). */
+export async function setPassword(password: string): Promise<{ ok?: boolean; error?: string }> {
+  if (password.length < 8) return { error: 'La contraseña necesita al menos 8 caracteres.' };
+  const t = await token(); if (!t) return { error: 'El enlace venció. Pide otro correo para cambiar tu contraseña.' };
+  const r = await fetch(`${base()}/auth/v1/user`, { method: 'PUT', headers: head(t), body: JSON.stringify({ password }) });
+  return r.ok ? { ok: true } : { error: await why(r) };
 }
 export async function signOut() {
   const t = await token();

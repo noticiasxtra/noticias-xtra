@@ -29,8 +29,17 @@
     <p class="auth-fine" data-auth-fine hidden>Al crear tu cuenta confirmas que tienes 13 años o más y aceptas los <a href="terminos/">términos de uso</a> y la <a href="privacidad/">política de privacidad</a>.</p>
   </form>
 </dialog>
+<dialog class="auth" data-newpass aria-labelledby="np-h">
+  <h2 id="np-h">Crea tu contraseña nueva</h2>
+  <form class="auth-form" data-np-form novalidate>
+    <label>Contraseña nueva<input name="p1" type="password" autocomplete="new-password" minlength="8" placeholder="Al menos 8 caracteres" /></label>
+    <label>Repítela<input name="p2" type="password" autocomplete="new-password" minlength="8" /></label>
+    <p class="auth-err" data-np-err role="alert" hidden></p>
+    <button type="submit" class="auth-go">Guardar contraseña</button>
+  </form>
+</dialog>
 <script>
-  import { accountsOn, signIn, signUp, signInWithGoogle, finishRedirect, sendReset, loggedIn, me } from '../lib/account';
+  import { accountsOn, signIn, signUp, signInWithGoogle, finishRedirect, sendReset, setPassword, loggedIn, me } from '../lib/account';
   const dlg = document.querySelector<HTMLDialogElement>('[data-auth]');
   if (dlg && accountsOn()) {
     const $ = <T extends Element = HTMLElement>(s: string) => dlg.querySelector<T>(s)!;
@@ -75,7 +84,19 @@
     });
     dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
     // Back from Google: finish the login; otherwise refresh the profile once per visit
+    // From a password-reset email: the reader is signed in for a moment to pick a new password
+    const np = document.querySelector<HTMLDialogElement>('[data-newpass]')!;
+    const npForm = np.querySelector<HTMLFormElement>('[data-np-form]')!, npErr = np.querySelector<HTMLElement>('[data-np-err]')!;
+    npForm.addEventListener('submit', async (e) => {
+      e.preventDefault(); npErr.hidden = true;
+      const p1 = npForm.p1.value, p2 = npForm.p2.value;
+      if (p1 !== p2) { npErr.textContent = 'Las dos contraseñas no son iguales.'; npErr.hidden = false; return; }
+      const r = await setPassword(p1);
+      if (r.error) { npErr.textContent = r.error; npErr.hidden = false; return; }
+      np.close(); dispatchEvent(new CustomEvent('nx-toast', { detail: 'Listo: tu contraseña nueva quedó guardada.' }));
+    });
     void finishRedirect().then((back) => {
+      if (back === 'recovery') { np.showModal(); npForm.p1.focus(); return; }
       if (back) dispatchEvent(new CustomEvent('nx-toast', { detail: '¡Bienvenido! Ya entraste a tu cuenta.' }));
       else if (loggedIn()) { try { if (!sessionStorage.getItem('nx-me')) { sessionStorage.setItem('nx-me', '1'); void me(); } } catch { /* storage blocked */ } }
     });
