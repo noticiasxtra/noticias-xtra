@@ -403,7 +403,7 @@ const TABS = [
               <h2>${esc(d.title)}</h2><p class="pnl-muted">${esc(d.section)} · ${ago(d.at)} · Fuente: <a href="${d.sourceUrl}" target="_blank" rel="noopener">${esc(d.source)} ↗</a></p></div></header>
             <div class="pnl-cmp">
               <div><p class="pnl-lbl">Lo que dice la fuente</p><blockquote>${esc(d.excerpt)}</blockquote></div>
-              <div><p class="pnl-lbl">Borrador de la IA</p><div class="pnl-body" data-body>${esc(d.body).split('\n\n').map((p) => `<p>${p}</p>`).join('')}</div>
+              <div><p class="pnl-lbl">Borrador NX</p><div class="pnl-body" data-body>${esc(d.body).split('\n\n').map((p) => `<p>${p}</p>`).join('')}</div>
                 <textarea data-edit hidden rows="8">${esc(d.body)}</textarea></div>
             </div>
             <div class="apr-acts">
