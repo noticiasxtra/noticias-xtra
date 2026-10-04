@@ -169,3 +169,8 @@ export async function deleteAccount(): Promise<{ ok?: boolean; error?: string }>
   dispatchEvent(new Event('nx-profile-change')); changed();
   return { ok: true };
 }
+
+/** Is "Continuar con Google" turned on in Supabase? (the button stays hidden until it is) */
+let googleOn: Promise<boolean> | null = null;
+export const googleEnabled = () => (googleOn ??= fetch(`${base()}/auth/v1/settings`, { headers: { apikey: BACKEND.anonKey } })
+  .then((r) => r.json()).then((d) => !!d?.external?.google).catch(() => false));
