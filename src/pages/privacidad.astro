@@ -37,7 +37,7 @@ const updated = '4 de octubre de 2026';
       <p>Guardamos los datos del formulario de <a href={url('publicidad')}>Anúnciate</a> (nombre, negocio, correo, teléfono, el anuncio y sus imágenes) para revisarlo, publicarlo, cobrarlo y darte el servicio. Los pagos los procesan <strong>Stripe</strong> (tarjeta) o <strong>ATH Móvil</strong>: los números de tu tarjeta o cuenta nunca pasan por nuestro sitio.</p>
 
       <h3>Lo que se guarda en tu propio dispositivo</h3>
-      <p>Tu navegador recuerda algunas preferencias para que el sitio funcione mejor: modo oscuro, tamaño de letra, idioma, el pueblo del clima, qué secciones lees más (para la tarjeta <strong>Para ti</strong>), tu sesión si entraste con tu cuenta, y el progreso de los juegos. Se queda en tu dispositivo y puedes borrarlo limpiando los datos del sitio en tu navegador. No usamos cookies de publicidad ni de rastreo.</p>
+      <p>Tu navegador recuerda algunas preferencias para que el sitio funcione mejor: modo oscuro, tamaño de letra, idioma, el pueblo del clima, qué secciones lees más (para la tarjeta <strong>Para ti</strong>), tu sesión si entraste con tu cuenta, y el progreso de los juegos. Se queda en tu dispositivo y puedes borrarlo limpiando los datos del sitio en tu navegador. No usamos cookies de publicidad.{SITE.gaId ? ' Para contar las visitas usamos Google Analytics, que guarda sus propias cookies (más abajo).' : ' Tampoco usamos cookies de rastreo.'}</p>
 
       <h2>Para qué la usamos</h2>
       <ul>
@@ -59,7 +59,9 @@ const updated = '4 de octubre de 2026';
         <li><strong>cdnjs (Cloudflare)</strong>, para mostrar los documentos PDF dentro de las noticias.</li>
         <li>Publicaciones de <strong>X, Instagram, Facebook o TikTok</strong> que se muestran dentro de algunas noticias: esos servicios cargan su propio contenido.</li>
       </ul>
-      <p>Cuando añadamos un contador de visitas o publicidad de Google, lo indicaremos aquí antes de activarlo.</p>
+      {SITE.gaId
+        ? <p><strong>Google Analytics</strong> cuenta las visitas: qué páginas se leen, cuánto tiempo, desde qué tipo de dispositivo y de qué país o región llegan. Lo usamos solo para saber qué noticias le interesan al público y para mostrarle a los anunciantes cuántas personas nos leen. Google no nos dice quién eres y no compartimos esos datos con nadie más. Puedes impedirlo con el <a href="https://tools.google.com/dlpage/gaoptout?hl=es" rel="noopener" target="_blank">complemento de inhabilitación de Google Analytics</a> o con un bloqueador en tu navegador (<a href="https://policies.google.com/technologies/partner-sites?hl=es" rel="noopener" target="_blank">cómo usa Google estos datos</a>).</p>
+        : <p>Cuando añadamos un contador de visitas o publicidad de Google, lo indicaremos aquí antes de activarlo.</p>}
 
       <h2>Cuánto tiempo la guardamos</h2>
       <ul>

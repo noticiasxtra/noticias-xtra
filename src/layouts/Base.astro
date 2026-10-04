@@ -55,6 +55,18 @@ const TABS = [
     <link rel="icon" type="image/png" href={url('favicon.png')} />
     <link rel="apple-touch-icon" href={url('apple-touch-icon.png')} />
     <link rel="manifest" href={url('manifest.webmanifest')} />
+    {SITE.gaId && !staff && (
+      <script is:inline define:vars={{ gaId: SITE.gaId }}>
+        // Google Analytics: only on the real site, never on local copies or the staff panel
+        if (/(^|\.)noticiasxtra\.com$/.test(location.hostname)) {
+          window.dataLayer = window.dataLayer || [];
+          window.gtag = function () { dataLayer.push(arguments); };
+          gtag('js', new Date());
+          gtag('config', gaId);
+          const s = document.createElement('script'); s.async = true; s.src = 'https://www.googletagmanager.com/gtag/js?id=' + gaId; document.head.appendChild(s);
+        }
+      </script>
+    )}
     <meta property="og:site_name" content={SITE.name} />
     <meta property="og:title" content={title ?? SITE.name} />
     <meta property="og:description" content={description} />
