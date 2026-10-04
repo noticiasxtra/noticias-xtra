@@ -84,6 +84,13 @@ const TOOLS = [
           </div>
         </div>
 
+        <details class="wr-gal" data-wr-gal>
+          <summary><b>Galería de fotos</b> <span class="pnl-muted pnl-small" data-gal-n>(opcional)</span></summary>
+          <p class="pnl-muted pnl-small">Fotos adicionales: en la noticia se ven en una presentación junto a la foto principal (se deslizan en el celular). Cada una lleva su pie y su crédito.</p>
+          <ul class="wr-gal-list" data-gal-list></ul>
+          <div class="wr-gal-acts"><label class="adp-btn ghost-dark">+ Subir fotos<input type="file" accept="image/*" multiple class="sr" data-gal-file /></label><button type="button" class="adp-btn ghost-dark" data-photo-lib="gallery">Elegir de la biblioteca</button></div>
+        </details>
+
         <div class="wr-tools" role="toolbar" aria-label="Formato">
           <select data-block aria-label="Tipo de texto"><option value="p">Párrafo</option><option value="h2">Subtítulo grande</option><option value="h3">Subtítulo pequeño</option></select>
           {TOOLS.map(([id, label, d]) => <button type="button" data-tool={id} title={label} aria-label={label}><Fragment set:html={I(d)} /></button>)}
@@ -207,11 +214,13 @@ const TOOLS = [
   const root = document.querySelector<HTMLElement>('[data-wr]');
   if (root) {
     type Src = { name: string; url?: string };
+    type Gal = { src: string; caption: string; credit: string; creditUrl?: string };
     type Art = {
       id: string; status: 'draft' | 'review' | 'scheduled' | 'published'; updated: number; owner: string; note?: string;
       title: string; description: string; section: string; league: string; place: string; author: string; date: string;
       image: string; imageUrl: string; imageCaption: string; imageCredit: string; breaking: boolean; trending: boolean; featured: boolean; live: boolean; pinned?: boolean; homeLead?: boolean; sectionLead?: boolean; sectionPinned?: boolean;
       sources: Src[]; related: string[]; correction: string; body: string; slug?: string;
+      gallery?: Gal[]; // extra photos shown as a slideshow with the main one
       aiAssisted?: boolean; fmExtra?: string; // kept from an existing story file: the AI label and fields the editor doesn't show
     };
     const SECS: Array<{ id: string; name: string }> = JSON.parse(root.dataset.secs!);
@@ -361,6 +370,7 @@ const TOOLS = [
     const field = (k: string) => $<HTMLInputElement>(`[data-f="${k}"]`);
     function openEditor(a: Art) {
       cur = structuredClone(a);
+      $('[data-gal-list]').dataset.sig = ''; ($('[data-wr-gal]') as HTMLDetailsElement).open = !!cur.gallery?.length;
       (['title', 'description', 'section', 'league', 'place', 'author', 'date', 'imageUrl', 'imageCaption', 'imageCredit', 'correction'] as const).forEach((k) => (field(k).value = String(cur![k] ?? '')));
       (['breaking', 'trending', 'featured', 'live', 'pinned', 'homeLead', 'sectionLead', 'sectionPinned'] as const).forEach((k) => (field(k).checked = !!cur![k]));
       body.innerHTML = cur.body || '<p><br></p>';
@@ -401,6 +411,16 @@ const TOOLS = [
       const photo = cur.image || cur.imageUrl;
       $('[data-photo-empty]').hidden = !!photo; $('[data-photo-full]').hidden = !photo; $('[data-photo-meta]').hidden = !photo;
       if (photo) $<HTMLImageElement>('[data-photo-img]').src = /^(https?:|data:)/.test(photo) ? photo : `${root.dataset.base!.replace(/\/$/, '')}/${photo}`;
+      const gal = cur.gallery ?? [];
+      $('[data-gal-n]').textContent = gal.length ? `(${gal.length} ${gal.length === 1 ? 'foto' : 'fotos'})` : '(opcional)';
+      const gl = $('[data-gal-list]');
+      if (gl.dataset.sig !== JSON.stringify(gal.map((g) => g.src))) { // repaint only when photos change, so typing keeps focus
+        gl.dataset.sig = JSON.stringify(gal.map((g) => g.src));
+        const abs = (x: string) => (/^(https?:|data:)/.test(x) ? x : `${root.dataset.base!.replace(/\/$/, '')}/${x}`);
+        gl.innerHTML = gal.map((g, i) => `<li data-gi="${i}"><img src="${esc(abs(g.src))}" alt="" loading="lazy" />
+          <div class="wr-gal-f"><input data-gk="caption" value="${esc(g.caption)}" maxlength="200" placeholder="Pie de foto" aria-label="Pie de foto" /><input data-gk="credit" value="${esc(g.credit)}" maxlength="120" placeholder="Crédito (obligatorio)" aria-label="Crédito" /></div>
+          <span class="wr-gal-b"><button type="button" data-gm="-1" aria-label="Subir" ${i === 0 ? 'disabled' : ''}>↑</button><button type="button" data-gm="1" aria-label="Bajar" ${i === gal.length - 1 ? 'disabled' : ''}>↓</button><button type="button" data-grm aria-label="Quitar">✕</button></span></li>`).join('');
+      }
       $('[data-srcs]').innerHTML = cur.sources.map((s, i) => `<li><span>${s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.name)}</a>` : esc(s.name)}</span><button type="button" class="pnl-link" data-src-rm="${i}" aria-label="Quitar">✕</button></li>`).join('');
       $('[data-rels]').innerHTML = cur.related.map((id, i) => `<li><span>${esc(RECENT.find((r) => r.id === id)?.title ?? id)}</span><button type="button" class="pnl-link" data-rel-rm="${i}" aria-label="Quitar">✕</button></li>`).join('');
       const future = new Date(cur.date).valueOf() > Date.now() + 60000;
@@ -414,6 +434,7 @@ const TOOLS = [
         [words >= 80, 'Al menos 80 palabras'],
         [!!cur.place, 'Lugar'],
         [!photo || !!cur.imageCredit, 'Crédito de la foto (si tiene foto)'],
+        ...((cur.gallery ?? []).length ? [[(cur.gallery ?? []).every((g) => g.credit.trim()), 'Crédito en cada foto de la galería'] as [boolean, string]] : []),
         [cur.sources.length > 0, 'Al menos una fuente'],
       ];
       $('[data-checks]').innerHTML = checks.map(([ok, t]) => `<li class="${ok ? 'ok' : ''}"><span>${ok ? '✓' : '○'} ${t}</span></li>`).join('');
@@ -492,12 +513,33 @@ const TOOLS = [
       try { const data = await shrink(f, 1400); cur.image = await upload(data, 'foto', 'jpg'); cur.imageUrl = ''; field('imageUrl').value = ''; changed(); } catch { toast('No pudimos leer esa imagen.'); }
     });
     $('[data-photo-rm]').addEventListener('click', () => { if (!cur) return; cur.image = ''; field('imageUrl').value = ''; changed(); });
+    // ---------- gallery: extra photos (upload several, or pick from the library), each with caption and credit ----------
+    $<HTMLInputElement>('[data-gal-file]').addEventListener('change', async (e) => {
+      const inp = e.target as HTMLInputElement; const files = [...(inp.files ?? [])]; inp.value = ''; if (!cur || !files.length) return;
+      toast(files.length === 1 ? 'Subiendo la foto…' : `Subiendo ${files.length} fotos…`);
+      for (const f of files.slice(0, 30)) {
+        try { const data = await shrink(f, 1600); const src = await upload(data, 'foto', 'jpg'); if (src) (cur.gallery ??= []).push({ src, caption: '', credit: '' }); } catch { toast(`No pudimos leer ${f.name}.`); }
+      }
+      changed(); ($('[data-wr-gal]') as HTMLDetailsElement).open = true;
+    });
+    $('[data-gal-list]').addEventListener('input', (e) => {
+      const t = e.target as HTMLInputElement; const i = Number(t.closest<HTMLElement>('[data-gi]')?.dataset.gi); const k = t.dataset.gk as 'caption' | 'credit';
+      if (!cur?.gallery?.[i] || !k) return; cur.gallery[i][k] = t.value;
+    });
+    $('[data-gal-list]').addEventListener('click', (e) => {
+      const b = (e.target as HTMLElement).closest<HTMLButtonElement>('button'); if (!b || !cur?.gallery) return;
+      const i = Number(b.closest<HTMLElement>('[data-gi]')!.dataset.gi);
+      if (b.hasAttribute('data-grm')) cur.gallery.splice(i, 1);
+      else { const j = i + Number(b.dataset.gm); if (j < 0 || j >= cur.gallery.length) return; [cur.gallery[i], cur.gallery[j]] = [cur.gallery[j], cur.gallery[i]]; }
+      changed();
+    });
     // Photo library (PhotoLibrary.astro): the main photo, or a photo inside the story, with its caption and credit
     let libAnchor: HTMLElement | null = null;
     $$<HTMLButtonElement>('[data-photo-lib]').forEach((b) => b.addEventListener('click', () => { libAnchor = popAnchor; dispatchEvent(new CustomEvent('nx-photo-open', { detail: { target: b.dataset.photoLib } })); }));
     addEventListener('nx-photo-pick', (e) => {
       const { photo, target } = (e as CustomEvent).detail as { photo: { src: string; caption?: string; credit?: string }; target: string };
       if (!cur) return;
+      if (target === 'gallery') { (cur.gallery ??= []).push({ src: photo.src, caption: photo.caption ?? '', credit: photo.credit ?? '' }); changed(); ($('[data-wr-gal]') as HTMLDetailsElement).open = true; toast('Foto añadida a la galería.'); return; }
       if (target === 'main') {
         cur.image = ''; field('imageUrl').value = photo.src; field('imageCaption').value = photo.caption ?? ''; field('imageCredit').value = photo.credit ?? ''; changed();
         toast('Foto principal escogida de la biblioteca.'); return;
@@ -570,7 +612,7 @@ const TOOLS = [
     // ---------- open a story that is already on the site (AI or older) in the editor ----------
     const RAW = 'https://raw.githubusercontent.com/noticiasxtra/noticias-xtra/main/src/content/noticias/';
     const MANAGED = new Set(['title', 'description', 'section', 'league', 'place', 'date', 'author', 'image', 'imageCaption', 'imageCredit',
-      'breaking', 'trending', 'featured', 'live', 'pinned', 'homeLead', 'sectionLead', 'sectionPinned', 'aiAssisted', 'draft', 'sources', 'related', 'correction']);
+      'breaking', 'trending', 'featured', 'live', 'pinned', 'homeLead', 'sectionLead', 'sectionPinned', 'aiAssisted', 'draft', 'sources', 'related', 'correction', 'gallery']);
     const unq = (v: string) => { v = v.trim(); try { return v.startsWith('"') ? JSON.parse(v) : v.replace(/^'(.*)'$/, '$1'); } catch { return v; } };
     const inline = (t: string) => esc(t.replace(/\\([*_`[\]\\])/g, '$1'))
       .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/(^|[^*])\*([^*\s][^*]*?)\*/g, '$1<i>$2</i>')
@@ -594,7 +636,7 @@ const TOOLS = [
     /** A story file from the site → an article in the editor that updates that same story when published. */
     function fromFile(id: string, text: string): Art | null {
       const m = text.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/); if (!m) return null;
-      const fm: Record<string, string> = {}; const sources: Src[] = []; const related: string[] = []; const extra: string[] = [];
+      const fm: Record<string, string> = {}; const sources: Src[] = []; const related: string[] = []; const extra: string[] = []; const gallery: Gal[] = [];
       let key = '';
       for (const line of m[1].split('\n')) {
         const top = line.match(/^([A-Za-z]\w*):\s*(.*)$/);
@@ -604,6 +646,11 @@ const TOOLS = [
         if (key === 'sources' && nm) sources.push({ name: unq(nm[1]) });
         else if (key === 'sources' && ur && sources.length) sources[sources.length - 1].url = unq(ur[1]);
         else if (key === 'related' && li) related.push(unq(li[1]));
+        else if (key === 'gallery') {
+          const gs = line.match(/^\s*-\s*src:\s*(.*)$/), gk = line.match(/^\s+(caption|credit|creditUrl):\s*(.*)$/);
+          if (gs) gallery.push({ src: unq(gs[1]), caption: '', credit: '' });
+          else if (gk && gallery.length) (gallery[gallery.length - 1] as Record<string, string>)[gk[1]] = unq(gk[2]);
+        }
       }
       const yes = (k: string) => fm[k] === 'true';
       const d = new Date(unq(fm.date || '')); const local = isNaN(+d) ? localNow() : new Date(+d - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
@@ -613,7 +660,7 @@ const TOOLS = [
         imageCaption: unq(fm.imageCaption || ''), imageCredit: unq(fm.imageCredit || ''),
         breaking: yes('breaking'), trending: yes('trending'), featured: yes('featured'), live: yes('live'), pinned: yes('pinned'), homeLead: yes('homeLead'), sectionLead: yes('sectionLead'), sectionPinned: yes('sectionPinned'),
         aiAssisted: fm.aiAssisted ? yes('aiAssisted') : true, fmExtra: extra.join('\n').trim() || undefined,
-        sources, related, correction: unq(fm.correction || ''), body: mdToHtml(m[2]) };
+        sources, related, gallery, correction: unq(fm.correction || ''), body: mdToHtml(m[2]) };
     }
     async function importStory(id: string) {
       if (DB) await refresh(); // the team's latest: someone may have opened this story already
@@ -627,11 +674,20 @@ const TOOLS = [
     }
     root.addEventListener('click', (e) => { const b = (e.target as HTMLElement).closest<HTMLElement>('[data-import]'); if (b) void importStory(b.dataset.import!); });
 
+    /** The gallery in the story file. Without a main photo, the first gallery photo becomes the main one (toFile). */
+    const galleryYaml = (a: Art) => {
+      const g = (a.gallery ?? []).filter((x) => x.src && !x.src.startsWith('data:'));
+      const list = a.image || a.imageUrl ? g : g.slice(1);
+      return list.length ? ['gallery:', ...list.flatMap((x) => [`  - src: ${y(x.src)}`, `    caption: ${y(x.caption || '')}`, `    credit: ${y(x.credit || '')}`, ...(x.creditUrl ? [`    creditUrl: ${y(x.creditUrl)}`] : [])])] : [];
+    };
     function toFile(a: Art) {
+      const gy = galleryYaml(a); // before the first gallery photo is promoted, so it isn't listed twice
+      if (!(a.image || a.imageUrl) && a.gallery?.[0]?.src && !a.gallery[0].src.startsWith('data:')) a = { ...a, imageUrl: a.gallery[0].src, imageCaption: a.gallery[0].caption, imageCredit: a.gallery[0].credit };
       const date = new Date(a.date || Date.now());
       return ['---', `title: ${y(a.title)}`, `description: ${y(a.description)}`, `section: ${a.section}`, ...(a.section === 'deportes' && a.league ? [`league: ${a.league}`] : []),
         `place: ${y(a.place || 'Puerto Rico')}`, `date: ${date.toISOString()}`, `author: ${y(a.author || 'Noticias Xtra')}`,
         ...(a.image || a.imageUrl ? [`image: ${y(a.imageUrl || (a.image.startsWith('data:') ? `imagenes/${a.id.toLowerCase()}.jpg` : a.image))}`, ...(a.imageCaption ? [`imageCaption: ${y(a.imageCaption)}`] : []), ...(a.imageCredit ? [`imageCredit: ${y(a.imageCredit)}`] : [])] : []),
+        ...gy,
         ...(['breaking', 'trending', 'featured', 'live', 'pinned', 'homeLead', 'sectionLead', 'sectionPinned'] as const).filter((k) => a[k]).map((k) => `${k}: true`),
         `aiAssisted: ${a.aiAssisted ?? false}`, 'draft: false', ...(a.fmExtra ? [a.fmExtra] : []),
         ...(a.sources.length ? ['sources:', ...a.sources.flatMap((s) => [`  - name: ${y(s.name)}`, ...(s.url ? [`    url: ${y(s.url)}`] : [])])] : []),

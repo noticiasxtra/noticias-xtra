@@ -22,6 +22,8 @@ const noticias = defineCollection({
     imageCaption: z.string().optional(),
     imageCredit: z.string().optional(), // e.g. "Foto: NASA/Joel Kowsky (dominio público)"
     imageCreditUrl: z.string().optional(), // link to the photo's license page
+    // Optional extra photos: the story page shows the main photo and these as a slideshow
+    gallery: z.array(z.object({ src: z.string(), caption: z.string().default(''), credit: z.string().default(''), creditUrl: z.string().optional() })).default([]),
     breaking: z.boolean().default(false), // eligible for the red ÚLTIMA HORA bar for 12 hours
     trending: z.boolean().default(false), // editor's "tendencia": a U.S. or world story big enough to lead over local news
     pinned: z.boolean().default(false), // 📌 locked in the home page's main spot until an editor unpins it (pinTop in src/lib/site.ts)

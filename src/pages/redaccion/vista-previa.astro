@@ -39,6 +39,7 @@ const secs = Object.fromEntries(SECTIONS.map((s) => [s.id, { name: s.name, color
         </div>
         <div class="ph" data-vp-ph><img alt="" data-vp-img /><span class="place notranslate" translate="no" data-vp-ph-place></span></div>
         <p class="caption" data-vp-cap></p>
+        <div class="gal-thumbs vp-gal" data-vp-gal hidden></div>
         <div class="body" data-vp-body></div>
         <p class="sources" data-vp-corr hidden></p>
         <p class="sources" data-vp-src hidden></p>
@@ -83,6 +84,10 @@ const secs = Object.fromEntries(SECTIONS.map((s) => [s.id, { name: s.name, color
       (root.querySelector('[data-vp-img]') as HTMLImageElement).src = own ? (/^(https?:|data:)/.test(own) ? own : `${base}/${own}`) : fallback.src;
       $('[data-vp-ph-place]').textContent = a.place || '';
       $('[data-vp-cap]').textContent = own ? `${a.imageCaption || `${a.place || 'Puerto Rico'}. Imagen de referencia.`} ${a.imageCredit || ''}` : `${fallback.caption} Imagen de archivo. ${fallback.credit}`;
+      // Gallery: the extra photos (the site shows them as a slideshow with the main one)
+      const galBox = $('[data-vp-gal]'); const gal = (a.gallery ?? []) as Array<{ src: string }>;
+      galBox.hidden = !gal.length;
+      galBox.innerHTML = gal.length ? `<span class="vp-gal-n">+${gal.length} ${gal.length === 1 ? 'foto' : 'fotos'} en la galería</span>` + gal.map((g) => `<button type="button" aria-hidden="true"><img src="${/^(https?:|data:)/.test(g.src) ? g.src : `${base}/${g.src}`}" alt="" /></button>`).join('') : '';
       // Body: the editor's blocks, with embeds and photos exactly as the site shows them
       const box = document.createElement('div'); box.innerHTML = a.body || '';
       box.querySelectorAll<HTMLElement>('figure.wr-embed').forEach((f) => { const h = embedFor(f.dataset.url || '', { size: f.dataset.size, align: f.dataset.align }); if (h) f.outerHTML = h; else f.remove(); });

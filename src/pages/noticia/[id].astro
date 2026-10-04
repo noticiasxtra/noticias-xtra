@@ -2,6 +2,7 @@
 import { render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import Ph from '../../components/Ph.astro';
+import Gallery from '../../components/Gallery.astro';
 import Label from '../../components/Label.astro';
 import Time from '../../components/Time.astro';
 import StoryCard from '../../components/StoryCard.astro';
@@ -93,8 +94,12 @@ const columnist = d.section === 'opinion' ? columnistOf(d.author) : undefined;
             </span>
           </div>
         </div>
-        <Ph sectionId={d.section} image={d.image} place={d.place} alt={caption} league={d.league} sizes="(max-width:760px) 100vw, 760px" priority />
-        <p class="caption">{caption}{credit && <> {creditUrl ? <a href={creditUrl} rel="noopener" target="_blank">{credit}</a> : credit}</>}</p>
+        {d.gallery.length > 0 && d.image ? (
+          <Gallery slides={[{ src: d.image, caption, credit, creditUrl }, ...d.gallery]} />
+        ) : (<>
+          <Ph sectionId={d.section} image={d.image} place={d.place} alt={caption} league={d.league} sizes="(max-width:760px) 100vw, 760px" priority />
+          <p class="caption">{caption}{credit && <> {creditUrl ? <a href={creditUrl} rel="noopener" target="_blank">{credit}</a> : credit}</>}</p>
+        </>)}
         <div class="body">{bodyHtml !== undefined ? <Fragment set:html={bodyHtml.replace(DOC, '')} /> : <Content />}</div>
         {docs.length > 0 && <section class="doc-attach" aria-label="Documentos"><h2 class="doc-attach-h">{docs.length === 1 ? 'Documento' : 'Documentos'}</h2><Fragment set:html={docs.join('')} /></section>}
         <AdSlot size="infeed" />
