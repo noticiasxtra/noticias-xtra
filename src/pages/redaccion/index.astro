@@ -566,10 +566,11 @@ const TABS = [
       const act = t.closest<HTMLElement>('[data-act]'); const card = t.closest<HTMLElement>('.pnl-draft,.pnl-row');
       if (!act || !card || !card.closest('[data-news]')) return;
       const id = card.dataset.id!; const a = act.dataset.act;
-      if (a === 'edit') {
-        const ta = $<HTMLTextAreaElement>('[data-edit]', card); const shown = $('[data-body]', card);
-        const editing = ta.hidden; ta.hidden = !editing; shown.hidden = editing; act.textContent = editing ? 'Ver como queda' : 'Editar';
-        if (!editing) shown.innerHTML = esc(ta.value).split('\n\n').map((p) => `<p>${p}</p>`).join('');
+      if (a === 'edit') { // the draft opens in Escribir, with the full editor
+        const d = DRAFTS.find((x) => x.id === id); if (!d) return;
+        const body = card.querySelector<HTMLTextAreaElement>('[data-edit]')?.value || d.body;
+        dispatchEvent(new CustomEvent('nx-edit-draft', { detail: { title: d.title, description: d.excerpt, sectionName: d.section, body, sources: [{ name: d.source, url: d.sourceUrl }] } }));
+        showTab('escribir'); scrollTo({ top: 0 });
         return;
       }
       if (a === 'approve') { setNews(id, { status: 'approved', body: card.querySelector<HTMLTextAreaElement>('[data-edit]')?.value, at: Date.now() }); toast('Aprobada. En la versión real se publica en el sitio en unos 2 minutos.'); }

@@ -938,6 +938,14 @@ const TOOLS = [
       } finally { goBtn.disabled = false; }
     });
     $('[data-wr-back]').addEventListener('click', closeEditor);
+    // A draft from the Noticias tab (Editar): it opens here as a story waiting for review, with the full editor
+    addEventListener('nx-edit-draft', async (e) => {
+      const d = (e as CustomEvent).detail as { title: string; description: string; sectionName: string; body: string; sources: Src[] };
+      const a: Art = { ...blank(), status: 'review', title: d.title, description: d.description,
+        section: SECS.find((x) => x.name === d.sectionName)?.id ?? 'puerto-rico', sources: d.sources.filter((x) => x.name),
+        body: d.body.split(/\n{2,}/).map((p) => `<p>${esc(p.trim())}</p>`).join('') };
+      await store(a); openEditor(a); toast('El borrador se abrió en Escribir. Edítalo y publícalo desde aquí.');
+    });
     $('[data-wr-new]').addEventListener('click', () => openEditor(blank()));
     root.addEventListener('click', async (e) => {
       const t = e.target as HTMLElement;
