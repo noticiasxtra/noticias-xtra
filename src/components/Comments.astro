@@ -229,7 +229,7 @@ const STICKER_IMGS = [['wepa', '¡Wepa!'], ['coqui', 'Coquí'], ['bandera', 'Ban
     root.addEventListener('touchend', () => { if (!drag) return; drag = false; root.style.transition = ''; root.style.transform = ''; if (dy > 110) close(); });
     // The writing bar stays above the phone's keyboard
     const vv = window.visualViewport;
-    vv?.addEventListener('resize', () => html.style.setProperty('--kb', `${Math.max(0, innerHeight - vv.height - vv.offsetTop)}px`));
+    vv?.addEventListener('resize', () => html.style.setProperty('--kb', `${vv.scale > 1.01 ? 0 : Math.max(0, Math.round(innerHeight - vv.height - vv.offsetTop))}px`));
     // The card on the story: how many comments there are and the newest three
     const paint = () => {
       const items = [...root.querySelectorAll<HTMLElement>('.cm-item:not(.cm-hidden):not(.reply)')].slice(0, 3);

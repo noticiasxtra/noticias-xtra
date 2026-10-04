@@ -4047,3 +4047,7 @@ a,button,summary,label{-webkit-tap-highlight-color:transparent}
   .cm-list{max-height:460px;overflow-y:auto;overscroll-behavior:contain;margin-right:-8px;padding-right:8px;scrollbar-width:thin}
 }
 .cm-item.cm-new{background:color-mix(in srgb,var(--purple) 12%,transparent);border-radius:12px;transition:background 1.5s}
+/* Phones: text boxes at 16px or more, so iPhones don't zoom the page in when you tap one (that zoom also threw off the comment panel) */
+@media (max-width:760px){
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),textarea,select{font-size:16px !important}
+}
