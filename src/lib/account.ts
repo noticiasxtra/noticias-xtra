@@ -138,3 +138,24 @@ export async function uploadCommentPhoto(dataUrl: string): Promise<string | null
   const r = await fetch(`${base()}/storage/v1/object/comentarios/${name}`, { method: 'POST', headers: { apikey: BACKEND.anonKey, Authorization: `Bearer ${t}`, 'Content-Type': 'image/jpeg' }, body: blob }).catch(() => null);
   return r?.ok ? `${base()}/storage/v1/object/public/comentarios/${name}` : null;
 }
+
+/** "Borrar mi cuenta": deletes the reader's photos, then the account and everything tied to it (delete_my_account()). */
+export async function deleteAccount(): Promise<{ ok?: boolean; error?: string }> {
+  const id = userId(); const t = await token(); if (!id || !t) return { error: 'Entra a tu cuenta otra vez.' };
+  const h = { apikey: BACKEND.anonKey, Authorization: `Bearer ${t}`, 'Content-Type': 'application/json' };
+  // Profile photo and photos in comments live in folders named after the account
+  for (const bucket of ['avatars', 'comentarios']) {
+    const l = await fetch(`${base()}/storage/v1/object/list/${bucket}`, { method: 'POST', headers: h, body: JSON.stringify({ prefix: `${id}/`, limit: 1000 }) }).catch(() => null);
+    const names: string[] = l?.ok ? (await l.json()).map((f: { name: string }) => `${id}/${f.name}`) : [];
+    if (names.length) await fetch(`${base()}/storage/v1/object/${bucket}`, { method: 'DELETE', headers: h, body: JSON.stringify({ prefixes: names }) }).catch(() => null);
+  }
+  const r = await fetch(`${base()}/rest/v1/rpc/delete_my_account`, { method: 'POST', headers: h, body: '{}' }).catch(() => null);
+  if (!r?.ok) return { error: r?.status === 404 ? 'Falta activar esta opción en el sitio. Inténtalo más tarde.' : 'No se pudo borrar. Intenta otra vez.' };
+  const msg = await r.json();
+  if (msg !== 'ok') return { error: String(msg) };
+  // Signed out, and this device forgets the account's copies (saved stories, points, notifications, profile)
+  write(SESSION, null);
+  try { Object.keys(localStorage).filter((k) => k.startsWith('nx-') && !['nx-theme-manual', 'nx-font', 'nx-lang'].includes(k)).forEach((k) => localStorage.removeItem(k)); } catch { /* storage blocked */ }
+  dispatchEvent(new Event('nx-profile-change')); changed();
+  return { ok: true };
+}

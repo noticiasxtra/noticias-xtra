@@ -238,6 +238,7 @@ const CTAS = ['Llama hoy', 'Visítanos', 'Ordena ya', 'Escríbenos por WhatsApp'
         </div>
 
         <p class="cm-err" data-err hidden></p>
+        <p class="adp-terms" data-pay-terms hidden>Al enviar tu solicitud aceptas los <a href={url('terminos-anunciantes')} target="_blank" rel="noopener">términos para anunciantes</a> y la <a href={url('privacidad')} target="_blank" rel="noopener">política de privacidad</a>.</p>
         <div class="wiz-bar" data-bar>
           <div class="wiz-bar-total"><span>Total</span><b data-bar-total>$0</b></div>
           <button type="button" class="adp-btn ghost-dark" data-back hidden>Atrás</button>
@@ -474,7 +475,7 @@ const CTAS = ['Llama hoy', 'Visítanos', 'Ordena ya', 'Escríbenos por WhatsApp'
       step = n;
       wf.querySelectorAll<HTMLElement>('[data-step]').forEach((s) => (s.hidden = Number(s.dataset.step) !== n));
       document.querySelectorAll<HTMLButtonElement>('[data-goto]').forEach((b) => { const k = Number(b.dataset.goto); if (k === n) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); b.classList.toggle('done', k < n); });
-      $('[data-back]').hidden = n === 1; $('[data-next]').hidden = n === 4; $('[data-pay]').hidden = n !== 4;
+      $('[data-back]').hidden = n === 1; $('[data-next]').hidden = n === 4; $('[data-pay]').hidden = n !== 4; $('[data-pay-terms]').hidden = n !== 4;
       err('');
       calc();
     }

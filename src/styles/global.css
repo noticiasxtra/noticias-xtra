@@ -4051,3 +4051,10 @@ a,button,summary,label{-webkit-tap-highlight-color:transparent}
 @media (max-width:760px){
   input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),textarea,select{font-size:16px !important}
 }
+.adp-terms{margin:6px 0 0;font-size:13px;color:var(--muted)} .adp-terms a{color:var(--purple);text-decoration:underline}
+/* Mi perfil → Borrar mi cuenta */
+.pf-delete{margin-top:22px;padding:16px;border:1px solid color-mix(in srgb,#B71C30 35%,transparent);border-radius:14px}
+.pf-delete .pf-h{margin-top:0;color:#B71C30}
+[data-theme="dark"] .pf-delete .pf-h{color:#FF8A95}
+.pf-delete-btn{margin-top:6px;padding:10px 16px;border:0;border-radius:999px;background:#B71C30;color:#fff;font-family:var(--head);font-weight:700;cursor:pointer}
+.pf-delete-btn:disabled{opacity:.6}

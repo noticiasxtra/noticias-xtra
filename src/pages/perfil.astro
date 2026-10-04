@@ -133,6 +133,11 @@ const BADGES = [
             <button type="button" class="tool" data-logout>Cerrar sesión</button>
             <button type="button" class="pf-linkbtn red" data-wipe>Borrar todos mis datos de este dispositivo</button>
           </div>
+          <div class="pf-delete" data-delete-box hidden>
+            <h2 class="pf-h">Borrar mi cuenta</h2>
+            <p class="pf-note">Se borran tu cuenta, tus comentarios, fotos, Me gusta, temas del Foro, noticias guardadas, puntos y notificaciones. <b>No se puede deshacer.</b> Lee la <a href={url('privacidad')}>política de privacidad</a>.</p>
+            <button type="button" class="pf-delete-btn" data-delete-account>Borrar mi cuenta para siempre</button>
+          </div>
         </section>
       </div>
     </div>
@@ -145,7 +150,8 @@ const BADGES = [
     import { renderNotifs } from '../lib/notif-view';
     import { BADGE } from '../lib/badges';
     import { squarePhoto, paintAvatar } from '../lib/avatar';
-    import { accountsOn, loggedIn, askLogin, signOut, updateProfile } from '../lib/account';
+    import { accountsOn, loggedIn, askLogin, signOut, updateProfile, deleteAccount } from '../lib/account';
+    import { askText } from '../lib/dialogs';
     type Profile = { name?: string; color?: string; photo?: string };
     const get = <T,>(k: string, d: T): T => { try { return JSON.parse(localStorage.getItem(k) || '') ?? d; } catch { return d; } };
     const set = (k: string, v: unknown) => { try { v === null ? localStorage.removeItem(k) : localStorage.setItem(k, JSON.stringify(v)); } catch { /* storage blocked */ } };
@@ -216,6 +222,7 @@ const BADGES = [
       let p = get<Profile>('nx-profile', {});
       if (ACC && !loggedIn()) p = {};
       login.hidden = !!p.name; card.hidden = !p.name;
+      $('[data-delete-box]').hidden = !(ACC && loggedIn());
       rendering = true; dispatchEvent(new Event('nx-profile-change')); rendering = false;
       dispatchEvent(new Event('nx-profile-change'));
       if (!p.name) return;
@@ -313,6 +320,19 @@ const BADGES = [
     $('[data-nf-all]').addEventListener('click', () => markRead());
     $('[data-nf-full]').addEventListener('click', (e) => { const a = (e.target as HTMLElement).closest<HTMLElement>('[data-nf-id]'); if (a) markRead(a.dataset.nfId); });
     addEventListener('nx-notifs', paintNotifs);
+    // "Borrar mi cuenta": the reader types their username to confirm
+    $('[data-delete-account]').addEventListener('click', async () => {
+      const me = get<Profile>('nx-profile', {}).name ?? '';
+      const typed = await askText(`Para borrar tu cuenta para siempre, escribe tu nombre de usuario: ${me}`, { placeholder: me, ok: 'Borrar mi cuenta', danger: true });
+      if (typed === null) return;
+      if (typed.trim().replace(/^@/, '').toLowerCase() !== me.toLowerCase()) { dispatchEvent(new CustomEvent('nx-toast', { detail: 'El nombre no coincide. No se borró nada.' })); return; }
+      const btn = $<HTMLButtonElement>('[data-delete-account]'); btn.disabled = true; btn.textContent = 'Borrando…';
+      const r = await deleteAccount();
+      btn.disabled = false; btn.textContent = 'Borrar mi cuenta para siempre';
+      if (r.error) { dispatchEvent(new CustomEvent('nx-toast', { detail: r.error })); return; }
+      dispatchEvent(new CustomEvent('nx-toast', { detail: 'Tu cuenta y todo lo que publicaste fueron borrados.' }));
+      render();
+    });
     $('[data-logout]').addEventListener('click', async () => { if (ACC) { await signOut(); render(); return; } set('nx-profile', null); render(); });
     $('[data-wipe]').addEventListener('click', async () => {
       if (!(await ask('¿Borrar tu perfil, puntos, comentarios, guardadas y notificaciones de este dispositivo? No se puede deshacer.', { ok: 'Borrar todo', danger: true }))) return;
