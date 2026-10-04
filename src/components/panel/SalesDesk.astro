@@ -369,6 +369,9 @@ const booked = CAMPAIGNS.filter((c) => c.takeover).map((c) => ({ start: c.start,
     render();
     // The team's latest clients (and again when this person logs in)
     void leads.refresh().then((ok) => ok && render());
-    addEventListener('nx-staff-change', () => void leads.refresh().then((ok) => ok && render()));
+    // Only when someone else logs in: the panel's counters also send nx-staff-change, and refreshing on every one of
+    // them made an endless loop (refresh → nx-leads → counters → nx-staff-change → refresh…)
+    let who = localStorage.getItem('nx-staff');
+    addEventListener('nx-staff-change', () => { const now = localStorage.getItem('nx-staff'); if (now === who) return; who = now; void leads.refresh().then((ok) => ok && render()); });
   }
 </script>

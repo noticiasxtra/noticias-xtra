@@ -11,6 +11,7 @@
 // Without Supabase it's a preview: articles stay on this device ('nx-articles') and can be downloaded as story files.
 import { SECTIONS, PR_MUNICIPIOS, url } from '../../lib/site';
 import { LEAGUES } from '../../lib/leagues';
+import AiDraft from './AiDraft.astro';
 type Pub = { id: string; title: string; section: string; author: string; date: string; url: string; ai: boolean };
 interface Props { recent: Array<{ id: string; title: string }>; published: Pub[] }
 const { recent, published } = Astro.props;
@@ -38,7 +39,7 @@ const TOOLS = [
   <div data-wr-list-view>
     <header class="sd-head">
       <div><h1 class="pnl-h">Escribir</h1><p class="pnl-muted">Escribe y edita noticias como en WordPress. Los periodistas las envían a revisión; los editores las publican o las programan.</p></div>
-      <button type="button" class="adp-btn" data-wr-new>+ Nueva noticia</button>
+      <span class="wr-head-acts"><button type="button" class="adp-btn ghost-dark" data-wr-ai hidden>✨ Redactar con IA</button><button type="button" class="adp-btn" data-wr-new>+ Nueva noticia</button></span>
     </header>
     <nav class="apn-tabs pnl-sub" role="tablist" aria-label="Estado">
       <button type="button" role="tab" aria-selected="true" data-ws="draft">Borradores <b data-wn="draft"></b></button>
@@ -79,6 +80,7 @@ const TOOLS = [
           <div class="wr-2" data-photo-meta hidden>
             <label>Pie de foto<input data-f="imageCaption" maxlength="200" placeholder="Qué se ve en la foto" /></label>
             <label>Crédito (obligatorio)<input data-f="imageCredit" maxlength="120" placeholder="Foto: Nombre / Noticias Xtra" /></label>
+            <label>Enlace de la licencia (opcional)<input type="url" data-f="imageCreditUrl" maxlength="500" placeholder="https://…" /></label>
           </div>
         </div>
 
@@ -91,6 +93,7 @@ const TOOLS = [
       </div>
 
       <aside class="wr-side">
+        <div data-ai-box hidden></div>
         <div class="pnl-card"><h2 class="pnl-h3">Publicación</h2>
           <label>Sección<select data-f="section">{secs.map((s) => <option value={s.id}>{s.name}</option>)}</select></label>
           <label data-league-wrap hidden>Liga<select data-f="league"><option value="">—</option>{leagues.map((l) => <option value={l.id}>{l.name}</option>)}</select></label>
@@ -193,6 +196,7 @@ const TOOLS = [
     <div class="wr-prev-stage" data-prev-stage><iframe title="Vista previa de la noticia" data-prev-frame></iframe></div>
   </dialog>
   <div class="apn-toast" data-wr-toast role="status" hidden></div>
+  <AiDraft />
 </section>
 
 <script>
@@ -200,15 +204,17 @@ const TOOLS = [
   import { docCard } from '../../lib/doccard.mjs';
   import { ask, askText } from '../../lib/dialogs';
   import { hasBackend, listArticles, putArticle, deleteArticle, uploadStoryFile, publishArticle } from '../../lib/backend';
+  import { patchGen } from '../../lib/ai-drafts';
   const root = document.querySelector<HTMLElement>('[data-wr]');
   if (root) {
     type Src = { name: string; url?: string };
     type Art = {
       id: string; status: 'draft' | 'review' | 'scheduled' | 'published'; updated: number; owner: string; note?: string;
       title: string; description: string; section: string; league: string; place: string; author: string; date: string;
-      image: string; imageUrl: string; imageCaption: string; imageCredit: string; breaking: boolean; trending: boolean; featured: boolean; live: boolean; pinned?: boolean; homeLead?: boolean; sectionLead?: boolean; sectionPinned?: boolean;
+      image: string; imageUrl: string; imageCaption: string; imageCredit: string; imageCreditUrl?: string; breaking: boolean; trending: boolean; featured: boolean; live: boolean; pinned?: boolean; homeLead?: boolean; sectionLead?: boolean; sectionPinned?: boolean;
       sources: Src[]; related: string[]; correction: string; body: string; slug?: string;
       aiAssisted?: boolean; fmExtra?: string; // kept from an existing story file: the AI label and fields the editor doesn't show
+      aiGen?: string; // made with "Redactar con IA": its row in ai_generations (only the admin approves it)
     };
     const SECS: Array<{ id: string; name: string }> = JSON.parse(root.dataset.secs!);
     const RECENT: Array<{ id: string; title: string }> = JSON.parse(root.dataset.recent!);
@@ -220,6 +226,8 @@ const TOOLS = [
     const toast = (m: string) => { const t = $('[data-wr-toast]'); t.textContent = m; t.hidden = false; clearTimeout((t as any).tm); (t as any).tm = setTimeout(() => (t.hidden = true), 4000); };
     const me = () => { try { return JSON.parse(localStorage.getItem('nx-staff') || 'null') as { name: string; role: string } | null; } catch { return null; } };
     const canPublish = () => ['admin', 'editor'].includes(me()?.role ?? '');
+    const isAdmin = () => me()?.role === 'admin';
+    const canApprove = (a: Art) => canPublish() && (!a.aiGen || isAdmin()); // AI drafts: admin only
     // With Supabase (src/lib/backend.ts) articles are shared by the team; without it they stay on this device ('nx-articles')
     const DB = hasBackend();
     const KEY = 'nx-articles';
@@ -267,6 +275,7 @@ const TOOLS = [
     // ---------- list ----------
     let tab: Art['status'] = 'draft';
     function renderList() {
+      $('[data-wr-ai]').hidden = !(DB && isAdmin()); // "Redactar con IA" is for the admin
       const s = me(); const all = load().filter((a) => canPublish() || a.owner === s?.name); // periodistas see their own
       (['draft', 'review', 'scheduled', 'published'] as const).forEach((k) => { const n = all.filter((a) => a.status === k).length; $(`[data-wn="${k}"]`).textContent = n ? String(n) : ''; });
       const pubs = publishedList();
@@ -275,9 +284,9 @@ const TOOLS = [
       const list = all.filter((a) => a.status === tab).sort((a, b) => b.updated - a.updated);
       $('[data-wr-list]').innerHTML = list.map((a) => `<article class="pnl-row" data-id="${a.id}">
         <div><p class="pnl-muted">${STATUS[a.status]} · ${esc(SECS.find((x) => x.id === a.section)?.name ?? '')} · ${esc(a.author || a.owner)} · ${ago(a.updated)}${a.status === 'scheduled' ? ` · sale el ${new Date(a.date).toLocaleString('es-PR', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })}` : ''}</p>
-          <h2>${esc(a.title || 'Sin titular')}</h2>${a.note ? `<p class="sd-warn">Nota del editor: ${esc(a.note)}</p>` : ''}</div>
+          <h2>${a.aiGen ? '<span class="wr-ai">IA</span> ' : ''}${esc(a.title || 'Sin titular')}</h2>${a.note ? `<p class="sd-warn">Nota del editor: ${esc(a.note)}</p>` : ''}</div>
         <div class="pnl-row-acts">
-          ${a.status === 'review' && canPublish() ? '<button type="button" class="adp-btn" data-la="approve">Aprobar y publicar</button><button type="button" class="pnl-link" data-la="return">Devolver</button>' : ''}
+          ${a.status === 'review' && canApprove(a) ? `<button type="button" class="adp-btn" data-la="approve">Aprobar y publicar</button>${a.aiGen ? '' : '<button type="button" class="pnl-link" data-la="return">Devolver</button>'}` : ''}
           <button type="button" class="adp-btn ghost-dark" data-la="preview">Vista previa</button>
           <button type="button" class="adp-btn ghost-dark" data-la="edit">${a.status === 'published' ? 'Editar o corregir' : 'Editar'}</button>
           <button type="button" class="pnl-link" data-la="dup">Duplicar</button>
@@ -352,12 +361,12 @@ const TOOLS = [
     const body = $('[data-body]');
     let cur: Art | null = null, dirty = false, timer = 0;
     const blank = (): Art => ({ id: `A-${Date.now().toString(36)}`, status: 'draft', updated: Date.now(), owner: me()?.name ?? '', title: '', description: '', section: 'puerto-rico', league: '',
-      place: '', author: me()?.name ?? 'Noticias Xtra', date: localNow(), image: '', imageUrl: '', imageCaption: '', imageCredit: '', breaking: false, trending: false, featured: false, live: false, pinned: false, homeLead: false, sectionLead: false, sectionPinned: false,
+      place: '', author: me()?.name ?? 'Noticias Xtra', date: localNow(), image: '', imageUrl: '', imageCaption: '', imageCredit: '', imageCreditUrl: '', breaking: false, trending: false, featured: false, live: false, pinned: false, homeLead: false, sectionLead: false, sectionPinned: false,
       sources: [], related: [], correction: '', body: '' });
     const field = (k: string) => $<HTMLInputElement>(`[data-f="${k}"]`);
     function openEditor(a: Art) {
       cur = structuredClone(a);
-      (['title', 'description', 'section', 'league', 'place', 'author', 'date', 'imageUrl', 'imageCaption', 'imageCredit', 'correction'] as const).forEach((k) => (field(k).value = String(cur![k] ?? '')));
+      (['title', 'description', 'section', 'league', 'place', 'author', 'date', 'imageUrl', 'imageCaption', 'imageCredit', 'imageCreditUrl', 'correction'] as const).forEach((k) => (field(k).value = String(cur![k] ?? '')));
       (['breaking', 'trending', 'featured', 'live', 'pinned', 'homeLead', 'sectionLead', 'sectionPinned'] as const).forEach((k) => (field(k).checked = !!cur![k]));
       body.innerHTML = cur.body || '<p><br></p>';
       body.querySelectorAll<HTMLElement>('figure.wr-embed').forEach(paintEmbed);
@@ -365,11 +374,12 @@ const TOOLS = [
       $('[data-wr-list-view]').hidden = true; $('[data-wr-editor]').hidden = false;
       sync(); dirty = false; $('[data-wr-saved]').textContent = ''; scrollTo({ top: 0 });
       ($('[data-f="title"]') as HTMLTextAreaElement).focus();
+      dispatchEvent(new CustomEvent('nx-wr-open', { detail: { art: cur } })); // the AI box (AiDraft.astro)
     }
-    function closeEditor() { if (dirty) void persist(); cur = null; $('[data-wr-editor]').hidden = true; $('[data-wr-list-view]').hidden = false; renderList(); }
+    function closeEditor() { if (dirty) void persist(); cur = null; dispatchEvent(new CustomEvent('nx-wr-open', { detail: { art: null } })); $('[data-wr-editor]').hidden = true; $('[data-wr-list-view]').hidden = false; renderList(); }
     function readEditor() {
       if (!cur) return;
-      (['title', 'description', 'section', 'league', 'place', 'author', 'date', 'imageUrl', 'imageCaption', 'imageCredit', 'correction'] as const).forEach((k) => ((cur as any)[k] = field(k).value.trim()));
+      (['title', 'description', 'section', 'league', 'place', 'author', 'date', 'imageUrl', 'imageCaption', 'imageCredit', 'imageCreditUrl', 'correction'] as const).forEach((k) => ((cur as any)[k] = field(k).value.trim()));
       (['breaking', 'trending', 'featured', 'live', 'pinned', 'homeLead', 'sectionLead', 'sectionPinned'] as const).forEach((k) => (cur![k] = field(k).checked));
       cur.body = body.innerHTML;
     }
@@ -402,13 +412,15 @@ const TOOLS = [
       const future = new Date(cur.date).valueOf() > Date.now() + 60000;
       const go = $<HTMLButtonElement>('[data-wr-go]');
       go.textContent = !canPublish() ? 'Enviar a revisión' : future ? 'Programar' : cur.status === 'published' ? 'Actualizar' : 'Publicar';
+      if (cur.aiGen && !isAdmin() && cur.status !== 'published') go.textContent = 'Lo aprueba el administrador';
+      go.disabled = !!cur.aiGen && !isAdmin() && cur.status !== 'published';
       $('[data-wr-state]').textContent = STATUS[cur.status];
       $('[data-wr-state]').className = `wr-state ${cur.status}`;
       const checks: Array<[boolean, string]> = [
         [cur.title.length >= 20 && cur.title.length <= 110, 'Titular claro (20 a 110 caracteres)'],
         [cur.description.length >= 40, 'Subtítulo de una o dos oraciones'],
         [words >= 80, 'Al menos 80 palabras'],
-        [!!cur.place, 'Lugar'],
+        [!!cur.place || !!cur.aiGen, cur.aiGen ? 'Lugar (vacío = Puerto Rico)' : 'Lugar'],
         [!photo || !!cur.imageCredit, 'Crédito de la foto (si tiene foto)'],
         [cur.sources.length > 0, 'Al menos una fuente'],
       ];
@@ -549,7 +561,7 @@ const TOOLS = [
 
     // ---------- open a story that is already on the site (AI or older) in the editor ----------
     const RAW = 'https://raw.githubusercontent.com/publisher-noticel/noticias-xtra/main/src/content/noticias/';
-    const MANAGED = new Set(['title', 'description', 'section', 'league', 'place', 'date', 'author', 'image', 'imageCaption', 'imageCredit',
+    const MANAGED = new Set(['title', 'description', 'section', 'league', 'place', 'date', 'author', 'image', 'imageCaption', 'imageCredit', 'imageCreditUrl',
       'breaking', 'trending', 'featured', 'live', 'pinned', 'homeLead', 'sectionLead', 'sectionPinned', 'aiAssisted', 'draft', 'sources', 'related', 'correction']);
     const unq = (v: string) => { v = v.trim(); try { return v.startsWith('"') ? JSON.parse(v) : v.replace(/^'(.*)'$/, '$1'); } catch { return v; } };
     const inline = (t: string) => esc(t.replace(/\\([*_`[\]\\])/g, '$1'))
@@ -590,7 +602,7 @@ const TOOLS = [
       return { id: `A-${Date.now().toString(36)}`, status: 'published', updated: Date.now(), owner: me()?.name ?? '', slug: id,
         title: unq(fm.title || ''), description: unq(fm.description || ''), section: unq(fm.section || 'puerto-rico'), league: unq(fm.league || ''),
         place: unq(fm.place || ''), author: unq(fm.author || 'Noticias Xtra'), date: local, image: unq(fm.image || ''), imageUrl: '',
-        imageCaption: unq(fm.imageCaption || ''), imageCredit: unq(fm.imageCredit || ''),
+        imageCaption: unq(fm.imageCaption || ''), imageCredit: unq(fm.imageCredit || ''), imageCreditUrl: unq(fm.imageCreditUrl || ''),
         breaking: yes('breaking'), trending: yes('trending'), featured: yes('featured'), live: yes('live'), pinned: yes('pinned'), homeLead: yes('homeLead'), sectionLead: yes('sectionLead'), sectionPinned: yes('sectionPinned'),
         aiAssisted: fm.aiAssisted ? yes('aiAssisted') : true, fmExtra: extra.join('\n').trim() || undefined,
         sources, related, correction: unq(fm.correction || ''), body: mdToHtml(m[2]) };
@@ -610,7 +622,7 @@ const TOOLS = [
       const date = new Date(a.date || Date.now());
       return ['---', `title: ${y(a.title)}`, `description: ${y(a.description)}`, `section: ${a.section}`, ...(a.section === 'deportes' && a.league ? [`league: ${a.league}`] : []),
         `place: ${y(a.place || 'Puerto Rico')}`, `date: ${date.toISOString()}`, `author: ${y(a.author || 'Noticias Xtra')}`,
-        ...(a.image || a.imageUrl ? [`image: ${y(a.imageUrl || (a.image.startsWith('data:') ? `imagenes/${a.id.toLowerCase()}.jpg` : a.image))}`, ...(a.imageCaption ? [`imageCaption: ${y(a.imageCaption)}`] : []), ...(a.imageCredit ? [`imageCredit: ${y(a.imageCredit)}`] : [])] : []),
+        ...(a.image || a.imageUrl ? [`image: ${y(a.imageUrl || (a.image.startsWith('data:') ? `imagenes/${a.id.toLowerCase()}.jpg` : a.image))}`, ...(a.imageCaption ? [`imageCaption: ${y(a.imageCaption)}`] : []), ...(a.imageCredit ? [`imageCredit: ${y(a.imageCredit)}`] : []), ...(a.imageCreditUrl ? [`imageCreditUrl: ${y(a.imageCreditUrl)}`] : [])] : []),
         ...(['breaking', 'trending', 'featured', 'live', 'pinned', 'homeLead', 'sectionLead', 'sectionPinned'] as const).filter((k) => a[k]).map((k) => `${k}: true`),
         `aiAssisted: ${a.aiAssisted ?? false}`, 'draft: false', ...(a.fmExtra ? [a.fmExtra] : []),
         ...(a.sources.length ? ['sources:', ...a.sources.flatMap((s) => [`  - name: ${y(s.name)}`, ...(s.url ? [`    url: ${y(s.url)}`] : [])])] : []),
@@ -796,9 +808,12 @@ const TOOLS = [
         return true;
       }
       toast('Publicando…');
+      const firstDate = !a.date; if (firstDate) a.date = localNow(); // AI drafts get their date when they're published
       const r = await publishArticle({ id: a.id, slug: slug(a), file: toFile(a), title: a.title, scheduled: future });
       if (!r.ok) { toast(`No se publicó: ${r.error}`); return false; }
       a.status = future ? 'scheduled' : 'published'; a.slug = r.slug; a.updated = Date.now();
+      if (firstDate) await store(a);
+      if (a.aiGen) void patchGen(a.aiGen, { status: 'published', decided_by: me()?.name ?? '', decided_at: new Date().toISOString() });
       await refresh();
       const un = await unpinOthers(a);
       if (un.length) await refresh();
@@ -819,6 +834,30 @@ const TOOLS = [
       } finally { goBtn.disabled = false; }
     });
     $('[data-wr-back]').addEventListener('click', closeEditor);
+
+    // ---------- "Redactar con IA" (AiDraft.astro): admin only, with the shared database ----------
+    const aiBtn = $('[data-wr-ai]');
+    aiBtn.addEventListener('click', () => dispatchEvent(new Event('nx-ai-open')));
+    addEventListener('nx-ai-draft', async (e) => {
+      const { art, genId } = (e as CustomEvent).detail as { art: Art; genId: string };
+      if (!(await store(art))) return;
+      await patchGen(genId, { status: 'review', article_id: art.id });
+      await refresh(); tab = 'review'; $$('[data-ws]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.ws === 'review')));
+      openEditor(load().find((x) => x.id === art.id) ?? art);
+      toast('Guardada en “En revisión”. Revísala; solo se publica cuando tú la apruebes.');
+    });
+    addEventListener('nx-ai-photo', (e) => {
+      const p = (e as CustomEvent).detail as { src: string; caption?: string; credit: string; creditUrl: string }; if (!cur) return;
+      cur.image = ''; field('imageUrl').value = p.src; field('imageCaption').value = p.caption ?? ''; field('imageCredit').value = p.credit; field('imageCreditUrl').value = p.creditUrl; changed();
+    });
+    addEventListener('nx-ai-approve', () => { if (cur?.aiGen && isAdmin()) goBtn.click(); });
+    addEventListener('nx-ai-reject', async () => {
+      if (!cur?.aiGen || !isAdmin()) return;
+      const a = cur; dirty = false; clearTimeout(timer);
+      if (!(await drop(a.id))) return;
+      await patchGen(a.aiGen!, { status: 'rejected', article_id: null, decided_by: me()?.name ?? '', decided_at: new Date().toISOString() });
+      closeEditor(); toast('Rechazada: se borró el borrador.');
+    });
     $('[data-wr-new]').addEventListener('click', () => openEditor(blank()));
     root.addEventListener('click', async (e) => {
       const t = e.target as HTMLElement;

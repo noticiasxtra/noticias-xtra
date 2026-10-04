@@ -201,6 +201,11 @@ const Tag = embedded ? 'section' : 'main';
     if (hasBackend()) { await loadRequests(); stats = await campaignStats(listRequests().filter((x) => x.status === 'aprobada').map((x) => x.id.toLowerCase())); }
     render();
   });
-  // Staff login changes (or another tab approves something): fetch the requests again
-  addEventListener('nx-staff-change', () => void loadRequests().then(render));
+  // Staff login changes: fetch the requests again (the panel's counters send nx-staff-change too, often, so at most
+  // once every 30 seconds unless the person changed)
+  let who = localStorage.getItem('nx-staff'), last = Date.now();
+  addEventListener('nx-staff-change', () => {
+    const now = localStorage.getItem('nx-staff'); if (now === who && Date.now() - last < 30000) return;
+    who = now; last = Date.now(); void loadRequests().then(render);
+  });
 </script>

@@ -17,6 +17,7 @@ Noticias Xtra is a Spanish-language (Puerto Rico) news site built with Astro 7, 
 
 ## Editorial rules for the AI pipeline
 - Only primary/official sources in `scripts/sources.json`. Do not add other news outlets as sources.
+- One exception, approved by the user on 2026-10-03: "Redactar con IA" (panel → Escribir, admin only; `supabase/functions/redactar-ia/`, `src/components/panel/AiDraft.astro`). It may read articles from outlets that agreed, listed in the `ai_outlets` table (NotiCel first). The writer step sees only the extracted facts, the outlets are credited, a code check flags 8+ word matches, and the result is always a draft in `articles` with status `review`. It never publishes, and only the admin approves it. Wire stories (EFE, AP…) republished by an outlet are not covered by that outlet's permission.
 - Review levels (approved by the user on 2026-10-02), set per source with `"review"` in `scripts/sources.json`:
   - `auto`: publish right away. Weather and hurricane alerts, earthquakes, product recalls, league results.
   - `check`: publish right away, and list the story in a "Vistazo rápido" GitHub issue for an editor.
