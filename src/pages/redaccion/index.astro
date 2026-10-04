@@ -30,7 +30,7 @@ const sectionPins = SECTIONS.map((sec) => {
   return p ? { section: sec.name, title: p.data.title, url: url(`noticia/${p.id}`) } : null;
 }).filter(Boolean);
 const recent = stories.filter((s) => s.data.section !== 'opinion').slice(0, 12)
-  .map((s) => ({ id: s.id, title: s.data.title, section: SECTIONS.find((x) => x.id === s.data.section)?.name ?? '', url: url(`noticia/${s.id}/`), date: s.data.date.toISOString() }));
+  .map((s) => ({ id: s.id, title: s.data.title, section: SECTIONS.find((x) => x.id === s.data.section)?.name ?? '', url: url(`noticia/${s.id}/`), date: s.data.date.toISOString(), author: s.data.author }));
 const srcs = (sources as Array<{ name: string; section: string; review?: string; enabled?: boolean }>).filter((s) => s.enabled !== false)
   .map((s) => ({ name: s.name, section: s.section, review: s.review ?? 'always' }));
 const TABS = [
@@ -214,7 +214,7 @@ const TABS = [
     import { listRequests, loadRequests } from '../../lib/adrequests';
     import { hasBackend, staffLogin, staffLogout, staffProfile, syncTeam, addToTeam, removeFromTeam } from '../../lib/backend';
     const root = document.querySelector<HTMLElement>('[data-pnl]')!;
-    const RECENT: Array<{ id: string; title: string; section: string; url: string; date: string }> = JSON.parse(root.dataset.recent!);
+    const RECENT: Array<{ id: string; title: string; section: string; url: string; date: string; author: string }> = JSON.parse(root.dataset.recent!);
     const SOURCES: Array<{ name: string; section: string; review: string }> = JSON.parse(root.dataset.sources!);
     const PIN: { title: string; date: string; url: string } | null = JSON.parse(root.dataset.pin || 'null');
     const SECTION_PINS: Array<{ section: string; title: string; url: string }> = JSON.parse(root.dataset.sectionPins || '[]');
@@ -400,7 +400,7 @@ const TABS = [
         if (nf === 'pending') {
           box.innerHTML = pendingDrafts().map((d) => `<article class="pnl-draft" data-id="${d.id}">
             <header><div><p class="pnl-tags">${d.why.map((w) => `<span class="pnl-tag">${esc(w)}</span>`).join('')}<span class="sp-demo">EJEMPLO</span></p>
-              <h2>${esc(d.title)}</h2><p class="pnl-muted">${esc(d.section)} · ${ago(d.at)} · Fuente: <a href="${d.sourceUrl}" target="_blank" rel="noopener">${esc(d.source)} ↗</a></p></div></header>
+              <h2>${esc(d.title)}</h2><p class="pnl-muted">✍️ Escrita por <b>NX</b> · ${esc(d.section)} · ${ago(d.at)} · Fuente: <a href="${d.sourceUrl}" target="_blank" rel="noopener">${esc(d.source)} ↗</a></p></div></header>
             <div class="pnl-cmp">
               <div><p class="pnl-lbl">Lo que dice la fuente</p><blockquote>${esc(d.excerpt)}</blockquote></div>
               <div><p class="pnl-lbl">Borrador NX</p><div class="pnl-body" data-body>${esc(d.body).split('\n\n').map((p) => `<p>${p}</p>`).join('')}</div>
@@ -413,8 +413,8 @@ const TABS = [
             </div></article>`).join('') || '<p class="apr-empty">🎉 No hay noticias esperando aprobación.</p>';
         } else if (nf === 'check') {
           box.innerHTML = checkList().map((r) => `<article class="pnl-row" data-id="c-${r.id}">
-            <div><p class="pnl-muted">${esc(r.section)} · publicada ${ago(Date.parse(r.date))}</p><h2><a href="${r.url}" target="_blank" rel="noopener">${esc(r.title)}</a></h2></div>
-            <div class="pnl-row-acts"><button type="button" class="adp-btn ghost-dark" data-act="ok">Se ve bien</button><button type="button" class="apr-reject" data-act="remove">Quitar del sitio</button></div></article>`).join('')
+            <div><p class="pnl-muted">✍️ Escrita por <b>${esc(r.author || 'Noticias Xtra')}</b> · ${esc(r.section)} · publicada ${ago(Date.parse(r.date))}</p><h2><a href="${r.url}" target="_blank" rel="noopener">${esc(r.title)}</a></h2></div>
+            <div class="pnl-row-acts"><button type="button" class="adp-btn ghost-dark" data-act="ok">Se ve bien</button><button type="button" class="adp-btn ghost-dark" data-act="editpub">Editar</button><button type="button" class="apr-reject" data-act="remove">Quitar del sitio</button></div></article>`).join('')
             || '<p class="apr-empty">🎉 Ya le diste un vistazo a todo.</p>';
         } else {
           const label = { approved: 'Aprobada y publicada', rejected: 'Rechazada', ok: 'Revisada: se ve bien', removed: 'Quitada del sitio' };
@@ -566,6 +566,11 @@ const TABS = [
       const act = t.closest<HTMLElement>('[data-act]'); const card = t.closest<HTMLElement>('.pnl-draft,.pnl-row');
       if (!act || !card || !card.closest('[data-news]')) return;
       const id = card.dataset.id!; const a = act.dataset.act;
+      if (a === 'editpub') { // a published story (Vistazo rápido) opens in Escribir to correct and update it
+        dispatchEvent(new CustomEvent('nx-edit-story', { detail: { id: id.replace(/^c-/, '') } }));
+        showTab('escribir'); scrollTo({ top: 0 });
+        return;
+      }
       if (a === 'edit') { // the draft opens in Escribir, with the full editor
         const d = DRAFTS.find((x) => x.id === id); if (!d) return;
         const body = card.querySelector<HTMLTextAreaElement>('[data-edit]')?.value || d.body;

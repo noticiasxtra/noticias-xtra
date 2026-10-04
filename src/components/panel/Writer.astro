@@ -691,6 +691,7 @@ const TOOLS = [
       openEditor(a); toast('Lista para editar. Al tocar “Actualizar”, se corrige la misma noticia en el sitio.');
     }
     root.addEventListener('click', (e) => { const b = (e.target as HTMLElement).closest<HTMLElement>('[data-import]'); if (b) void importStory(b.dataset.import!); });
+    addEventListener('nx-edit-story', (e) => void importStory((e as CustomEvent).detail.id)); // "Editar" in Noticias → Vistazo rápido
 
     /** The gallery in the story file. Without a main photo, the first gallery photo becomes the main one (toFile). */
     const galleryYaml = (a: Art) => {
