@@ -257,8 +257,15 @@ const STICKER_IMGS = [['wepa', '¡Wepa!'], ['coqui', 'Coquí'], ['bandera', 'Ban
   }
 
   document.querySelectorAll<HTMLElement>('[data-comments]').forEach((root) => {
-    sheet(root);
-    if (accountsOn()) { live(root); return; } // real comments (Supabase): see live() below
+    // The phone panel and the comments are separate: if one fails on some browser, the other still works,
+    // and the error is shown in the box so it can be reported
+    const oops = (where: string, e: unknown) => {
+      console.error(`Comentarios (${where}):`, e);
+      const n = root.querySelector<HTMLElement>('.cm-note');
+      if (n) n.textContent = `No pudimos cargar los comentarios (${where}: ${e instanceof Error ? e.message : String(e)}). Recarga la página.`;
+    };
+    try { sheet(root); } catch (e) { console.error('Comentarios (panel):', e); }
+    if (accountsOn()) { try { live(root); } catch (e) { oops('live', e); } return; } // real comments (Supabase): see live() below
     const key = `nx-comments-${root.dataset.comments}`;
     const likesKey = `nx-likes-${root.dataset.comments}`;
     const list = root.querySelector<HTMLUListElement>('[data-cm-list]')!;
@@ -649,6 +656,6 @@ const STICKER_IMGS = [['wepa', '¡Wepa!'], ['coqui', 'Coquí'], ['bandera', 'Ban
     });
     addEventListener('nx-account', () => { paintMe(); void load(); refreshRep(); });
     addEventListener('nx-profile-change', paintMe);
-    paintMe(); void load(); refreshRep();
+    paintMe(); load().catch((e) => { console.error('Comentarios (load):', e); note.textContent = `No pudimos cargar los comentarios (${e instanceof Error ? e.message : String(e)}). Recarga la página.`; }); refreshRep();
   }
 </script>
