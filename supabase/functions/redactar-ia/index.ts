@@ -85,6 +85,9 @@ export function extract(html: string, url: string, outletName: string): Source {
     } catch { /* broken JSON-LD: ignore */ }
   }
   if (!author) author = meta('author') || meta('article:author');
+  // Official sites often have a generic page title ("La Fortaleza", "BSN - …"): the story's own heading is better
+  const h1 = strip(html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i)?.[1] ?? '');
+  if (h1.length > 15 && (title.length < 20 || title.includes(h1) || title === meta('og:site_name'))) title = h1;
   // The site name sometimes repeats in the title ("Story - NotiCel - La verdad…")
   const site = meta('og:site_name');
   const siteFirst = site.split(/\s+[|–—-]\s+/)[0].trim();
@@ -121,13 +124,14 @@ async function readPage(url: string, outlets: Array<{ domain: string; name: stri
   if (!/^https?:$/.test(u.protocol)) throw new Oops('El enlace debe empezar con https://');
   const h = u.hostname.toLowerCase().replace(/^www\./, '');
   const outlet = outlets.find((o) => h === o.domain || h.endsWith(`.${o.domain}`));
-  if (!outlet) throw new Oops('Este medio no está en la lista de medios autorizados. Añádelo en “Medios autorizados” solo si dio permiso.');
+  if (!outlet) throw new Oops('Este sitio no está en la lista de fuentes autorizadas. Añádelo en “Fuentes autorizadas” solo si es oficial o dio permiso.');
   const robots = await fetch(`${u.origin}/robots.txt`, { headers: { 'User-Agent': UA }, signal: AbortSignal.timeout(8000) }).catch(() => null);
   if (robots?.ok && !robotsAllows(await robots.text(), u.pathname + u.search)) throw new Oops('El robots.txt de este sitio no permite leer esta página. Pega el texto a mano.');
   const r = await fetch(u, { headers: { 'User-Agent': UA, Accept: 'text/html' }, redirect: 'follow', signal: AbortSignal.timeout(15000) }).catch(() => null);
   if (!r) throw new Oops('No pudimos abrir la página (tardó demasiado). Pega el texto a mano.');
   if (!r.ok) throw new Oops(`No pudimos abrir la página (error ${r.status}). Pega el texto a mano.`);
   const s = extract(await r.text(), r.url || url, outlet.name);
+  if (s.words >= 20 && s.words < 80) throw new Oops(`La página tiene muy poco texto (${s.words} palabras) para escribir una noticia. Si el artículo es más largo, pega el texto a mano.`);
   if (s.words < 80) throw new Oops('No encontramos el texto del artículo en la página (puede estar detrás de un muro de pago). Pega el texto a mano.');
   return s;
 }
@@ -308,7 +312,7 @@ async function stepFacts(body: any, D: ReturnType<typeof db>, me: { id: string; 
   const outlets: Array<{ domain: string; name: string }> = await D.get('ai_outlets?select=domain,name');
   const srcs: Source[] = (body.sources ?? []).map((s: any) => {
     const h = host(String(s.url ?? '')); const o = outlets.find((x) => h === x.domain || h.endsWith(`.${x.domain}`));
-    if (!o) throw new Oops(`El enlace ${s.url} no es de un medio autorizado.`);
+    if (!o) throw new Oops(`El enlace ${s.url} no es de una fuente autorizada.`);
     const text = String(s.text ?? '').slice(0, 20000);
     return { url: String(s.url), outlet: o.name, title: String(s.title ?? '').slice(0, 200), author: String(s.author ?? '').slice(0, 120), date: String(s.date ?? '').slice(0, 40), text, words: words(text), links: Array.isArray(s.links) ? s.links.slice(0, 8) : [], pasted: !!s.pasted };
   });

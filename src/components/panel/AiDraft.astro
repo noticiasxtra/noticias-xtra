@@ -13,14 +13,14 @@
 
     <!-- 1. The links -->
     <form data-ai-form novalidate>
-      <p class="pnl-muted">Pega 3 artículos sobre la <b>misma noticia</b> de medios autorizados. La IA saca los hechos, escribe una noticia original de Noticias Xtra y la deja <b>en revisión</b>. Nunca se publica sola.</p>
+      <p class="pnl-muted">Pega 3 artículos sobre la <b>misma noticia</b> de fuentes autorizadas (medios con permiso y sitios oficiales). La IA saca los hechos, escribe una noticia original de Noticias Xtra y la deja <b>en revisión</b>. Nunca se publica sola.</p>
       <label>Artículo 1<input type="url" name="u1" required placeholder="https://noticel.com/…" /></label>
       <label>Artículo 2<input type="url" name="u2" required placeholder="https://…" /></label>
       <label>Artículo 3<input type="url" name="u3" required placeholder="https://…" /></label>
       <label>Notas para el redactor (opcional)<textarea name="notes" rows="2" maxlength="1000" placeholder="ej. Enfócate en el impacto en los agricultores del centro de la isla."></textarea></label>
       <p class="cm-err" data-ai-err hidden></p>
       <div class="sd-dlg-f ai-foot">
-        <span><button type="button" class="pnl-link" data-ai-view="outlets">Medios autorizados</button> · <button type="button" class="pnl-link" data-ai-view="log">Registro</button></span>
+        <span><button type="button" class="pnl-link" data-ai-view="outlets">Fuentes autorizadas</button> · <button type="button" class="pnl-link" data-ai-view="log">Registro</button></span>
         <button type="submit" class="adp-btn">Redactar</button>
       </div>
     </form>
@@ -44,7 +44,7 @@
 
     <!-- Authorized outlets -->
     <div data-ai-outlets hidden>
-      <p class="pnl-muted">Solo se pueden usar artículos de estos medios. Añade uno <b>solo si dio permiso</b>, y anota cómo.</p>
+      <p class="pnl-muted">Solo se pueden usar páginas de estos sitios: medios que dieron permiso y fuentes oficiales. Añade un medio <b>solo si dio permiso</b>, y anota cómo.</p>
       <ul class="ai-list" data-ai-outlet-list></ul>
       <form class="ai-add" data-ai-outlet-form novalidate>
         <input name="domain" placeholder="Dominio (ej. noticel.com)" aria-label="Dominio" required />
@@ -102,7 +102,7 @@
       srcs = r.results.map((x) => (x.ok ? x.source! : null));
       if (srcs.every(Boolean)) return void facts();
       // Some pages couldn't be read: ask for their text (an unauthorized outlet can't be pasted either)
-      const blocked = r.results.find((x) => !x.ok && /medios autorizados/.test(x.error || ''));
+      const blocked = r.results.find((x) => !x.ok && /fuentes autorizadas/.test(x.error || ''));
       if (blocked) return fail(`${blocked.url}: ${blocked.error}`);
       $('[data-ai-paste-list]').innerHTML = r.results.map((x, i) => x.ok ? '' : `<fieldset data-pi="${i}"><legend>Artículo ${i + 1}</legend><p class="cm-err">${esc(x.error || '')}</p><p class="pnl-small"><a href="${esc(x.url || '')}" target="_blank" rel="noopener">${esc(x.url || '')} ↗</a></p>
         <label>Titular<input name="title" maxlength="200" /></label><label>Autor (si aparece)<input name="author" maxlength="120" /></label><label>Fecha (si aparece)<input name="date" maxlength="40" placeholder="ej. 3 de octubre de 2026" /></label>
@@ -228,7 +228,7 @@
     async function paintOutlets() {
       const list = await listOutlets(); const ul = $('[data-ai-outlet-list]');
       if (!list) { ul.innerHTML = '<li class="cm-err">No pudimos cargar la lista. ¿Corriste supabase/ai-drafts.sql?</li>'; return; }
-      ul.innerHTML = list.map((o) => `<li><span><b>${esc(o.name)}</b> · ${esc(o.domain)}<br><span class="pnl-small">${esc(o.permission || 'sin nota de permiso')} · añadido por ${esc(o.added_by || '—')}</span></span><button type="button" class="pnl-link" data-ai-orm="${esc(o.domain)}">Quitar</button></li>`).join('') || '<li class="pnl-muted">No hay medios autorizados.</li>';
+      ul.innerHTML = list.map((o) => `<li><span><b>${esc(o.name)}</b> · ${esc(o.domain)}<br><span class="pnl-small">${esc(o.permission || 'sin nota de permiso')} · añadido por ${esc(o.added_by || '—')}</span></span><button type="button" class="pnl-link" data-ai-orm="${esc(o.domain)}">Quitar</button></li>`).join('') || '<li class="pnl-muted">No hay fuentes autorizadas.</li>';
     }
     $<HTMLFormElement>('[data-ai-outlet-form]').addEventListener('submit', async (e) => {
       e.preventDefault(); const f = new FormData(e.target as HTMLFormElement); const err = $('[data-ai-oerr]'); err.hidden = true;
@@ -241,7 +241,7 @@
     });
     $('[data-ai-outlet-list]').addEventListener('click', async (e) => {
       const b = (e.target as HTMLElement).closest<HTMLElement>('[data-ai-orm]'); if (!b) return;
-      if (await ask(`¿Quitar ${b.dataset.aiOrm} de los medios autorizados?`, { ok: 'Quitar', danger: true })) { await removeOutlet(b.dataset.aiOrm!); void paintOutlets(); }
+      if (await ask(`¿Quitar ${b.dataset.aiOrm} de las fuentes autorizadas?`, { ok: 'Quitar', danger: true })) { await removeOutlet(b.dataset.aiOrm!); void paintOutlets(); }
     });
 
     // ---------- log ----------

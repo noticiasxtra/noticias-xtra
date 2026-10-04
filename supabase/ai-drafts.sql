@@ -13,7 +13,36 @@ create table if not exists ai_outlets (
   added_by text,
   added_at timestamptz not null default now()
 );
-insert into ai_outlets (domain, name, permission, added_by) values ('noticel.com', 'NotiCel', 'Medio de la casa', 'Sistema')
+-- The starting list (approved by the user on 2026-10-03). A domain covers its www. and subdomains. Official sites are
+-- public information; U.S. federal sites (weather.gov, nhc.noaa.gov, FEMA, CDC, Census...) are public domain.
+insert into ai_outlets (domain, name, permission, added_by) values
+  ('noticel.com', 'NotiCel', 'Medio de la casa', 'Sistema'),
+  ('periodismoinvestigativo.com', 'Centro de Periodismo Investigativo', 'Investigaciones; acreditar al CPI (confirmar sus condiciones de republicación)', 'Sistema'),
+  ('fortaleza.pr.gov', 'La Fortaleza', 'Fuente oficial: información pública', 'Sistema'),
+  ('camara.pr.gov', 'Cámara de Representantes de PR', 'Fuente oficial: información pública', 'Sistema'),
+  ('senado.pr.gov', 'Senado de Puerto Rico', 'Fuente oficial: información pública', 'Sistema'),
+  ('policia.pr.gov', 'Policía de Puerto Rico', 'Fuente oficial: información pública', 'Sistema'),
+  ('manejodeemergencias.pr.gov', 'Negociado de Manejo de Emergencias', 'Fuente oficial: información pública', 'Sistema'),
+  ('salud.pr.gov', 'Departamento de Salud', 'Fuente oficial: información pública', 'Sistema'),
+  ('poderjudicial.pr', 'Rama Judicial', 'Fuente oficial: información pública', 'Sistema'),
+  ('oversightboard.pr.gov', 'Junta de Supervisión Fiscal', 'Fuente oficial: información pública', 'Sistema'),
+  ('juntasupervision.pr.gov', 'Junta de Supervisión Fiscal', 'Fuente oficial: información pública', 'Sistema'),
+  ('lumapr.com', 'LUMA', 'Fuente oficial: comunicados públicos', 'Sistema'),
+  ('acueductos.pr.gov', 'Autoridad de Acueductos y Alcantarillados', 'Fuente oficial: información pública', 'Sistema'),
+  ('acueductospr.com', 'Autoridad de Acueductos y Alcantarillados', 'Fuente oficial: información pública', 'Sistema'),
+  ('weather.gov', 'Servicio Nacional de Meteorología (San Juan)', 'Gobierno federal: dominio público', 'Sistema'),
+  ('nhc.noaa.gov', 'Centro Nacional de Huracanes', 'Gobierno federal: dominio público', 'Sistema'),
+  ('fema.gov', 'FEMA', 'Gobierno federal: dominio público', 'Sistema'),
+  ('cdc.gov', 'CDC', 'Gobierno federal: dominio público', 'Sistema'),
+  ('census.gov', 'Negociado del Censo', 'Gobierno federal: dominio público', 'Sistema'),
+  ('whitehouse.gov', 'Casa Blanca', 'Gobierno federal: dominio público', 'Sistema'),
+  ('congress.gov', 'Congreso de EE. UU.', 'Gobierno federal: dominio público', 'Sistema'),
+  ('house.gov', 'Cámara de Representantes de EE. UU.', 'Gobierno federal: dominio público', 'Sistema'),
+  ('senate.gov', 'Senado de EE. UU.', 'Gobierno federal: dominio público', 'Sistema'),
+  ('bsnpr.com', 'BSN', 'Sitio oficial de la liga', 'Sistema'),
+  ('beisboldobleapr.com', 'Béisbol Doble A (Federación de Béisbol Aficionado)', 'Sitio oficial de la liga', 'Sistema'),
+  ('ligapr.com', 'Liga de Béisbol Profesional Roberto Clemente', 'Sitio oficial de la liga', 'Sistema'),
+  ('mlb.com', 'MLB', 'Sitio oficial de la liga', 'Sistema')
 on conflict (domain) do nothing;
 
 create table if not exists ai_generations (
