@@ -20,3 +20,9 @@ El show repasará sus 10 años de carrera, desde su debut *Letra Pa’ Tu Coco* 
 “Me gusta que la gente vaya a pensar, como que vaya a disfrutar y a dejarse ir por dos horitas”, dijo el artista de 37 años. Antes ha hecho conciertos en una tarima en medio de una piscina y en una guagua escolar.
 
 PJ celebra también su primera nominación al Latin Grammy: “Ante la duda, baila”, canción que compuso junto a otros para el uruguayo Jorge Drexler, compite como Canción Alternativa del Año. La ceremonia será en noviembre.
+
+**Médico y rapero:** su carrera musical comenzó cuando se graduó de medicina y decidió darle “un añito a la música”. Hoy es director médico de la organización sin fines de lucro Direct Relief, que lleva clínicas por la isla y a veces hasta las casas de pacientes que no tienen cómo moverse.
+
+El nombre del nuevo disco, *SAL*, nace en parte de la crisis de salud mental que ve en el país y de su idea de que a todos nos hace bien salir a caminar y conectar con la naturaleza.
+
+Después de este concierto, quiere tocar en pueblos que no suelen estar en las giras, como Utuado, Cabo Rojo, Yauco y Humacao.

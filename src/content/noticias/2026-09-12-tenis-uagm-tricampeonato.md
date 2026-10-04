@@ -16,4 +16,10 @@ Del equipo campeón solo queda **Arianna Paradas**, la Jugadora Más Valiosa de 
 
 “El equipo es prácticamente casi nuevo”, dijo el dirigente Fernando Negrón, quien recordó que el año pasado las Taínas ganaron el título con solo cuatro jugadoras.
 
-Negrón está contento con la integración de las novatas: “Son cuatro chicas bien trabajadoras, con mucho compromiso con el equipo y la institución”. Si ganan, sería el tercer campeonato consecutivo para la UAGM.
+Negrón está contento con la integración de las novatas: “Son cuatro chicas bien trabajadoras, con mucho compromiso con el equipo y la institución”. Si ganan, sería el tercer campeonato consecutivo para la UAGM. “Sentimos presión, pero una presión de la buena”, dijo.
+
+**Los rivales:** el dirigente espera los duelos más fuertes ante la Universidad del Sagrado Corazón y la UPR de Río Piedras. “La ‘IUPI’ siempre tiene muy buen equipo y Sagrado también”, comentó.
+
+**Un comienzo difícil:** en la inauguración del torneo, la UAGM cayó 3-2 ante las Juanas de la UPR de Mayagüez. El partido se decidió en el tercer sencillo, en el que la colegial Dana I. Gómez Aponte venció a la taína Natalia Aponte Bolorín, 7-5 y 6-1.
+
+En la LAI, cada partido de tenis tiene dos juegos de dobles y tres de sencillos.

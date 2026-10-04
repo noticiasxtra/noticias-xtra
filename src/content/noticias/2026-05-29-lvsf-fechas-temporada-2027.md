@@ -10,7 +10,7 @@ sources:
     url: "https://fedpurvoli.com/2026/05/29/lvsf-define-fechas-clave-para-la-temporada-2027-y-mantiene-reglamento-de-refuerzos/"
 ---
 
-La Liga de Voleibol Superior Femenino (LVSF) fijó las fechas clave de su temporada 2027 en una reunión de apoderados en Guaynabo.
+La Liga de Voleibol Superior Femenino (LVSF) fijó las fechas clave de su temporada 2027 en una reunión de apoderados en Guaynabo. Cinco de las siete apoderadas asistieron; Caguas y Juncos se excusaron.
 
 **Las fechas:**
 
@@ -21,4 +21,4 @@ La Liga de Voleibol Superior Femenino (LVSF) fijó las fechas clave de su tempor
 
 La liga mantendrá la regla que permite a cada equipo tener **tres jugadoras refuerzo**.
 
-La LVSF también evalúa solicitudes de nuevas franquicias: dos municipios han mostrado interés en unirse al torneo, y la administración estudiará sus peticiones en los próximos meses.
+**¿Más equipos?** La LVSF también evalúa solicitudes de nuevas franquicias: dos municipios han mostrado interés en unirse al torneo, y la administración estudiará sus peticiones en los próximos meses. La liga dijo que seguirá planificando la campaña 2027 mientras busca maneras de fortalecer y hacer crecer el voleibol superior femenino en Puerto Rico.

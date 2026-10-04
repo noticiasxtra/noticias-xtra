@@ -17,6 +17,10 @@ El cantautor puertorriqueño Lenny Tavárez llevó la salsa a la NFL. El pasado 
 
 La canción, producida por Sergio George, ocupa el puesto número 6 de la lista Hot Tropical Songs de Billboard.
 
-“Pa’ lo bonito” forma parte de “8”, su nuevo EP de ocho canciones. El proyecto está inspirado en ocho capítulos del amor y en la historia de Tavárez junto a su esposa, Natasha Nazario.
+**Del nuevo EP:** “Pa’ lo bonito” forma parte de “8”, el EP de ocho canciones que Tavárez lanzó a principios de septiembre. El proyecto está inspirado en ocho capítulos del amor y en la historia del artista junto a su esposa, Natasha Nazario.
+
+Es uno de los temas más personales del disco. La letra celebra a las personas y los momentos que hacen que la vida valga la pena, y muestra la incursión del cantante en la salsa.
 
 En “8”, el artista combina reguetón, salsa, cumbia y afrobeat, una muestra de cómo sigue ampliando su sonido sin perder sus raíces puertorriqueñas.
+
+Con la presentación, Tavárez llevó un sonido marcadamente latino a uno de los escenarios deportivos más importantes de Miami.

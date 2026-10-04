@@ -19,6 +19,10 @@ La oferta incluye 31 grados asociados, cerca de 196 cursos cortos y 32 certifica
 
 **Las áreas disponibles** incluyen tecnología, salud, construcción, ingeniería, energía renovable, agricultura, emprendimiento, educación, idiomas, manufactura, ciberseguridad, inteligencia artificial, soldadura, manejo de drones y diseño.
 
-“Con UPR Técnica hacemos más accesible una oferta educativa con un enorme potencial para abrir nuevas oportunidades”, dijo la presidenta de la UPR, Zayira Jordán Conde.
+“Con UPR Técnica hacemos más accesible una oferta educativa con un enorme potencial para abrir nuevas oportunidades”, dijo la presidenta de la UPR, Zayira Jordán Conde. Según explicó, la universidad no solo forma profesionales con sus grados tradicionales, sino que también puede responder a quienes quieren aprender una destreza, actualizarse, emprender o prepararse para un nuevo empleo.
+
+**Quién la dirige:** la iniciativa está a cargo de la Vicepresidencia de Programas Profesionales y a Distancia. La plataforma agrupa programas que antes cada recinto promocionaba por su cuenta.
+
+“Queremos que cada persona pueda identificar fácilmente la opción que responda a sus intereses y conectarse directamente con el recinto o unidad que la ofrece”, dijo la vicepresidenta Edna Chaar Santana.
 
 Los interesados pueden ver los ofrecimientos, saber qué recinto los ofrece y pedir orientación para matricularse en tecnica.upr.edu.

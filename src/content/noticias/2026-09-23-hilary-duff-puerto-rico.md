@@ -19,4 +19,8 @@ Será su segunda presentación en la isla. La primera fue en 2005.
 
 La extensión de la gira comenzará el 7 de mayo de 2027 y pasará por Berlín, París, Ámsterdam, Copenhague, Estocolmo, San Juan, São Paulo, Buenos Aires y Santiago, antes de cerrar el 20 de noviembre de 2027 en Anaheim, California.
 
+**La gira hasta ahora:** tras 18 años sin girar, Duff ha llevado el “Lucky Me Tour” a Estados Unidos, Canadá, México, el Reino Unido, Irlanda, Australia y Nueva Zelanda. Agotó conciertos en el O2 Arena de Londres, el Madison Square Garden de Nueva York y el Kia Forum de Los Ángeles. Sus fechas de septiembre en Londres, Glasgow y Manchester también se vendieron por completo.
+
+Su nuevo álbum, *Luck… or something*, es el sexto de su carrera y el primero desde *Breathe In. Breathe Out.* (2015). Debutó entre los cinco primeros lugares en seis países, entre ellos Canadá y Australia.
+
 Duff se dio a conocer en Disney Channel a principios de los 2000, con “Lizzie McGuire” y la canción “What Dreams Are Made Of”. Su carrera musical despegó en 2003 con el álbum “Metamorphosis”, que incluyó éxitos como “So Yesterday” y “Come Clean”.

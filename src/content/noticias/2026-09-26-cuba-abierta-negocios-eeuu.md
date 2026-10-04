@@ -13,10 +13,14 @@ sources:
     url: "https://noticel.com/noticias/20260926/cuba-dice-que-esta-abierta-a-relaciones-comerciales-y-de-negocios-con-companias-de-ee-uu/"
 ---
 
-El canciller cubano, Bruno Rodríguez, aseguró ante la Asamblea General de la ONU que el gobierno de la isla está abierto a “relaciones comerciales y de negocios con las compañías estadounidenses”.
+El canciller cubano, Bruno Rodríguez, aseguró ante la Asamblea General de la ONU que el gobierno de la isla está abierto a “relaciones comerciales y de negocios con las compañías estadounidenses como lo estamos con cualquier otro país”.
 
 Rodríguez mencionó las 176 reformas económicas aprobadas en junio, que buscan liberalizar y descentralizar la economía cubana. Sin embargo, aclaró que son medidas para “persistir en la construcción del socialismo”.
 
 El canciller dijo que La Habana sigue dispuesta al diálogo con Washington, pero puso condiciones: “seriedad, respeto, igualdad soberana” y “sin injerencia en los asuntos internos, ni precondiciones”.
 
-En el mismo discurso criticó con dureza al gobierno del presidente Donald Trump, al que acusó de mantener una política hostil contra la isla, incluido un bloqueo petrolero.
+En el mismo discurso criticó con dureza al gobierno del presidente Donald Trump, al que acusó de mantener una “hostilidad permanente, abusiva y despiadada” contra la isla.
+
+**El bloqueo petrolero:** Rodríguez dijo que desde enero EE.UU. prohíbe a todos los países exportar combustible a Cuba, lo que comparó con un bloqueo naval. La medida ha empeorado la crisis energética que la isla sufre desde 2024, también por causas internas, con apagones diarios de más de 20 horas seguidas, según la agencia EFE.
+
+El canciller también acusó a Washington de presionar a otros gobiernos de la región para que dejen de contratar médicos cubanos. Honduras, Guatemala, Jamaica y Antigua y Barbuda, entre otros, han suspendido esa cooperación.

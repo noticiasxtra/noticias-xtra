@@ -15,8 +15,12 @@ sources:
 
 Dalvin “La Melodía” da el próximo paso. Luego de llenar seis funciones en el Coca-Cola Music Hall, el artista llevará su espectáculo “La otra” al Coliseo de Puerto Rico José Miguel Agrelot el 16 de enero de 2027.
 
-Así lo anunciaron los productores Vitico Roque, de Plug & Play Entertainment, y Rolando Santa, de CHAD Events. Los boletos se venden a través de Ticketera desde el 23 de septiembre.
+Así lo anunciaron los productores Vitico Roque, de Plug & Play Entertainment, y Rolando Santa, de CHAD Events. Los boletos se venden a través de Ticketera desde el 23 de septiembre a las 10:00 a.m.
 
-Según los productores, Dalvin es el primer artista en lograr seis funciones completamente vendidas desde que abrió el Coca-Cola Music Hall. El cantante dominicano tiene apenas 23 años y lo logró en su primera serie de conciertos en Puerto Rico.
+Según los productores, Dalvin es el primer artista en lograr seis funciones completamente vendidas desde que abrió el Coca-Cola Music Hall. El cantante dominicano tiene apenas 23 años y lo logró en su primera serie de conciertos en Puerto Rico. Al cierre de la serie, el Music Hall le entregó una placa y sus botellas personalizadas como reconocimiento.
 
-“Lo que acaba de ocurrir con Dalvin es histórico”, expresó Roque. Santa añadió que la respuesta del público los convenció de que “había llegado el momento de pensar en grande”.
+“Lo que acaba de ocurrir con Dalvin es histórico. No estamos hablando solamente de seis funciones vendidas; estamos hablando de un récord que ningún otro artista había alcanzado en el Coca-Cola Music Hall”, expresó Roque.
+
+Santa explicó que la decisión de mudarse a un escenario más grande salió de la respuesta del público, que los convenció de que “había llegado el momento de pensar en grande”.
+
+Dalvin es conocido por temas como “Chiquilla bonita”, “Mi reina”, “Ya me enteré”, “Tesoro perdido”, “Amnesia”, “Alma rota” y “Duele”.

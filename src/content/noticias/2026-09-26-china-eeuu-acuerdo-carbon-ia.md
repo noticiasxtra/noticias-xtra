@@ -19,7 +19,13 @@ China y Estados Unidos llegaron a varios acuerdos durante la visita de Estado de
 
 - Un “Diálogo EE.UU.-China sobre Superinteligencia”, cuyo próximo encuentro será en noviembre de 2026.
 - Un canal de comunicación directo para incidentes relacionados con esa tecnología.
-- Recomendaciones para dar un trato arancelario más favorable a unos $30,000 millones en bienes no sensibles en cada dirección.
-- La compra de carbón estadounidense por parte de China.
+- Recomendaciones para dar un trato arancelario más favorable a unos $30,000 millones en bienes no sensibles en cada dirección. Del lado estadounidense hay productos agrícolas, madera y cosméticos; del chino, electrodomésticos y juguetes.
+- La compra de al menos 10 millones de toneladas métricas de carbón estadounidense por parte de China en 2027, y otra vez en 2028.
+
+Los dos países también pusieron en marcha los consejos de Comercio y de Inversión EE.UU.-China, creados durante la visita de Trump a Pekín en mayo.
 
 Los dos líderes mostraron visiones distintas sobre la IA. Trump ha dicho que la tecnología debe “dejarse tal y como está”, mientras Xi pidió garantizar que “permanezca bajo control humano y beneficie a la población”.
+
+**Lo que sigue pendiente:** según el comunicado, ambas partes “seguirán trabajando” en las preocupaciones de EE.UU. sobre las exportaciones chinas de tierras raras y minerales críticos. Washington también pidió a Pekín seguir combatiendo los químicos que se usan para fabricar fentanilo. El documento no menciona a Taiwán.
+
+La visita terminó, además, con la extensión hasta enero de la tregua en los aranceles entre los dos países.

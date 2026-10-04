@@ -17,6 +17,8 @@ Orgullo colegial. La Centenaria Banda Colegial y sus Abanderadas, del Recinto Un
 
 Será la segunda vez que marchen en el famoso desfile. La primera fue el 1 de enero de 2020, cuando se convirtieron en la primera banda universitaria puertorriqueña en participar.
 
-La noticia se anunció durante la celebración del aniversario 115 del Colegio, fundado el 23 de septiembre de 1911. La banda, fundada en 1914, también es la banda oficial de las justas de la Liga Atlética Interuniversitaria.
+La noticia se anunció durante la celebración del aniversario 115 del Colegio, fundado el 23 de septiembre de 1911. La banda, fundada en 1914, suma 112 años acompañando graduaciones, aniversarios y otros momentos importantes del recinto. También es la banda oficial de las justas de la Liga Atlética Interuniversitaria.
 
-“Detrás de este logro hay años de disciplina, sacrificio y trabajo en equipo de cientos de estudiantes”, dijo el profesor Lester Pérez Flores, director de la banda. El rector del RUM, el doctor Miguel A. Muñoz, afirmó que la selección demuestra que “la huella del Colegio trasciende las fronteras de Puerto Rico”.
+“Recibir esta invitación por segunda ocasión es un honor extraordinario para nuestra agrupación”, dijo el profesor Lester Pérez Flores, director de la banda. “Detrás de este logro hay años de disciplina, sacrificio y trabajo en equipo de cientos de estudiantes que dedican incontables horas a perfeccionar su ejecución musical y su desempeño en marcha”.
+
+El rector del RUM, el doctor Miguel A. Muñoz, afirmó que la selección reafirma el compromiso del recinto con la excelencia y demuestra que “la huella del Colegio trasciende las fronteras de Puerto Rico”.
