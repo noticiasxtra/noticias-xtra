@@ -139,7 +139,7 @@ const BADGES = [
   </main>
   <script>
     import { ask } from '../lib/dialogs';
-    import { getRep, levelOf as repLevel, needs, specialsOf, LEVELS } from '../lib/reputation';
+    import { getRep, levelOf as repLevel, needs, specialsOf, syncRep, LEVELS } from '../lib/reputation';
     import { getPoints, levelOf as ptsLevel, streakOf } from '../lib/points';
     import { getNotifs, markRead, getPrefs, setPrefs, ago, type NotifKind } from '../lib/notifications';
     import { renderNotifs } from '../lib/notif-view';
@@ -207,7 +207,8 @@ const BADGES = [
       login.querySelectorAll<HTMLElement>('label[for="pf-name"], #pf-name, .pf-colors').forEach((e) => (e.hidden = true));
       login.querySelector<HTMLButtonElement>('button[type="submit"]')!.textContent = 'Entrar o crear cuenta';
       $('[data-logout]').textContent = 'Salir de mi cuenta';
-      addEventListener('nx-account', () => render());
+      addEventListener('nx-account', () => { render(); void syncRep().then(() => render()); });
+      if (loggedIn()) void syncRep().then(() => render()); // reputation counted by the server
       addEventListener('nx-profile-change', () => { if (!rendering) render(); });
     }
     let rendering = false;

@@ -110,7 +110,7 @@ const STICKER_IMGS = [['wepa', '¡Wepa!'], ['coqui', 'Coquí'], ['bandera', 'Ban
 </section>
 
 <script>
-  import { addComment, removeComment, getRep, levelOf, needs, specialsOf, RULES, SPECIALS } from '../lib/reputation';
+  import { addComment, removeComment, getRep, levelOf, needs, specialsOf, syncRep, repsOf, RULES, SPECIALS, type Rep } from '../lib/reputation';
   import { notify } from '../lib/notifications';
   import { accountsOn, loggedIn, askLogin, api, myId, uploadCommentPhoto } from '../lib/account';
   import { assess, judgeReport, getReports, saveReports, upsertReport, isHidden, myReports, saveMyReports, isWeakReporter, REPORT_REASONS, type Report } from '../lib/moderation';
@@ -431,7 +431,23 @@ const STICKER_IMGS = [['wepa', '¡Wepa!'], ['coqui', 'Coquí'], ['bandera', 'Ban
     // Real mode: no examples, no "preview" labels; the reputation panel comes back with accounts' points (phase 2)
     list.replaceChildren();
     root.querySelector('.cm-head .sp-demo')?.remove();
-    root.querySelector<HTMLElement>('[data-cm-rep]')!.hidden = true;
+    // "Tu nivel": counted by the server from real comments and likes (shown when logged in)
+    const repBox = root.querySelector<HTMLElement>('[data-cm-rep]')!;
+    root.querySelector('.cm-rep-demo')?.remove();
+    const BADGES: Record<string, string> = JSON.parse(root.dataset.badges || '{}');
+    let reps: Record<string, Rep> = {};
+    const paintRep = () => {
+      repBox.hidden = !loggedIn(); if (!loggedIn()) return;
+      const r = getRep(); const lv = levelOf(r);
+      root.querySelector('[data-rep-level]')!.textContent = lv.name;
+      root.querySelector('[data-rep-pts]')!.textContent = r.points.toLocaleString('es-PR');
+      root.querySelector('[data-rep-next]')!.textContent = lv.next ? `Para llegar a ${lv.next.name} necesitas:` : '¡Eres Diamante! Mantén cero reportes para conservarlo.';
+      root.querySelector('[data-rep-needs]')!.innerHTML = lv.next ? needs(r, lv.next).map((n) => `<li class="${n.have >= n.need ? 'ok' : ''}"><span>${n.have >= n.need ? '✓' : '○'} ${n.label}</span><b>${Math.min(n.have, n.need).toLocaleString('es-PR')}/${n.need.toLocaleString('es-PR')}</b></li>`).join('') : '';
+      const got = specialsOf(r);
+      root.querySelectorAll<HTMLElement>('[data-special]').forEach((li) => li.classList.toggle('won', !!got[li.dataset.special!]));
+    };
+    addEventListener('nx-rep', paintRep);
+    const refreshRep = () => { if (loggedIn()) void syncRep().then(paintRep); else paintRep(); };
     const note = root.querySelector<HTMLElement>('.cm-note')!;
     const pk = setupPicker(root);
     let rows: Row[] = [], liked = new Set<string>(), reported = new Set<string>(), parentId: string | null = null, warned = '';
@@ -478,6 +494,9 @@ const STICKER_IMGS = [['wepa', '¡Wepa!'], ['coqui', 'Coquí'], ['bandera', 'Ban
         }
       } else { liked = new Set(); reported = new Set(); }
       render();
+      // Level badges next to each commenter's name (counted by the server)
+      reps = await repsOf([...new Set(rows.map((x) => x.user_id))]);
+      render();
     }
 
     function item(c: Row): HTMLLIElement {
@@ -488,6 +507,8 @@ const STICKER_IMGS = [['wepa', '¡Wepa!'], ['coqui', 'Coquí'], ['bandera', 'Ban
       li.innerHTML = `<span class="cm-av" aria-hidden="true"></span><div class="cm-body"><p><b></b> <span class="cm-text"></span></p><div class="cm-meta"><span></span><span data-likes-label></span><button type="button" data-reply>Responder</button>${mine ? '<button type="button" data-del>Borrar</button>' : `<button type="button" data-report${reported.has(c.id) ? ' disabled' : ''}>${reported.has(c.id) ? 'Reportado' : 'Reportar'}</button>`}</div></div><button type="button" class="cm-like" data-like aria-pressed="${liked.has(c.id)}" aria-label="Me gusta">${HEART}<span class="cm-like-n" data-like-n></span></button>`;
       avatar(li.querySelector<HTMLElement>('.cm-av')!, name, c.author?.photo);
       li.querySelector('b')!.textContent = name;
+      const lv = reps[c.user_id] ? levelOf(reps[c.user_id]) : null;
+      if (lv && lv.index > 0) { const bd = document.createElement('span'); bd.className = `cm-badge cm-b-${lv.id}`; bd.title = lv.name; bd.innerHTML = `${BADGES[lv.id] ?? ''} `; bd.append(lv.name); li.querySelector('b')!.after(' ', bd); }
       fillText(li.querySelector('.cm-text')!, c.body);
       if (c.media) { const im = document.createElement('img'); im.className = `cm-media${c.media.kind === 'photo' ? ' photo' : ''}`; im.src = c.media.src; im.alt = c.media.kind === 'gif' ? 'GIF' : c.media.kind === 'photo' ? 'Foto del comentario' : 'Sticker'; im.loading = 'lazy'; li.querySelector('.cm-body p')!.after(im); }
       li.querySelector('.cm-meta span')!.textContent = ago(Date.parse(c.created_at));
@@ -601,10 +622,10 @@ const STICKER_IMGS = [['wepa', '¡Wepa!'], ['coqui', 'Coquí'], ['bandera', 'Ban
       if (parentId) threads.add(parentId); // show the thread with the new reply
       warned = ''; ta.value = ''; ta.style.height = 'auto'; setReply(null); pk.setMedia(undefined); pk.close();
       if (chk.verdict === 'review') { err.textContent = 'Publicado. La redacción lo revisará antes de que otros lo vean.'; err.hidden = false; }
-      await load();
+      await load(); refreshRep();
     });
-    addEventListener('nx-account', () => { paintMe(); void load(); });
+    addEventListener('nx-account', () => { paintMe(); void load(); refreshRep(); });
     addEventListener('nx-profile-change', paintMe);
-    paintMe(); void load();
+    paintMe(); void load(); refreshRep();
   }
 </script>

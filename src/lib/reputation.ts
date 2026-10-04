@@ -2,8 +2,9 @@
 //  - only comments with real text count (40+ characters, stickers/short replies don't), and only 5 a day
 //  - likes from OTHER readers count most; an editor's "Destacado" counts a lot; reports cost points
 //  - each level needs points AND time AND likes; Top comentarista also needs no reports in 90 days
-// DEMO: until accounts exist this is kept in the reader's browser (localStorage 'nx-rep'), so likes from others and
-// editor picks can't arrive yet; the rules below are the ones the real version will use.
+// With reader accounts (Supabase) the server counts it from real comments and likes (reputation() in
+// supabase/connect-all.sql, same rules) and syncRep() mirrors it in 'nx-rep'; without accounts it's a preview
+// kept in this browser.
 
 export type Rep = {
   points: number;
@@ -122,3 +123,25 @@ export function specialsOf(r: Rep): Record<string, boolean> {
     limpio: !!first && Date.now() - first >= 90 * 864e5 && cleanFor(r, 90),
   };
 }
+
+// ---- Server reputation (reader accounts) ----
+import { accountsOn, loggedIn, api, myId } from './account';
+const toRep = (j: any): Rep => ({ ...empty(), points: j.points ?? 0, comments: j.comments ?? 0, likes: j.likes ?? 0, featured: j.featured ?? 0, days: j.days ?? [], reports: j.reports ?? [] });
+/** Brings the logged-in reader's reputation from the server and keeps it in 'nx-rep' (for the panels and badges). */
+export async function syncRep(): Promise<Rep | null> {
+  if (!accountsOn() || !loggedIn()) return null;
+  const r = await api('rpc/reputation', { method: 'POST', body: JSON.stringify({ uid: myId() }) });
+  if (!r?.ok) return null;
+  const rep = toRep(await r.json());
+  save(rep);
+  return rep;
+}
+/** Reputation of several readers at once (the badges next to their names). */
+export async function repsOf(ids: string[]): Promise<Record<string, Rep>> {
+  if (!ids.length) return {};
+  const r = await api('rpc/reputations', { method: 'POST', body: JSON.stringify({ uids: ids }) }, false);
+  if (!r?.ok) return {};
+  return Object.fromEntries((await r.json()).map((x: { user_id: string; rep: unknown }) => [x.user_id, toRep(x.rep)]));
+}
+/** True when the server keeps the reputation (accounts on): the device no longer adds or removes points itself. */
+export const serverRep = () => accountsOn();
