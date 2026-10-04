@@ -32,7 +32,7 @@ export const SITE = {
   },
   // Google Analytics 4 Measurement ID (looks like G-XXXXXXXXXX; public, safe to keep here). Empty = no visitor counting.
   // Counts visits on noticiasxtra.com only (not localhost, not the staff panel); privacidad.astro describes it.
-  gaId: '',
+  gaId: 'G-B7RTCH8ZQR',
   // GIPHY key for GIF search in comments (free account at developers.giphy.com). Empty = only our own animated GIFs Xtra.
   giphyKey: '',
   // Set to true once the ANTHROPIC_API_KEY secret is added in GitHub (the staff panel's Salud tab reads it)
