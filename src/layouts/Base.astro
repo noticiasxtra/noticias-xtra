@@ -188,6 +188,10 @@ const TABS = [
       // Phones: the section menu scrolls sideways. Keep it where the reader left it when they open another section,
       // and make sure the current section is in view (runs right away so the menu doesn't jump).
       (function () {
+        // Pinned header height, for everything that sticks under it (section menu, panel side menu and tabs)
+        var head = document.querySelector('.masthead');
+        var setMh = function () { if (head) document.documentElement.style.setProperty('--mh-h', head.offsetHeight + 'px'); };
+        setMh(); addEventListener('resize', setMh);
         var bar = document.querySelector('.nav .wrap');
         if (!bar) return;
         try { var x = sessionStorage.getItem('nx-nav-x'); if (x) bar.scrollLeft = +x; } catch (e) { /* storage blocked */ }
