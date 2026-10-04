@@ -5,6 +5,10 @@ section: deportes
 league: bsn
 place: "Mayagüez"
 date: 2026-09-25T14:08:00-04:00
+image: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/Palacio_de_Recreaci%C3%B3n_y_Deportes.jpg/1280px-Palacio_de_Recreaci%C3%B3n_y_Deportes.jpg"
+imageCaption: "El Palacio de Recreación y Deportes de Mayagüez, casa de los Indios."
+imageCredit: "Foto: Rody PR, CC BY-SA 4.0, vía Wikimedia Commons"
+imageCreditUrl: "https://commons.wikimedia.org/wiki/File:Palacio_de_Recreaci%C3%B3n_y_Deportes.jpg"
 sources:
   - name: "Baloncesto Superior Nacional (BSN)"
     url: "https://www.bsnpr.com/noticias/la-junta-de-gobierno-del-bsn-no-aprueba-la-mudanza-de-la-franquicia-de-los-indios-de-mayaguez-a-isabela"

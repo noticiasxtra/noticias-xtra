@@ -5,6 +5,10 @@ section: deportes
 league: mlb
 place: "Nueva York"
 date: 2026-10-02T09:00:00-04:00
+image: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Cleveland_Guardians_vs._Milwaukee_Brewers_August_2024_01_%28American_Family_Field%29.jpg/1280px-Cleveland_Guardians_vs._Milwaukee_Brewers_August_2024_01_%28American_Family_Field%29.jpg"
+imageCaption: "El American Family Field, casa de los Cerveceros de Milwaukee, el equipo con el mejor récord de las Mayores."
+imageCredit: "Foto: Michael Barera, CC BY-SA 4.0, vía Wikimedia Commons"
+imageCreditUrl: "https://commons.wikimedia.org/wiki/File:Cleveland_Guardians_vs._Milwaukee_Brewers_August_2024_01_(American_Family_Field).jpg"
 sources:
   - name: "MLB.com"
     url: "https://www.mlb.com/postseason"

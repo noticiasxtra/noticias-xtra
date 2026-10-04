@@ -4,6 +4,10 @@ description: "Las asociaciones del programa apoyan reducir la burocracia, pero p
 section: estados-unidos
 place: "San Juan"
 date: 2026-09-24T13:00:00-04:00
+image: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/YR_Ranger_John_with_Head_Start_%2826680244145%29.jpg/1280px-YR_Ranger_John_with_Head_Start_%2826680244145%29.jpg"
+imageCaption: "Niños de un programa Head Start en una actividad educativa, en una foto de archivo."
+imageCredit: "Foto: Virginia State Parks, CC BY 2.0, vía Wikimedia Commons"
+imageCreditUrl: "https://commons.wikimedia.org/wiki/File:YR_Ranger_John_with_Head_Start_(26680244145).jpg"
 sources:
   - name: "NotiCel"
     url: "https://noticel.com/noticias/20260924/advierten-que-cambios-federales-podrian-afectar-servicios-a-mas-de-21000-ninos-de-head-start-en-puerto-rico/"

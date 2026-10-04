@@ -4,6 +4,10 @@ description: "La Comisión Estatal de Elecciones certificó el resultado de la e
 section: politica
 place: "Cataño"
 date: 2026-09-28T15:30:00-04:00
+image: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Cata%C3%B1o_Ferry_Terminal.jpg/1280px-Cata%C3%B1o_Ferry_Terminal.jpg"
+imageCaption: "El terminal de la lancha de Cataño, en una foto de archivo."
+imageCredit: "Foto: Moebiusuibeom-en, CC BY-SA 4.0, vía Wikimedia Commons"
+imageCreditUrl: "https://commons.wikimedia.org/wiki/File:Cata%C3%B1o_Ferry_Terminal.jpg"
 sources:
   - name: "NotiCel"
     url: "https://noticel.com/ultima-hora/20260928/torres-montalvo-supero-a-bethzaida-rodriguez-por-246-votos/"

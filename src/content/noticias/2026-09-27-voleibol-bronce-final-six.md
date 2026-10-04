@@ -5,6 +5,10 @@ section: deportes
 league: lvsf
 place: "Zinacantepec, México"
 date: 2026-09-27T20:00:00-04:00
+image: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/BRA_x_PUR.jpg/1280px-BRA_x_PUR.jpg"
+imageCaption: "La selección femenina de voleibol de Puerto Rico ante Brasil, en el Grand Prix de 2009."
+imageCredit: "Foto: Rcandre, dominio público, vía Wikimedia Commons"
+imageCreditUrl: "https://commons.wikimedia.org/wiki/File:BRA_x_PUR.jpg"
 sources:
   - name: "Federación Puertorriqueña de Voleibol"
     url: "https://fedpurvoli.com/2026/09/27/puerto-rico-se-cuelga-el-bronce-en-el-final-six-femenino-con-dominio-sobre-cuba/"

@@ -4,6 +4,10 @@ description: "Durante la visita de Xi Jinping a Washington, los dos países pact
 section: mundo
 place: "Washington"
 date: 2026-09-26T16:00:00-04:00
+image: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Xi_Jinping_in_the_Oval_Office_-_2026.jpg/1280px-Xi_Jinping_in_the_Oval_Office_-_2026.jpg"
+imageCaption: "El presidente Donald Trump recibe a Xi Jinping en la Oficina Oval, el 24 de septiembre."
+imageCredit: "Foto: Margo Martin, dominio público, vía Wikimedia Commons"
+imageCreditUrl: "https://commons.wikimedia.org/wiki/File:Xi_Jinping_in_the_Oval_Office_-_2026.jpg"
 sources:
   - name: "NotiCel (EFE)"
     url: "https://noticel.com/noticias/20260926/china-y-eeuu-alcanzan-acuerdo-sobre-carbon-y-establecen-canal-de-dialogo-sobre-ia/"

@@ -4,6 +4,10 @@ description: "Tras ser, según sus productores, el primer artista en vender seis
 section: entretenimiento
 place: "San Juan"
 date: 2026-09-22T09:22:00-04:00
+image: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Coliseum_of_PR.JPG/1280px-Coliseum_of_PR.JPG"
+imageCaption: "El Coliseo de Puerto Rico José Miguel Agrelot, en Hato Rey."
+imageCredit: "Foto: Mtmelendez, CC BY-SA 3.0, vía Wikimedia Commons"
+imageCreditUrl: "https://commons.wikimedia.org/wiki/File:Coliseum_of_PR.JPG"
 sources:
   - name: "NotiCel"
     url: "https://noticel.com/entretenimiento/20260922/dalvin-la-melodia-va-pal-choli-tras-hacer-historia-con-seis-funciones-sold-out/"

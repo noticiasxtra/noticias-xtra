@@ -4,6 +4,10 @@ description: "El ponceño repasará sus 10 años de música en “Mucho Gusto”
 section: entretenimiento
 place: "San Juan"
 date: 2026-09-28T10:00:00-04:00
+image: "https://upload.wikimedia.org/wikipedia/commons/2/2b/DistritoTMobile.jpg"
+imageCaption: "El Distrito T-Mobile, donde está el Coca-Cola Music Hall, en San Juan."
+imageCredit: "Foto: Ligocsicnarf89, CC BY-SA 4.0, vía Wikimedia Commons"
+imageCreditUrl: "https://commons.wikimedia.org/wiki/File:DistritoTMobile.jpg"
 sources:
   - name: "NotiCel"
     url: "https://noticel.com/entretenimiento/20260928/pj-sin-suela-se-estrena-en-un-teatro-con-un-show-para-dejarse-ir/"

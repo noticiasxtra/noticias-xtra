@@ -4,6 +4,10 @@ description: "Las fuerzas que llegaron en 2014 para combatir al Estado Islámico
 section: mundo
 place: "Bagdad"
 date: 2026-09-30T10:00:00-04:00
+image: "https://upload.wikimedia.org/wikipedia/commons/4/42/Baghdad_Green_Zone.jpg"
+imageCaption: "La Zona Verde de Bagdad, en una foto de archivo."
+imageCredit: "Foto: Robert Smith, dominio público, vía Wikimedia Commons"
+imageCreditUrl: "https://commons.wikimedia.org/wiki/File:Baghdad_Green_Zone.jpg"
 sources:
   - name: "NotiCel (EFE)"
     url: "https://noticel.com/noticias/20260930/los-iraquies-celebran-la-salida-de-tropas-de-ee-uu/"

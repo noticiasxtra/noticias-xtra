@@ -4,6 +4,10 @@ description: "La banda del Recinto Universitario de Mayagüez volverá a represe
 section: entretenimiento
 place: "Mayagüez"
 date: 2026-09-23T07:51:00-04:00
+image: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/Pasadena_City_College_Tournament_of_Roses_Honor_Band_%2831748114133%29.jpg/1280px-Pasadena_City_College_Tournament_of_Roses_Honor_Band_%2831748114133%29.jpg"
+imageCaption: "Una banda desfila en el Desfile de las Rosas de Pasadena, en 2017."
+imageCredit: "Foto: Prayitno, CC BY 2.0, vía Wikimedia Commons"
+imageCreditUrl: "https://commons.wikimedia.org/wiki/File:Pasadena_City_College_Tournament_of_Roses_Honor_Band_(31748114133).jpg"
 sources:
   - name: "NotiCel"
     url: "https://noticel.com/entretenimiento/20260923/la-centenaria-banda-colegial-regresara-al-desfile-de-las-rosas-de-pasadena-en-2028/"

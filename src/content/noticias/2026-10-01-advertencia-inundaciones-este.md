@@ -4,6 +4,10 @@ description: "El Servicio Nacional de Meteorología detectó hasta 2 pulgadas de
 section: clima
 place: "Humacao"
 date: 2026-10-01T17:20:00-04:00
+image: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Humacao_-_Rio_Anton_Ruiz.jpg/1280px-Humacao_-_Rio_Anton_Ruiz.jpg"
+imageCaption: "El río Antón Ruiz, en Humacao, en una foto de archivo."
+imageCredit: "Foto: P. Hughes, CC BY-SA 4.0, vía Wikimedia Commons"
+imageCreditUrl: "https://commons.wikimedia.org/wiki/File:Humacao_-_Rio_Anton_Ruiz.jpg"
 sources:
   - name: "NotiCel"
     url: "https://noticel.com/noticias/20261001/tres-municipios-del-este-bajo-advertencia-de-inundaciones/"

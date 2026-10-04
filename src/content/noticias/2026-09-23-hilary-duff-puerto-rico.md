@@ -4,6 +4,10 @@ description: "Será su segunda presentación en la isla, 22 años después de la
 section: entretenimiento
 place: "San Juan"
 date: 2026-09-23T15:01:00-04:00
+image: "https://upload.wikimedia.org/wikipedia/commons/1/1b/Hilary_Duff_%2835661671285%29_%28cropped%29.jpg"
+imageCaption: "Hilary Duff, en una foto de 2017."
+imageCredit: "Foto: greg2600 (Flickr), CC BY-SA 2.0, vía Wikimedia Commons"
+imageCreditUrl: "https://commons.wikimedia.org/wiki/File:Hilary_Duff_(35661671285)_(cropped).jpg"
 sources:
   - name: "NotiCel"
     url: "https://noticel.com/entretenimiento/20260923/hilary-duff-se-presentara-en-la-isla-en-agosto-del-ano-que-viene/"

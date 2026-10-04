@@ -5,6 +5,10 @@ section: deportes
 league: mlb
 place: "Atlanta"
 date: 2026-10-01T22:30:00-04:00
+image: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Truist_Park_2025.jpg/1280px-Truist_Park_2025.jpg"
+imageCaption: "El Truist Park, casa de los Bravos de Atlanta, en 2025."
+imageCredit: "Foto: TarheelBornBred, CC0, vía Wikimedia Commons"
+imageCreditUrl: "https://commons.wikimedia.org/wiki/File:Truist_Park_2025.jpg"
 sources:
   - name: "MLB.com"
     url: "https://www.mlb.com/postseason"

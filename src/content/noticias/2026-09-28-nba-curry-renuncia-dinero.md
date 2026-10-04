@@ -5,6 +5,10 @@ section: deportes
 league: nba
 place: "San Francisco"
 date: 2026-09-28T19:00:00-04:00
+image: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Stephen_Curry_Talks_to_Reporters.jpg/1280px-Stephen_Curry_Talks_to_Reporters.jpg"
+imageCaption: "Stephen Curry habla con la prensa, en una foto de archivo."
+imageCredit: "Foto: Cyrus Saatsaz, CC BY-SA 4.0, vía Wikimedia Commons"
+imageCreditUrl: "https://commons.wikimedia.org/wiki/File:Stephen_Curry_Talks_to_Reporters.jpg"
 sources:
   - name: "NotiCel (EFE)"
     url: "https://noticel.com/deportes/20260928/steph-curry-confirma-que-renuncio-a-dinero-para-ayudar-a-los-warriors/"

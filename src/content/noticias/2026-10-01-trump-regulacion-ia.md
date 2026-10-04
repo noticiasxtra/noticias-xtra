@@ -4,6 +4,10 @@ description: "El presidente prefiere que las empresas se controlen a sí mismas.
 section: estados-unidos
 place: "Washington"
 date: 2026-10-01T11:30:00-04:00
+image: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/President_Trump_signs_the_Executive_Order_on_%E2%80%9CMaintaining_American_Leadership_in_Artificial_Intelligence%E2%80%9D_%2832123469237%29.jpg/1280px-President_Trump_signs_the_Executive_Order_on_%E2%80%9CMaintaining_American_Leadership_in_Artificial_Intelligence%E2%80%9D_%2832123469237%29.jpg"
+imageCaption: "El presidente Donald Trump firma en 2019 una orden ejecutiva sobre el liderato de EE.UU. en inteligencia artificial."
+imageCredit: "Foto: Casa Blanca, dominio público, vía Wikimedia Commons"
+imageCreditUrl: "https://commons.wikimedia.org/wiki/File:President_Trump_signs_the_Executive_Order_on_%E2%80%9CMaintaining_American_Leadership_in_Artificial_Intelligence%E2%80%9D_(32123469237).jpg"
 sources:
   - name: "NotiCel (EFE)"
     url: "https://noticel.com/noticias/20261001/trump-asegura-que-si-se-regula-la-inteligencia-artificial-te-pueden-sacar-del-negocio/"

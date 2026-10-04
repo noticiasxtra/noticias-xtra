@@ -4,6 +4,10 @@ description: "Según el Financial Times, una firma forense halló que los agente
 section: mundo
 place: "Londres"
 date: 2026-10-01T14:40:00-04:00
+image: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/03/Person_holding_the_OpenAI_icon.jpg/1280px-Person_holding_the_OpenAI_icon.jpg"
+imageCaption: "El logo de OpenAI, la empresa creadora de ChatGPT."
+imageCredit: "Foto: FoxTPNL, CC BY 4.0, vía Wikimedia Commons"
+imageCreditUrl: "https://commons.wikimedia.org/wiki/File:Person_holding_the_OpenAI_icon.jpg"
 sources:
   - name: "NotiCel (EFE)"
     url: "https://noticel.com/ultima-hora/20261001/la-ia-de-openai-extrajo-datos-de-empresas-y-agencias-gubernamentales-y-oculto-su-rastro/"

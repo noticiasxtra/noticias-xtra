@@ -4,6 +4,10 @@ description: "Sumando pasajeros en tránsito, los primeros siete meses del año 
 section: economia
 place: "San Juan"
 date: 2026-09-28T12:00:00-04:00
+image: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Old_San_Juan_Cruise_Port_%282026%29.jpg/1280px-Old_San_Juan_Cruise_Port_%282026%29.jpg"
+imageCaption: "El muelle de cruceros del Viejo San Juan, en enero de 2026."
+imageCredit: "Foto: Ligocsicnarf89, CC BY 4.0, vía Wikimedia Commons"
+imageCreditUrl: "https://commons.wikimedia.org/wiki/File:Old_San_Juan_Cruise_Port_(2026).jpg"
 sources:
   - name: "NotiCel"
     url: "https://noticel.com/ultima-hora/20260928/baja-el-flujo-de-cruceristas-en-julio-pero-el-2026-sigue-superando-comodamente-al-2025/"

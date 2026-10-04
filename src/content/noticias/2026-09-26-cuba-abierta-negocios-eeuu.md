@@ -4,6 +4,10 @@ description: "El canciller Bruno Rodríguez habló de las 176 reformas económic
 section: mundo
 place: "Naciones Unidas, Nueva York"
 date: 2026-09-26T15:00:00-04:00
+image: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Sven_Mikser_and_Bruno_Rodr%C3%ADguez_Parrilla_09.jpg/1280px-Sven_Mikser_and_Bruno_Rodr%C3%ADguez_Parrilla_09.jpg"
+imageCaption: "El canciller cubano Bruno Rodríguez Parrilla firma un acuerdo con Estonia, en 2017."
+imageCredit: "Foto: Estonian Foreign Ministry, CC BY 2.0, vía Wikimedia Commons"
+imageCreditUrl: "https://commons.wikimedia.org/wiki/File:Sven_Mikser_and_Bruno_Rodr%C3%ADguez_Parrilla_09.jpg"
 sources:
   - name: "NotiCel (EFE)"
     url: "https://noticel.com/noticias/20260926/cuba-dice-que-esta-abierta-a-relaciones-comerciales-y-de-negocios-con-companias-de-ee-uu/"

@@ -4,6 +4,10 @@ description: "El Servicio Nacional de Meteorología prevé 60% de probabilidad d
 section: clima
 place: "San Juan"
 date: 2026-10-02T06:00:00-04:00
+image: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Rain_shaft_off_the_coast_of_Old_San_Juan%2C_PR_04.jpg/1280px-Rain_shaft_off_the_coast_of_Old_San_Juan%2C_PR_04.jpg"
+imageCaption: "Un aguacero sobre el mar frente al Viejo San Juan, en una foto de archivo."
+imageCredit: "Foto: EF5, CC0, vía Wikimedia Commons"
+imageCreditUrl: "https://commons.wikimedia.org/wiki/File:Rain_shaft_off_the_coast_of_Old_San_Juan,_PR_04.jpg"
 sources:
   - name: "Servicio Nacional de Meteorología en San Juan"
     url: "https://forecast.weather.gov/MapClick.php?lat=18.4655&lon=-66.1057"
