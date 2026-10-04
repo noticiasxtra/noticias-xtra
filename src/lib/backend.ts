@@ -127,6 +127,10 @@ export async function putArticle(id: string, status: string, doc: unknown, slug?
     return add.ok;
   } catch { lastSaveError = 'No hay conexión.'; return false; }
 }
+/** Notes a failed publish, schedule or take-down for Salud del sitio (supabase/salud.sql). Never blocks the panel. */
+export async function logPanelError(who: string, what: string, detail: string): Promise<void> {
+  await staffApi('panel_errors', { method: 'POST', body: JSON.stringify({ who: who.slice(0, 60), what: what.slice(0, 200), detail: detail.slice(0, 500) }) }).catch(() => null);
+}
 export async function deleteArticle(id: string): Promise<boolean> {
   const token = await freshToken(); if (!token) return false;
   const r = await fetch(rest(`articles?id=eq.${encodeURIComponent(id)}`), { method: 'DELETE', headers: head(token) }).catch(() => null);

@@ -212,7 +212,7 @@ const TOOLS = [
   import { embedFor } from '../../lib/embeds.mjs';
   import { docCard } from '../../lib/doccard.mjs';
   import { ask, askText } from '../../lib/dialogs';
-  import { hasBackend, listArticles, putArticle, deleteArticle, uploadStoryFile, publishArticle, lastSaveError } from '../../lib/backend';
+  import { hasBackend, listArticles, putArticle, deleteArticle, uploadStoryFile, publishArticle, lastSaveError, logPanelError } from '../../lib/backend';
   const root = document.querySelector<HTMLElement>('[data-wr]');
   if (root) {
     type Src = { name: string; url?: string };
@@ -251,7 +251,7 @@ const TOOLS = [
       if (!DB) return saveLocal(list);
       const { status, ...doc } = a;
       const ok = await putArticle(a.id, status, doc, a.slug);
-      if (!ok) toast(`No se pudo guardar en la base de datos. ${lastSaveError || 'Revisa la conexión e intenta otra vez.'}`);
+      if (!ok) { toast(`No se pudo guardar en la base de datos. ${lastSaveError || 'Revisa la conexión e intenta otra vez.'}`); void logPanelError(me()?.name ?? '', `Guardar: ${a.title || 'Sin titular'}`, lastSaveError || 'sin conexión'); }
       return ok;
     }
     async function drop(id: string): Promise<boolean> {
@@ -665,7 +665,7 @@ const TOOLS = [
       if (!DB) { toast('Vista previa: con Supabase conectado, la noticia se quita del sitio.'); return false; }
       const file = toFile(a).replace(/^draft: false$/m, 'draft: true');
       const r = await publishArticle({ id: a.id, slug: a.slug, file, title: a.title, scheduled: false });
-      if (!r.ok) { toast(`No se pudo quitar: ${r.error}`); return false; }
+      if (!r.ok) { toast(`No se pudo quitar: ${r.error}`); void logPanelError(me()?.name ?? '', `Quitar: ${a.title}`, r.error ?? ''); return false; }
       await store({ ...a, status: 'draft', updated: Date.now(), note: `Quitada del sitio el ${new Date().toLocaleDateString('es-PR', { day: 'numeric', month: 'short' })}. Corrígela y publícala otra vez si hace falta.` });
       await refresh(); renderList(); dispatchEvent(new Event('nx-articles-changed'));
       toast('Quitada. Desaparece del sitio en unos 2 minutos. Está en Escribir → Borradores.');
@@ -920,7 +920,7 @@ const TOOLS = [
       }
       toast('Publicando…');
       const r = await publishArticle({ id: a.id, slug: slug(a), file: toFile(a), title: a.title, scheduled: future });
-      if (!r.ok) { toast(`No se publicó: ${r.error}`); return false; }
+      if (!r.ok) { toast(`No se publicó: ${r.error}`); void logPanelError(me()?.name ?? '', `${future ? 'Programar' : 'Publicar'}: ${a.title || 'Sin titular'}`, r.error ?? ''); return false; }
       a.status = future ? 'scheduled' : 'published'; a.slug = r.slug; a.updated = Date.now();
       await refresh();
       const un = await unpinOthers(a);

@@ -15,6 +15,8 @@ import PhotoLibrary from '../../components/panel/PhotoLibrary.astro';
 import { getStories, url, SECTIONS, SITE } from '../../lib/site';
 import { hasBackend } from '../../lib/backend';
 import sources from '../../../scripts/sources.json';
+import { getCollection } from 'astro:content';
+import fs from 'node:fs';
 
 const stories = await getStories();
 const hasBackendBuild = hasBackend(); // Supabase connected: real accounts and team
@@ -32,6 +34,22 @@ const recent = stories.filter((s) => s.data.section !== 'opinion').slice(0, 12)
   .map((s) => ({ id: s.id, title: s.data.title, section: SECTIONS.find((x) => x.id === s.data.section)?.name ?? '', url: url(`noticia/${s.id}/`), date: s.data.date.toISOString(), author: s.data.author }));
 const srcs = (sources as Array<{ name: string; section: string; review?: string; enabled?: boolean }>).filter((s) => s.enabled !== false)
   .map((s) => ({ name: s.name, section: s.section, review: s.review ?? 'always' }));
+// Salud del sitio: stories missing something, every web photo (checked in the browser) and story files scheduled ahead
+const words = (t = '') => (t.replace(/<[^>]+>/g, ' ').match(/[\p{L}\p{N}]+/gu) || []).length;
+const isWeb = (x = '') => /^https?:/.test(x);
+const problems = stories.map((s) => {
+  const d = s.data; const p: string[] = [];
+  if (!d.image) p.push('sin foto propia');
+  else if (!isWeb(d.image) && !fs.existsSync(`public/${d.image.replace(/^\//, '')}`)) p.push('la foto no existe');
+  else if (!d.imageCredit) p.push('foto sin crédito');
+  if (d.gallery.some((g) => !g.credit)) p.push('galería sin crédito');
+  const w = words(s.body); if (w < 150) p.push(`solo ${w} palabras`);
+  if (!d.sources.length && d.section !== 'opinion') p.push('sin fuentes');
+  return p.length ? { id: s.id, title: d.title, date: d.date.toISOString(), p } : null;
+}).filter(Boolean);
+const webPhotos = stories.flatMap((s) => [s.data.image ?? '', ...s.data.gallery.map((g) => g.src)].filter(isWeb).map((src) => ({ id: s.id, title: s.data.title, src })));
+const aheadFiles = (await getCollection('noticias', ({ data }) => !data.draft && data.date.valueOf() > Date.now()))
+  .map((s) => ({ title: s.data.title, author: s.data.author, date: s.data.date.toISOString() }));
 const TABS = [
   ['inicio', 'Inicio', '<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/>'],
   ['noticias', 'Noticias', '<path d="M4 5h13v14H6a2 2 0 0 1-2-2zM17 9h3v8a2 2 0 0 1-2 2M8 9h5M8 13h5"/>'],
@@ -45,7 +63,7 @@ const TABS = [
 ];
 ---
 <Base title="Panel de la redacción" description="Panel interno de Noticias Xtra (uso del personal)." noindex staff>
-  <main class="wrap pnl" id="main" data-pnl data-secs={JSON.stringify(Object.fromEntries(SECTIONS.map((x) => [x.id, x.name])))} data-pin={JSON.stringify(pin)} data-section-pins={JSON.stringify(sectionPins)} data-recent={JSON.stringify(recent)} data-published={JSON.stringify(published.map(({ id, title, section, author, date, url }) => ({ id, title, section, author, date, url })))} data-sources={JSON.stringify(srcs)} data-base={url()} data-aikey={String(SITE.aiKeyConnected)}>
+  <main class="wrap pnl" id="main" data-pnl data-secs={JSON.stringify(Object.fromEntries(SECTIONS.map((x) => [x.id, x.name])))} data-pin={JSON.stringify(pin)} data-section-pins={JSON.stringify(sectionPins)} data-recent={JSON.stringify(recent)} data-published={JSON.stringify(published.map(({ id, title, section, author, date, url }) => ({ id, title, section, author, date, url })))} data-sources={JSON.stringify(srcs)} data-problems={JSON.stringify(problems)} data-photos={JSON.stringify(webPhotos)} data-ahead={JSON.stringify(aheadFiles)} data-base={url()} data-aikey={String(SITE.aiKeyConnected)}>
     <form class="pnl-login" data-login hidden>
       <p class="pnl-kicker">Noticias Xtra</p>
       <h1>Panel de la redacción</h1>
@@ -139,12 +157,28 @@ const TABS = [
         <!-- Salud -->
         <section class="pnl-pane" data-pane="salud" hidden>
           <h1 class="pnl-h">Salud del sitio</h1>
-          <p class="pnl-muted">Estado real, tomado de GitHub en este momento.</p>
+          <p class="pnl-muted">Estado real del sitio en este momento.</p>
           <div class="pnl-kpis" data-health></div>
           <div class="pnl-grid2">
-            <div class="pnl-card"><h2 class="pnl-h3">Cuentas y conexiones</h2><ul class="pnl-checks" data-accounts></ul></div>
-            <div class="pnl-card"><h2 class="pnl-h3">Fuentes de noticias <small data-src-n></small></h2><ul class="pnl-srcs" data-srcs></ul></div>
+            <div class="pnl-card"><h2 class="pnl-h3">¿Está todo en línea?</h2><ul class="sl-lights" data-lights></ul></div>
+            <div class="pnl-card"><h2 class="pnl-h3">Programadas <small data-sched-n></small></h2><ul class="sl-list" data-sched></ul></div>
+            <div class="pnl-card"><h2 class="pnl-h3">Comentarios y cuentas</h2><div data-sl-mod><p class="pnl-muted">Cargando…</p></div></div>
+            <div class="pnl-card"><h2 class="pnl-h3">Espacio usado <small>plan gratis de Supabase</small></h2><div data-space><p class="pnl-muted">Cargando…</p></div></div>
           </div>
+          <div class="pnl-card"><h2 class="pnl-h3">Noticias con problemas <small data-prob-n></small></h2><p class="pnl-muted pnl-small">Les falta algo: foto, crédito de la foto, texto o fuentes. Toca “Corregir” para arreglarla en Escribir.</p><ul class="sl-list" data-prob></ul><button type="button" class="pnl-link" data-prob-more hidden>Ver todas</button></div>
+          <div class="pnl-grid2">
+            <div class="pnl-card"><h2 class="pnl-h3">Fotos rotas</h2><p class="pnl-muted pnl-small" data-ph-note></p><ul class="sl-list" data-sl-ph></ul><button type="button" class="adp-btn ghost-dark" data-ph-run>Revisar las fotos</button></div>
+            <div class="pnl-card"><h2 class="pnl-h3">Errores al publicar</h2><p class="pnl-muted pnl-small">Si publicar, programar o quitar una noticia falla, queda anotado aquí.</p><ul class="sl-list" data-errs></ul><button type="button" class="pnl-link" data-errs-clear hidden>Borrar la lista</button></div>
+          </div>
+          <div class="pnl-grid2">
+            <div class="pnl-card"><h2 class="pnl-h3">Cuentas y conexiones</h2><ul class="pnl-checks" data-accounts></ul></div>
+            <div class="pnl-card"><h2 class="pnl-h3">Fuentes de noticias <small data-src-n></small></h2><ul class="pnl-srcs" data-sl-srcs></ul></div>
+          </div>
+          <div class="pnl-card"><h2 class="pnl-h3">Herramientas de Google</h2><ul class="sl-tools">
+            <li><a href="https://search.google.com/search-console" target="_blank" rel="noopener">Search Console ↗</a><small>si Google encuentra las noticias nuevas y errores</small></li>
+            <li><a href="https://pagespeed.web.dev/analysis?url=https%3A%2F%2Fnoticiasxtra.com%2F" target="_blank" rel="noopener">Velocidad (PageSpeed) ↗</a><small>mide bien después del lanzamiento: mientras haya clave de acceso, Google ve la página de la clave</small></li>
+            <li><a href="https://analytics.google.com/" target="_blank" rel="noopener">Google Analytics ↗</a><small>visitantes: cuando lo conectes, sus números salen en este panel</small></li>
+          </ul></div>
         </section>
 
         <!-- Equipo -->
@@ -171,10 +205,13 @@ const TABS = [
     import { ask, askText } from '../../lib/dialogs';
     import { getReports } from '../../lib/moderation';
     import { listRequests, loadRequests } from '../../lib/adrequests';
-    import { hasBackend, staffApi, staffLogin, staffLogout, staffProfile, syncTeam, addToTeam, removeFromTeam } from '../../lib/backend';
+    import { BACKEND, hasBackend, staffApi, staffLogin, staffLogout, staffProfile, syncTeam, addToTeam, removeFromTeam } from '../../lib/backend';
     const root = document.querySelector<HTMLElement>('[data-pnl]')!;
     const RECENT: Array<{ id: string; title: string; section: string; url: string; date: string; author: string }> = JSON.parse(root.dataset.recent!);
     const SOURCES: Array<{ name: string; section: string; review: string }> = JSON.parse(root.dataset.sources!);
+    const PROBLEMS: Array<{ id: string; title: string; date: string; p: string[] }> = JSON.parse(root.dataset.problems || '[]');
+    const PHOTOS: Array<{ id: string; title: string; src: string }> = JSON.parse(root.dataset.photos || '[]');
+    const AHEAD: Array<{ title: string; author: string; date: string }> = JSON.parse(root.dataset.ahead || '[]');
     const PIN: { title: string; date: string; url: string } | null = JSON.parse(root.dataset.pin || 'null');
     const SECTION_PINS: Array<{ section: string; title: string; url: string }> = JSON.parse(root.dataset.sectionPins || '[]');
     const $ = <T extends Element = HTMLElement>(s: string, el: ParentNode = root) => el.querySelector<T>(s)!;
@@ -268,6 +305,98 @@ const TABS = [
     }
 
     // ---------- panes ----------
+    // ---------- Salud del sitio ----------
+    const fmtDate = (d: string) => new Date(d).toLocaleString('es-PR', { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
+    const mb = (b: number) => (b >= 1e9 ? `${(b / 1e9).toFixed(2)} GB` : `${Math.max(0.1, b / 1e6).toFixed(1)} MB`);
+    /** The newest story on the site; more than 6 hours without one gets a warning. */
+    function lastStoryKpi() {
+      const now = Date.now(); const live = PUBLISHED.filter((p) => Date.parse(p.date) <= now);
+      const last = live.reduce((m, p) => Math.max(m, Date.parse(p.date)), 0);
+      if (!last) return kpi('Última noticia', 'Ninguna', '', '', 'bad');
+      const today = live.filter((p) => new Date(p.date).toDateString() === new Date().toDateString()).length;
+      const h = (now - last) / 36e5;
+      return kpi('Última noticia', ago(last), `${today} publicadas hoy${h >= 6 ? ' · ⚠ más de 6 horas sin noticias nuevas' : ''}`, '', h >= 6 ? 'warn' : 'good');
+    }
+    async function ping(u: string, init: RequestInit = {}) {
+      const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 8000);
+      try { const r = await fetch(u, { cache: 'no-store', ...init, signal: ctl.signal }); return r.ok; } catch { return false; } finally { clearTimeout(t); }
+    }
+    let photoRun: Array<{ id: string; title: string; src: string }> | null = null; let probAll = false;
+    function paintProblems() {
+      const list = PROBLEMS.slice().sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
+      $('[data-prob-n]').textContent = list.length ? `${list.length} de ${PUBLISHED.length}` : '';
+      const show = probAll ? list : list.slice(0, 8);
+      $('[data-prob]').innerHTML = show.map((x) => `<li><span><b>${esc(x.title)}</b><small>${x.p.map(esc).join(' · ')}</small></span><button type="button" class="adp-btn ghost-dark" data-fix="${esc(x.id)}">Corregir</button></li>`).join('')
+        || '<li><span>🎉 Todas las noticias tienen foto, crédito, texto y fuentes.</span></li>';
+      $('[data-prob-more]').hidden = probAll || list.length <= 8;
+    }
+    function paintPhotos() {
+      const btn = $<HTMLButtonElement>('[data-ph-run]');
+      $('[data-ph-note]').textContent = `${PHOTOS.length} fotos de otros sitios (Wikimedia, agencias, Supabase) en las noticias publicadas.`;
+      if (!photoRun) { $('[data-sl-ph]').innerHTML = ''; return; }
+      btn.textContent = 'Revisar otra vez';
+      $('[data-sl-ph]').innerHTML = photoRun.map((x) => `<li><span><b>${esc(x.title)}</b><small><a href="${esc(x.src)}" target="_blank" rel="noopener">${esc(x.src.replace(/^https?:\/\//, '').slice(0, 60))}…</a></small></span><button type="button" class="adp-btn ghost-dark" data-fix="${esc(x.id)}">Corregir</button></li>`).join('')
+        || '<li><span>🎉 Todas las fotos cargan.</span></li>';
+    }
+    async function checkPhotos() {
+      const btn = $<HTMLButtonElement>('[data-ph-run]'); btn.disabled = true; btn.textContent = 'Revisando…';
+      const load = (src: string) => new Promise<boolean>((ok) => { const im = new Image(); const t = setTimeout(() => ok(false), 15000); im.onload = () => { clearTimeout(t); ok(true); }; im.onerror = () => { clearTimeout(t); ok(false); }; im.src = src; });
+      const bad: typeof PHOTOS = []; const queue = PHOTOS.slice();
+      await Promise.all(Array.from({ length: 6 }, async () => { for (let x = queue.shift(); x; x = queue.shift()) if (!(await load(x.src))) bad.push(x); }));
+      photoRun = bad; btn.disabled = false; paintPhotos();
+    }
+    /** The parts that need the database: online checks, scheduled stories, comments, space and errors. */
+    async function saludLive() {
+      paintProblems(); paintPhotos();
+      const sb = BACKEND.url.replace(/\/$/, '');
+      const lights: Array<[string, string, Promise<boolean>]> = [
+        ['El sitio (noticiasxtra.com)', 'abre la portada', ping(root.dataset.base!)],
+        ['Cuentas y base de datos (Supabase)', 'entrar, comentarios, este panel', ping(`${sb}/auth/v1/health`, { headers: { apikey: BACKEND.anonKey } })],
+        ['Botón de publicar', 'la función “publicar” en Supabase', ping(`${sb}/functions/v1/publicar`, { method: 'OPTIONS' })],
+        ['GitHub', 'donde se guardan las noticias', ping('https://api.github.com/repos/noticiasxtra/noticias-xtra')],
+      ];
+      $('[data-lights]').innerHTML = lights.map(([n, why]) => `<li><i class="sl-dot"></i><span><b>${n}</b><small>${why} · revisando…</small></span></li>`).join('');
+      lights.forEach(([n, why, p], i) => void p.then((ok) => {
+        const li = $$('[data-lights] li')[i]; if (!li) return;
+        li.className = ok ? 'ok' : 'bad'; li.innerHTML = `<i class="sl-dot"></i><span><b>${n}</b><small>${ok ? 'funciona' : 'no responde ahora'} · ${why}</small></span>`;
+      }));
+      if (!hasBackend()) return;
+      const [sc, st, er] = await Promise.all([
+        staffApi('articles?status=eq.scheduled&select=id,doc,slug&order=updated_at.desc'),
+        staffApi('rpc/panel_stats', { method: 'POST', body: '{}' }),
+        staffApi('panel_errors?select=*&order=at.desc&limit=15'),
+      ]);
+      // Scheduled: the team's (database) plus story files dated ahead (automatic news, imports)
+      const rows: Array<{ title: string; author: string; date: string }> = sc?.ok ? (await sc.json()).map((r: any) => ({ title: r.doc.title, author: r.doc.author || r.doc.owner, date: r.doc.date })) : [];
+      const all = [...rows, ...AHEAD.filter((f) => !rows.some((r) => r.title === f.title))].filter((x) => Date.parse(x.date) > Date.now()).sort((a, b) => Date.parse(a.date) - Date.parse(b.date));
+      $('[data-sched-n]').textContent = all.length ? String(all.length) : '';
+      $('[data-sched]').innerHTML = all.map((x) => `<li><span><b>${esc(x.title || 'Sin titular')}</b><small>sale el ${fmtDate(x.date)} · ${esc(x.author || '')}</small></span></li>`).join('') || '<li><span>No hay noticias programadas.</span></li>';
+      const missing = '<p class="pnl-muted pnl-small">Falta correr <b>supabase/salud.sql</b> en Supabase.</p>';
+      if (st?.ok) {
+        const n = await st.json();
+        $('[data-sl-mod]').innerHTML = `<ul class="sl-nums">
+          <li><b>${n.comments_today}</b><span>comentarios hoy</span></li><li><b>${n.review_now}</b><span>esperan revisión${n.review_today ? ` (${n.review_today} de hoy)` : ''}</span></li>
+          <li><b>${n.removed_week}</b><span>quitados esta semana</span></li><li><b>${n.signups_week}</b><span>cuentas nuevas esta semana</span></li>
+          <li><b>${n.accounts}</b><span>cuentas en total</span></li><li><b>${n.banned}</b><span>bloqueadas</span></li></ul>
+          <p class="pnl-muted pnl-small">Los comentarios que el filtro bloquea al instante no se guardan, así que no se cuentan.</p>`;
+        const bar = (label: string, used: number, max: number) => { const pc = Math.min(100, Math.round((used / max) * 100)); return `<div class="sl-bar ${pc >= 80 ? 'bad' : ''}"><p><b>${label}</b><span>${mb(used)} de ${mb(max)} · ${pc}%</span></p><i><em style="width:${Math.max(1, pc)}%"></em></i></div>`; };
+        $('[data-space]').innerHTML = bar('Fotos y archivos', n.storage_bytes, 1e9) + bar('Base de datos', n.db_bytes, 5e8) + '<p class="pnl-muted pnl-small">Al pasar de 80%, toca subir al plan Pro de Supabase (unos $25 al mes) o mover las fotos a otro servicio.</p>';
+      } else { $('[data-sl-mod]').innerHTML = missing; $('[data-space]').innerHTML = missing; }
+      if (er?.ok) {
+        const list = await er.json();
+        $('[data-errs]').innerHTML = list.map((x: any) => `<li><span><b>${esc(x.what)}</b><small>${esc(x.who)} · ${ago(Date.parse(x.at))} · ${esc(x.detail)}</small></span></li>`).join('') || '<li><span>🎉 Ningún error.</span></li>';
+        $('[data-errs-clear]').hidden = !list.length || me()?.role !== 'admin';
+      } else $('[data-errs]').innerHTML = `<li>${missing}</li>`;
+    }
+    root.addEventListener('click', async (e) => {
+      const t = e.target as HTMLElement;
+      const fix = t.closest<HTMLElement>('[data-fix]');
+      if (fix) { dispatchEvent(new CustomEvent('nx-edit-story', { detail: { id: fix.dataset.fix } })); showTab('escribir'); scrollTo({ top: 0 }); return; }
+      if (t.closest('[data-prob-more]')) { probAll = true; paintProblems(); return; }
+      if (t.closest('[data-ph-run]')) { void checkPhotos(); return; }
+      if (t.closest('[data-errs-clear]') && (await ask('¿Borrar la lista de errores?', { ok: 'Borrar' }))) { await staffApi('panel_errors?id=gt.0', { method: 'DELETE' }); void saludLive(); }
+    });
+
     const paint: Record<string, () => void> = {
       inicio() {
         const s = me()!; const c = counts(); const allowed = ROLE_TABS[s.role];
@@ -329,7 +458,8 @@ const TABS = [
 
       async salud() {
         const box = $('[data-health]');
-        box.innerHTML = kpi('Actualización del sitio', 'Cargando…') + kpi('Redactor de noticias (IA)', 'Cargando…');
+        box.innerHTML = kpi('Última noticia', 'Cargando…') + kpi('Actualización del sitio', 'Cargando…') + kpi('Redactor de noticias (IA)', 'Cargando…');
+        void saludLive();
         const api = 'https://api.github.com/repos/noticiasxtra/noticias-xtra';
         try {
           const [dep, ai, prs, iss] = await Promise.all([
@@ -345,12 +475,13 @@ const TABS = [
           if (root.dataset.aikey !== 'true' && at === 'good') [as, at] = ['Sin clave ⚠', 'bad']; // runs, but writes nothing yet
           const openPrs = Array.isArray(prs) ? prs.length : 0; const checks = Array.isArray(iss) ? iss.filter((i: any) => !i.pull_request && /Vistazo/.test(i.title)).length : 0;
           box.innerHTML = [
+            lastStoryKpi(),
             kpi('Actualización del sitio', ds, d ? `cada 15 minutos · última ${ago(Date.parse(d.updated_at))}` : '', '', dt),
             kpi('Redactor de noticias (IA)', as, root.dataset.aikey !== 'true' ? 'corre a las 7 a.m. y 5 p.m., pero no redacta hasta conectar la clave' : a ? `7 a.m. y 5 p.m. · última ${ago(Date.parse(a.updated_at))}` : '', '', at),
             kpi('Esperan aprobación en GitHub', String(openPrs), 'noticias reales por aprobar'),
             kpi('Vistazos rápidos abiertos', String(checks), 'avisos en GitHub'),
           ].join('');
-        } catch { box.innerHTML = kpi('Estado', 'No se pudo consultar GitHub', 'intenta en unos minutos', '', 'bad'); }
+        } catch { box.innerHTML = lastStoryKpi() + kpi('Estado', 'No se pudo consultar GitHub', 'intenta en unos minutos', '', 'bad'); }
         const acc: Array<[string, boolean, string]> = [
           ['Sitio publicado en noticiasxtra.com', true, 'GitHub Pages + Cloudflare, con clave de acceso hasta el lanzamiento'], ['Actualización cada 15 minutos', true, 'listo'],
           ['Cuentas, comentarios y este panel (Supabase)', true, 'listo'], ['Entrar con Google', true, 'listo'], ['Google Search Console', true, 'sitio verificado'],
@@ -362,7 +493,7 @@ const TABS = [
         $('[data-accounts]').innerHTML = acc.map(([n, ok, why]) => `<li class="${ok ? 'ok' : ''}"><span>${ok ? '✓' : '○'} ${n}</span><small>${why}</small></li>`).join('');
         const lv: Record<string, [string, string]> = { auto: ['Se publica sola', 'g'], check: ['Se publica + vistazo', 'y'], always: ['Espera aprobación', 'r'] };
         $('[data-src-n]').textContent = `${SOURCES.length} fuentes oficiales`;
-        $('[data-srcs]').innerHTML = SOURCES.map((s) => `<li><span>${esc(s.name)}</span><span class="pnl-lv ${lv[s.review]?.[1] ?? 'r'}">${lv[s.review]?.[0] ?? 'Espera aprobación'}</span></li>`).join('');
+        $('[data-sl-srcs]').innerHTML = SOURCES.map((s) => `<li><span>${esc(s.name)}</span><span class="pnl-lv ${lv[s.review]?.[1] ?? 'r'}">${lv[s.review]?.[0] ?? 'Espera aprobación'}</span></li>`).join('');
       },
 
       equipo() {
