@@ -10,6 +10,9 @@ imageCaption: "Imagen de archivo: la bahía de San Juan vista desde la Estación
 imageCredit: "Foto: NASA (dominio público), vía Wikimedia Commons"
 imageCreditUrl: "https://commons.wikimedia.org/wiki/File:ISS032-E-10290_-_View_of_Puerto_Rico.jpg"
 aiAssisted: false
+related:
+  - "2026-10-04-industriales-piden-abrir-el-suplido-de-gas-a-mas-empresas"
+  - "2026-10-01-amur-river-orden-jueza"
 draft: false
 sources:
   - name: "NotiCel: Citan a vista pública para atender controversia con barcaza NFE"

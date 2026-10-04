@@ -36,8 +36,10 @@ const creditUrl = d.image ? d.imageCreditUrl : fallback.creditUrl;
 // Reading time: about 200 words a minute
 const words = (story.body ?? '').split(/\s+/).filter(Boolean).length;
 const minutes = Math.max(1, Math.round(words / 200));
+// Related stories the editor picked (Escribir → Noticias relacionadas), shown at the end of the story
+const related = d.related.map((id) => stories.find((x) => x.id === id)).filter((x): x is Story => !!x && x.id !== story.id).slice(0, 6);
 const more = stories
-  .filter((x) => x.id !== story.id)
+  .filter((x) => x.id !== story.id && !related.includes(x))
   .sort((a, b) => Number(b.data.section === d.section) - Number(a.data.section === d.section))
   .slice(0, 4);
 // Opinion columns: the byline shows the columnist's picture and links to their profile
@@ -112,6 +114,13 @@ const columnist = d.section === 'opinion' ? columnistOf(d.author) : undefined;
         )}
         {d.section === 'opinion' && (
           <div class="ai"><strong>Columna de opinión</strong>Este texto expresa la opinión de su autor{d.author === 'Noticias Xtra' ? ' y la línea editorial de Noticias Xtra' : ''}. Las noticias de Noticias Xtra se redactan por separado y se limitan a los hechos.</div>
+        )}
+
+        {related.length > 0 && (
+          <section class="rel-box" aria-labelledby="rel-h">
+            <h2 id="rel-h" class="lead-extra-h">Noticias relacionadas</h2>
+            <div class="rel-list">{related.map((x) => <StoryCard story={x} variant="item" />)}</div>
+          </section>
         )}
 
         <a class="tip-cta" href={url('contacto')}>

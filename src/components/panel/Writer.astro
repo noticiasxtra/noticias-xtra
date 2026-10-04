@@ -125,8 +125,10 @@ const TOOLS = [
           <div class="wr-addsrc"><input data-src-name placeholder="Nombre (ej. Policía de PR)" aria-label="Nombre de la fuente" /><input data-src-url type="url" placeholder="Enlace (opcional)" aria-label="Enlace de la fuente" /><button type="button" class="pnl-link" data-src-add>Añadir</button></div>
         </div>
         <div class="pnl-card"><h2 class="pnl-h3">Noticias relacionadas</h2>
-          <select data-rel-pick aria-label="Añadir relacionada"><option value="">Escoge una noticia…</option>{recent.map((r) => <option value={r.id}>{r.title}</option>)}</select>
-          <ul class="wr-srcs" data-rels></ul>
+          <p class="pnl-muted pnl-small">Salen al final de la noticia. Escoge las que quieras (hasta 6).</p>
+          <ul class="wr-srcs wr-rels" data-rels></ul>
+          <input type="search" class="wr-rel-q" data-rel-q placeholder="Buscar noticias publicadas…" aria-label="Buscar noticias relacionadas" />
+          <ul class="wr-rel-res" data-rel-res></ul>
         </div>
         <div class="pnl-card"><h2 class="pnl-h3">Corrección</h2>
           <textarea data-f="correction" rows="2" maxlength="300" placeholder="Solo si corriges algo ya publicado: qué se corrigió y cuándo"></textarea>
@@ -423,7 +425,8 @@ const TOOLS = [
           <span class="wr-gal-b"><button type="button" data-gm="-1" aria-label="Subir" ${i === 0 ? 'disabled' : ''}>↑</button><button type="button" data-gm="1" aria-label="Bajar" ${i === gal.length - 1 ? 'disabled' : ''}>↓</button><button type="button" data-grm aria-label="Quitar">✕</button></span></li>`).join('');
       }
       $('[data-srcs]').innerHTML = cur.sources.map((s, i) => `<li><span>${s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.name)}</a>` : esc(s.name)}</span><button type="button" class="pnl-link" data-src-rm="${i}" aria-label="Quitar">✕</button></li>`).join('');
-      $('[data-rels]').innerHTML = cur.related.map((id, i) => `<li><span>${esc(RECENT.find((r) => r.id === id)?.title ?? id)}</span><button type="button" class="pnl-link" data-rel-rm="${i}" aria-label="Quitar">✕</button></li>`).join('');
+      $('[data-rels]').innerHTML = cur.related.map((id, i) => `<li><span>${esc(PUBLISHED.find((r) => r.id === id)?.title ?? RECENT.find((r) => r.id === id)?.title ?? id)}</span><button type="button" class="pnl-link" data-rel-rm="${i}" aria-label="Quitar">✕</button></li>`).join('');
+      paintRelSearch();
       const future = new Date(cur.date).valueOf() > Date.now() + 60000;
       const go = $<HTMLButtonElement>('[data-wr-go]');
       go.textContent = !canPublish() ? 'Enviar a revisión' : future ? 'Programar' : cur.status === 'published' ? 'Actualizar' : 'Publicar';
@@ -565,9 +568,23 @@ const TOOLS = [
       const sr = t.closest<HTMLElement>('[data-src-rm]'); if (sr) { cur.sources.splice(Number(sr.dataset.srcRm), 1); changed(); }
       const rr = t.closest<HTMLElement>('[data-rel-rm]'); if (rr) { cur.related.splice(Number(rr.dataset.relRm), 1); changed(); }
     });
-    $<HTMLSelectElement>('[data-rel-pick]').addEventListener('change', (e) => {
-      const v = (e.target as HTMLSelectElement).value; (e.target as HTMLSelectElement).value = '';
-      if (cur && v && !cur.related.includes(v) && cur.related.length < 3) { cur.related.push(v); changed(); }
+    // Related stories: search every published story and tick as many as you want (up to 6)
+    const plainTxt = (t: string) => t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    function paintRelSearch() {
+      if (!cur) return;
+      const q = plainTxt($<HTMLInputElement>('[data-rel-q]').value.trim()); const words = q.split(/\s+/).filter(Boolean);
+      const own = cur.slug;
+      const hits = PUBLISHED.filter((p) => p.id !== own && words.every((w) => plainTxt(`${p.title} ${p.section}`).includes(w))).slice(0, q ? 30 : 8);
+      $('[data-rel-res]').innerHTML = hits.map((p) => { const on = cur!.related.includes(p.id); return `<li><label class="${on ? 'on' : ''}"><input type="checkbox" data-rel-id="${esc(p.id)}" ${on ? 'checked' : ''} ${!on && cur!.related.length >= 6 ? 'disabled' : ''} />
+        <span><b>${esc(p.title)}</b><small>${esc(p.section)} · ${new Date(p.date).toLocaleDateString('es-PR', { day: 'numeric', month: 'short', year: 'numeric' })}</small></span></label></li>`; }).join('')
+        || `<li class="pnl-muted pnl-small">${q ? 'No encontramos noticias con esas palabras.' : ''}</li>`;
+    }
+    $('[data-rel-q]').addEventListener('input', paintRelSearch);
+    $('[data-rel-res]').addEventListener('change', (e) => {
+      const c = e.target as HTMLInputElement; const id = c.dataset.relId; if (!cur || !id) return;
+      if (c.checked && !cur.related.includes(id)) { if (cur.related.length >= 6) { c.checked = false; toast('Puedes escoger hasta 6 relacionadas.'); return; } cur.related.push(id); }
+      if (!c.checked) cur.related = cur.related.filter((x) => x !== id);
+      changed();
     });
 
     // ---------- the story file (same shape as src/content.config.ts) ----------

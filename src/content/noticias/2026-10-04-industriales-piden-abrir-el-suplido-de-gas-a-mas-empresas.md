@@ -10,6 +10,9 @@ imageCaption: "Imagen ilustrativa: un buque de gas natural licuado. No es el bar
 imageCredit: "Foto: Gordon Leggett, CC BY-SA 4.0, vía Wikimedia Commons"
 imageCreditUrl: "https://commons.wikimedia.org/wiki/File:2023-05-20_01_LNG_tanker,_GULF_ENERGY_-_IMO_7390143.jpg"
 aiAssisted: false
+related:
+  - "2026-10-04-camara-cita-a-puertos-practicos-y-nfe-por-barcaza-de-gas"
+  - "2026-10-01-amur-river-orden-jueza"
 draft: false
 sources:
   - name: "NotiCel: Industriales piden que el gobierno abra el suplido de gas a más empresas"
