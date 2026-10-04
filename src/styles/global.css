@@ -3980,3 +3980,44 @@ a,button,summary,label{-webkit-tap-highlight-color:transparent}
 .cm-photo-btn:hover,.cm-photo-btn:focus-within{border-color:var(--purple);color:var(--purple)}
 .cm-media.photo{width:auto;height:auto;max-width:150px;max-height:150px;object-fit:cover;border-radius:12px;box-shadow:0 1px 4px rgba(22,22,29,.15)}
 .cm-media-prev img[src^="data:image/jpeg"]{object-fit:cover}
+
+/* Comments, Instagram style on phones: a bar on the story opens a panel that slides up from the bottom */
+.cm-teaser,.cm-backdrop,.cm-grab,.cm-close,.cm-quick{display:none}
+.cm-replying{display:flex;align-items:center;gap:6px;margin:0 0 6px;padding:6px 10px;border-radius:10px;background:var(--soft);color:var(--muted);font-size:13px}
+.cm-replying[hidden]{display:none}
+.cm-replying b{color:var(--ink)}
+.cm-replying button{margin-left:auto;border:0;background:none;color:var(--muted);font-size:14px;cursor:pointer}
+.cm-more{list-style:none;padding:0 0 6px 44px}
+.cm-more button{display:flex;align-items:center;gap:10px;border:0;background:none;padding:4px 0;color:var(--muted);font:inherit;font-size:12.5px;font-weight:700;cursor:pointer}
+.cm-more button::before{content:"";width:24px;height:1px;background:var(--muted)}
+.cm-item{position:relative}
+.cm-burst{position:absolute;left:50%;top:50%;font-size:44px;transform:translate(-50%,-50%) scale(0);pointer-events:none;animation:cm-burst .8s ease-out forwards}
+@keyframes cm-burst{30%{transform:translate(-50%,-50%) scale(1.2);opacity:1}70%{transform:translate(-50%,-50%) scale(1);opacity:1}100%{transform:translate(-50%,-70%) scale(.8);opacity:0}}
+@media (max-width:760px){
+  .cm-teaser{display:grid;gap:4px;width:100%;margin-top:var(--gap-lg);padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+  .cm-teaser-h{font-family:var(--head);font-weight:800;font-size:16px}
+  .cm-teaser-h b{color:var(--muted);font-weight:600}
+  .cm-teaser-first{font-size:14px;color:var(--muted);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+  .cm-teaser-first b{color:var(--ink)}
+  .cm-backdrop{display:block;position:fixed;inset:0;z-index:69;background:rgba(10,10,18,.5);opacity:0;pointer-events:none;transition:opacity .25s}
+  html.cm-open .cm-backdrop{opacity:1;pointer-events:auto}
+  html.cm-open,html.cm-open body{overflow:hidden}
+  .cm{position:fixed;left:0;right:0;bottom:var(--kb,0px);z-index:70;display:flex;flex-direction:column;height:86dvh;max-height:calc(100dvh - var(--kb,0px) - 24px);margin:0;padding:0 14px;border:0;border-radius:20px 20px 0 0;box-shadow:0 -10px 40px rgba(22,22,29,.25);transform:translateY(105%);visibility:hidden;transition:transform .3s cubic-bezier(.2,.8,.2,1),visibility 0s .3s}
+  html.cm-open .cm{transform:none;visibility:visible;transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+  .cm-grab{display:grid;place-items:center;padding:8px 0 2px;touch-action:none}
+  .cm-grab span{width:40px;height:5px;border-radius:999px;background:var(--line)}
+  .cm-head{justify-content:center;padding-bottom:8px;border-bottom:1px solid var(--line);touch-action:none}
+  .cm-head h2{font-size:16px}
+  .cm-close{display:grid;place-items:center;position:absolute;right:12px;top:14px;width:32px;height:32px;border:0;border-radius:50%;background:var(--soft);color:var(--ink);cursor:pointer}
+  .cm > .cm-note{order:2;margin:8px 0 0;font-size:12px}
+  .cm > .cm-list{order:3;flex:1;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;margin:0 -14px;padding:4px 14px}
+  .cm > .cm-repnote{order:4}
+  .cm > .cm-rep{order:5}
+  .cm > .cm-form{order:6;margin:0 -14px;padding:8px 14px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);border-bottom:0;background:var(--card)}
+  .cm-quick{display:flex;justify-content:space-between;gap:4px;margin:0 0 8px}
+  .cm > .cm-form > .cm-av{margin-top:38px} /* next to the text box, below the quick emojis */
+  .cm-quick button{border:0;background:none;font-size:22px;line-height:1;padding:2px;cursor:pointer}
+  .cm-picker{max-height:34dvh;overflow-y:auto}
+  .cm-list{touch-action:manipulation}
+}
+@media (max-width:760px) and (prefers-reduced-motion:reduce){ .cm,html.cm-open .cm{transition:none} .cm-burst{animation:none;opacity:0} }

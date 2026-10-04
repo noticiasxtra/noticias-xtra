@@ -27,16 +27,26 @@ const STICKER_IMGS = [['wepa', '¡Wepa!'], ['coqui', 'Coquí'], ['bandera', 'Ban
 const GIF_IMGS = [['gif-wepa', '¡Wepa! animado'], ['gif-coqui', 'Coquí saltando'], ['gif-bandera', 'Bandera ondeando'], ['gif-corazon', 'Corazón latiendo'],
   ['gif-jajaja', 'Jajaja animado'], ['gif-fuego', 'Fuego animado'], ['gif-bravo', '¡Bravo! con destellos'], ['gif-cafe', 'Café humeante']];
 ---
+{/* Phones: a compact bar opens the comments in a panel that slides up from the bottom, like Instagram */}
+<button type="button" class="cm-teaser" data-cm-teaser aria-controls="comentarios" aria-expanded="false">
+  <span class="cm-teaser-h">💬 Comentarios <b data-cm-teaser-n></b></span>
+  <span class="cm-teaser-first" data-cm-teaser-first>Sé la primera persona en comentar.</span>
+</button>
+<div class="cm-backdrop" data-cm-backdrop></div>
 <section class="cm" id="comentarios" data-comments={storyId} data-badges={JSON.stringify(BADGE)} aria-labelledby="cm-h">
+  <div class="cm-grab" data-cm-grab aria-hidden="true"><span></span></div>
   <div class="cm-head">
     <h2 id="cm-h">Comentarios <span data-cm-count></span></h2>
     <span class="sp-demo">DEMO</span>
+    <button type="button" class="cm-close" data-cm-close aria-label="Cerrar comentarios">✕</button>
   </div>
   <p class="cm-note">Vista previa de los comentarios: lo que escribas se guarda solo en este dispositivo.</p>
 
   <form class="cm-form" data-cm-form novalidate>
     <span class="cm-av me" data-cm-me aria-hidden="true">T</span>
     <div class="cm-box">
+      <div class="cm-quick" aria-label="Emojis rápidos">{['❤️', '🔥', '👏', '😂', '😮', '😢', '🙌', '🇵🇷'].map((e) => <button type="button" data-quick={e} aria-label={`Añadir ${e}`}>{e}</button>)}</div>
+      <p class="cm-replying" data-cm-replying hidden>Respondiendo a <b></b> <button type="button" data-cm-unreply aria-label="No responder">✕</button></p>
       <label for={`cm-text-${storyId}`} class="sr">Escribe un comentario</label>
       <textarea id={`cm-text-${storyId}`} rows="1" maxlength="500" placeholder="Añade un comentario…"></textarea>
       <div class="cm-media-prev" data-media-prev hidden><img alt="" /><button type="button" data-media-rm aria-label="Quitar">✕</button></div>
@@ -194,7 +204,57 @@ const GIF_IMGS = [['gif-wepa', '¡Wepa! animado'], ['gif-coqui', 'Coquí saltand
     return { media: () => media, setMedia, close };
   }
 
+  // Phones: the comments open in a panel that slides up from the bottom (Instagram style); computers keep them in the page
+  function sheet(root: HTMLElement) {
+    const backdrop = root.previousElementSibling as HTMLElement, teaser = backdrop.previousElementSibling as HTMLButtonElement;
+    const html = document.documentElement, phone = matchMedia('(max-width: 760px)');
+    const ta = root.querySelector<HTMLTextAreaElement>('[data-cm-form] textarea')!;
+    const isOpen = () => html.classList.contains('cm-open');
+    const open = (push = true) => {
+      if (!phone.matches || isOpen()) return;
+      html.classList.add('cm-open'); teaser.setAttribute('aria-expanded', 'true');
+      if (push) history.pushState({ cm: 1 }, ''); // the phone's back button closes the panel
+    };
+    const close = (fromBack = false) => {
+      if (!isOpen()) return;
+      html.classList.remove('cm-open'); teaser.setAttribute('aria-expanded', 'false'); ta.blur();
+      if (!fromBack && history.state?.cm) history.back();
+    };
+    teaser.addEventListener('click', () => open());
+    backdrop.addEventListener('click', () => close());
+    root.querySelector('[data-cm-close]')!.addEventListener('click', () => close());
+    addEventListener('popstate', () => close(true));
+    addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+    // Swipe the top of the panel down to close it
+    let y0 = 0, dy = 0, drag = false;
+    [root.querySelector('[data-cm-grab]')!, root.querySelector('.cm-head')!].forEach((h) => h.addEventListener('touchstart', (e) => {
+      y0 = (e as TouchEvent).touches[0].clientY; dy = 0; drag = true; root.style.transition = 'none';
+    }, { passive: true }));
+    root.addEventListener('touchmove', (e) => { if (!drag) return; dy = Math.max(0, e.touches[0].clientY - y0); root.style.transform = `translateY(${dy}px)`; }, { passive: true });
+    root.addEventListener('touchend', () => { if (!drag) return; drag = false; root.style.transition = ''; root.style.transform = ''; if (dy > 110) close(); });
+    // The writing bar stays above the phone's keyboard
+    const vv = window.visualViewport;
+    vv?.addEventListener('resize', () => html.style.setProperty('--kb', `${Math.max(0, innerHeight - vv.height - vv.offsetTop)}px`));
+    // The bar on the story shows how many comments there are and the newest one
+    const paint = () => {
+      const items = [...root.querySelectorAll<HTMLElement>('.cm-item:not(.cm-hidden)')];
+      teaser.querySelector('[data-cm-teaser-n]')!.textContent = root.querySelector('[data-cm-count]')!.textContent || '';
+      const first = items[0];
+      const firstEl = teaser.querySelector('[data-cm-teaser-first]')!;
+      if (first) { firstEl.replaceChildren(); const b = document.createElement('b'); b.textContent = first.querySelector('b')?.textContent ?? ''; const media = first.querySelector<HTMLImageElement>('.cm-media'); firstEl.append(b, ' ', first.querySelector('.cm-text')?.textContent?.trim() || (media ? (media.classList.contains('photo') ? 'envió una foto' : media.alt === 'GIF' ? 'envió un GIF' : 'envió un sticker') : '')); }
+      else firstEl.textContent = 'Sé la primera persona en comentar.';
+    };
+    new MutationObserver(paint).observe(root.querySelector('[data-cm-list]')!, { childList: true, subtree: true, characterData: true });
+    paint();
+    if (location.hash === '#comentarios') setTimeout(() => open(false), 300); // links from notifications open the panel
+    // Quick emojis above the text box
+    root.querySelectorAll<HTMLButtonElement>('[data-quick]').forEach((b) => b.addEventListener('click', () => {
+      ta.value += b.dataset.quick; ta.focus(); ta.dispatchEvent(new Event('input'));
+    }));
+  }
+
   document.querySelectorAll<HTMLElement>('[data-comments]').forEach((root) => {
+    sheet(root);
     if (accountsOn()) { live(root); return; } // real comments (Supabase): see live() below
     const key = `nx-comments-${root.dataset.comments}`;
     const likesKey = `nx-likes-${root.dataset.comments}`;
@@ -387,6 +447,14 @@ const GIF_IMGS = [['gif-wepa', '¡Wepa! animado'], ['gif-coqui', 'Coquí saltand
     const note = root.querySelector<HTMLElement>('.cm-note')!;
     const pk = setupPicker(root);
     let rows: Row[] = [], liked = new Set<string>(), reported = new Set<string>(), parentId: string | null = null, warned = '';
+    const threads = new Set<string>(); // comments whose replies are open
+    const replying = root.querySelector<HTMLElement>('[data-cm-replying]')!;
+    const setReply = (c: Row | null) => {
+      parentId = c ? c.parent ?? c.id : null; // one level of replies, like Instagram
+      replying.hidden = !c;
+      if (c) { replying.querySelector('b')!.textContent = `@${c.author?.username ?? ''}`; ta.value = `@${c.author?.username ?? ''} `; ta.focus(); }
+    };
+    root.querySelector('[data-cm-unreply]')!.addEventListener('click', () => { ta.value = ta.value.replace(/^@[\w.]+\s*/, ''); setReply(null); ta.focus(); });
 
     const avatar = (el: HTMLElement, name: string, photo?: string | null) => {
       el.textContent = photo ? '' : (name[0] || '?').toUpperCase();
@@ -445,14 +513,26 @@ const GIF_IMGS = [['gif-wepa', '¡Wepa! animado'], ['gif-coqui', 'Coquí saltand
     }
     function render() {
       const top = rows.filter((c) => !c.parent).reverse(); // newest first; replies under their comment, oldest first
-      list.replaceChildren(...top.flatMap((c) => [item(c), ...rows.filter((x) => x.parent === c.id).map(item)]));
+      list.replaceChildren(...top.flatMap((c) => {
+        const reps = rows.filter((x) => x.parent === c.id);
+        if (!reps.length) return [item(c)];
+        // Replies are folded under "— Ver N respuestas", like Instagram
+        const more = document.createElement('li'); more.className = 'cm-more';
+        const b = document.createElement('button'); b.type = 'button'; b.dataset.thread = c.id;
+        b.textContent = threads.has(c.id) ? 'Ocultar respuestas' : `Ver ${reps.length} ${reps.length === 1 ? 'respuesta' : 'respuestas'}`;
+        more.append(b);
+        return [item(c), more, ...(threads.has(c.id) ? reps.map(item) : [])];
+      }));
       const n = rows.filter((c) => c.status === 'visible').length;
       count.textContent = n ? `(${n})` : '';
       if (!rows.length) { const e = document.createElement('li'); e.className = 'cm-empty'; e.textContent = 'Sé la primera persona en comentar.'; list.append(e); }
     }
 
     list.addEventListener('click', async (e) => {
-      const t = e.target as HTMLElement; const li = t.closest<HTMLElement>('.cm-item'); if (!li) return;
+      const t = e.target as HTMLElement;
+      const th = t.closest<HTMLElement>('[data-thread]');
+      if (th) { const id = th.dataset.thread!; threads.has(id) ? threads.delete(id) : threads.add(id); render(); return; }
+      const li = t.closest<HTMLElement>('.cm-item'); if (!li) return;
       const c = rows.find((x) => x.id === li.dataset.id)!;
       if (t.closest('[data-like]')) {
         if (!need('Entra para dar Me gusta.')) return;
@@ -466,8 +546,7 @@ const GIF_IMGS = [['gif-wepa', '¡Wepa! animado'], ['gif-coqui', 'Coquí saltand
       }
       if (t.closest('[data-reply]')) {
         if (!need('Entra para responder.')) return;
-        parentId = c.parent ?? c.id; // one level of replies, like Instagram
-        ta.value = `@${c.author?.username ?? ''} `; ta.focus();
+        setReply(c);
       }
       if (t.closest('[data-del]')) {
         const { ask } = await import('../lib/dialogs');
@@ -495,6 +574,18 @@ const GIF_IMGS = [['gif-wepa', '¡Wepa! animado'], ['gif-coqui', 'Coquí saltand
       }
     });
 
+    // Double tap (or double click) a comment to like it, with a heart
+    let lastTap = 0, lastId = '';
+    const doubleLike = (li: HTMLElement) => {
+      const heart = document.createElement('span'); heart.className = 'cm-burst'; heart.textContent = '❤️'; li.append(heart); setTimeout(() => heart.remove(), 800);
+      if (li.querySelector('[data-like]')?.getAttribute('aria-pressed') !== 'true') li.querySelector<HTMLButtonElement>('[data-like]')!.click();
+    };
+    list.addEventListener('dblclick', (e) => { const li = (e.target as HTMLElement).closest<HTMLElement>('.cm-item'); if (li && !(e.target as HTMLElement).closest('button,a')) doubleLike(li); });
+    list.addEventListener('touchend', (e) => {
+      const li = (e.target as HTMLElement).closest<HTMLElement>('.cm-item'); if (!li || (e.target as HTMLElement).closest('button,a,form')) return;
+      const now = Date.now();
+      if (now - lastTap < 320 && lastId === li.dataset.id) { e.preventDefault(); lastTap = 0; doubleLike(li); } else { lastTap = now; lastId = li.dataset.id!; }
+    });
     ta.addEventListener('focus', () => { if (!loggedIn()) { ta.blur(); askLogin('Entra para comentar.'); } });
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -505,7 +596,7 @@ const GIF_IMGS = [['gif-wepa', '¡Wepa! animado'], ['gif-coqui', 'Coquí saltand
       const chk = assess(text); const whyTxt = chk.reasons.join(', ').toLowerCase();
       if (chk.verdict === 'block') { err.textContent = `No se puede publicar: ${whyTxt}. Revisa el texto.`; err.hidden = false; return; }
       if (chk.verdict === 'review' && warned !== text) { warned = text; err.textContent = `Ojo: ${whyTxt}. Edítalo, o pulsa Publicar otra vez y la redacción lo revisará.`; err.hidden = false; return; }
-      if (parentId && !text.startsWith('@')) parentId = null; // the reader erased the @name: it's a new comment
+      if (parentId && !text.startsWith('@')) setReply(null); // the reader erased the @name: it's a new comment
       const send = form.querySelector<HTMLButtonElement>('.cm-send')!; send.disabled = true;
       let att = media ?? null;
       if (att?.kind === 'photo' && att.src.startsWith('data:')) {
@@ -519,7 +610,8 @@ const GIF_IMGS = [['gif-wepa', '¡Wepa! animado'], ['gif-coqui', 'Coquí saltand
         status: chk.verdict === 'review' ? 'review' : 'visible', flags: chk.reasons }) });
       send.disabled = false;
       if (!r?.ok) { err.textContent = r?.status === 403 ? 'Tu cuenta no puede comentar ahora mismo.' : 'No se pudo publicar. Intenta otra vez.'; err.hidden = false; return; }
-      warned = ''; ta.value = ''; ta.style.height = 'auto'; parentId = null; pk.setMedia(undefined); pk.close();
+      if (parentId) threads.add(parentId); // show the thread with the new reply
+      warned = ''; ta.value = ''; ta.style.height = 'auto'; setReply(null); pk.setMedia(undefined); pk.close();
       if (chk.verdict === 'review') { err.textContent = 'Publicado. La redacción lo revisará antes de que otros lo vean.'; err.hidden = false; }
       await load();
     });
