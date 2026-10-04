@@ -38,7 +38,7 @@ const TOOLS = [
   <!-- List of my articles -->
   <div data-wr-list-view>
     <header class="sd-head">
-      <div><h1 class="pnl-h">Escribir</h1><p class="pnl-muted">Escribe y edita noticias como en WordPress. Los periodistas las envían a revisión; los editores las publican o las programan.</p></div>
+      <div><h1 class="pnl-h">Escribir</h1><p class="pnl-muted">Escribe y edita noticias como en WordPress. Los periodistas las programan para una hora futura o las envían a revisión; los editores las publican.</p></div>
       <button type="button" class="adp-btn" data-wr-new>+ Nueva noticia</button>
     </header>
     <nav class="apn-tabs pnl-sub" role="tablist" aria-label="Estado">
@@ -355,8 +355,8 @@ const TOOLS = [
     async function persist(status?: Art['status']) {
       readEditor(); if (!cur) return false;
       if (status) cur.status = status;
-      // A reporter's change to a published story goes back to an editor
-      if (!canPublish() && (cur.status === 'published' || cur.status === 'scheduled')) cur.status = 'review';
+      // A reporter's change to a published story goes back to an editor (their scheduled stories stay scheduled)
+      if (!canPublish() && cur.status === 'published') cur.status = 'review';
       cur.updated = Date.now();
       const a = structuredClone(cur);
       if (!(await store(a))) return false;
@@ -391,7 +391,7 @@ const TOOLS = [
       paintRelSearch();
       const future = new Date(cur.date).valueOf() > Date.now() + 60000;
       const go = $<HTMLButtonElement>('[data-wr-go]');
-      go.textContent = !canPublish() ? 'Enviar a revisión' : future ? 'Programar' : cur.status === 'published' ? 'Actualizar' : 'Publicar';
+      go.textContent = future || (!canPublish() && cur.status === 'scheduled') ? 'Programar' : !canPublish() ? 'Enviar a revisión' : cur.status === 'published' ? 'Actualizar' : 'Publicar';
       $('[data-wr-state]').textContent = STATUS[cur.status];
       $('[data-wr-state]').className = `wr-state ${cur.status}`;
       const checks: Array<[boolean, string]> = [
@@ -890,7 +890,7 @@ const TOOLS = [
 
     // ---------- save / send / publish ----------
     $('[data-wr-save]').addEventListener('click', async () => { if (await persist(cur?.status === 'published' ? 'published' : cur?.status === 'review' ? 'review' : 'draft')) toast('Borrador guardado.'); });
-    const when = (d: string) => new Date(d).toLocaleString('es-PR', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
+    const when = (d: string) => new Date(d).toLocaleString('es-PR', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }).replace(/\.$/, ''); // "a. m." would end in two periods
     /** Puts a saved article on the site: the "publicar" function saves its file in GitHub (shared database only). */
     /** Only one story is pinned (📌) in the Portada: publishing a pinned story unpins the others for real. */
     async function unpinOthers(a: Art): Promise<string[]> {
@@ -935,6 +935,14 @@ const TOOLS = [
       if (!ok && !(await ask('Faltan cosas en “Antes de publicar”. ¿Seguir de todos modos?', { ok: 'Seguir' }))) return;
       goBtn.disabled = true;
       try {
+        const future = new Date(cur.date).valueOf() > Date.now() + 60000;
+        if (!canPublish() && cur.status === 'scheduled' && !future) { toast('Escoge una fecha y hora futura. Para publicarla ahora, pídele a un editor.'); return; }
+        if (!canPublish() && future) { // periodistas schedule their own stories; labels and pins are for editors
+          (['breaking', 'trending', 'featured', 'live', 'pinned', 'homeLead', 'sectionLead', 'sectionPinned'] as const).forEach((k) => (cur![k] = false)); cur.note = '';
+          if (!(await persist(cur.status === 'scheduled' ? 'scheduled' : 'draft'))) return;
+          if (await goLive(structuredClone(cur))) { closeEditor(); dispatchEvent(new Event('nx-articles-changed')); }
+          return;
+        }
         if (!canPublish()) { cur.note = ''; if (await persist('review')) { toast('Enviada a revisión. Un editor la revisará.'); closeEditor(); dispatchEvent(new Event('nx-articles-changed')); } return; }
         // Save first (as it is now), then publish the saved copy
         if (!(await persist(cur.status === 'published' || cur.status === 'scheduled' ? cur.status : 'draft'))) return;

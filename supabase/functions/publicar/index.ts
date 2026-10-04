@@ -1,4 +1,5 @@
 // Supabase Edge Function "publicar": an editor or admin publishes a staff article to the site.
+// Reporters can only schedule their own stories for a future time, without labels or pins (approved 2026-10-04).
 // It saves the story file in GitHub (src/content/noticias/<slug>.md); that push rebuilds the site in about 2 minutes
 // and keeps the story's full history. Then it marks the article as published (or scheduled) in the `articles` table.
 // Deploy: Supabase → Edge Functions → Deploy a new function → Via Editor → name "publicar" → paste this file.
@@ -30,14 +31,21 @@ Deno.serve(async (req) => {
     const user = await who.json();
     const db = { apikey: service, Authorization: `Bearer ${service}`, 'Content-Type': 'application/json' };
     const staff = (await (await fetch(`${base}/rest/v1/staff?user_id=eq.${user.id}&select=name,role`, { headers: db })).json())[0];
-    if (!staff || !['admin', 'editor'].includes(staff.role)) return json({ error: 'Solo editores y administradores pueden publicar.' }, 403);
+    if (!staff || !['admin', 'editor', 'reporter'].includes(staff.role)) return json({ error: 'Solo el equipo de la redacción puede publicar.' }, 403);
 
     const { id, slug, file, title, scheduled } = await req.json();
     if (typeof id !== 'string' || !/^[a-z0-9][a-z0-9-]{5,90}$/.test(slug ?? '') || typeof file !== 'string' || !file.startsWith('---\n') || file.length > 500_000) {
       return json({ error: 'La noticia no tiene el formato correcto.' }, 400);
     }
-    const art = (await (await fetch(`${base}/rest/v1/articles?id=eq.${encodeURIComponent(id)}&select=id,slug`, { headers: db })).json())[0];
+    const art = (await (await fetch(`${base}/rest/v1/articles?id=eq.${encodeURIComponent(id)}&select=id,slug,owner,status`, { headers: db })).json())[0];
     if (!art) return json({ error: 'Guarda la noticia antes de publicarla.' }, 404);
+    if (staff.role === 'reporter') {
+      const when = Date.parse(file.match(/^date: (.+)$/m)?.[1] ?? '');
+      if (art.owner !== user.id) return json({ error: 'Solo puedes programar tus propias noticias.' }, 403);
+      if (!scheduled || !(when > Date.now() + 60_000)) return json({ error: 'Escoge una fecha y hora futura. Para publicarla ahora, envíala a revisión.' }, 403);
+      if (art.slug && art.status !== 'scheduled') return json({ error: 'Esta noticia ya salió: tus cambios van a revisión.' }, 403);
+      if (/^(breaking|trending|featured|live|pinned|homeLead|sectionLead|sectionPinned): true$/m.test(file)) return json({ error: 'Las etiquetas y las noticias fijadas las pone un editor.' }, 403);
+    }
 
     // Updates keep the same file; a new story gets its own name (a short suffix if that name is taken)
     const gh = { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json', 'User-Agent': 'noticias-xtra-publicar' };

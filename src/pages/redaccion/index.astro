@@ -106,7 +106,6 @@ const TABS = [
           <nav class="apn-tabs pnl-sub" role="tablist" aria-label="Noticias">
             <button type="button" role="tab" aria-selected="true" data-nf="pending">Por aprobar <b data-nn="pending"></b></button>
             <button type="button" role="tab" aria-selected="false" data-nf="check">Vistazo rápido <b data-nn="check"></b></button>
-            <button type="button" role="tab" aria-selected="false" data-nf="done">Resueltas <b data-nn="done"></b></button>
             <button type="button" role="tab" aria-selected="false" data-nf="pub">Publicadas <b data-nn="pub"></b></button>
           </nav>
           <div class="pnl-list" data-news></div>
@@ -199,7 +198,7 @@ const TABS = [
     };
     const me = () => get<Staff | null>('nx-staff', null);
 
-    type NewsState = Record<string, { status: 'approved' | 'returned' | 'ok' | 'removed'; title?: string; at: number }>;
+    type NewsState = Record<string, { status: 'ok' | 'removed'; at: number }>; // Vistazo rápido: what this editor already checked
     const news = () => get<NewsState>('nx-panel-news', {});
     const setNews = (id: string, v: NewsState[string]) => { set('nx-panel-news', { ...news(), [id]: v }); };
     const checkList = () => RECENT.slice(0, 6).filter((r) => !news()[`c-${r.id}`]);
@@ -301,11 +300,10 @@ const TABS = [
       },
 
       noticias() {
-        const c = counts(); const st = news();
+        const c = counts();
         $('[data-nn="pending"]').textContent = c.pending ? String(c.pending) : '';
         $('[data-nn="check"]').textContent = c.check ? String(c.check) : '';
         $('[data-nn="pub"]').textContent = String(PUBLISHED.length);
-        const done = Object.keys(st).length; $('[data-nn="done"]').textContent = done ? String(done) : '';
         const box = $('[data-news]');
         if (nf === 'pending') {
           const canApprove = ['admin', 'editor'].includes(me()?.role ?? '');
@@ -326,11 +324,6 @@ const TABS = [
           box.innerHTML = `<input type="search" class="pl-q pnl-pub-q" data-pub-q placeholder="Buscar en las ${PUBLISHED.length} noticias publicadas…" aria-label="Buscar noticias publicadas" value="${esc(pubQ)}" /><div data-pub-list></div>`;
           paintPub();
           $<HTMLInputElement>('[data-pub-q]', box).addEventListener('input', (e) => { pubQ = (e.target as HTMLInputElement).value; paintPub(); });
-        } else {
-          const label: Record<string, string> = { approved: 'Aprobada y publicada', returned: 'Devuelta al periodista', rejected: 'Rechazada', ok: 'Revisada: se ve bien', removed: 'Quitada del sitio' };
-          const title = (id: string) => st[id]?.title ?? RECENT.find((r) => `c-${r.id}` === id)?.title ?? PUBLISHED.find((p) => `c-${p.id}` === id)?.title ?? id;
-          box.innerHTML = Object.entries(st).sort((a, b) => b[1].at - a[1].at).map(([id, v]) => `<article class="pnl-row"><div><p class="pnl-muted">${label[v.status]} · ${ago(v.at)}</p><h2>${esc(title(id))}</h2></div><div class="pnl-row-acts"><button type="button" class="pnl-link" data-undo="${id}">Deshacer</button></div></article>`).join('')
-            || '<p class="apr-empty">Todavía no hay decisiones.</p>';
         }
       },
 
@@ -420,8 +413,6 @@ const TABS = [
       const t = e.target as HTMLElement;
       const sub = t.closest<HTMLElement>('[data-nf]');
       if (sub) { nf = sub.dataset.nf!; $$('[data-nf]').forEach((b) => b.setAttribute('aria-selected', String(b === sub))); paint.noticias(); return; }
-      const undo = t.closest<HTMLElement>('[data-undo]');
-      if (undo) { const st = news(); delete st[undo.dataset.undo!]; set('nx-panel-news', st); paint.noticias(); paintCounts(); return; }
       const rng = t.closest<HTMLElement>('[data-range]');
       if (rng) { $$('[data-range]').forEach((b) => b.setAttribute('aria-pressed', String(b === rng))); paint.analitica(); return; }
       const rm = t.closest<HTMLElement>('[data-rm]');
@@ -442,12 +433,12 @@ const TABS = [
           if (!(await ask(`¿Aprobar y publicar “${r?.doc.title || 'esta noticia'}”? ${r?.doc.date && Date.parse(r.doc.date) > Date.now() ? 'Saldrá sola a la hora programada.' : 'Aparece en el sitio en unos 2 minutos.'}`, { ok: 'Aprobar y publicar' }))) return;
           (rv as HTMLButtonElement).disabled = true; (rv as HTMLButtonElement).textContent = 'Publicando…';
           dispatchEvent(new CustomEvent('nx-approve-article', { detail: { id } }));
-          setNews(`a-${id}`, { status: 'approved', title: r?.doc.title, at: Date.now() }); return;
+          return;
         }
         if (rv.dataset.rv === 'return') {
           const n = await askText('¿Qué debe corregir el periodista?', { placeholder: 'ej. Falta la fuente oficial del dato.', ok: 'Devolver', multiline: true }); if (n === null) return;
           dispatchEvent(new CustomEvent('nx-return-article', { detail: { id, note: n } }));
-          setNews(`a-${id}`, { status: 'returned', title: r?.doc.title, at: Date.now() }); return;
+          return;
         }
       }
       const act = t.closest<HTMLElement>('[data-act]'); const card = t.closest<HTMLElement>('.pnl-draft,.pnl-row');

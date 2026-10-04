@@ -24,10 +24,11 @@ create policy "staff read articles" on articles for select
   using (owner = auth.uid() or staff_role() in ('admin', 'editor'));
 create policy "staff create articles" on articles for insert
   with check (staff_role() is not null and owner = auth.uid() and (status in ('draft', 'review') or staff_role() in ('admin', 'editor')));
--- Only editors and admins can mark a story scheduled or published (the Edge Function does it after saving to GitHub)
+-- Only editors and admins can mark a story published (the Edge Function does it after saving to GitHub).
+-- Reporters can keep editing their own scheduled stories (the function schedules them)
 create policy "staff edit articles" on articles for update
   using (owner = auth.uid() or staff_role() in ('admin', 'editor'))
-  with check (staff_role() in ('admin', 'editor') or (owner = auth.uid() and status in ('draft', 'review')));
+  with check (staff_role() in ('admin', 'editor') or (owner = auth.uid() and status in ('draft', 'review', 'scheduled')));
 create policy "staff delete articles" on articles for delete
   using (staff_role() in ('admin', 'editor') or (owner = auth.uid() and status = 'draft'));
 
