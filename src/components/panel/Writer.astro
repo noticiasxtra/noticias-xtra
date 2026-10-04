@@ -199,7 +199,7 @@ const TOOLS = [
   import { embedFor } from '../../lib/embeds.mjs';
   import { docCard } from '../../lib/doccard.mjs';
   import { ask, askText } from '../../lib/dialogs';
-  import { hasBackend, listArticles, putArticle, deleteArticle, uploadStoryFile, publishArticle } from '../../lib/backend';
+  import { hasBackend, listArticles, putArticle, deleteArticle, uploadStoryFile, publishArticle, lastSaveError } from '../../lib/backend';
   const root = document.querySelector<HTMLElement>('[data-wr]');
   if (root) {
     type Src = { name: string; url?: string };
@@ -236,7 +236,7 @@ const TOOLS = [
       if (!DB) return saveLocal(list);
       const { status, ...doc } = a;
       const ok = await putArticle(a.id, status, doc, a.slug);
-      if (!ok) toast('No se pudo guardar en la base de datos. Revisa la conexión e intenta otra vez.');
+      if (!ok) toast(`No se pudo guardar en la base de datos. ${lastSaveError || 'Revisa la conexión e intenta otra vez.'}`);
       return ok;
     }
     async function drop(id: string): Promise<boolean> {
@@ -596,6 +596,7 @@ const TOOLS = [
         sources, related, correction: unq(fm.correction || ''), body: mdToHtml(m[2]) };
     }
     async function importStory(id: string) {
+      if (DB) await refresh(); // the team's latest: someone may have opened this story already
       const have = load().find((a) => a.slug === id); if (have) { openEditor(have); return; }
       toast('Abriendo la noticia…');
       const r = await fetch(`${RAW}${encodeURIComponent(id)}.md?t=${Date.now()}`).catch(() => null);

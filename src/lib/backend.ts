@@ -104,17 +104,28 @@ export async function listArticles(): Promise<ArticleRow[] | null> {
     return r.ok ? await r.json() : null;
   } catch { return null; }
 }
-/** Saves an article (updates it, or creates it the first time). */
+/** Saves an article (updates it, or creates it the first time). When it fails, lastSaveError says why (in Spanish). */
+export let lastSaveError = '';
+const why = async (r: Response) => {
+  const e = await r.json().catch(() => ({})) as { message?: string; code?: string };
+  if (r.status === 401 || /JWT/i.test(e.message ?? '')) return 'Tu sesión venció: sal del panel y vuelve a entrar.';
+  if (e.code === '23505') return 'Esta noticia ya está guardada en el panel: búscala en la lista y ábrela desde ahí.';
+  if (e.code === '42501' || r.status === 403) return 'Tu cuenta no tiene permiso para guardar esta noticia.';
+  return `Error ${r.status}${e.message ? `: ${e.message}` : ''}`;
+};
 export async function putArticle(id: string, status: string, doc: unknown, slug?: string): Promise<boolean> {
-  const token = await freshToken(); if (!token) return false;
+  lastSaveError = '';
+  const token = await freshToken(); if (!token) { lastSaveError = 'No has entrado al panel en esta dirección: sal y vuelve a entrar.'; return false; }
   const body = JSON.stringify({ status, doc, updated_at: new Date().toISOString() });
   try {
     const up = await fetch(rest(`articles?id=eq.${encodeURIComponent(id)}`), { method: 'PATCH', headers: { ...head(token), Prefer: 'return=representation' }, body });
-    if (up.ok && (await up.json()).length) return true;
+    if (!up.ok) { lastSaveError = await why(up); return false; }
+    if ((await up.json()).length) return true;
     // New row; `slug` links it to a story already on the site, so publishing updates that same file
     const add = await fetch(rest('articles'), { method: 'POST', headers: head(token), body: JSON.stringify({ id, status, doc, ...(slug ? { slug } : {}) }) });
+    if (!add.ok) lastSaveError = await why(add);
     return add.ok;
-  } catch { return false; }
+  } catch { lastSaveError = 'No hay conexión.'; return false; }
 }
 export async function deleteArticle(id: string): Promise<boolean> {
   const token = await freshToken(); if (!token) return false;
