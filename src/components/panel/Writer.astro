@@ -212,7 +212,7 @@ const TOOLS = [
   import { embedFor } from '../../lib/embeds.mjs';
   import { docCard } from '../../lib/doccard.mjs';
   import { ask, askText } from '../../lib/dialogs';
-  import { hasBackend, listArticles, putArticle, deleteArticle, uploadStoryFile, publishArticle, lastSaveError, logPanelError } from '../../lib/backend';
+  import { hasBackend, listArticles, putArticle, deleteArticle, uploadStoryFile, publishArticle, lastSaveError, logPanelError, getAnalytics } from '../../lib/backend';
   const root = document.querySelector<HTMLElement>('[data-wr]');
   if (root) {
     type Src = { name: string; url?: string };
@@ -310,14 +310,26 @@ const TOOLS = [
       return [...local, ...PUBLISHED.filter((p) => !slugs.has(p.id))].filter(mine);
     }
     const LIVE = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>';
+    // Real views per story (last 28 days, Google Analytics), for editors and the admin; loaded once
+    let VIEWS: Map<string, number> | null = null; let viewsAsked = false;
+    function loadViews() {
+      if (viewsAsked || !DB || !canPublish()) return; viewsAsked = true;
+      void getAnalytics(28, 1000).then((d) => {
+        if ('error' in d) return;
+        VIEWS = new Map(); for (const p of d.pages) { const m = p.path.match(/^\/noticia\/([^/]+)/); if (m) VIEWS.set(m[1], (VIEWS.get(m[1]) ?? 0) + p.views); }
+        if (tab === 'published') renderList();
+      });
+    }
     function renderPublished(pubs: Pub[]) {
+      loadViews();
       const rows = pubs.slice().sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
+      const viewsOf = (p: Pub) => { const slug = p.url.match(/noticia\/([^/]+)/)?.[1] ?? p.id; return VIEWS ? ` · <span class="wr-views">👁 ${(VIEWS.get(slug) ?? 0).toLocaleString('es-PR')} vistas en 28 días</span>` : ''; };
       $('[data-wr-list]').innerHTML = rows.map((p) => {
         const mineArt = load().some((a) => a.id === p.id);
         const siteStory = !mineArt && !p.local && canPublish(); // a story already on the site (AI or older): editors and admins
         return `<article class="pnl-row wr-pub" data-pid="${esc(p.id)}"${mineArt ? ` data-id="${esc(p.id)}"` : ''}>
           <span class="wr-pub-ic" title="Publicada" aria-label="Publicada">${LIVE}</span>
-          <div class="wr-pub-main"><p class="pnl-muted">${esc(p.section)} · ${esc(p.author)} · ${new Date(p.date).toLocaleDateString('es-PR', { day: 'numeric', month: 'short', year: 'numeric' })}${p.local ? ' · <span class="wr-ai">desde el editor</span>' : ''}</p>
+          <div class="wr-pub-main"><p class="pnl-muted">${esc(p.section)} · ${esc(p.author)} · ${new Date(p.date).toLocaleDateString('es-PR', { day: 'numeric', month: 'short', year: 'numeric' })}${p.local ? ' · <span class="wr-ai">desde el editor</span>' : ''}${viewsOf(p)}</p>
             <h2>${p.url ? `<a href="${p.url}" target="_blank" rel="noopener">${esc(p.title)}</a>` : esc(p.title)}</h2>
           </div>
           <div class="pnl-row-acts">${mineArt ? '<button type="button" class="adp-btn" data-la="edit">Editar o corregir</button>' : siteStory ? `<button type="button" class="adp-btn" data-import="${esc(p.id)}">Editar o corregir</button>` : ''}${p.url ? `<a class="adp-btn ghost-dark" href="${p.url}" target="_blank" rel="noopener">Ver en el sitio ↗</a>` : ''}</div>

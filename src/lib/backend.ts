@@ -127,6 +127,34 @@ export async function putArticle(id: string, status: string, doc: unknown, slug?
     return add.ok;
   } catch { lastSaveError = 'No hay conexión.'; return false; }
 }
+// ---- Visitor numbers from Google Analytics (Edge Function "analitica"; supabase/functions/analitica) ----
+export type Analytics = {
+  days: number; now: number; at: string;
+  totals: { users: number; views: number; sessions: number; avgSeconds: number; newUsers: number };
+  series: { at: string; users: number; views: number }[];
+  pages: { path: string; views: number; users: number }[];
+  channels: { name: string; sessions: number }[];
+  devices: { name: string; users: number }[];
+  countries: { name: string; users: number }[];
+};
+const analyticsCache = new Map<string, Promise<Analytics | { error: string }>>();
+/** Visits for the last `days` (1, 7 or 28) and the `top` most-viewed pages. Shared by the Analítica tab and Escribir. */
+export function getAnalytics(days: 1 | 7 | 28, top = 20, fresh = false): Promise<Analytics | { error: string }> {
+  const key = `${days}:${top}`;
+  if (!fresh && analyticsCache.has(key)) return analyticsCache.get(key)!;
+  const p = (async () => {
+    const token = await freshToken(); if (!token) return { error: 'Tu sesión venció. Sal y vuelve a entrar al panel.' };
+    try {
+      const r = await fetch(`${BACKEND.url.replace(/\/$/, '')}/functions/v1/analitica`, { method: 'POST', headers: head(token), body: JSON.stringify({ days, top }) });
+      if (r.status === 404) return { error: 'Falta instalar la función "analitica" en Supabase.' };
+      const out = await r.json().catch(() => ({}));
+      return r.ok ? out : { error: out.error || `Error ${r.status}` };
+    } catch { return { error: 'No hay conexión con el servidor. Intenta otra vez.' }; }
+  })();
+  analyticsCache.set(key, p); p.then((x) => { if ('error' in x) analyticsCache.delete(key); });
+  return p;
+}
+
 /** Notes a failed publish, schedule or take-down for Salud del sitio (supabase/salud.sql). Never blocks the panel. */
 export async function logPanelError(who: string, what: string, detail: string): Promise<void> {
   await staffApi('panel_errors', { method: 'POST', body: JSON.stringify({ who: who.slice(0, 60), what: what.slice(0, 200), detail: detail.slice(0, 500) }) }).catch(() => null);
