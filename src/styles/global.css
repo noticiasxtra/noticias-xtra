@@ -4035,3 +4035,4 @@ a,button,summary,label{-webkit-tap-highlight-color:transparent}
 .wr-pub-head .pnl-kpi small{font-size:11px}
 .wr-pub-head .wr-top-t{font-size:13px !important;-webkit-line-clamp:1 !important}
 @media (max-width:1280px){ .wr-pub{flex-wrap:wrap} .wr-pub-main{flex-basis:calc(100% - 40px)} .wr-pub .pnl-row-acts{width:100%;padding-left:40px;flex-wrap:wrap} }
+.fo-empty{list-style:none;padding:18px 4px;color:var(--muted)}

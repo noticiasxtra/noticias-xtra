@@ -1,7 +1,7 @@
 ---
 // Foro Xtra: readers' threads, Reddit style (topics, replies, votes), linked from Opinión.
-// DEMO: no server yet, so new topics, replies and votes are saved only in this reader's browser
-// (localStorage 'nx-foro'). The sample topics are marked EJEMPLO.
+// With reader accounts (Supabase) topics, replies and votes are shared by everyone (forum_* tables,
+// supabase/connect-all.sql); without them it's a preview kept in this browser ('nx-foro') with EJEMPLO topics.
 import Base from '../layouts/Base.astro';
 import AdSlot from '../components/AdSlot.astro';
 import { url } from '../lib/site';
@@ -12,8 +12,8 @@ const CATS = ['Puerto Rico', 'Gobierno', 'Economía', 'Deportes', 'Educación', 
   <main class="wrap" id="main">
     <div class="fo-head">
       <div>
-        <h1>Foro <span>Xtra</span> <span class="sp-demo">DEMO</span></h1>
-        <p>Los lectores proponen temas, responden y votan. Vista previa: lo que publiques se guarda solo en este dispositivo.</p>
+        <h1>Foro <span>Xtra</span> <span class="sp-demo" data-fo-demo>DEMO</span></h1>
+        <p data-fo-intro>Los lectores proponen temas, responden y votan. Vista previa: lo que publiques se guarda solo en este dispositivo.</p>
       </div>
       <a class="fo-back" href={url('seccion/opinion')}>← Opinión</a>
     </div>
@@ -53,6 +53,128 @@ const CATS = ['Puerto Rico', 'Gobierno', 'Economía', 'Deportes', 'Educación', 
     window.__FORO_SAMPLES = SAMPLES;
   </script>
   <script>
+    import { accountsOn, loggedIn, askLogin, api, myId } from '../lib/account';
+    import { assess } from '../lib/moderation';
+    import { ask } from '../lib/dialogs';
+    if (accountsOn()) liveForum(); else previewForum();
+
+    // ---------- Real forum (Supabase) ----------
+    function liveForum() {
+      type T = { id: string; cat: string; title: string; body: string; votes: number; replies: number; created_at: string; user_id: string; author: { username: string } | null };
+      type Rp = { id: string; body: string; created_at: string; user_id: string; author: { username: string } | null };
+      document.querySelector('[data-fo-demo]')?.remove();
+      document.querySelector('[data-fo-intro]')!.textContent = 'Los lectores proponen temas, responden y votan. Para participar, entra con tu cuenta.';
+      const list = document.querySelector<HTMLUListElement>('[data-fo-list]')!;
+      const form = document.querySelector<HTMLFormElement>('[data-fo-new]')!;
+      const err = form.querySelector<HTMLElement>('[data-fo-err]')!;
+      let threads: T[] = [], votes: Record<string, number> = {}, sort: 'top' | 'new' = 'top', cat = '';
+      const open = new Map<string, Rp[]>();
+      const ago = (iso: string) => { const m = Math.round((Date.now() - Date.parse(iso)) / 60000); return m < 1 ? 'ahora' : m < 60 ? `hace ${m} min` : m < 1440 ? `hace ${Math.round(m / 60)} h` : `hace ${Math.round(m / 1440)} d`; };
+      const el = <K extends keyof HTMLElementTagNameMap>(tag: K, cls?: string, text?: string) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text !== undefined) e.textContent = text; return e; };
+      const need = (why: string) => { if (loggedIn()) return true; askLogin(why); return false; };
+      const bad = (t: string) => { const a = assess(t); return a.verdict === 'block' ? a.reasons.join(', ').toLowerCase() : ''; };
+
+      async function load() {
+        const r = await api('forum_threads?select=id,cat,title,body,votes,replies,created_at,user_id,author:profiles!forum_threads_user_id_fkey(username)&status=eq.visible&order=created_at.desc&limit=200', {}, false);
+        threads = r?.ok ? await r.json() : [];
+        votes = {};
+        if (loggedIn()) {
+          const v = await api(`forum_votes?user_id=eq.${myId()}&select=target,value`);
+          if (v?.ok) (await v.json()).forEach((x: { target: string; value: number }) => (votes[x.target] = x.value));
+        }
+        render();
+      }
+      async function loadReplies(id: string) {
+        const r = await api(`forum_replies?thread=eq.${id}&status=eq.visible&select=id,body,created_at,user_id,author:profiles!forum_replies_user_id_fkey(username)&order=created_at.asc`, {}, false);
+        open.set(id, r?.ok ? await r.json() : []);
+        render();
+      }
+      async function vote(t: T, v: number) {
+        if (!need('Entra para votar.')) return;
+        const cur = votes[t.id] ?? 0, next = cur === v ? 0 : v;
+        t.votes += next - cur; votes[t.id] = next; render(); // right away; the server keeps the real total
+        const r = next === 0
+          ? await api(`forum_votes?target=eq.${t.id}&user_id=eq.${myId()}`, { method: 'DELETE' })
+          : await api('forum_votes', { method: 'POST', headers: { Prefer: 'resolution=merge-duplicates' }, body: JSON.stringify({ target: t.id, kind: 'thread', value: next }) });
+        if (!r?.ok) void load();
+      }
+      function render() {
+        let items = threads.filter((t) => !cat || t.cat === cat);
+        items = sort === 'top' ? [...items].sort((a, b) => b.votes - a.votes) : [...items].sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at));
+        list.replaceChildren(...items.map((t) => {
+          const li = el('li', 'fo-item');
+          const box = el('div', 'fo-vote');
+          const up = el('button', 'up', '▲'); up.type = 'button'; up.setAttribute('aria-label', 'Votar a favor'); up.setAttribute('aria-pressed', String(votes[t.id] === 1));
+          const dn = el('button', 'dn', '▼'); dn.type = 'button'; dn.setAttribute('aria-label', 'Votar en contra'); dn.setAttribute('aria-pressed', String(votes[t.id] === -1));
+          up.addEventListener('click', () => void vote(t, 1)); dn.addEventListener('click', () => void vote(t, -1));
+          box.append(up, el('b', '', String(t.votes)), dn);
+          const body = el('div', 'fo-body');
+          const meta = el('p', 'fo-meta'); meta.append(el('span', 'fo-cat', t.cat), document.createTextNode(` · @${t.author?.username ?? 'lector'} · ${ago(t.created_at)}`));
+          const actions = el('div', 'fo-actions');
+          const toggle = el('button', '', `💬 ${t.replies} ${t.replies === 1 ? 'respuesta' : 'respuestas'}`); toggle.type = 'button';
+          toggle.addEventListener('click', () => { if (open.has(t.id)) { open.delete(t.id); render(); } else void loadReplies(t.id); });
+          actions.append(toggle);
+          if (t.user_id === myId()) {
+            const del = el('button', '', 'Borrar'); del.type = 'button';
+            del.addEventListener('click', async () => {
+              if (!(await ask('¿Borrar tu tema y sus respuestas?', { ok: 'Borrar', danger: true }))) return;
+              const r = await api(`forum_threads?id=eq.${t.id}`, { method: 'DELETE' }); if (r?.ok) void load();
+            });
+            actions.append(del);
+          }
+          body.append(meta, el('h3', '', t.title), el('p', 'fo-text', t.body), actions);
+          const reps = open.get(t.id);
+          if (reps) {
+            const rl = el('ul', 'fo-replies');
+            reps.forEach((r) => { const ri = el('li'); ri.append(el('b', '', `@${r.author?.username ?? 'lector'}`), document.createTextNode(` ${r.body}`)); rl.append(ri); });
+            const f = document.createElement('form'); f.className = 'fo-reply';
+            const inp = document.createElement('input'); inp.placeholder = loggedIn() ? 'Escribe una respuesta…' : 'Entra para responder…'; inp.maxLength = 1000; inp.setAttribute('aria-label', 'Respuesta');
+            inp.addEventListener('focus', () => { if (!loggedIn()) { inp.blur(); askLogin('Entra para responder.'); } });
+            const go = el('button', 'cm-send', 'Responder'); (go as HTMLButtonElement).type = 'submit';
+            f.append(inp, go);
+            f.addEventListener('submit', async (e) => {
+              e.preventDefault();
+              if (!need('Entra para responder.')) return;
+              const text = inp.value.trim(); const why = bad(text);
+              if (!text || why) { inp.value = ''; inp.placeholder = why ? `No se puede publicar: ${why}.` : 'Escribe algo primero.'; return; }
+              const r = await api('forum_replies', { method: 'POST', body: JSON.stringify({ thread: t.id, body: text }) });
+              if (r?.ok) { t.replies++; await loadReplies(t.id); } else inp.placeholder = 'No se pudo publicar. Intenta otra vez.';
+            });
+            body.append(rl, f);
+          }
+          li.append(box, body);
+          return li;
+        }));
+        if (!items.length) { const e = el('li', 'fo-empty', cat ? 'Todavía no hay temas en esta categoría.' : 'Sé la primera persona en proponer un tema.'); list.append(e); }
+      }
+      document.querySelectorAll<HTMLButtonElement>('[data-sort]').forEach((b) => b.addEventListener('click', () => {
+        sort = b.dataset.sort as 'top' | 'new';
+        document.querySelectorAll('[data-sort]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+        render();
+      }));
+      document.querySelectorAll<HTMLButtonElement>('[data-cat]').forEach((b) => b.addEventListener('click', () => { cat = b.dataset.cat || ''; render(); }));
+      form.querySelectorAll('input,textarea').forEach((x) => x.addEventListener('focus', () => { if (!loggedIn()) { (x as HTMLElement).blur(); askLogin('Entra para proponer un tema.'); } }));
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!need('Entra para proponer un tema.')) return;
+        const title = (form.querySelector('#fo-title') as HTMLInputElement).value.trim();
+        const body = (form.querySelector('#fo-body') as HTMLTextAreaElement).value.trim();
+        const c = (form.querySelector('#fo-cat') as HTMLSelectElement).value;
+        if (title.length < 5) { err.textContent = 'Escribe un título más largo.'; err.hidden = false; return; }
+        const why = bad(`${title} ${body}`); if (why) { err.textContent = `No se puede publicar: ${why}.`; err.hidden = false; return; }
+        err.hidden = true;
+        const r = await api('forum_threads', { method: 'POST', body: JSON.stringify({ cat: c, title, body }) });
+        if (!r?.ok) { err.textContent = 'No se pudo publicar. Intenta otra vez.'; err.hidden = false; return; }
+        form.reset(); sort = 'new';
+        document.querySelectorAll('[data-sort]').forEach((x) => x.setAttribute('aria-pressed', String((x as HTMLElement).dataset.sort === 'new')));
+        void load();
+      });
+      addEventListener('nx-account', () => void load());
+      void load();
+    }
+
+    // ---------- Preview forum (this browser only) ----------
+    function previewForum() {
     type Reply = { by: string; text: string; votes: number; mine?: boolean };
     type Thread = { id: string; cat: string; title: string; body: string; by: string; votes: number; ago?: string; at?: number; replies: Reply[]; mine?: boolean; sample?: boolean };
     const BAD = /\b(pendej\w*|cabr[oó]n\w*|puñet\w*|carajo|mierd\w*|idiota)\b/i;
@@ -147,5 +269,6 @@ const CATS = ['Puerto Rico', 'Gobierno', 'Economía', 'Deportes', 'Educación', 
       render();
     });
     render();
+    }
   </script>
 </Base>
