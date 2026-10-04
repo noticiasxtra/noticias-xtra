@@ -7,6 +7,7 @@
 // The real version needs a login so only staff can open it.
 import { FORMATS } from '../lib/ads';
 import { url } from '../lib/site';
+import { hasBackend } from '../lib/backend';
 const fmtInfo = FORMATS.map(({ id, name, slots, art, where }) => ({ id, name, slots, art, where }));
 const home = url();
 interface Props { embedded?: boolean } // inside the staff panel (/redaccion/): no page wrapper
@@ -14,7 +15,7 @@ const { embedded = false } = Astro.props;
 const Tag = embedded ? 'section' : 'main';
 ---
 <Tag class:list={["apr", !embedded && "wrap"]} id={embedded ? undefined : "main"} data-apr data-formats={JSON.stringify(fmtInfo)} data-home={home}>
-  <p class="pf-demo"><span class="sp-demo">VISTA PREVIA</span> Página interna para quien aprueba los anuncios. Muestra las solicitudes hechas en este dispositivo y dos de ejemplo.</p>
+  {!hasBackend() && <p class="pf-demo"><span class="sp-demo">VISTA PREVIA</span> Página interna para quien aprueba los anuncios. Muestra las solicitudes hechas en este dispositivo y dos de ejemplo.</p>}
   <header class="apr-head">
     <h1>Aprobar anuncios</h1>
     <p class="apn-sub">Revisa cada anuncio, diséñalo si el cliente lo pidió, y apruébalo. Prometemos responder en 24 horas.</p>

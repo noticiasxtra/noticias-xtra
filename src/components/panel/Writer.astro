@@ -300,8 +300,7 @@ const TOOLS = [
         </div></article>`).join('') || `<p class="apr-empty">${tab === 'draft' ? 'No tienes borradores. Toca “Nueva noticia” para empezar.' : 'Nada aquí todavía.'}</p>`;
     }
 
-    // ---------- Publicadas: every published article with its numbers (DEMO until Google Analytics is connected) ----------
-    let pubSort: 'new' | 'views' = 'new'; let openStats = '';
+    // ---------- Publicadas: every published article (newest first) ----------
     function publishedList(): Pub[] {
       const s = me(); const mine = (p: Pub) => canPublish() || p.author === s?.name;
       const mineHere = load().filter((a) => a.status === 'published');
@@ -310,58 +309,21 @@ const TOOLS = [
       const slugs = new Set(mineHere.map((a) => a.slug).filter(Boolean));
       return [...local, ...PUBLISHED.filter((p) => !slugs.has(p.id))].filter(mine);
     }
-    // Stable sample numbers per article: they grow with its age and never change between visits
-    const hash = (t: string) => [...t].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
-    function statsOf(p: Pub) {
-      const h = hash(p.id), days = Math.max(0.2, (Date.now() - Date.parse(p.date)) / 864e5);
-      const peak = 600 + (h % 5200);
-      const views = Math.round(peak * (1 - Math.exp(-days / 1.6)) + (h % 90));
-      const byDay = Array.from({ length: 7 }, (_, i) => { const d = days - (6 - i); return d < 0 ? 0 : Math.round(peak * Math.exp(-Math.max(0, d) / 1.6) * 0.42 + ((h >> i) % 40)); });
-      const mins = 1 + (h % 3), secs = 10 + (h % 50);
-      const google = 30 + (h % 20), fb = 15 + ((h >> 3) % 18), wa = 8 + ((h >> 5) % 10), direct = 100 - google - fb - wa;
-      const pr = 62 + (h % 20), phone = 70 + ((h >> 2) % 15);
-      return { views, byDay, time: `${mins} min ${secs} s`, comments: (h >> 4) % 23, shares: Math.round(views / (40 + (h % 30))),
-        refs: [['Google', google], ['Facebook', fb], ['WhatsApp', wa], ['Directo y otros', direct]] as Array<[string, number]>,
-        geo: [['Puerto Rico', pr], ['Estados Unidos', 100 - pr - 3], ['Otros países', 3]] as Array<[string, number]>, phone };
-    }
-    const fmtN = (n: number) => n.toLocaleString('es-PR');
-    const EYE = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
     const LIVE = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>';
-    const bars = (rows: Array<[string, number]>) => `<ul class="pc-rows">${rows.map(([l, v]) => `<li><span class="pc-rl">${esc(l)}</span><span class="pc-rb"><i style="width:${v}%"></i></span><b>${v}%</b></li>`).join('')}</ul>`;
     function renderPublished(pubs: Pub[]) {
-      const rows = pubs.map((p) => ({ p, st: statsOf(p) })).sort((a, b) => (pubSort === 'views' ? b.st.views - a.st.views : Date.parse(b.p.date) - Date.parse(a.p.date)));
-      const total = rows.reduce((a, r) => a + r.st.views, 0);
-      const top = rows.slice().sort((a, b) => b.st.views - a.st.views)[0];
-      const head = `<div class="wr-pub-head">
-        <div class="pnl-kpis"><div class="pnl-kpi"><span>Publicadas</span><b>${fmtN(rows.length)}</b></div><div class="pnl-kpi"><span>Vistas en total</span><b>${fmtN(total)}</b><small>DEMO</small></div>
-          <div class="pnl-kpi"><span>Promedio por noticia</span><b>${fmtN(Math.round(total / Math.max(1, rows.length)))}</b></div>
-          ${top ? `<div class="pnl-kpi"><span>La más leída</span><b class="wr-top-t">${esc(top.p.title)}</b><small>${fmtN(top.st.views)} vistas</small></div>` : ''}</div>
-        <div class="pnl-range" role="group" aria-label="Ordenar"><button type="button" data-psort="new" aria-pressed="${pubSort === 'new'}">Más recientes</button><button type="button" data-psort="views" aria-pressed="${pubSort === 'views'}">Más vistas</button></div>
-        <p class="pnl-muted pnl-small"><span class="sp-demo">DEMO</span> Las vistas son de muestra. Con Google Analytics conectado, aquí salen las reales de cada noticia.</p></div>`;
-      $('[data-wr-list]').innerHTML = head + (rows.map(({ p, st }) => {
-        const open = openStats === p.id; const max = Math.max(1, ...st.byDay);
+      const rows = pubs.slice().sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
+      $('[data-wr-list]').innerHTML = rows.map((p) => {
         const mineArt = load().some((a) => a.id === p.id);
         const siteStory = !mineArt && !p.local && canPublish(); // a story already on the site (AI or older): editors and admins
         return `<article class="pnl-row wr-pub" data-pid="${esc(p.id)}"${mineArt ? ` data-id="${esc(p.id)}"` : ''}>
           <span class="wr-pub-ic" title="Publicada" aria-label="Publicada">${LIVE}</span>
-          <div class="wr-pub-main"><p class="pnl-muted">${esc(p.section)} · ${esc(p.author)} · ${new Date(p.date).toLocaleDateString('es-PR', { day: 'numeric', month: 'short', year: 'numeric' })}${p.ai ? ' · <span class="wr-ai">IA</span>' : ''}${p.local ? ' · <span class="wr-ai">desde el editor</span>' : ''}</p>
+          <div class="wr-pub-main"><p class="pnl-muted">${esc(p.section)} · ${esc(p.author)} · ${new Date(p.date).toLocaleDateString('es-PR', { day: 'numeric', month: 'short', year: 'numeric' })}${p.local ? ' · <span class="wr-ai">desde el editor</span>' : ''}</p>
             <h2>${p.url ? `<a href="${p.url}" target="_blank" rel="noopener">${esc(p.title)}</a>` : esc(p.title)}</h2>
-            <p class="wr-pub-stats"><span class="wr-views">${EYE} <b>${fmtN(st.views)}</b> vistas</span><span>⏱ ${st.time}</span><span>💬 ${st.comments}</span><span>↗ ${fmtN(st.shares)} compartidas</span></p>
-            ${open ? `<div class="wr-pub-detail">
-              <div><h3 class="pnl-h4">Vistas en los últimos 7 días</h3><div class="wr-spark">${st.byDay.map((v, i) => `<span title="${fmtN(v)} vistas"><i style="height:${Math.round((v / max) * 100)}%"></i><small>${['L', 'M', 'M', 'J', 'V', 'S', 'D'][(new Date(Date.now() - (6 - i) * 864e5).getDay() + 6) % 7]}</small></span>`).join('')}</div></div>
-              <div><h3 class="pnl-h4">De dónde llegan</h3>${bars(st.refs)}</div>
-              <div><h3 class="pnl-h4">Dónde están</h3>${bars(st.geo)}<p class="pnl-muted pnl-small">${st.phone}% en celular</p></div>
-            </div>` : ''}
           </div>
-          <div class="pnl-row-acts">${mineArt ? '<button type="button" class="adp-btn" data-la="edit">Editar o corregir</button>' : siteStory ? `<button type="button" class="adp-btn" data-import="${esc(p.id)}">Editar o corregir</button>` : ''}${p.url ? `<a class="adp-btn ghost-dark" href="${p.url}" target="_blank" rel="noopener">Ver en el sitio ↗</a>` : ''}<button type="button" class="adp-btn ${open ? '' : 'ghost-dark'}" data-pstats="${esc(p.id)}">${open ? 'Cerrar' : 'Estadísticas'}</button></div>
+          <div class="pnl-row-acts">${mineArt ? '<button type="button" class="adp-btn" data-la="edit">Editar o corregir</button>' : siteStory ? `<button type="button" class="adp-btn" data-import="${esc(p.id)}">Editar o corregir</button>` : ''}${p.url ? `<a class="adp-btn ghost-dark" href="${p.url}" target="_blank" rel="noopener">Ver en el sitio ↗</a>` : ''}</div>
         </article>`;
-      }).join('') || '<p class="apr-empty">Todavía no hay noticias publicadas.</p>');
+      }).join('') || '<p class="apr-empty">Todavía no hay noticias publicadas.</p>';
     }
-    root.addEventListener('click', (e) => {
-      const t = e.target as HTMLElement;
-      const so = t.closest<HTMLElement>('[data-psort]'); if (so) { pubSort = so.dataset.psort as 'new' | 'views'; renderList(); return; }
-      const ps = t.closest<HTMLElement>('[data-pstats]'); if (ps) { openStats = openStats === ps.dataset.pstats ? '' : ps.dataset.pstats!; renderList(); }
-    });
 
     // ---------- editor ----------
     const body = $('[data-body]');
@@ -705,7 +667,7 @@ const TOOLS = [
       const r = await publishArticle({ id: a.id, slug: a.slug, file, title: a.title, scheduled: false });
       if (!r.ok) { toast(`No se pudo quitar: ${r.error}`); return false; }
       await store({ ...a, status: 'draft', updated: Date.now(), note: `Quitada del sitio el ${new Date().toLocaleDateString('es-PR', { day: 'numeric', month: 'short' })}. Corrígela y publícala otra vez si hace falta.` });
-      await refresh(); renderList();
+      await refresh(); renderList(); dispatchEvent(new Event('nx-articles-changed'));
       toast('Quitada. Desaparece del sitio en unos 2 minutos. Está en Escribir → Borradores.');
       return true;
     }
@@ -973,21 +935,13 @@ const TOOLS = [
       if (!ok && !(await ask('Faltan cosas en “Antes de publicar”. ¿Seguir de todos modos?', { ok: 'Seguir' }))) return;
       goBtn.disabled = true;
       try {
-        if (!canPublish()) { cur.note = ''; if (await persist('review')) { toast('Enviada a revisión. Un editor la revisará.'); closeEditor(); } return; }
+        if (!canPublish()) { cur.note = ''; if (await persist('review')) { toast('Enviada a revisión. Un editor la revisará.'); closeEditor(); dispatchEvent(new Event('nx-articles-changed')); } return; }
         // Save first (as it is now), then publish the saved copy
         if (!(await persist(cur.status === 'published' || cur.status === 'scheduled' ? cur.status : 'draft'))) return;
-        if (await goLive(structuredClone(cur))) closeEditor();
+        if (await goLive(structuredClone(cur))) { closeEditor(); dispatchEvent(new Event('nx-articles-changed')); }
       } finally { goBtn.disabled = false; }
     });
     $('[data-wr-back]').addEventListener('click', closeEditor);
-    // A draft from the Noticias tab (Editar): it opens here as a story waiting for review, with the full editor
-    addEventListener('nx-edit-draft', async (e) => {
-      const d = (e as CustomEvent).detail as { title: string; description: string; sectionName: string; body: string; sources: Src[] };
-      const a: Art = { ...blank(), status: 'review', title: d.title, description: d.description,
-        section: SECS.find((x) => x.name === d.sectionName)?.id ?? 'puerto-rico', sources: d.sources.filter((x) => x.name),
-        body: d.body.split(/\n{2,}/).map((p) => `<p>${esc(p.trim())}</p>`).join('') };
-      await store(a); openEditor(a); toast('El borrador se abrió en Escribir. Edítalo y publícalo desde aquí.');
-    });
     $('[data-wr-new]').addEventListener('click', () => openEditor(blank()));
     root.addEventListener('click', async (e) => {
       const t = e.target as HTMLElement;
@@ -999,8 +953,17 @@ const TOOLS = [
       if (la.dataset.la === 'preview') showPreview(a);
       if (la.dataset.la === 'dup') { const { slug: _s, ...copy } = structuredClone(a); await store({ ...copy, id: `A-${Date.now().toString(36)}`, status: 'draft', title: `${a.title} (copia)`, updated: Date.now(), owner: me()?.name ?? a.owner }); renderList(); }
       if (la.dataset.la === 'del') { if (await ask(`¿Borrar “${a.title || 'Sin titular'}”?`, { ok: 'Borrar', danger: true })) { await drop(id); renderList(); } }
-      if (la.dataset.la === 'approve') { (la as HTMLButtonElement).disabled = true; await goLive(structuredClone(a)); renderList(); }
-      if (la.dataset.la === 'return') { const n = await askText('¿Qué debe corregir el periodista?', { placeholder: 'ej. Falta la fuente oficial del dato.', ok: 'Devolver', multiline: true }); if (n === null) return; await store({ ...a, status: 'draft', note: n, updated: Date.now() }); renderList(); }
+      if (la.dataset.la === 'approve') { (la as HTMLButtonElement).disabled = true; await goLive(structuredClone(a)); renderList(); dispatchEvent(new Event('nx-articles-changed')); }
+      if (la.dataset.la === 'return') { const n = await askText('¿Qué debe corregir el periodista?', { placeholder: 'ej. Falta la fuente oficial del dato.', ok: 'Devolver', multiline: true }); if (n === null) return; await store({ ...a, status: 'draft', note: n, updated: Date.now() }); renderList(); dispatchEvent(new Event('nx-articles-changed')); }
+    });
+    // Noticias → Por aprobar: the same actions as this list, from the editor's queue
+    const reviewArt = async (id: string) => { await refresh(); const a = load().find((x) => x.id === id); if (!a) toast('Esa noticia ya no está en revisión.'); return a; };
+    addEventListener('nx-open-article', async (e) => { const a = await reviewArt((e as CustomEvent).detail.id); if (a) openEditor(a); });
+    addEventListener('nx-approve-article', async (e) => { const a = await reviewArt((e as CustomEvent).detail.id); if (a) await goLive(structuredClone(a)); renderList(); dispatchEvent(new Event('nx-articles-changed')); });
+    addEventListener('nx-return-article', async (e) => {
+      const { id, note } = (e as CustomEvent).detail; const a = await reviewArt(id); if (!a) return;
+      if (await store({ ...a, status: 'draft', note, updated: Date.now() })) toast('Devuelta al periodista con tu nota.');
+      renderList(); dispatchEvent(new Event('nx-articles-changed'));
     });
     addEventListener('beforeunload', () => { if (cur && dirty) void persist(); });
     if (DB) { $('[data-wr-list]').innerHTML = '<p class="apr-empty">Cargando las noticias del equipo…</p>'; refresh().then(renderList); } else renderList();
