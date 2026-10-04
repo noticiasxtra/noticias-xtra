@@ -19,13 +19,10 @@ const SAMPLES = kind === 'game' ? [
 import { LEVELS, RULES, LEVEL_INFO, SPECIALS } from '../lib/reputation';
 import { BADGE } from '../lib/badges';
 const levelName = (id: string) => LEVELS.find((l) => l.id === id)?.name ?? '';
-const STICKERS = ['👏', '🔥', '❤️', '😂', '😮', '😢', '🙏', '🇵🇷', '💯', '⚾', '🏀', '🎶'];
-// Our own drawn stickers and animated "GIFs Xtra" (public/stickers/); GIPHY search shows too when SITE.giphyKey is set
+// Our own drawn stickers (public/stickers/). Emojis and GIFs are off for now; GIF search (GIPHY) comes after launch
 import { SITE, url } from '../lib/site';
 const STICKER_IMGS = [['wepa', '¡Wepa!'], ['coqui', 'Coquí'], ['bandera', 'Bandera de Puerto Rico'], ['te-quiero-pr', 'Te quiero PR'], ['jajaja', 'Jajaja'], ['fuego', 'Fuego'],
   ['palante', "¡Pa'lante!"], ['que-bueno', '¡Qué bueno!'], ['bravo', '¡Bravo!'], ['cafe', 'Buenos días'], ['capicu', '¡Capicú!']];
-const GIF_IMGS = [['gif-wepa', '¡Wepa! animado'], ['gif-coqui', 'Coquí saltando'], ['gif-bandera', 'Bandera ondeando'], ['gif-corazon', 'Corazón latiendo'],
-  ['gif-jajaja', 'Jajaja animado'], ['gif-fuego', 'Fuego animado'], ['gif-bravo', '¡Bravo! con destellos'], ['gif-cafe', 'Café humeante']];
 ---
 {/* Phones: a compact bar opens the comments in a panel that slides up from the bottom, like Instagram */}
 <button type="button" class="cm-teaser" data-cm-teaser aria-controls="comentarios" aria-expanded="false">
@@ -45,25 +42,16 @@ const GIF_IMGS = [['gif-wepa', '¡Wepa! animado'], ['gif-coqui', 'Coquí saltand
   <form class="cm-form" data-cm-form novalidate>
     <span class="cm-av me" data-cm-me aria-hidden="true">T</span>
     <div class="cm-box">
-      <div class="cm-quick" aria-label="Emojis rápidos">{['❤️', '🔥', '👏', '😂', '😮', '😢', '🙌', '🇵🇷'].map((e) => <button type="button" data-quick={e} aria-label={`Añadir ${e}`}>{e}</button>)}</div>
       <p class="cm-replying" data-cm-replying hidden>Respondiendo a <b></b> <button type="button" data-cm-unreply aria-label="No responder">✕</button></p>
       <label for={`cm-text-${storyId}`} class="sr">Escribe un comentario</label>
       <textarea id={`cm-text-${storyId}`} rows="1" maxlength="500" placeholder="Añade un comentario…"></textarea>
       <div class="cm-media-prev" data-media-prev hidden><img alt="" /><button type="button" data-media-rm aria-label="Quitar">✕</button></div>
       <div class="cm-picker" data-picker hidden>
-        <div class="cm-pk-grid emoji" data-pane="emoji">{STICKERS.map((s) => <button type="button" data-stk={s} aria-label={`Emoji ${s}`}>{s}</button>)}</div>
         <div class="cm-pk-grid" data-pane="sticker" hidden>{STICKER_IMGS.map(([id, alt]) => <button type="button" data-media="sticker" data-src={url(`stickers/${id}.svg`)} aria-label={alt} title={alt}><img src={url(`stickers/${id}.svg`)} alt="" /></button>)}</div>
-        <div data-pane="gif" hidden data-giphy={SITE.giphyKey}>
-          {SITE.giphyKey && <input type="search" class="cm-gif-q" data-gif-q placeholder="Buscar GIF…" />}
-          <div class="cm-pk-grid" data-gif-grid>{GIF_IMGS.map(([id, alt]) => <button type="button" data-media="gif" data-src={url(`stickers/${id}.svg`)} aria-label={alt} title={alt}><img src={url(`stickers/${id}.svg`)} alt="" /></button>)}</div>
-          <p class="cm-pk-note">{SITE.giphyKey ? 'Busca en GIPHY o usa los GIFs Xtra.' : 'GIFs Xtra animados. Muy pronto podrás buscar más GIFs.'}</p>
-        </div>
       </div>
       <div class="cm-tools">
         <div class="cm-pick-btns" role="group" aria-label="Agregar">
-          <button type="button" data-pick-tab="emoji" aria-label="Emojis" aria-pressed="false">😊</button>
           <button type="button" data-pick-tab="sticker" aria-pressed="false">Sticker</button>
-          <button type="button" data-pick-tab="gif" aria-pressed="false">GIF</button>
           <label class="cm-photo-btn" title="Añadir una foto"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z" /><circle cx="12" cy="13" r="3.5" /></svg>Foto<input type="file" accept="image/*" data-cm-photo class="sr" /></label>
         </div>
         <span class="cm-err" data-cm-err hidden></span>

@@ -4002,8 +4002,10 @@ a,button,summary,label{-webkit-tap-highlight-color:transparent}
   .cm-backdrop{display:block;position:fixed;inset:0;z-index:69;background:rgba(10,10,18,.5);opacity:0;pointer-events:none;transition:opacity .25s}
   html.cm-open .cm-backdrop{opacity:1;pointer-events:auto}
   html.cm-open,html.cm-open body{overflow:hidden}
-  .cm{position:fixed;left:0;right:0;bottom:var(--kb,0px);z-index:70;display:flex;flex-direction:column;height:86dvh;max-height:calc(100dvh - var(--kb,0px) - 24px);margin:0;padding:0 14px;border:0;border-radius:20px 20px 0 0;box-shadow:0 -10px 40px rgba(22,22,29,.25);transform:translateY(105%);visibility:hidden;transition:transform .3s cubic-bezier(.2,.8,.2,1),visibility 0s .3s}
-  html.cm-open .cm{transform:none;visibility:visible;transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+  .cm{position:fixed;left:0;right:0;bottom:var(--kb,0px);z-index:70;display:none;flex-direction:column;height:86dvh;max-height:calc(100dvh - var(--kb,0px) - 24px);margin:0;padding:0 14px;border:0;border-radius:20px 20px 0 0;box-shadow:0 -10px 40px rgba(22,22,29,.25)}
+  /* Shown as soon as it opens; the slide is only a finishing touch (it never leaves the panel off screen) */
+  html.cm-open .cm{display:flex;animation:cm-up .28s cubic-bezier(.2,.8,.2,1)}
+  @keyframes cm-up{from{transform:translateY(20px);opacity:.85}}
   .cm-grab{display:grid;place-items:center;padding:8px 0 2px;touch-action:none}
   .cm-grab span{width:40px;height:5px;border-radius:999px;background:var(--line)}
   .cm-head{justify-content:center;padding-bottom:8px;border-bottom:1px solid var(--line);touch-action:none}
@@ -4015,9 +4017,8 @@ a,button,summary,label{-webkit-tap-highlight-color:transparent}
   .cm > .cm-rep{order:5}
   .cm > .cm-form{order:6;margin:0 -14px;padding:8px 14px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);border-bottom:0;background:var(--card)}
   .cm-quick{display:flex;justify-content:space-between;gap:4px;margin:0 0 8px}
-  .cm > .cm-form > .cm-av{margin-top:38px} /* next to the text box, below the quick emojis */
   .cm-quick button{border:0;background:none;font-size:22px;line-height:1;padding:2px;cursor:pointer}
   .cm-picker{max-height:34dvh;overflow-y:auto}
   .cm-list{touch-action:manipulation}
 }
-@media (max-width:760px) and (prefers-reduced-motion:reduce){ .cm,html.cm-open .cm{transition:none} .cm-burst{animation:none;opacity:0} }
+@media (max-width:760px) and (prefers-reduced-motion:reduce){ html.cm-open .cm{animation:none} .cm-burst{animation:none;opacity:0} }
