@@ -6,7 +6,7 @@ place: "Puerto Rico"
 date: 2026-10-04T20:45:00.000Z
 author: "Admin"
 aiAssisted: false
-draft: false
+draft: true
 sources:
   - name: "La Casa Blanca"
     url: "https://www.whitehouse.gov/news/"
