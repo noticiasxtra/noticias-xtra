@@ -38,6 +38,7 @@
 
 <script>
   import { ask } from '../../lib/dialogs';
+  import { sharedList } from '../../lib/shared';
   const root = document.querySelector<HTMLElement>('[data-tk]');
   if (root) {
     type Status = 'todo' | 'doing' | 'done';
@@ -57,12 +58,15 @@
     const ago = (t: number) => { const m = Math.round((Date.now() - t) / 60000); return m < 60 ? `hace ${Math.max(1, m)} min` : m < 1440 ? `hace ${Math.round(m / 60)} h` : `hace ${Math.round(m / 1440)} d`; };
     const ROLE: Record<string, string> = { admin: 'Administrador', editor: 'Editor', ads: 'Ventas', reporter: 'Periodista' };
     const STATUS: Record<Status, string> = { todo: 'Pendiente', doing: 'En progreso', done: 'Hecha' };
-    const tasks = () => get<Task[]>('nx-tasks', []);
-    const save = (l: Task[]) => set('nx-tasks', l);
+    // Shared by the whole team through Supabase (staff_tasks), mirrored on this device
+    const board = sharedList<Task>('staff_tasks', 'nx-tasks', 'nx-tasks');
+    const tasks = board.load, save = board.save;
+    // With Supabase, the preview's example tasks left on this device are never sent to the team
+    if (board.shared()) { try { localStorage.setItem('nx-tasks', JSON.stringify(tasks().filter((t) => !t.demo && !t.id.startsWith('T-EJ')))); } catch { /* storage blocked */ } }
     // The team comes from Equipo; the person logged in is always on it
     const EXAMPLE_TEAM: Member[] = [{ name: 'Editora (ejemplo)', mail: '', role: 'editor' }, { name: 'Ventas (ejemplo)', mail: '', role: 'ads' }, { name: 'Periodista (ejemplo)', mail: '', role: 'reporter' }];
     const team = (): Member[] => {
-      const saved = get<Member[]>('nx-staff-team', []); const t = saved.length ? saved : EXAMPLE_TEAM; const m = me();
+      const saved = get<Member[]>('nx-staff-team', []); const t = saved.length || board.shared() ? saved : EXAMPLE_TEAM; const m = me();
       return m && !t.some((x) => x.name === m.name) ? [{ name: m.name, mail: 'tú', role: m.role }, ...t] : t;
     };
     const av = (name: string, cls = '') => `<span class="tk-av ${cls}" title="${esc(name)}">${esc((name || '?')[0].toUpperCase())}</span>`;
@@ -70,7 +74,7 @@
 
     // A few example tasks, once, so the board isn't empty in the preview
     function seed() {
-      if (localStorage.getItem('nx-tasks-seeded') || !me()) return;
+      if (board.shared() || localStorage.getItem('nx-tasks-seeded') || !me()) return; // examples only in the preview
       try { localStorage.setItem('nx-tasks-seeded', '1'); } catch { return; }
       const t = team(); const n = (i: number) => t[i % Math.max(1, t.length)]?.name ?? me()!.name; // 0 = me, 1 editor, 2 sales, 3 reporter
       const base = { notes: '', mates: [] as string[], by: me()!.name, created: Date.now() - 864e5, comments: [] as Task['comments'], demo: true };
@@ -191,6 +195,8 @@
       if (text) update(id, (t) => t.comments.push({ who: me()?.name ?? '', at: Date.now(), text }));
     });
     addEventListener('nx-staff-change', render);
+    addEventListener('nx-team', render);
     render();
+    void board.refresh().then((ok) => ok && render()); // the team's latest tasks
   }
 </script>

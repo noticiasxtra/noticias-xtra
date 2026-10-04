@@ -146,3 +146,24 @@ export async function staffApi(path: string, init: RequestInit = {}): Promise<Re
   const token = await freshToken(); if (!hasBackend() || !token) return null;
   return fetch(rest(path), { ...init, headers: { ...head(token), ...(init.headers || {}) } }).catch(() => null);
 }
+
+// ---- The staff team (panel → Equipo); supabase/connect-all.sql: staff_list, staff_add ----
+export type Member = { id: string; name: string; mail: string; role: string };
+/** The team from the database, also kept in 'nx-staff-team' so the tasks board can assign to them. null = couldn't load. */
+export async function syncTeam(): Promise<Member[] | null> {
+  const r = await staffApi('rpc/staff_list', { method: 'POST', body: '{}' });
+  if (!r?.ok) return null;
+  const team: Member[] = (await r.json()).map((m: any) => ({ id: m.user_id, name: m.name || m.username || 'Equipo', mail: m.email || (m.username ? `@${m.username}` : ''), role: m.role }));
+  try { localStorage.setItem('nx-staff-team', JSON.stringify(team)); } catch { /* storage blocked */ }
+  return team;
+}
+/** Admin: gives a role to someone who already has an account (by @username or email). Returns 'ok' or a reason. */
+export async function addToTeam(handle: string, name: string, role: string): Promise<string> {
+  const r = await staffApi('rpc/staff_add', { method: 'POST', body: JSON.stringify({ handle, display: name, new_role: role }) });
+  return r?.ok ? await r.json() : 'No se pudo. Revisa tu conexión.';
+}
+/** Admin: takes someone out of the team (they keep their reader account). */
+export async function removeFromTeam(id: string): Promise<boolean> {
+  const r = await staffApi(`staff?user_id=eq.${id}`, { method: 'DELETE' });
+  return !!r?.ok;
+}

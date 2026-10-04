@@ -13,9 +13,11 @@ import SalesDesk from '../../components/panel/SalesDesk.astro';
 import Writer from '../../components/panel/Writer.astro';
 import Tasks from '../../components/panel/Tasks.astro';
 import { getStories, url, SECTIONS, SITE } from '../../lib/site';
+import { hasBackend } from '../../lib/backend';
 import sources from '../../../scripts/sources.json';
 
 const stories = await getStories();
+const hasBackendBuild = hasBackend(); // Supabase connected: real accounts and team
 // Everything on the site, for Escribir → Publicadas (with views once analytics is connected)
 const published = stories.map((s) => ({ id: s.id, title: s.data.title, section: SECTIONS.find((x) => x.id === s.data.section)?.name ?? '', author: s.data.author, date: s.data.date.toISOString(), url: url(`noticia/${s.id}/`), ai: s.data.aiAssisted }));
 // The story pinned (📌) in the home page's main spot, for the reminder on Inicio
@@ -178,10 +180,11 @@ const TABS = [
         <section class="pnl-pane" data-pane="equipo" hidden>
           <h1 class="pnl-h">Equipo</h1>
           <p class="pnl-muted">Quién entra al panel y qué puede hacer.</p>
+          {hasBackendBuild && <p class="pnl-muted pnl-small">Para añadir a alguien: primero crea su cuenta en el sitio (Entrar → Crear cuenta). Luego escribe aquí su nombre, su correo o @usuario y su rol. Entra al panel con ese mismo correo y contraseña.</p>}
           <ul class="pnl-team" data-team></ul>
-          <form class="pnl-add" data-add>
+          <form class="pnl-add" data-add novalidate>
             <input placeholder="Nombre" data-add-name maxlength="30" aria-label="Nombre" />
-            <input type="email" placeholder="Correo" data-add-mail maxlength="60" aria-label="Correo" />
+            <input placeholder="Correo o @usuario" data-add-mail maxlength="60" aria-label="Correo o nombre de usuario" autocapitalize="off" />
             <select data-add-role aria-label="Rol"><option value="editor">Editor</option><option value="ads">Ventas</option><option value="reporter">Periodista</option><option value="admin">Administrador</option></select>
             <button type="submit" class="adp-btn">Añadir</button>
           </form>
@@ -197,7 +200,7 @@ const TABS = [
     import { ask } from '../../lib/dialogs';
     import { getReports } from '../../lib/moderation';
     import { listRequests, loadRequests } from '../../lib/adrequests';
-    import { hasBackend, staffLogin, staffLogout, staffProfile } from '../../lib/backend';
+    import { hasBackend, staffLogin, staffLogout, staffProfile, syncTeam, addToTeam, removeFromTeam } from '../../lib/backend';
     const root = document.querySelector<HTMLElement>('[data-pnl]')!;
     const RECENT: Array<{ id: string; title: string; section: string; url: string; date: string }> = JSON.parse(root.dataset.recent!);
     const SOURCES: Array<{ name: string; section: string; review: string }> = JSON.parse(root.dataset.sources!);
@@ -511,7 +514,7 @@ const TABS = [
 
       equipo() {
         const s = me()!;
-        const team = get<Array<{ name: string; mail: string; role: Staff['role'] }>>('nx-staff-team', [
+        const team = get<Array<{ id?: string; name: string; mail: string; role: Staff['role'] }>>('nx-staff-team', [
           { name: s.name, mail: 'tú', role: 'admin' }, { name: 'Editora (ejemplo)', mail: 'editora@ejemplo.com', role: 'editor' },
           { name: 'Ventas (ejemplo)', mail: 'ventas@ejemplo.com', role: 'ads' }, { name: 'Periodista (ejemplo)', mail: 'periodista@ejemplo.com', role: 'reporter' },
         ]);
@@ -537,7 +540,15 @@ const TABS = [
       const rng = t.closest<HTMLElement>('[data-range]');
       if (rng) { $$('[data-range]').forEach((b) => b.setAttribute('aria-pressed', String(b === rng))); paint.analitica(); return; }
       const rm = t.closest<HTMLElement>('[data-rm]');
-      if (rm) { const team = get<unknown[]>('nx-staff-team', []); team.splice(Number(rm.dataset.rm), 1); set('nx-staff-team', team); paint.equipo(); return; }
+      if (rm) {
+        if (hasBackend()) {
+          const m = get<Array<{ id?: string; name: string }>>('nx-staff-team', [])[Number(rm.dataset.rm)];
+          if (!m?.id || !(await ask(`¿Quitar a ${m.name} del equipo? Ya no podrá entrar al panel (su cuenta de lector sigue).`, { ok: 'Quitar', danger: true }))) return;
+          if (await removeFromTeam(m.id)) { await syncTeam(); paint.equipo(); dispatchEvent(new Event('nx-team')); toast(`${m.name} ya no está en el equipo.`); } else toast('No se pudo. Solo el administrador puede quitar personas.');
+          return;
+        }
+        const team = get<unknown[]>('nx-staff-team', []); team.splice(Number(rm.dataset.rm), 1); set('nx-staff-team', team); paint.equipo(); return;
+      }
       const act = t.closest<HTMLElement>('[data-act]'); const card = t.closest<HTMLElement>('.pnl-draft,.pnl-row');
       if (!act || !card || !card.closest('[data-news]')) return;
       const id = card.dataset.id!; const a = act.dataset.act;
@@ -553,9 +564,18 @@ const TABS = [
       if (a === 'remove') { if (!(await ask('¿Quitar esta noticia del sitio? Podrás corregirla y volver a publicarla.', { ok: 'Quitar', danger: true }))) return; setNews(id, { status: 'removed', at: Date.now() }); toast('Vista previa: en la versión real desaparece del sitio en unos minutos.'); }
       card.classList.add('pnl-gone'); setTimeout(() => { paint.noticias(); paintCounts(); }, 250);
     });
-    $<HTMLFormElement>('[data-add]').addEventListener('submit', (e) => {
+    $<HTMLFormElement>('[data-add]').addEventListener('submit', async (e) => {
       e.preventDefault();
       const name = $<HTMLInputElement>('[data-add-name]').value.trim(), mail = $<HTMLInputElement>('[data-add-mail]').value.trim();
+      if (hasBackend()) {
+        // Real team: the person signs up on the site first; here the admin gives them a role by @username or email
+        if (name.length < 2 || mail.length < 3) { toast('Escribe el nombre y su @usuario o correo.'); return; }
+        const res = await addToTeam(mail, name, $<HTMLSelectElement>('[data-add-role]').value);
+        if (res !== 'ok') { toast(res); return; }
+        (e.target as HTMLFormElement).reset(); await syncTeam(); paint.equipo(); dispatchEvent(new Event('nx-team'));
+        toast(`Listo: ${name} ya puede entrar al panel con su cuenta.`);
+        return;
+      }
       if (name.length < 2 || !/^\S+@\S+\.\S+$/.test(mail)) { toast('Escribe el nombre y un correo válido.'); return; }
       const team = get<Array<{ name: string; mail: string; role: string }>>('nx-staff-team', []);
       if (!team.length) { paint.equipo(); }
@@ -564,7 +584,8 @@ const TABS = [
       toast(`Vista previa: con las cuentas, ${mail} recibirá una invitación por correo.`);
     });
     // Keep the team list saved once it's first shown, so adding works on top of the examples
-    const ensureTeam = () => { if (!localStorage.getItem('nx-staff-team')) { const s = me(); if (s) set('nx-staff-team', [{ name: s.name, mail: 'tú', role: 'admin' }, { name: 'Editora (ejemplo)', mail: 'editora@ejemplo.com', role: 'editor' }, { name: 'Ventas (ejemplo)', mail: 'ventas@ejemplo.com', role: 'ads' }, { name: 'Periodista (ejemplo)', mail: 'periodista@ejemplo.com', role: 'reporter' }]); } };
+    const ensureTeam = () => { if (hasBackend()) { void syncTeam().then((t) => { if (t) { if ((location.hash.slice(1) || 'inicio') === 'equipo') paint.equipo(); dispatchEvent(new Event('nx-team')); } }); return; }
+      if (!localStorage.getItem('nx-staff-team')) { const s = me(); if (s) set('nx-staff-team', [{ name: s.name, mail: 'tú', role: 'admin' }, { name: 'Editora (ejemplo)', mail: 'editora@ejemplo.com', role: 'editor' }, { name: 'Ventas (ejemplo)', mail: 'ventas@ejemplo.com', role: 'ads' }, { name: 'Periodista (ejemplo)', mail: 'periodista@ejemplo.com', role: 'reporter' }]); } };
 
     // ---------- start ----------
     function start() {
