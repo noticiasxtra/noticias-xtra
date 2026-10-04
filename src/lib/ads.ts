@@ -94,7 +94,7 @@ export const ROTATE_SECONDS = 8;
 // or sent, and it tells the visitor to write to us.
 //  - stripeLink: a Stripe Payment Link (https://buy.stripe.com/…) made with "Customers choose what to pay"
 //    (cards, Apple Pay, Google Pay). In its "After payment" settings, choose "Don't show confirmation page" and
-//    redirect to https://publisher-noticel.github.io/noticias-xtra/publicidad/?pagado=1
+//    redirect to https://noticiasxtra.com/publicidad/?pagado=1
 //  - athMovilToken: the PUBLIC token from ATH Business (Settings → API Keys). Never put the private token here.
 //  - requestsUrl: where requests (with the uploaded files) are saved for the employee who approves them.
 export const PAYMENTS = { stripeLink: '', athMovilToken: '' };

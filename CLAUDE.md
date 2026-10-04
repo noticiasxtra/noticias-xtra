@@ -1,15 +1,15 @@
 # Project notes for Claude Code
 
-Noticias Xtra is a Spanish-language (Puerto Rico) news site built with Astro 7, deployed to GitHub Pages.
+Noticias Xtra is a Spanish-language (Puerto Rico) news site built with Astro 7, deployed to GitHub Pages at noticiasxtra.com.
 
 ## Commands
-- `npm install` then `npm run dev` (http://localhost:4321/noticias-xtra/)
+- `npm install` then `npm run dev` (http://localhost:4321/)
 - `npm run build` must pass before committing.
 - `DRY_RUN=1 npm run news` tests the AI script without calling the API.
 
 ## Conventions
 - All user-facing text is in Spanish (Puerto Rico). Code comments in English.
-- The site uses a `base` path (`/noticias-xtra`). Always build internal links with `url()` from `src/lib/site.ts`, never hard-coded `/` paths.
+- The site lives at https://noticiasxtra.com (custom domain on GitHub Pages, DNS and password gate on Cloudflare; `cloudflare/password-gate.js`). Build internal links with `url()` from `src/lib/site.ts`, so the base path can change again without breaking links.
 - Stories are Markdown files in `src/content/noticias/`; their schema is in `src/content.config.ts`. The AI script `scripts/fetch-news.mjs` writes the same shape, so keep both in sync when changing fields.
 - Brand colors: purple `#2B1185`, blue `#1F90DA`, red `#D7263D` only for breaking/live. Fonts: Poppins (headings), Noto Sans (body). Styles live in `src/styles/global.css`.
 - No frameworks (React etc.) unless needed; plain Astro components and small inline scripts.

@@ -8,7 +8,7 @@ You need [Node.js](https://nodejs.org) (version 22 or newer).
 
 ```bash
 npm install      # first time only
-npm run dev      # opens the site at http://localhost:4321/noticias-xtra/
+npm run dev      # opens the site at http://localhost:4321/
 ```
 
 ## Publish it on GitHub Pages
@@ -16,7 +16,7 @@ npm run dev      # opens the site at http://localhost:4321/noticias-xtra/
 1. In `astro.config.mjs`, the GitHub username is already set to `publisher-noticel` (change it if you move the project).
 2. Create a repository called `noticias-xtra` on GitHub and push this folder to it (include `package-lock.json`).
 3. On GitHub: **Settings > Pages > Source: GitHub Actions**.
-4. Every push to `main` rebuilds the site automatically. The link will be `https://publisher-noticel.github.io/noticias-xtra/`.
+4. Every push to `main` rebuilds the site automatically. The site is at `https://noticiasxtra.com` (custom domain set in Settings → Pages).
 
 ## Where things are
 
