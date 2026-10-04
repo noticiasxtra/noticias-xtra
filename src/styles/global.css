@@ -4196,3 +4196,5 @@ a,button,summary,label{-webkit-tap-highlight-color:transparent}
 .sl-bar em{display:block;height:100%;border-radius:999px;background:var(--blue)}
 .sl-bar.bad em{background:var(--red)}
 .sl-tools a{font-weight:700;color:var(--blue)}
+/* Escribir list: room between the header (title, "Nueva noticia") and the status tabs */
+[data-wr-list-view] > .sd-head{margin-bottom:16px}
