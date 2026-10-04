@@ -680,16 +680,40 @@ const TOOLS = [
         aiAssisted: fm.aiAssisted ? yes('aiAssisted') : true, fmExtra: extra.join('\n').trim() || undefined,
         sources, related, gallery, correction: unq(fm.correction || ''), body: mdToHtml(m[2]) };
     }
-    async function importStory(id: string) {
+    /** A story on the site as an article of the team (opened before, or brought from its file now). */
+    async function storyArt(id: string): Promise<Art | null> {
       if (DB) await refresh(); // the team's latest: someone may have opened this story already
-      const have = load().find((a) => a.slug === id); if (have) { openEditor(have); return; }
+      const have = load().find((a) => a.slug === id); if (have) return have;
       toast('Abriendo la noticia…');
       const r = await fetch(`${RAW}${encodeURIComponent(id)}.md?t=${Date.now()}`).catch(() => null);
       const a = r?.ok ? fromFile(id, await r.text()) : null;
-      if (!a) { toast('No pudimos abrir esa noticia. Intenta otra vez en un minuto.'); return; }
-      if (!(await store(a))) return; // saved for the team, linked to the story on the site
+      if (!a) { toast('No pudimos abrir esa noticia. Intenta otra vez en un minuto.'); return null; }
+      if (!(await store(a))) return null; // saved for the team, linked to the story on the site
+      return a;
+    }
+    async function importStory(id: string) {
+      const a = await storyArt(id); if (!a) return;
       openEditor(a); toast('Lista para editar. Al tocar “Actualizar”, se corrige la misma noticia en el sitio.');
     }
+    /** Takes a story off the site (its file gets draft: true; the site rebuilds in about 2 minutes). It stays in
+     *  Escribir → Borradores, so it can be corrected and published again. Editors and the admin only. */
+    async function takeDown(id: string): Promise<boolean> {
+      if (!canPublish()) { toast('Solo los editores y el administrador pueden quitar noticias del sitio.'); return false; }
+      const a = await storyArt(id); if (!a || !a.slug) return false;
+      if (!DB) { toast('Vista previa: con Supabase conectado, la noticia se quita del sitio.'); return false; }
+      const file = toFile(a).replace(/^draft: false$/m, 'draft: true');
+      const r = await publishArticle({ id: a.id, slug: a.slug, file, title: a.title, scheduled: false });
+      if (!r.ok) { toast(`No se pudo quitar: ${r.error}`); return false; }
+      await store({ ...a, status: 'draft', updated: Date.now(), note: `Quitada del sitio el ${new Date().toLocaleDateString('es-PR', { day: 'numeric', month: 'short' })}. Corrígela y publícala otra vez si hace falta.` });
+      await refresh(); renderList();
+      toast('Quitada. Desaparece del sitio en unos 2 minutos. Está en Escribir → Borradores.');
+      return true;
+    }
+    addEventListener('nx-takedown', async (e) => {
+      const id = (e as CustomEvent).detail.id as string;
+      const ok = await takeDown(id);
+      dispatchEvent(new CustomEvent('nx-takedown-done', { detail: { id, ok } }));
+    });
     root.addEventListener('click', (e) => { const b = (e.target as HTMLElement).closest<HTMLElement>('[data-import]'); if (b) void importStory(b.dataset.import!); });
     addEventListener('nx-edit-story', (e) => void importStory((e as CustomEvent).detail.id)); // "Editar" in Noticias → Vistazo rápido
 
