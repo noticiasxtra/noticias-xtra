@@ -4098,3 +4098,14 @@ a,button,summary,label{-webkit-tap-highlight-color:transparent}
 .pl-up-list li.ok::after{content:'✓';color:#0E8A5F;font-weight:800}
 .pl-up-list li.bad::after{content:'✕';color:var(--red);font-weight:800}
 @media (max-width:760px){ .pl-view-in{grid-template-columns:1fr} .pl-view-img{min-height:200px} .pl-grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px} .pl-dlg{height:92vh} }
+
+/* "Más titulares" under the main story: two tidy, equal columns */
+.lead-extra{margin-top:16px;padding-top:12px;border-top:1px solid var(--line)}
+.lead-extra-h{margin:0 0 6px}
+.lead-extra-grid{gap:0 20px}
+.lead-extra-grid .item,.lead-extra-grid .item:first-child{grid-template-columns:96px 1fr;gap:12px;padding:8px 0 0;align-items:start}
+.lead-extra-grid .item .ph{width:96px;aspect-ratio:4/3;height:auto;border-radius:8px;overflow:hidden}
+.lead-extra-grid .item .ph img{width:100%;height:100%;object-fit:cover}
+.lead-extra-grid .item h3{font-size:14.5px;line-height:1.3;margin:2px 0 4px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.lead-extra-grid .item .badge{font-size:11.5px}
+.lead-extra-grid .item time{font-size:12px;display:block}
