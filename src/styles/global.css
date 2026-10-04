@@ -4143,3 +4143,13 @@ a,button,summary,label{-webkit-tap-highlight-color:transparent}
 .vp-gal{align-items:center}
 .vp-gal-n{font-size:12px;font-weight:700;color:var(--muted);white-space:nowrap;padding-right:6px}
 @media (max-width:560px){ .wr-gal-list li{grid-template-columns:64px minmax(0,1fr)} .wr-gal-list img{width:64px;height:48px} .wr-gal-b{grid-column:1/-1;justify-content:flex-end} }
+/* Escribir: move photos, videos and documents inside the story */
+.wr-body figure.wr-img,.wr-body figure.wr-embed,.wr-body figure.wr-doc,.wr-body figure.wr-raw{position:relative}
+.wr-mv{position:absolute;top:6px;left:6px;z-index:3;display:flex;gap:2px;background:rgba(0,0,0,.65);border-radius:999px;padding:2px;user-select:none}
+.wr-mv button{width:28px;height:28px;border:0;border-radius:50%;background:transparent;color:#fff;font-size:15px;line-height:1;cursor:pointer;display:grid;place-items:center}
+.wr-mv button:hover,.wr-mv button:focus-visible{background:rgba(255,255,255,.2)}
+.wr-mv .wr-mv-h{cursor:grab;font-size:17px}
+.wr-dragging{opacity:.4}
+.wr-drop-before{box-shadow:0 -3px 0 var(--blue)}
+.wr-drop-after{box-shadow:0 3px 0 var(--blue)}
+.wr-moved{outline:3px solid var(--blue);outline-offset:3px;transition:outline-color .7s}

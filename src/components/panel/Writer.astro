@@ -385,7 +385,8 @@ const TOOLS = [
       if (!cur) return;
       (['title', 'description', 'section', 'league', 'place', 'author', 'date', 'imageUrl', 'imageCaption', 'imageCredit', 'correction'] as const).forEach((k) => ((cur as any)[k] = field(k).value.trim()));
       (['breaking', 'trending', 'featured', 'live', 'pinned', 'homeLead', 'sectionLead', 'sectionPinned'] as const).forEach((k) => (cur![k] = field(k).checked));
-      cur.body = body.innerHTML;
+      const c = body.cloneNode(true) as HTMLElement; c.querySelectorAll('.wr-mv').forEach((x) => x.remove()); // the move controls aren't part of the story
+      cur.body = c.innerHTML;
     }
     async function persist(status?: Art['status']) {
       readEditor(); if (!cur) return false;
@@ -822,6 +823,47 @@ const TOOLS = [
       f.dataset.ready = '1'; f.innerHTML = `${docCard(docOf(f)).replace(/^<figure class="doc-card">|<\/figure>$/g, '')}<button type="button" class="wr-photo-x" data-img-rm aria-label="Quitar documento">✕</button>`;
     });
     new MutationObserver(paintDocs).observe(body, { childList: true, subtree: true });
+
+    // ---------- move photos, videos, posts and documents inside the story: ↑ ↓ buttons, or drag them ----------
+    const MV = '<span class="wr-mv" contenteditable="false"><button type="button" class="wr-mv-h" draggable="true" data-drag title="Arrastra para moverlo" aria-label="Arrastrar para mover">⠿</button><button type="button" data-move="-1" title="Subir" aria-label="Subir">↑</button><button type="button" data-move="1" title="Bajar" aria-label="Bajar">↓</button></span>';
+    const isBlock = (el: Element | null): el is HTMLElement => !!el && el.matches('figure.wr-img, figure.wr-embed, figure.wr-doc, figure.wr-raw');
+    const addMovers = () => [...body.children].forEach((f) => { if (isBlock(f) && !f.querySelector(':scope > .wr-mv')) f.insertAdjacentHTML('afterbegin', MV); });
+    new MutationObserver(addMovers).observe(body, { childList: true, subtree: true });
+    const emptyLine = (el: Element) => !isBlock(el) && !(el.textContent ?? '').trim() && !el.querySelector('img,iframe');
+    /** One step up or down, skipping empty lines. */
+    function moveBlock(f: HTMLElement, dir: number) {
+      let sib = dir < 0 ? f.previousElementSibling : f.nextElementSibling;
+      while (sib && emptyLine(sib)) sib = dir < 0 ? sib.previousElementSibling : sib.nextElementSibling;
+      if (!sib) { toast(dir < 0 ? 'Ya está al principio.' : 'Ya está al final.'); return; }
+      if (dir < 0) sib.before(f); else sib.after(f);
+      f.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); f.classList.add('wr-moved'); setTimeout(() => f.classList.remove('wr-moved'), 700);
+      changed();
+    }
+    body.addEventListener('click', (e) => {
+      const b = (e.target as HTMLElement).closest<HTMLElement>('[data-move]'); if (!b) return;
+      e.preventDefault(); moveBlock(b.closest<HTMLElement>('figure')!, Number(b.dataset.move));
+    });
+    let dragging: HTMLElement | null = null, dropAt: { el: HTMLElement; after: boolean } | null = null;
+    const clearDrop = () => body.querySelectorAll('.wr-drop-before,.wr-drop-after').forEach((x) => x.classList.remove('wr-drop-before', 'wr-drop-after'));
+    body.addEventListener('dragstart', (e) => {
+      const h = (e.target as HTMLElement).closest?.('[data-drag]'); if (!h) return;
+      dragging = h.closest<HTMLElement>('figure'); dragging?.classList.add('wr-dragging');
+      e.dataTransfer!.effectAllowed = 'move'; e.dataTransfer!.setData('text/plain', ' ');
+    });
+    body.addEventListener('dragover', (e) => {
+      if (!dragging) return; e.preventDefault();
+      let t = document.elementFromPoint(e.clientX, e.clientY) as HTMLElement | null;
+      while (t && t.parentElement !== body) t = t.parentElement;
+      clearDrop(); if (!t || t === dragging) { dropAt = null; return; }
+      const r = t.getBoundingClientRect(); const after = e.clientY > r.top + r.height / 2;
+      t.classList.add(after ? 'wr-drop-after' : 'wr-drop-before'); dropAt = { el: t, after };
+    });
+    body.addEventListener('drop', (e) => {
+      if (!dragging) return; e.preventDefault(); clearDrop();
+      if (dropAt) { if (dropAt.after) dropAt.el.after(dragging); else dropAt.el.before(dragging); changed(); }
+      dragging.classList.remove('wr-dragging'); dragging = null; dropAt = null;
+    });
+    body.addEventListener('dragend', () => { clearDrop(); dragging?.classList.remove('wr-dragging'); dragging = null; dropAt = null; });
     body.addEventListener('click', (e) => { if ((e.target as HTMLElement).closest('.doc-open')) e.preventDefault(); }); // no navigation while editing
 
     // ---------- preview: the real story page (/redaccion/vista-previa/) in a frame, at computer or phone width ----------
