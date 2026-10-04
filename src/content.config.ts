@@ -27,6 +27,7 @@ const noticias = defineCollection({
     pinned: z.boolean().default(false), // 📌 locked in the home page's main spot until an editor unpins it (pinTop in src/lib/site.ts)
     homeLead: z.boolean().default(false), // editor's pick for the big top story of the home page (topOrder + pinFirst in src/lib/site.ts)
     sectionLead: z.boolean().default(false), // editor's pick for the top story of its section page
+    sectionPinned: z.boolean().default(false), // 📌 locked at the top of its section page until an editor unpins it (sectionTop)
     aiAssisted: z.boolean().default(true),
     sources: z.array(z.object({ name: z.string(), url: z.string().optional() })).default([]),
     related: z.array(z.string()).default([]),

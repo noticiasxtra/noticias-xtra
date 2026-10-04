@@ -107,6 +107,7 @@ const TOOLS = [
           <p class="pnl-muted pnl-small wr-lead-h">Noticia principal (dura hasta 2 días o hasta que marques otra):</p>
           <label class="adb-check"><input type="checkbox" data-f="pinned" /> 📌 Fijar arriba en la Portada (se queda hasta que la desfijes)</label>
           <label class="adb-check"><input type="checkbox" data-f="homeLead" /> Principal de la Portada</label>
+          <label class="adb-check"><input type="checkbox" data-f="sectionPinned" /> 📌 Fijar arriba en su sección (se queda hasta que la desfijes)</label>
           <label class="adb-check"><input type="checkbox" data-f="sectionLead" /> Principal de su sección</label>
           <label class="adb-check"><input type="checkbox" data-f="live" /> En vivo / en desarrollo</label>
         </div>
@@ -205,7 +206,7 @@ const TOOLS = [
     type Art = {
       id: string; status: 'draft' | 'review' | 'scheduled' | 'published'; updated: number; owner: string; note?: string;
       title: string; description: string; section: string; league: string; place: string; author: string; date: string;
-      image: string; imageUrl: string; imageCaption: string; imageCredit: string; breaking: boolean; trending: boolean; featured: boolean; live: boolean; pinned?: boolean; homeLead?: boolean; sectionLead?: boolean;
+      image: string; imageUrl: string; imageCaption: string; imageCredit: string; breaking: boolean; trending: boolean; featured: boolean; live: boolean; pinned?: boolean; homeLead?: boolean; sectionLead?: boolean; sectionPinned?: boolean;
       sources: Src[]; related: string[]; correction: string; body: string; slug?: string;
       aiAssisted?: boolean; fmExtra?: string; // kept from an existing story file: the AI label and fields the editor doesn't show
     };
@@ -351,13 +352,13 @@ const TOOLS = [
     const body = $('[data-body]');
     let cur: Art | null = null, dirty = false, timer = 0;
     const blank = (): Art => ({ id: `A-${Date.now().toString(36)}`, status: 'draft', updated: Date.now(), owner: me()?.name ?? '', title: '', description: '', section: 'puerto-rico', league: '',
-      place: '', author: me()?.name ?? 'Noticias Xtra', date: localNow(), image: '', imageUrl: '', imageCaption: '', imageCredit: '', breaking: false, trending: false, featured: false, live: false, pinned: false, homeLead: false, sectionLead: false,
+      place: '', author: me()?.name ?? 'Noticias Xtra', date: localNow(), image: '', imageUrl: '', imageCaption: '', imageCredit: '', breaking: false, trending: false, featured: false, live: false, pinned: false, homeLead: false, sectionLead: false, sectionPinned: false,
       sources: [], related: [], correction: '', body: '' });
     const field = (k: string) => $<HTMLInputElement>(`[data-f="${k}"]`);
     function openEditor(a: Art) {
       cur = structuredClone(a);
       (['title', 'description', 'section', 'league', 'place', 'author', 'date', 'imageUrl', 'imageCaption', 'imageCredit', 'correction'] as const).forEach((k) => (field(k).value = String(cur![k] ?? '')));
-      (['breaking', 'trending', 'featured', 'live', 'pinned', 'homeLead', 'sectionLead'] as const).forEach((k) => (field(k).checked = !!cur![k]));
+      (['breaking', 'trending', 'featured', 'live', 'pinned', 'homeLead', 'sectionLead', 'sectionPinned'] as const).forEach((k) => (field(k).checked = !!cur![k]));
       body.innerHTML = cur.body || '<p><br></p>';
       body.querySelectorAll<HTMLElement>('figure.wr-embed').forEach(paintEmbed);
       $$('[data-editor-only]').forEach((e) => (e.hidden = !canPublish()));
@@ -369,7 +370,7 @@ const TOOLS = [
     function readEditor() {
       if (!cur) return;
       (['title', 'description', 'section', 'league', 'place', 'author', 'date', 'imageUrl', 'imageCaption', 'imageCredit', 'correction'] as const).forEach((k) => ((cur as any)[k] = field(k).value.trim()));
-      (['breaking', 'trending', 'featured', 'live', 'pinned', 'homeLead', 'sectionLead'] as const).forEach((k) => (cur![k] = field(k).checked));
+      (['breaking', 'trending', 'featured', 'live', 'pinned', 'homeLead', 'sectionLead', 'sectionPinned'] as const).forEach((k) => (cur![k] = field(k).checked));
       cur.body = body.innerHTML;
     }
     async function persist(status?: Art['status']) {
@@ -549,7 +550,7 @@ const TOOLS = [
     // ---------- open a story that is already on the site (AI or older) in the editor ----------
     const RAW = 'https://raw.githubusercontent.com/publisher-noticel/noticias-xtra/main/src/content/noticias/';
     const MANAGED = new Set(['title', 'description', 'section', 'league', 'place', 'date', 'author', 'image', 'imageCaption', 'imageCredit',
-      'breaking', 'trending', 'featured', 'live', 'pinned', 'homeLead', 'sectionLead', 'aiAssisted', 'draft', 'sources', 'related', 'correction']);
+      'breaking', 'trending', 'featured', 'live', 'pinned', 'homeLead', 'sectionLead', 'sectionPinned', 'aiAssisted', 'draft', 'sources', 'related', 'correction']);
     const unq = (v: string) => { v = v.trim(); try { return v.startsWith('"') ? JSON.parse(v) : v.replace(/^'(.*)'$/, '$1'); } catch { return v; } };
     const inline = (t: string) => esc(t.replace(/\\([*_`[\]\\])/g, '$1'))
       .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/(^|[^*])\*([^*\s][^*]*?)\*/g, '$1<i>$2</i>')
@@ -590,7 +591,7 @@ const TOOLS = [
         title: unq(fm.title || ''), description: unq(fm.description || ''), section: unq(fm.section || 'puerto-rico'), league: unq(fm.league || ''),
         place: unq(fm.place || ''), author: unq(fm.author || 'Noticias Xtra'), date: local, image: unq(fm.image || ''), imageUrl: '',
         imageCaption: unq(fm.imageCaption || ''), imageCredit: unq(fm.imageCredit || ''),
-        breaking: yes('breaking'), trending: yes('trending'), featured: yes('featured'), live: yes('live'), pinned: yes('pinned'), homeLead: yes('homeLead'), sectionLead: yes('sectionLead'),
+        breaking: yes('breaking'), trending: yes('trending'), featured: yes('featured'), live: yes('live'), pinned: yes('pinned'), homeLead: yes('homeLead'), sectionLead: yes('sectionLead'), sectionPinned: yes('sectionPinned'),
         aiAssisted: fm.aiAssisted ? yes('aiAssisted') : true, fmExtra: extra.join('\n').trim() || undefined,
         sources, related, correction: unq(fm.correction || ''), body: mdToHtml(m[2]) };
     }
@@ -610,7 +611,7 @@ const TOOLS = [
       return ['---', `title: ${y(a.title)}`, `description: ${y(a.description)}`, `section: ${a.section}`, ...(a.section === 'deportes' && a.league ? [`league: ${a.league}`] : []),
         `place: ${y(a.place || 'Puerto Rico')}`, `date: ${date.toISOString()}`, `author: ${y(a.author || 'Noticias Xtra')}`,
         ...(a.image || a.imageUrl ? [`image: ${y(a.imageUrl || (a.image.startsWith('data:') ? `imagenes/${a.id.toLowerCase()}.jpg` : a.image))}`, ...(a.imageCaption ? [`imageCaption: ${y(a.imageCaption)}`] : []), ...(a.imageCredit ? [`imageCredit: ${y(a.imageCredit)}`] : [])] : []),
-        ...(['breaking', 'trending', 'featured', 'live', 'pinned', 'homeLead', 'sectionLead'] as const).filter((k) => a[k]).map((k) => `${k}: true`),
+        ...(['breaking', 'trending', 'featured', 'live', 'pinned', 'homeLead', 'sectionLead', 'sectionPinned'] as const).filter((k) => a[k]).map((k) => `${k}: true`),
         `aiAssisted: ${a.aiAssisted ?? false}`, 'draft: false', ...(a.fmExtra ? [a.fmExtra] : []),
         ...(a.sources.length ? ['sources:', ...a.sources.flatMap((s) => [`  - name: ${y(s.name)}`, ...(s.url ? [`    url: ${y(s.url)}`] : [])])] : []),
         ...(a.related.length ? ['related:', ...a.related.map((r) => `  - ${y(r)}`)] : []),
@@ -770,11 +771,15 @@ const TOOLS = [
     /** Puts a saved article on the site: the "publicar" function saves its file in GitHub (shared database only). */
     /** Only one story is pinned (📌) in the Portada: publishing a pinned story unpins the others for real. */
     async function unpinOthers(a: Art): Promise<string[]> {
-      if (!a.pinned) return [];
-      const old = load().filter((x) => x.id !== a.id && x.pinned && (x.status === 'published' || x.status === 'scheduled'));
+      if (!a.pinned && !a.sectionPinned) return [];
+      const live = (x: Art) => x.id !== a.id && (x.status === 'published' || x.status === 'scheduled');
+      const old = load().filter((x) => live(x) && ((a.pinned && x.pinned) || (a.sectionPinned && x.sectionPinned && x.section === a.section)));
       const done: string[] = [];
       for (const o of old) {
-        const u: Art = { ...structuredClone(o), pinned: false, homeLead: true, updated: Date.now() }; // moves to the first spot under the new main story
+        const u: Art = structuredClone(o); u.updated = Date.now();
+        // The replaced story moves to the first spot under the new one (Portada and/or its section)
+        if (a.pinned && u.pinned) { u.pinned = false; u.homeLead = true; }
+        if (a.sectionPinned && u.sectionPinned && u.section === a.section) { u.sectionPinned = false; u.sectionLead = true; }
         if (!(await store(u))) continue;
         if (DB && u.slug) { const r = await publishArticle({ id: u.id, slug: u.slug, file: toFile(u), title: u.title, scheduled: u.status === 'scheduled' }); if (!r.ok) continue; }
         done.push(u.title || 'Sin titular');

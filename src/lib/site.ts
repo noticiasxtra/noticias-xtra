@@ -238,6 +238,14 @@ export function pinTop(stories: Story[]): Story[] {
   return pin ? [pin, ...rest] : rest;
 }
 
+/** Section page order: a story pinned to its section (📌, newest pin wins) keeps the top spot with no time limit;
+ *  the editor's "Principal de su sección" picks come next. Use after topOrder, on one section's stories. */
+export function sectionTop(stories: Story[]): Story[] {
+  const pin = stories.filter((s) => s.data.sectionPinned).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())[0];
+  const rest = pinFirst(stories.filter((s) => s !== pin), 'sectionLead');
+  return pin ? [pin, ...rest] : rest;
+}
+
 /** Stories by view count would come from analytics later. For now: featured first, then newest. */
 export function mostRead(stories: Story[], n = 5): Story[] {
   return [...stories].sort((a, b) => Number(b.data.featured) - Number(a.data.featured) || Number(b.data.live) - Number(a.data.live)).slice(0, n);
