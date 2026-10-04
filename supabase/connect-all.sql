@@ -265,11 +265,20 @@ drop policy if exists "own points" on game_points;
 create policy "own points" on game_points for insert with check (user_id = auth.uid());
 drop policy if exists "own points update" on game_points;
 create policy "own points update" on game_points for update using (user_id = auth.uid());
--- Leaderboard: all time, or one game
-create or replace function game_leaders(game text default null, lim int default 10) returns table (username text, photo text, points int)
+-- Leaderboard: all games or one game, all time or one day ("Hoy")
+drop function if exists game_leaders(text, int);
+create or replace function game_leaders(game text default null, day text default null, lim int default 10) returns table (username text, photo text, points int)
 language sql stable security definer set search_path = public as $$
-  select p.username, p.photo, case when game is null then g.total else coalesce((g.state -> 'games' ->> game)::int, 0) end as points
-  from game_points g join profiles p on p.id = g.user_id
-  where not p.banned and (case when game is null then g.total else coalesce((g.state -> 'games' ->> game)::int, 0) end) > 0
-  order by 3 desc limit lim;
+  with s as (
+    select p.username, p.photo,
+      case
+        when day is not null and game is not null then coalesce((g.state -> 'byDay' -> day ->> game)::int, 0)
+        when day is not null then coalesce((select sum(v::int) from jsonb_each_text(coalesce(g.state -> 'byDay' -> day, '{}'::jsonb)) as e(k, v)), 0)
+        when game is not null then coalesce((g.state -> 'games' ->> game)::int, 0)
+        else g.total
+      end as pts
+    from game_points g join profiles p on p.id = g.user_id
+    where not p.banned
+  )
+  select username, photo, pts from s where pts > 0 order by pts desc limit lim;
 $$;

@@ -295,6 +295,8 @@ const TABS = [
       import { accountsOn, loggedIn, signOut, askLogin } from '../lib/account';
       import { startSavedSync } from '../lib/saved-sync';
       startSavedSync(); // saved stories follow the reader's account to any device
+      import { startPointsSync } from '../lib/points-sync';
+      startPointsSync(); // Juegos Xtra points follow the reader's account (real leaderboards)
       import { renderNotifs, sentence } from '../lib/notif-view';
       // Profile menu: every reader setting in one place, opens over the page (Escape or a tap outside closes it)
       const pfBtn = document.querySelector<HTMLButtonElement>('[data-pf-toggle]');
