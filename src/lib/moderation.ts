@@ -50,6 +50,12 @@ export function assess(text: string): Assessment {
 
 /** Decision for a report. The reason picked by the reader adds doubt but never hides a comment alone.
  *  weak = this reader's earlier reports were mostly wrong, so their report alone doesn't send it to review. */
+/** The server applies the same rules plus speed limits (supabase/anti-spam.sql); its Spanish message is shown as is. */
+export async function serverSays(r: Response | null, fallback: string): Promise<string> {
+  const m = r && r.status === 400 ? ((await r.json().catch(() => ({}))) as { code?: string; message?: string }) : {};
+  return m.code === 'P0001' && m.message ? m.message : fallback;
+}
+
 export function judgeReport(text: string, reasonIds: string[], reportCount: number, weak = false): { action: 'hide' | 'keep' | 'review'; a: Assessment } {
   const a = assess(text);
   if (a.verdict === 'block') return { action: 'hide', a };

@@ -1335,7 +1335,7 @@ main.wrap,.home-grid,.ys-page,.tb-page{padding-top:var(--gap)}
 .fo-head h1 span:not(.sp-demo){color:var(--blue)}
 .fo-head p{margin:4px 0 0;color:var(--muted);font-size:14px}
 .fo-back{font-weight:700;color:var(--purple);white-space:nowrap}
-.fo-grid{display:grid;grid-template-columns:minmax(0,1fr) clamp(260px,22vw,320px);gap:var(--gap-lg)}
+.fo-grid{display:grid;grid-template-columns:minmax(0,1fr) clamp(300px,24vw,320px);gap:var(--gap-lg)}
 .fo-new{background:var(--card);border:1px solid #D7D3CA;border-radius:12px;padding:14px;display:grid;gap:8px}
 .fo-new h2{margin:0;font-size:17px}
 .fo-new input,.fo-new textarea,.fo-new select,.fo-reply input{font:inherit;font-size:15px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--card);color:var(--ink)}

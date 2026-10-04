@@ -4,6 +4,7 @@
 // payments are set up. Without it, this is a PREVIEW kept in this browser (localStorage 'nx-ad-requests').
 import { REQUESTS } from './ads';
 import { BACKEND, hasBackend, staffApi } from './backend';
+import { serverSays } from './moderation';
 
 export type ArtFile = { name: string; w: number; h: number; data: string };
 export type AdRequest = {
@@ -54,8 +55,8 @@ async function uploadArt(reqId: string, name: string, data: string): Promise<str
   return `${base()}/storage/v1/object/public/solicitudes/${path}`;
 }
 
-/** Saves a new request (anyone can send one; only the team can read them). */
-export async function saveRequest(r: AdRequest): Promise<boolean> {
+/** Saves a new request (anyone can send one; only the team can read them). A string is the server's reason for saying no. */
+export async function saveRequest(r: AdRequest): Promise<boolean | string> {
   if (!hasBackend()) return store([r, ...listRequests()].slice(0, 20));
   try {
     const files = await Promise.all(r.art.files.map(async (f) => ({ ...f, data: await uploadArt(r.id, f.name, f.data) })));
@@ -63,7 +64,7 @@ export async function saveRequest(r: AdRequest): Promise<boolean> {
     const row = { id: r.id, status: r.status, paid: false, client: r.client, formats: r.formats, placement: r.where, start: r.start, duration: r.duration,
       total: r.total, lines: r.lines, views: r.views ?? null, art: { ...r.art, files, ...(logo ? { logo } : {}) }, link: r.link || null };
     const res = await fetch(`${base()}/rest/v1/ad_requests`, { method: 'POST', headers: { apikey: BACKEND.anonKey, Authorization: `Bearer ${BACKEND.anonKey}`, 'Content-Type': 'application/json', Prefer: 'return=minimal' }, body: JSON.stringify(row) });
-    return res.ok;
+    return res.ok || (await serverSays(res, '')) || false;
   } catch { return false; }
 }
 /** Team changes a request (status, note). */

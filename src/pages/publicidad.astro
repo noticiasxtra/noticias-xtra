@@ -567,7 +567,7 @@ const CTAS = ['Llama hoy', 'Visítanos', 'Ordena ya', 'Escríbenos por WhatsApp'
         link: val('link'),
       });
       if (go4) go4.disabled = false;
-      if (!sent) { err('No pudimos enviar tu solicitud. Revisa tu conexión e intenta otra vez (las imágenes de hasta 5 MB).'); return; }
+      if (sent !== true) { err(sent || 'No pudimos enviar tu solicitud. Revisa tu conexión e intenta otra vez (las imágenes de hasta 5 MB).'); return; }
       const amount = amountOf(total);
       const body = [`Solicitud: ${id}`, `Nombre: ${val('nombre')}`, `Negocio: ${val('negocio')}`, `Correo: ${val('correo')}`, `Teléfono: ${val('telefono')}`, '',
         ...summary, `Dónde: ${where}`, `Empieza: ${val('start')} · ${durLabel()}`, `Total pagado: $${amount.toFixed(2)}`, `Enlace: ${val('link') || '—'}`, '',

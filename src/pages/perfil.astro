@@ -224,7 +224,6 @@ const BADGES = [
       login.hidden = !!p.name; card.hidden = !p.name;
       $('[data-delete-box]').hidden = !(ACC && loggedIn());
       rendering = true; dispatchEvent(new Event('nx-profile-change')); rendering = false;
-      dispatchEvent(new Event('nx-profile-change'));
       if (!p.name) return;
       const av = $('[data-av]');
       paintAvatar(av, p); paintAvatar($('[data-av2]'), p);

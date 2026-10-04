@@ -54,7 +54,7 @@ const CATS = ['Puerto Rico', 'Gobierno', 'Economía', 'Deportes', 'Educación', 
   </script>
   <script>
     import { accountsOn, loggedIn, askLogin, api, myId } from '../lib/account';
-    import { assess } from '../lib/moderation';
+    import { assess, serverSays } from '../lib/moderation';
     import { ask } from '../lib/dialogs';
     if (accountsOn()) liveForum(); else previewForum();
 
@@ -138,7 +138,7 @@ const CATS = ['Puerto Rico', 'Gobierno', 'Economía', 'Deportes', 'Educación', 
               const text = inp.value.trim(); const why = bad(text);
               if (!text || why) { inp.value = ''; inp.placeholder = why ? `No se puede publicar: ${why}.` : 'Escribe algo primero.'; return; }
               const r = await api('forum_replies', { method: 'POST', body: JSON.stringify({ thread: t.id, body: text }) });
-              if (r?.ok) { t.replies++; await loadReplies(t.id); } else inp.placeholder = 'No se pudo publicar. Intenta otra vez.';
+              if (r?.ok) { t.replies++; await loadReplies(t.id); } else dispatchEvent(new CustomEvent('nx-toast', { detail: await serverSays(r, 'No se pudo publicar. Intenta otra vez.') }));
             });
             body.append(rl, f);
           }
@@ -164,7 +164,7 @@ const CATS = ['Puerto Rico', 'Gobierno', 'Economía', 'Deportes', 'Educación', 
         const why = bad(`${title} ${body}`); if (why) { err.textContent = `No se puede publicar: ${why}.`; err.hidden = false; return; }
         err.hidden = true;
         const r = await api('forum_threads', { method: 'POST', body: JSON.stringify({ cat: c, title, body }) });
-        if (!r?.ok) { err.textContent = 'No se pudo publicar. Intenta otra vez.'; err.hidden = false; return; }
+        if (!r?.ok) { err.textContent = await serverSays(r, 'No se pudo publicar. Intenta otra vez.'); err.hidden = false; return; }
         form.reset(); sort = 'new';
         document.querySelectorAll('[data-sort]').forEach((x) => x.setAttribute('aria-pressed', String((x as HTMLElement).dataset.sort === 'new')));
         void load();

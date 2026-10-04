@@ -114,7 +114,7 @@ const STICKER_IMGS = [['wepa', '¡Wepa!'], ['coqui', 'Coquí'], ['bandera', 'Ban
   import { addComment, removeComment, getRep, levelOf, needs, specialsOf, syncRep, repsOf, RULES, SPECIALS, type Rep } from '../lib/reputation';
   import { notify } from '../lib/notifications';
   import { accountsOn, loggedIn, askLogin, api, myId, uploadCommentPhoto } from '../lib/account';
-  import { assess, judgeReport, getReports, saveReports, upsertReport, isHidden, myReports, saveMyReports, isWeakReporter, REPORT_REASONS, type Report } from '../lib/moderation';
+  import { assess, serverSays, judgeReport, getReports, saveReports, upsertReport, isHidden, myReports, saveMyReports, isWeakReporter, REPORT_REASONS, type Report } from '../lib/moderation';
   type Mine = { id: string; name: string; text: string; at: number; replyTo?: string; media?: { kind: string; src: string } };
   const store = {
     get: <T,>(k: string, d: T): T => { try { return JSON.parse(localStorage.getItem(k) || '') ?? d; } catch { return d; } },
@@ -633,7 +633,7 @@ const STICKER_IMGS = [['wepa', '¡Wepa!'], ['coqui', 'Coquí'], ['bandera', 'Ban
       const r = await api('comments', { method: 'POST', headers: { Prefer: 'return=representation' }, body: JSON.stringify({ story: sid, url: `${location.pathname}#comentarios`, parent: parentId, body: text, media: att,
         status: chk.verdict === 'review' ? 'review' : 'visible', flags: chk.reasons }) });
       send.disabled = false;
-      if (!r?.ok) { err.textContent = r?.status === 403 ? 'Tu cuenta no puede comentar ahora mismo.' : 'No se pudo publicar. Intenta otra vez.'; err.hidden = false; return; }
+      if (!r?.ok) { err.textContent = r?.status === 403 ? 'Tu cuenta no puede comentar ahora mismo.' : await serverSays(r, 'No se pudo publicar. Intenta otra vez.'); err.hidden = false; return; }
       if (parentId) threads.add(parentId); // show the thread with the new reply
       warned = ''; ta.value = ''; ta.style.height = 'auto'; setReply(null); pk.setMedia(undefined); pk.close();
       if (chk.verdict === 'review') { err.textContent = 'Publicado. La redacción lo revisará antes de que otros lo vean.'; err.hidden = false; }
