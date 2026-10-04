@@ -1,7 +1,7 @@
 ---
 // En vivo: live YouTube feeds on the left, the latest news on the right.
-// Priority (LIVE_SOURCES in src/lib/site.ts): NotiCel → Cámara de Representantes → Casa Blanca → Gobierno de PR →
-// Senado de PR → NASA. Each time the site
+// Priority (LIVE_SOURCES in src/lib/site.ts): Gobierno de PR → Senado de PR → Cámara de Representantes → Casa Blanca →
+// NotiCel → NASA. Each time the site
 // rebuilds (every 15 minutes) every channel is checked; the first one that is live plays automatically. If none is live,
 // NotiCel's newest video plays. Readers can also switch channels with the buttons under the video.
 // Tapping a story opens it inside the right column, so the video keeps playing while the reader reads.
@@ -16,7 +16,7 @@ const sources = await Promise.all(LIVE_SOURCES.map(async (src) => {
   const live = await checkLive(src.channel);
   return { ...src, live, src: embedFor(src.channel, live) };
 }));
-const current = sources.find((x) => x.live) ?? sources[0];
+const current = sources.find((x) => x.live) ?? sources.find((x) => x.id === 'noticel') ?? sources[0];
 const title = current.live ? current.live.title || `${current.name} en vivo` : `Ningún canal está transmitiendo ahora`;
 ---
 <Base title="En vivo" active="en-vivo" description="En vivo: NotiCel, la Cámara de Representantes de Puerto Rico y la Casa Blanca, con las últimas noticias de Puerto Rico.">
