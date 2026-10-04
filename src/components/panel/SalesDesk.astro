@@ -3,7 +3,7 @@
 // For each: what the client wants (formats, takeover days, months, audience, special requests), an instant quote with the
 // same rules as the Anúnciate page (quote() in src/lib/ads.ts), a takeover calendar that warns about taken days,
 // follow-up dates and notes, a printable proposal, and "convert to ad" once the client says yes.
-// PREVIEW: saved on this device (localStorage 'nx-leads'). With accounts it moves to Supabase and the whole team shares it.
+// Shared by the sales team through Supabase (sales_leads, supabase/connect-all.sql); preview on this device without it.
 import { FORMATS, REGIONS, CAMPAIGNS, SPECIALS, SALES_DISCOUNT_LIMIT, VIEW_PACKS } from '../../lib/ads';
 const fmts = FORMATS.map(({ id, name, price, per }) => ({ id, name, price, per }));
 const booked = CAMPAIGNS.filter((c) => c.takeover).map((c) => ({ start: c.start, end: c.end, client: c.client }));
@@ -103,6 +103,7 @@ const booked = CAMPAIGNS.filter((c) => c.takeover).map((c) => ({ start: c.start,
   import { ask, askText } from '../../lib/dialogs';
   import { quote, lengthLabel, SPECIALS, SALES_DISCOUNT_LIMIT, type QuoteInput, type CustomLine } from '../../lib/ads';
   import { saveRequest } from '../../lib/adrequests';
+  import { sharedList } from '../../lib/shared';
   const root = document.querySelector<HTMLElement>('[data-sd]');
   if (root) {
     type Fmt = { id: string; name: string; price: number; per: string };
@@ -125,9 +126,9 @@ const booked = CAMPAIGNS.filter((c) => c.takeover).map((c) => ({ start: c.start,
     const addDays = (s: string, n: number) => { const d = new Date(`${s}T12:00:00`); d.setDate(d.getDate() + n); return iso(d); };
     const fmtDate = (s: string) => (s ? new Date(`${s}T12:00:00`).toLocaleDateString('es-PR', { day: 'numeric', month: 'short' }) : '—');
     const toast = (m: string) => { const t = $('[data-sd-toast]'); t.textContent = m; t.hidden = false; clearTimeout((t as any).tm); (t as any).tm = setTimeout(() => (t.hidden = true), 3800); };
-    const KEY = 'nx-leads';
-    const load = (): Lead[] => { try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch { return []; } };
-    const save = (l: Lead[]) => { try { localStorage.setItem(KEY, JSON.stringify(l)); } catch { /* storage blocked */ } dispatchEvent(new Event('nx-leads')); };
+    // Clients and proposals: shared by the whole sales team (Supabase), mirrored on this device
+    const leads = sharedList<Lead>('sales_leads', 'nx-leads', 'nx-leads');
+    const load = leads.load, save = leads.save;
     const STAGES = { new: 'Nueva', talking: 'En conversación', proposal: 'Propuesta enviada', won: 'Ganada', lost: 'Perdida' };
 
     // Campaign length in days, from the start and end dates (older inquiries kept a number of months)
@@ -146,8 +147,10 @@ const booked = CAMPAIGNS.filter((c) => c.takeover).map((c) => ({ start: c.start,
       return m;
     };
 
-    // Three example inquiries, added once
-    if (!localStorage.getItem('nx-leads-seeded')) {
+    // With Supabase, the preview's example clients left on this device are never sent to the team's list
+    if (leads.shared()) { try { localStorage.setItem('nx-leads', JSON.stringify(load().filter((l) => !l.id.startsWith('L-EJ') && !l.demo))); } catch { /* storage blocked */ } }
+    // Three example inquiries, added once (preview only: with Supabase the list is the team's real clients)
+    if (!leads.shared() && !localStorage.getItem('nx-leads-seeded')) {
       try { localStorage.setItem('nx-leads-seeded', '1'); } catch { /* storage blocked */ }
       const base = { contact: '', email: '', phone: '', who: 'retail' as const, end: '', days: 1, extraAmt: 0, custom: [] as CustomLine[], aud: 'all' as const, reg: [] as string[], design: false, prepay: false, founder: true, extra: 0, notes: [] as Lead['notes'], demo: true };
       const ex: Lead[] = [
@@ -364,5 +367,8 @@ const booked = CAMPAIGNS.filter((c) => c.takeover).map((c) => ({ start: c.start,
     });
     addEventListener('nx-leads', () => {}); // other tabs listen for this
     render();
+    // The team's latest clients (and again when this person logs in)
+    void leads.refresh().then((ok) => ok && render());
+    addEventListener('nx-staff-change', () => void leads.refresh().then((ok) => ok && render()));
   }
 </script>
