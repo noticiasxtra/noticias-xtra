@@ -319,7 +319,7 @@ const CTAS = ['Llama hoy', 'Visítanos', 'Ordena ya', 'Escríbenos por WhatsApp'
   </main>
   <script>
     import { drawAd, loadImage, THEMES } from '../lib/adcreative';
-    import { saveRequest, updateRequest, shrink, type ArtFile } from '../lib/adrequests';
+    import { saveRequest, markPaid, sharedRequests, shrink, type ArtFile } from '../lib/adrequests';
     import { quote, type QuoteInput } from '../lib/ads';
 
     const money = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
@@ -509,7 +509,7 @@ const CTAS = ['Llama hoy', 'Visítanos', 'Ordena ya', 'Escríbenos por WhatsApp'
       top();
     };
     function done(p: Pending, how: string) {
-      updateRequest(p.id, { paid: true });
+      void markPaid(p.id);
       try { localStorage.removeItem('nx-ad-pending'); } catch { /* storage blocked */ }
       $('[data-done-ref]').textContent = `${how} · Solicitud ${p.id}`;
       $('[data-done-email]').textContent = p.email;
@@ -557,13 +557,16 @@ const CTAS = ['Llama hoy', 'Visítanos', 'Ordena ya', 'Escríbenos por WhatsApp'
       const id = `NX-${Date.now().toString(36).toUpperCase()}`;
       const designFiles: ArtFile[] = [];
       if (mode === 'design') wf.querySelectorAll<HTMLCanvasElement>('[data-previews] canvas').forEach((c) => designFiles.push({ name: `${c.dataset.w}x${c.dataset.h}.png`, w: Number(c.dataset.w), h: Number(c.dataset.h), data: c.toDataURL('image/png') }));
-      await saveRequest({
+      const go4 = wf.querySelector<HTMLButtonElement>('button[type="submit"]'); if (go4) go4.disabled = true;
+      const sent = await saveRequest({
         id, created: new Date().toISOString(), status: mode === 'design' ? 'disenar' : 'revisar', paid: false,
         client: { name: val('nombre'), business: val('negocio'), email: val('correo'), phone: val('telefono'), who: val('who') },
         formats: picked().map((f) => f.id), where, start: val('start'), duration: durLabel(), views: viewsPicked() || undefined, total: Math.round(total), lines: summary,
         art: mode === 'upload' ? { mode, files } : { mode, files: designFiles, logo: logoData, title: val('title'), msg: val('msg'), cta: val('cta'), theme: val('theme'), notes: val('notes') },
         link: val('link'),
       });
+      if (go4) go4.disabled = false;
+      if (!sent) { err('No pudimos enviar tu solicitud. Revisa tu conexión e intenta otra vez (las imágenes de hasta 5 MB).'); return; }
       const amount = amountOf(total);
       const body = [`Solicitud: ${id}`, `Nombre: ${val('nombre')}`, `Negocio: ${val('negocio')}`, `Correo: ${val('correo')}`, `Teléfono: ${val('telefono')}`, '',
         ...summary, `Dónde: ${where}`, `Empieza: ${val('start')} · ${durLabel()}`, `Total pagado: $${amount.toFixed(2)}`, `Enlace: ${val('link') || '—'}`, '',
@@ -576,6 +579,15 @@ Notas: ${val('notes')}
 
 (Adjunto mi logo si tengo uno.)` : '(Adjunto las imágenes de mi anuncio.)'].join('\n');
       pending = { id, email: val('correo'), business: val('negocio'), mode, amount, body };
+      if (!canPay && sharedRequests()) {
+        // Online payments aren't set up yet, but the request reached the team: they contact the client to pay
+        show('done');
+        $('[data-done-h]').textContent = '¡Recibimos tu solicitud!';
+        $('[data-done-ref]').textContent = `Solicitud ${id}`; $('[data-done-email]').textContent = val('correo'); $('[data-done-design]').hidden = mode !== 'design';
+        const n = $('[data-done-note]'); n.hidden = false;
+        n.textContent = 'Nuestro equipo de ventas la revisará y te escribirá en 1 día laborable para coordinar el pago y la fecha de salida. No se ha cobrado nada todavía.';
+        return;
+      }
       if (!canPay) {
         // Preview: nothing is charged or sent
         show('done');

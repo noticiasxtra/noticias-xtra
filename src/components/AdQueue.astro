@@ -31,7 +31,7 @@ const Tag = embedded ? 'section' : 'main';
 <script>
   import { ask, askText } from '../lib/dialogs';
   import { drawAd, THEMES } from '../lib/adcreative';
-  import { listRequests, saveRequest, updateRequest, type AdRequest } from '../lib/adrequests';
+  import { listRequests, loadRequests, saveRequest, updateRequest, type AdRequest } from '../lib/adrequests';
   import { hasBackend, publishCampaign, campaignStats } from '../lib/backend';
   import type { Campaign, AdSize } from '../lib/ads';
   const page = document.querySelector<HTMLElement>('[data-apr]')!;
@@ -44,6 +44,7 @@ const Tag = embedded ? 'section' : 'main';
 
   // Two example requests, added once so the queue isn't empty in the preview
   async function seed() {
+    if (hasBackend()) return; // real requests come from the database
     try { if (localStorage.getItem('nx-ad-seeded')) return; localStorage.setItem('nx-ad-seeded', '1'); } catch { return; }
     const c = document.createElement('canvas');
     drawAd(c, 300, 250, { title: 'Gomas a mitad de precio', msg: 'Alineación gratis con 4 gomas. Bayamón y Caguas.', cta: 'Llama hoy', business: 'Gomera El Pana' }, THEMES[4], null, 1);
@@ -196,5 +197,10 @@ const Tag = embedded ? 'section' : 'main';
     render();
   });
 
-  seed().then(async () => { if (hasBackend()) stats = await campaignStats(listRequests().filter((x) => x.status === 'aprobada').map((x) => x.id.toLowerCase())); render(); });
+  seed().then(async () => {
+    if (hasBackend()) { await loadRequests(); stats = await campaignStats(listRequests().filter((x) => x.status === 'aprobada').map((x) => x.id.toLowerCase())); }
+    render();
+  });
+  // Staff login changes (or another tab approves something): fetch the requests again
+  addEventListener('nx-staff-change', () => void loadRequests().then(render));
 </script>

@@ -196,7 +196,7 @@ const TABS = [
   <script>
     import { ask } from '../../lib/dialogs';
     import { getReports } from '../../lib/moderation';
-    import { listRequests } from '../../lib/adrequests';
+    import { listRequests, loadRequests } from '../../lib/adrequests';
     import { hasBackend, staffLogin, staffLogout, staffProfile } from '../../lib/backend';
     const root = document.querySelector<HTMLElement>('[data-pnl]')!;
     const RECENT: Array<{ id: string; title: string; section: string; url: string; date: string }> = JSON.parse(root.dataset.recent!);
@@ -576,6 +576,7 @@ const TABS = [
       $('[data-av]').textContent = s.name[0].toUpperCase();
       $('[data-role]').textContent = ROLE_NAME[s.role];
       paintCounts(); showTab(location.hash.slice(1) || 'inicio');
+      if (hasBackend()) void loadRequests().then(() => { paintCounts(); if ((location.hash.slice(1) || 'inicio') === 'inicio') showTab('inicio'); }); // real ad requests for the counts and Inicio
     }
     // Real login (once BACKEND is set in src/lib/backend.ts): Supabase email + password, role from the `staff` table
     if (hasBackend()) { $('[data-real]').hidden = false; $$('[data-prevlogin]').forEach((e) => (e.hidden = true)); }
