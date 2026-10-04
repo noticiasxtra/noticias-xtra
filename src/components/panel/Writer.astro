@@ -204,7 +204,7 @@ const TOOLS = [
   import { docCard } from '../../lib/doccard.mjs';
   import { ask, askText } from '../../lib/dialogs';
   import { hasBackend, listArticles, putArticle, deleteArticle, uploadStoryFile, publishArticle } from '../../lib/backend';
-  import { patchGen } from '../../lib/ai-drafts';
+  import { patchGen, wipe } from '../../lib/ai-drafts';
   const root = document.querySelector<HTMLElement>('[data-wr]');
   if (root) {
     type Src = { name: string; url?: string };
@@ -284,7 +284,7 @@ const TOOLS = [
       const list = all.filter((a) => a.status === tab).sort((a, b) => b.updated - a.updated);
       $('[data-wr-list]').innerHTML = list.map((a) => `<article class="pnl-row" data-id="${a.id}">
         <div><p class="pnl-muted">${STATUS[a.status]} · ${esc(SECS.find((x) => x.id === a.section)?.name ?? '')} · ${esc(a.author || a.owner)} · ${ago(a.updated)}${a.status === 'scheduled' ? ` · sale el ${new Date(a.date).toLocaleString('es-PR', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })}` : ''}</p>
-          <h2>${a.aiGen ? '<span class="wr-ai">IA</span> ' : ''}${esc(a.title || 'Sin titular')}</h2>${a.note ? `<p class="sd-warn">Nota del editor: ${esc(a.note)}</p>` : ''}</div>
+          <h2>${esc(a.title || 'Sin titular')}</h2>${a.note ? `<p class="sd-warn">Nota del editor: ${esc(a.note)}</p>` : ''}</div>
         <div class="pnl-row-acts">
           ${a.status === 'review' && canApprove(a) ? `<button type="button" class="adp-btn" data-la="approve">Aprobar y publicar</button>${a.aiGen ? '' : '<button type="button" class="pnl-link" data-la="return">Devolver</button>'}` : ''}
           <button type="button" class="adp-btn ghost-dark" data-la="preview">Vista previa</button>
@@ -855,7 +855,7 @@ const TOOLS = [
       if (!cur?.aiGen || !isAdmin()) return;
       const a = cur; dirty = false; clearTimeout(timer);
       if (!(await drop(a.id))) return;
-      await patchGen(a.aiGen!, { status: 'rejected', article_id: null, decided_by: me()?.name ?? '', decided_at: new Date().toISOString() });
+      await patchGen(a.aiGen!, wipe(a.title, me()?.name ?? '')); // the log keeps only title, links, who and when
       closeEditor(); toast('Rechazada: se borró el borrador.');
     });
     $('[data-wr-new]').addEventListener('click', () => openEditor(blank()));

@@ -1,6 +1,6 @@
 ---
-// "✨ Redactar con IA" (panel → Escribir, admin only). 3 links from authorized outlets → the "redactar-ia" Edge Function
-// reads them, checks they're independent, lists the facts, writes one original story from the facts only, checks it for
+// "✨ Redactar con IA" (panel → Escribir, admin only). 1 to 3 links from authorized sources (with fewer than 3, the
+// "redactar-ia" Edge Function searches the authorized sites for the others) → it reads them, checks they're independent, lists the facts, writes one original story from the facts only, checks it for
 // copying and finds up to 3 free photos. The result is saved as a draft "En revisión"; only a person publishes it.
 // Also the "IA" box inside the editor (facts, warnings, copy score, photo options, Aprobar / Editar / Rechazar)
 // and the lists of authorized outlets and of generations (the log). Talks to Writer.astro with window events:
@@ -13,10 +13,13 @@
 
     <!-- 1. The links -->
     <form data-ai-form novalidate>
-      <p class="pnl-muted">Pega 3 artículos sobre la <b>misma noticia</b> de fuentes autorizadas (medios con permiso y sitios oficiales). La IA saca los hechos, escribe una noticia original de Noticias Xtra y la deja <b>en revisión</b>. Nunca se publica sola.</p>
-      <label>Artículo 1<input type="url" name="u1" required placeholder="https://noticel.com/…" /></label>
-      <label>Artículo 2<input type="url" name="u2" required placeholder="https://…" /></label>
-      <label>Artículo 3<input type="url" name="u3" required placeholder="https://…" /></label>
+      <p class="pnl-muted">Pega el enlace de una noticia de una fuente autorizada (medios con permiso y sitios oficiales). Buscamos solos otras 2 fuentes sobre la <b>misma noticia</b>, sacamos los hechos, escribimos una noticia original de Noticias Xtra y la dejamos <b>en revisión</b>. Nunca se publica sola.</p>
+      <label>Enlace de la noticia<input type="url" name="u1" required placeholder="https://noticel.com/…" /></label>
+      <details class="ai-more"><summary>¿Ya tienes otras fuentes? Añádelas (opcional)</summary>
+        <label>Otra fuente<input type="url" name="u2" placeholder="https://…" /></label>
+        <label>Otra fuente<input type="url" name="u3" placeholder="https://…" /></label>
+        <p class="pnl-muted pnl-small">Si las dejas vacías, las buscamos en las fuentes autorizadas.</p>
+      </details>
       <label>Notas para el redactor (opcional)<textarea name="notes" rows="2" maxlength="1000" placeholder="ej. Enfócate en el impacto en los agricultores del centro de la isla."></textarea></label>
       <p class="cm-err" data-ai-err hidden></p>
       <div class="sd-dlg-f ai-foot">
@@ -66,7 +69,7 @@
 </dialog>
 
 <script>
-  import { callAi, getGen, patchGen, listGens, listOutlets, addOutlet, removeOutlet, overlap, type AiSource, type AiPhoto, type AiGen, type AiStory } from '../../lib/ai-drafts';
+  import { callAi, getGen, patchGen, wipe, listGens, listOutlets, addOutlet, removeOutlet, overlap, type AiSource, type AiPhoto, type AiGen, type AiStory } from '../../lib/ai-drafts';
   import { ask } from '../../lib/dialogs';
   const dlg = document.querySelector<HTMLDialogElement>('[data-ai-dlg]');
   if (dlg) {
@@ -80,31 +83,32 @@
     let busy = false;
 
     addEventListener('nx-ai-open', () => { if (busy) { dlg.showModal(); return; } $<HTMLFormElement>('[data-ai-form]').reset(); $('[data-ai-err]').hidden = true; show('form'); dlg.showModal(); });
-    $('[data-ai-close]').addEventListener('click', async () => { if (busy && !(await ask('La IA todavía está trabajando. ¿Cerrar de todos modos? Se pierde este intento.', { ok: 'Cerrar' }))) return; busy = false; dlg.close(); });
+    $('[data-ai-close]').addEventListener('click', async () => { if (busy && !(await ask('Todavía estamos trabajando. ¿Cerrar de todos modos? Se pierde este intento.', { ok: 'Cerrar' }))) return; busy = false; dlg.close(); });
     dlg.addEventListener('cancel', (e) => { if (busy) e.preventDefault(); });
     dlg.addEventListener('click', (e) => { const v = (e.target as HTMLElement).closest<HTMLElement>('[data-ai-view]'); if (!v) return; const k = v.dataset.aiView as keyof typeof views; show(k); if (k === 'outlets') void paintOutlets(); if (k === 'log') void paintLog(); });
 
     // ---------- progress ----------
-    const STEPS = ['Leyendo las fuentes', 'Revisando que sean independientes', 'Sacando los hechos', 'Escribiendo la noticia', 'Revisando que no haya copia', 'Buscando fotos'];
+    const STEPS = ['Leyendo la noticia', 'Buscando otras fuentes', 'Revisando que sean independientes', 'Sacando los hechos', 'Escribiendo la noticia', 'Revisando que no haya copia', 'Buscando fotos'];
     const step = (n: number) => { $('[data-ai-steps]').innerHTML = STEPS.map((t, i) => `<li class="${i < n ? 'ok' : i === n ? 'on' : ''}">${i < n ? '✓' : i === n ? '…' : '○'} ${t}</li>`).join(''); };
     const fail = (msg: string) => { busy = false; show('form'); const e = $('[data-ai-err]'); e.textContent = msg; e.hidden = false; };
 
     // ---------- run ----------
+    // 1. read the pasted links · 2. text by hand for any that couldn't be read · 3. search for the others · 4. facts...
     let notes = '', srcs: Array<AiSource | null> = [], urls: string[] = [];
     $<HTMLFormElement>('[data-ai-form]').addEventListener('submit', async (e) => {
       e.preventDefault(); $('[data-ai-err]').hidden = true;
       const f = new FormData(e.target as HTMLFormElement);
-      urls = ['u1', 'u2', 'u3'].map((k) => String(f.get(k) || '').trim()); notes = String(f.get('notes') || '').trim();
-      if (urls.some((u) => !/^https?:\/\/\S+\.\S+/.test(u))) return fail('Pega los 3 enlaces completos (empiezan con https://).');
+      urls = ['u1', 'u2', 'u3'].map((k) => String(f.get(k) || '').trim()).filter(Boolean); notes = String(f.get('notes') || '').trim();
+      if (!urls.length || urls.some((u) => !/^https?:\/\/\S+\.\S+/.test(u))) return fail('Pega el enlace completo de la noticia (empieza con https://).');
       busy = true; show('work'); step(0);
       const r = await callAi<{ results: Array<{ ok: boolean; source?: AiSource; url?: string; error?: string }> }>('fetch', { urls });
       if (r.error) return fail(r.error);
-      srcs = r.results.map((x) => (x.ok ? x.source! : null));
-      if (srcs.every(Boolean)) return void facts();
-      // Some pages couldn't be read: ask for their text (an unauthorized outlet can't be pasted either)
       const blocked = r.results.find((x) => !x.ok && /fuentes autorizadas/.test(x.error || ''));
       if (blocked) return fail(`${blocked.url}: ${blocked.error}`);
-      $('[data-ai-paste-list]').innerHTML = r.results.map((x, i) => x.ok ? '' : `<fieldset data-pi="${i}"><legend>Artículo ${i + 1}</legend><p class="cm-err">${esc(x.error || '')}</p><p class="pnl-small"><a href="${esc(x.url || '')}" target="_blank" rel="noopener">${esc(x.url || '')} ↗</a></p>
+      srcs = r.results.map((x) => (x.ok ? x.source! : null));
+      if (srcs.every(Boolean)) return void more();
+      // Some pages couldn't be read: ask for their text
+      $('[data-ai-paste-list]').innerHTML = r.results.map((x, i) => x.ok ? '' : `<fieldset data-pi="${i}"><legend>${esc(x.url || '')}</legend><p class="cm-err">${esc(x.error || '')}</p><p class="pnl-small"><a href="${esc(x.url || '')}" target="_blank" rel="noopener">Abrir la página ↗</a></p>
         <label>Titular<input name="title" maxlength="200" /></label><label>Autor (si aparece)<input name="author" maxlength="120" /></label><label>Fecha (si aparece)<input name="date" maxlength="40" placeholder="ej. 3 de octubre de 2026" /></label>
         <label>Texto del artículo<textarea name="text" rows="8" required></textarea></label></fieldset>`).join('');
       busy = false; show('paste');
@@ -114,20 +118,33 @@
       e.preventDefault(); const err = $('[data-ai-perr]'); err.hidden = true;
       for (const fs of dlg.querySelectorAll<HTMLFieldSetElement>('[data-pi]')) {
         const i = Number(fs.dataset.pi); const v = (n: string) => (fs.querySelector<HTMLInputElement>(`[name="${n}"]`)!.value || '').trim();
-        const text = v('text'); if ((text.match(/\S+/g) || []).length < 80) { err.textContent = `El texto del artículo ${i + 1} es muy corto: pega el artículo completo.`; err.hidden = false; return; }
+        const text = v('text'); if ((text.match(/\S+/g) || []).length < 80) { err.textContent = 'Uno de los textos es muy corto: pega el artículo completo.'; err.hidden = false; return; }
         srcs[i] = { url: urls[i], outlet: '', title: v('title'), author: v('author'), date: v('date'), text, words: 0, links: [], pasted: true };
       }
-      busy = true; show('work'); void facts();
+      busy = true; show('work'); void more();
     });
 
+    /** With fewer than 3 sources, search the authorized sites for other articles about the same news. */
+    async function more() {
+      let all = srcs.filter(Boolean) as AiSource[];
+      if (all.length < 3) {
+        step(1);
+        const f = await callAi<{ found: AiSource[]; note?: string }>('find', { first: all[0], have: all.map((x) => x.url) });
+        if (f.error && all.length < 2) return fail(`${f.error}`);
+        all = [...all, ...(f.found ?? []).map((x) => ({ ...x, auto: true }))];
+        if (all.length < 2) return fail(`${f.note || 'No encontramos otras fuentes.'} Pega a mano el enlace de otra fuente autorizada sobre la misma noticia.`);
+      }
+      srcs = all; void facts();
+    }
+
     async function facts() {
-      step(1); await new Promise((r) => setTimeout(r, 300)); step(2);
+      step(2); await new Promise((r) => setTimeout(r, 300)); step(3);
       const f = await callAi<{ genId: string }>('facts', { sources: srcs, notes });
       if (f.error) return fail(f.error);
-      step(3);
+      step(4);
       const w = await callAi<{ story: AiStory; overlap: number; overlapSpans: string[]; warnings: string[]; suggestions: string[] }>('write', { genId: f.genId });
       if (w.error) return fail(w.error);
-      step(5);
+      step(6);
       const p = await callAi<{ options: AiPhoto[]; note: string }>('photos', { genId: f.genId });
       const gen = await getGen(f.genId);
       busy = false;
@@ -143,6 +160,7 @@
         ${box(g, { compact: true })}
         <h3 class="ai-t">${esc(s.title)}</h3><p class="pnl-muted">${esc(s.description)}</p>
         <p class="pnl-small">${esc(SECS[s.section] ?? s.section)}${s.place ? ` · ${esc(s.place)}` : ''} · ${s.words} palabras</p>
+        <h4 class="pnl-h4">Fuentes (${g.sources.length})</h4>${srcList(g)}
         <div class="ai-body body">${s.body}</div>
         <h4 class="pnl-h4">Foto</h4>${photos(g.photo_options, chosen)}${photoNote ? `<p class="sd-warn">${esc(photoNote)}</p>` : ''}
         <div class="sd-dlg-f"><button type="button" class="adp-btn ghost-dark" data-ai-discard>Descartar</button><button type="button" class="adp-btn" data-ai-save>Guardar para aprobar</button></div>`; };
@@ -150,12 +168,12 @@
       $('[data-ai-result]').onclick = async (e) => {
         const t = e.target as HTMLElement;
         const pick = t.closest<HTMLElement>('[data-ai-pick]'); if (pick) { chosen = Number(pick.dataset.aiPick); paint(); return; }
-        if (t.closest('[data-ai-discard]')) { if (await ask('¿Descartar esta noticia? Queda en el registro como rechazada.', { ok: 'Descartar', danger: true })) { await patchGen(g.id, { status: 'rejected', decided_by: me()?.name ?? '', decided_at: new Date().toISOString() }); dlg.close(); } return; }
+        if (t.closest('[data-ai-discard]')) { if (await ask('¿Descartar esta noticia? Queda en el registro como rechazada.', { ok: 'Descartar', danger: true })) { await patchGen(g.id, wipe(s.title, me()?.name ?? '')); dlg.close(); } return; }
         if (t.closest('[data-ai-save]')) {
           const ph = g.photo_options[chosen];
           if (ph?.provider === 'unsplash' && ph.downloadLocation) void callAi('unsplash', { downloadLocation: ph.downloadLocation });
           dispatchEvent(new CustomEvent('nx-ai-draft', { detail: { genId: g.id, art: {
-            id: `A-${Date.now().toString(36)}`, status: 'review', updated: Date.now(), owner: me()?.name ?? '', aiGen: g.id, aiAssisted: true,
+            id: `A-${Date.now().toString(36)}`, status: 'review', updated: Date.now(), owner: me()?.name ?? '', aiGen: g.id, aiAssisted: false,
             title: s.title, description: s.description, section: s.section, league: s.league, place: s.place, author: '', date: '',
             image: '', imageUrl: ph?.src ?? '', imageCaption: ph?.caption ?? '', imageCredit: ph?.credit ?? '', imageCreditUrl: ph?.creditUrl ?? '',
             breaking: false, trending: false, featured: false, live: false, pinned: false, homeLead: false, sectionLead: false, sectionPinned: false,
@@ -166,6 +184,7 @@
     }
 
     // ---------- shared pieces ----------
+    const srcList = (g: AiGen) => `<ol class="ai-srcs">${g.sources.map((x: AiSource & { auto?: boolean }) => `<li><a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.title || x.url)}</a><br><span class="pnl-small">${esc(x.outlet)}${x.author ? ` · ${esc(x.author)}` : ''}${x.date ? ` · ${esc(x.date.slice(0, 10))}` : ''} · ${x.words} palabras${x.pasted ? ' · texto pegado a mano' : ''}${x.auto ? ' · <b>encontrada por la búsqueda</b>' : ''}</span></li>`).join('')}</ol>`;
     function photos(opts: AiPhoto[], cur: number, current?: string) {
       if (!opts.length) return '<p class="pnl-muted pnl-small">Sin opciones de foto.</p>';
       return `<ul class="ai-photos">${opts.map((p, i) => { const on = current ? current === p.src : i === cur; return `<li class="${on ? 'on' : ''}">
@@ -178,13 +197,13 @@
       const lvl = ov.spans.length ? 'bad' : ov.score > 0 ? 'mid' : 'ok';
       const warns = (g.warnings ?? []).filter((w) => !/^Copia:/.test(w) || ov.spans.length);
       return `<div class="ai-box">
-        <p class="ai-tag">✨ Generado con asistencia de IA · ${esc(g.created_by_name || '')} · ${new Date(g.created_at).toLocaleString('es-PR', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })}</p>
+        <p class="ai-tag">Creado por ${esc(g.created_by_name || '—')} · ${new Date(g.created_at).toLocaleString('es-PR', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })}</p>
         ${g.independent ? '' : '<p class="ai-bad">⚠ Fuentes no independientes</p>'}
         ${warns.length ? `<ul class="ai-warn">${warns.map((w) => `<li>${esc(w)}</li>`).join('')}</ul>` : ''}
         <p class="ai-ov ${lvl}">Parecido con las fuentes: <b>${ov.score} %</b> ${ov.spans.length ? `· ${ov.spans.length} pasaje(s) de 8+ palabras iguales` : '· sin pasajes copiados'}</p>
         ${ov.spans.length ? `<ul class="ai-spans">${ov.spans.map((x) => `<li>«${esc(x)}»</li>`).join('')}</ul>` : ''}
         ${g.suggestions?.length ? `<ul class="ai-sug">${g.suggestions.map((x) => `<li>💡 ${esc(x)}</li>`).join('')}</ul>` : ''}
-        ${o.compact ? '' : `<details><summary>Fuentes (${g.sources.length})</summary><ol class="ai-srcs">${g.sources.map((x) => `<li><a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.title || x.url)}</a><br><span class="pnl-small">${esc(x.outlet)}${x.author ? ` · ${esc(x.author)}` : ''}${x.date ? ` · ${esc(x.date.slice(0, 10))}` : ''} · ${x.words} palabras${x.pasted ? ' · texto pegado a mano' : ''}</span></li>`).join('')}</ol></details>
+        ${o.compact ? '' : `<details><summary>Fuentes (${g.sources.length})</summary>${srcList(g)}</details>
         <details><summary>Hechos (${g.facts?.hechos.length ?? 0})</summary><ol class="ai-facts">${(g.facts?.hechos ?? []).map((h) => `<li>${esc(h.hecho)}${h.cita ? `<br><i>“${esc(h.cita)}” — ${esc(h.quien)}</i>` : ''} <span class="ai-src">${esc(h.medios.join(', '))}</span>${h.exclusivo ? ` <span class="ai-ex">exclusivo de ${esc(h.exclusivo)}</span>` : ''}</li>`).join('')}</ol></details>`}
       </div>`;
     }
@@ -194,12 +213,12 @@
     const slot = () => document.querySelector<HTMLElement>('[data-ai-box]');
     async function paintBox(curPhoto?: string) {
       const el = slot(); if (!el || !open) return;
-      if (me()?.role !== 'admin') { el.hidden = false; el.innerHTML = '<div class="ai-box"><p class="ai-tag">✨ Borrador de IA</p><p class="pnl-small">Lo revisa y lo aprueba el administrador.</p></div>'; return; }
+      if (me()?.role !== 'admin') { el.hidden = false; el.innerHTML = '<div class="ai-box"><p class="ai-tag">Borrador pendiente</p><p class="pnl-small">Lo revisa y lo aprueba el administrador.</p></div>'; return; }
       open.gen ??= await getGen(open.genId);
-      const g = open.gen; if (!g) { el.hidden = false; el.innerHTML = '<div class="ai-box"><p class="cm-err">No pudimos cargar los datos de la IA.</p></div>'; return; }
+      const g = open.gen; if (!g) { el.hidden = false; el.innerHTML = '<div class="ai-box"><p class="cm-err">No pudimos cargar los datos de este borrador.</p></div>'; return; }
       const text = (document.querySelector<HTMLElement>('[data-body]')?.innerText ?? '');
       el.hidden = false;
-      el.innerHTML = `<div class="pnl-card ai-card"><h2 class="pnl-h3">Borrador de IA</h2>${box(g, { text })}
+      el.innerHTML = `<div class="pnl-card ai-card"><h2 class="pnl-h3">Revisión del borrador</h2>${box(g, { text })}
         <button type="button" class="pnl-link" data-ai-recheck>Volver a revisar copia</button>
         <h3 class="pnl-h4">Fotos</h3>${photos(g.photo_options, -1, curPhoto)}
         <div class="ai-acts"><button type="button" class="adp-btn" data-ai-approve>Aprobar y publicar</button><button type="button" class="adp-btn ghost-dark" data-ai-edit>Editar</button><button type="button" class="apr-reject" data-ai-reject>Rechazar</button></div></div>`;

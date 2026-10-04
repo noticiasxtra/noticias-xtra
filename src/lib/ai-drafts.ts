@@ -2,7 +2,7 @@
 // (supabase/ai-drafts.sql). The function writes a draft; it never publishes. Publishing is the usual "publicar" flow.
 import { BACKEND, freshToken, staffApi } from './backend';
 
-export type AiSource = { url: string; outlet: string; title: string; author: string; date: string; text: string; words: number; links: Array<{ name: string; url: string }>; pasted?: boolean };
+export type AiSource = { url: string; outlet: string; title: string; author: string; date: string; text: string; words: number; links: Array<{ name: string; url: string }>; pasted?: boolean; auto?: boolean };
 export type AiFact = { tipo: string; hecho: string; cita: string; quien: string; fuentes: number[]; medios: string[]; exclusivo: string };
 export type AiPhoto = { provider: 'biblioteca' | 'wikimedia' | 'pexels' | 'unsplash'; src: string; thumb: string; about: string; author: string; license: string; credit: string; creditUrl: string; downloadLocation?: string; caption?: string; why?: string };
 export type AiStory = { title: string; description: string; section: string; league: string; place: string; body: string; words: number; related: string[]; sources: Array<{ name: string; url?: string }> };
@@ -32,6 +32,9 @@ export async function patchGen(id: string, patch: Partial<AiGen>): Promise<boole
   const r = await staffApi(`ai_generations?id=eq.${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify(patch) });
   return !!r?.ok;
 }
+/** A rejected story: the log keeps only its title, links, who and when; the text, facts and source texts are erased. */
+export const wipe = (title: string, by: string): Partial<AiGen> => ({ status: 'rejected', article_id: null, decided_by: by, decided_at: new Date().toISOString(),
+  story: { title } as unknown as AiStory, facts: null, sources: [], photo_options: [], overlap_spans: [], suggestions: [] });
 /** The last generations (the log: who, when, which sources, what happened). */
 export async function listGens(limit = 30): Promise<AiGen[]> {
   const r = await staffApi(`ai_generations?select=id,created_at,created_by_name,urls,status,decided_by,decided_at,title:story->>title&order=created_at.desc&limit=${limit}`);

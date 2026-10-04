@@ -3,7 +3,10 @@
 // The panel saves the result in `articles` with status 'review' and only a person publishes it (function "publicar").
 //
 // Steps (the panel calls them one by one, so no call runs too long):
-//   fetch   read the 3 pages: only authorized outlets (table ai_outlets), robots.txt respected, text only (never images)
+//   fetch   read the pages the admin pasted (1 to 3): only authorized sources (table ai_outlets), robots.txt respected,
+//           text only (never images)
+//   find    with fewer than 3, AI web search (limited to the authorized sites) looks for other articles about the same
+//           news, and the best ones are read the same way
 //   facts   check the sources are independent, then AI step 1 lists the facts and tags each with its outlet(s)
 //   write   AI step 2 writes the story from the fact list ONLY (it never sees the articles), then the copy check:
 //           8+ words in a row matching a source (quotes aside) get rewritten once, and whatever remains is flagged
@@ -36,6 +39,7 @@ export const words = (s: string) => (s.match(/[\p{L}\p{N}][\p{L}\p{N}'’.,%$-]*
 const norm = (w: string) => w.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]/g, '');
 const toks = (s: string) => s.split(/\s+/).map(norm).filter(Boolean);
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
+const canon = (u: string) => u.replace(/[?#].*$/, '').replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '').toLowerCase();
 const host = (u: string) => { try { return new URL(u).hostname.toLowerCase().replace(/^www\./, ''); } catch { return ''; } };
 
 /* ---------------- 1. reading a page ---------------- */
@@ -61,7 +65,7 @@ export function robotsAllows(txt: string, path: string, agent = 'noticiasxtrabot
   return best[0];
 }
 
-type Source = { url: string; outlet: string; title: string; author: string; date: string; text: string; words: number; links: Array<{ name: string; url: string }>; pasted?: boolean };
+type Source = { url: string; outlet: string; title: string; author: string; date: string; text: string; words: number; links: Array<{ name: string; url: string }>; pasted?: boolean; auto?: boolean };
 
 /** Title, outlet, author, date, main text and links to official sources, from a news page's HTML. Images are ignored. */
 export function extract(html: string, url: string, outletName: string): Source {
@@ -300,9 +304,9 @@ function db() {
 
 /* ---------------- the steps ---------------- */
 async function stepFetch(body: any, D: ReturnType<typeof db>) {
-  const urls: string[] = (body.urls ?? []).map((u: string) => String(u).trim());
-  if (urls.length !== 3 || urls.some((u) => !u)) throw new Oops('Pega los 3 enlaces.');
-  if (new Set(urls.map((u) => u.replace(/[?#].*$/, '').replace(/\/$/, ''))).size < 3) throw new Oops('Los 3 enlaces deben ser artículos distintos.');
+  const urls: string[] = (body.urls ?? []).map((u: string) => String(u).trim()).filter(Boolean).slice(0, 3);
+  if (!urls.length) throw new Oops('Pega al menos un enlace.');
+  if (new Set(urls.map(canon)).size < urls.length) throw new Oops('Los enlaces deben ser artículos distintos.');
   const outlets = await D.get('ai_outlets?select=domain,name');
   const results = await Promise.all(urls.map(async (url) => { try { return { ok: true, source: await readPage(url, outlets) }; } catch (e) { return { ok: false, url, error: e instanceof Oops ? e.message : 'No pudimos leer esta página. Pega el texto a mano.' }; } }));
   return { results };
@@ -314,18 +318,19 @@ async function stepFacts(body: any, D: ReturnType<typeof db>, me: { id: string; 
     const h = host(String(s.url ?? '')); const o = outlets.find((x) => h === x.domain || h.endsWith(`.${x.domain}`));
     if (!o) throw new Oops(`El enlace ${s.url} no es de una fuente autorizada.`);
     const text = String(s.text ?? '').slice(0, 20000);
-    return { url: String(s.url), outlet: o.name, title: String(s.title ?? '').slice(0, 200), author: String(s.author ?? '').slice(0, 120), date: String(s.date ?? '').slice(0, 40), text, words: words(text), links: Array.isArray(s.links) ? s.links.slice(0, 8) : [], pasted: !!s.pasted };
+    return { url: String(s.url), outlet: o.name, title: String(s.title ?? '').slice(0, 200), author: String(s.author ?? '').slice(0, 120), date: String(s.date ?? '').slice(0, 40), text, words: words(text), links: Array.isArray(s.links) ? s.links.slice(0, 8) : [], pasted: !!s.pasted, auto: !!s.auto };
   });
-  if (srcs.length !== 3) throw new Oops('Faltan fuentes: necesitamos las 3.');
+  if (srcs.length < 2 || srcs.length > 3) throw new Oops('Necesitamos 2 o 3 fuentes sobre la misma noticia.');
   const short = srcs.find((s) => s.words < 80); if (short) throw new Oops(`El texto de ${short.outlet} es muy corto (${short.words} palabras). Pega el artículo completo.`);
   const ind = independence(srcs);
+  if (srcs.length < 3) ind.warnings.push('Solo 2 fuentes: no encontramos una tercera sobre esta noticia. Verifica los datos con cuidado.');
   const notes = String(body.notes ?? '').slice(0, 1000);
   const gen = await D.insert('ai_generations', { created_by: me.id, created_by_name: me.name, urls: srcs.map((s) => s.url), sources: srcs, notes, independent: ind.ok, warnings: ind.warnings });
   if (!gen?.id) throw new Oops('No pudimos guardar el registro. ¿Corriste supabase/ai-drafts.sql?', 500);
   const prompt = srcs.map((s, i) => `ARTÍCULO ${i + 1} — ${s.outlet}${s.author ? `, por ${s.author}` : ''}${s.date ? `, ${s.date}` : ''}\nTítulo: ${s.title}\nEnlaces oficiales del artículo: ${s.links.map((l) => `${l.name} <${l.url}>`).join('; ') || 'ninguno'}\nTexto:\n"""\n${s.text.slice(0, 12000)}\n"""`).join('\n\n');
   const f = await claude(FACTS_SYSTEM, prompt);
   const hechos = (Array.isArray(f.hechos) ? f.hechos : []).filter((h: any) => h?.hecho).map((h: any) => {
-    const fuentes = [...new Set((Array.isArray(h.fuentes) ? h.fuentes : []).map(Number).filter((n: number) => n >= 1 && n <= 3))] as number[];
+    const fuentes = [...new Set((Array.isArray(h.fuentes) ? h.fuentes : []).map(Number).filter((n: number) => n >= 1 && n <= srcs.length))] as number[];
     return { tipo: String(h.tipo || 'que'), hecho: String(h.hecho), cita: String(h.cita || ''), quien: String(h.quien || ''), fuentes, medios: fuentes.map((n) => srcs[n - 1].outlet), exclusivo: fuentes.length === 1 ? srcs[fuentes[0] - 1].outlet : '' };
   });
   if (hechos.length < 3) throw new Oops('La IA no encontró suficientes hechos en las fuentes.', 422);
@@ -411,6 +416,52 @@ async function stepPhotos(body: any, D: ReturnType<typeof db>) {
   return { options, note };
 }
 
+/* ---------------- 2b. find the other sources (AI web search, authorized sites only) ---------------- */
+const FIND_SYSTEM = `Eres investigador de una redacción de Puerto Rico. Te dan un artículo y debes encontrar OTROS artículos o comunicados
+sobre EXACTAMENTE la misma noticia (el mismo hecho, no el mismo tema en general), publicados cerca de esa fecha.
+Busca solo en los sitios permitidos. Prefiere medios u organismos distintos al del artículo original y fuentes oficiales directas
+(el comunicado de la agencia, la policía, el tribunal...). No devuelvas portadas, listas de noticias ni el mismo artículo.
+Responde al final SOLO con JSON: {"encontrados":[{"url":"","titulo":"","por_que":""}]} (máximo 5, el mejor primero; lista vacía si no hay).`;
+async function searchSameStory(first: Source, domains: string[], have: string[]) {
+  const key = env('ANTHROPIC_API_KEY'); if (!key) throw new Oops('Falta el secreto ANTHROPIC_API_KEY en Supabase (Edge Functions → Secrets).', 500);
+  const tool = { type: 'web_search_20250305', name: 'web_search', max_uses: 4, allowed_domains: domains, user_location: { type: 'approximate', timezone: 'America/Puerto_Rico' } };
+  const messages: any[] = [{ role: 'user', content: `ARTÍCULO ORIGINAL (${first.outlet}${first.date ? `, ${first.date}` : ''}):\nTítulo: ${first.title}\n${first.text.slice(0, 1800)}\n\nYa tenemos estos enlaces (no los repitas): ${have.join(', ')}` }];
+  const seen: string[] = []; let text = '';
+  for (let turn = 0; turn < 3; turn++) {
+    const r = await fetch(env('ANTHROPIC_API_URL') || 'https://api.anthropic.com/v1/messages', {
+      method: 'POST', signal: AbortSignal.timeout(120000),
+      headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
+      body: JSON.stringify({ model: env('ANTHROPIC_MODEL') || 'claude-opus-5-5', max_tokens: 4000, system: FIND_SYSTEM, messages, tools: [tool] }),
+    }).catch(() => null);
+    if (!r) throw new Oops('La búsqueda tardó demasiado. Pega los otros enlaces a mano.', 502);
+    if (!r.ok) { const e = await r.json().catch(() => ({})); if (/web search/i.test(e?.error?.message ?? '')) throw new Oops('La búsqueda web está desactivada en tu cuenta de Anthropic (Console → Settings → Capabilities). Pega los otros enlaces a mano.', 502); throw new Oops(`La búsqueda dio un error (${r.status}). Pega los otros enlaces a mano.`, 502); }
+    const data = await r.json();
+    for (const b of data.content ?? []) if (b.type === 'web_search_tool_result' && Array.isArray(b.content)) for (const x of b.content) if (x.url) seen.push(x.url);
+    text += (data.content ?? []).filter((b: any) => b.type === 'text').map((b: any) => b.text).join('');
+    if (data.stop_reason === 'pause_turn') { messages.push({ role: 'assistant', content: data.content }); continue; }
+    break;
+  }
+  let picked: string[] = [];
+  const t = text.replace(/```json|```/g, '');
+  try { const j = JSON.parse(t.slice(t.indexOf('{'), t.lastIndexOf('}') + 1)); picked = (j.encontrados ?? []).map((x: any) => String(x.url)); } catch { /* use the raw results */ }
+  return [...picked, ...seen];
+}
+async function stepFind(body: any, D: ReturnType<typeof db>) {
+  const outlets: Array<{ domain: string; name: string }> = await D.get('ai_outlets?select=domain,name');
+  const have: string[] = (body.have ?? []).map(String).slice(0, 3);
+  const f = body.first ?? {}; const first: Source = { url: String(f.url ?? ''), outlet: String(f.outlet ?? ''), title: String(f.title ?? '').slice(0, 200), author: '', date: String(f.date ?? '').slice(0, 40), text: String(f.text ?? '').slice(0, 4000), words: 0, links: [] };
+  if (!first.title && !first.text) throw new Oops('Falta el artículo de partida.');
+  const need = Math.max(0, 3 - have.length); if (!need) return { found: [] };
+  const ok = (u: string) => { const h = host(u); try { return outlets.some((o) => h === o.domain || h.endsWith(`.${o.domain}`)) && new URL(u).pathname.length > 8; } catch { return false; } };
+  const cands = [...new Set((await searchSameStory(first, outlets.map((o) => o.domain), have)).filter(ok).map((u) => u.replace(/#.*$/, '')))].filter((u) => !have.some((h) => canon(h) === canon(u)));
+  const found: Source[] = [];
+  for (const u of cands.slice(0, 6)) {
+    if (found.length >= need) break;
+    try { const s = await readPage(u, outlets); if (!found.some((x) => canon(x.url) === canon(s.url))) found.push(s); } catch { /* blocked or too short: try the next one */ }
+  }
+  return { found, tried: Math.min(cands.length, 6), note: found.length < need ? (found.length ? `Encontramos ${found.length} fuente más.` : 'No encontramos otras fuentes sobre esta noticia en los sitios autorizados.') : '' };
+}
+
 /* ---------------- entry ---------------- */
 export async function handler(req: Request): Promise<Response> {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
@@ -425,6 +476,7 @@ export async function handler(req: Request): Promise<Response> {
     const body = await req.json().catch(() => ({}));
     const me = { id: user.id, name: staff.name || user.email || 'Administrador' };
     if (body.action === 'fetch') return json(await stepFetch(body, D));
+    if (body.action === 'find') return json(await stepFind(body, D));
     if (body.action === 'facts') return json(await stepFacts(body, D, me));
     if (body.action === 'write') return json(await stepWrite(body, D));
     if (body.action === 'photos') return json(await stepPhotos(body, D));

@@ -4115,3 +4115,6 @@ a,button,summary,label{-webkit-tap-highlight-color:transparent}
 [data-theme="dark"] .ai-ex{background:#4A3510;color:#FCE3A8}
 [data-theme="dark"] .ai-tag{color:#B9A6FF}
 [data-theme="dark"] .ai-steps li.ok,[data-theme="dark"] .ai-ov.ok b{color:#5BD6A0}
+.ai-more{border:1px solid var(--line);border-radius:12px;padding:8px 12px}
+.ai-more[open]{display:grid;gap:10px}
+.ai-more summary{cursor:pointer;font-weight:700;font-size:13.5px}
