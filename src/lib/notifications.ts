@@ -3,7 +3,7 @@
 // Kept in this browser (localStorage 'nx-notifs'). With reader accounts (Supabase), notifications from other readers
 // (replies, mentions, likes, the newsroom's decisions) come from the `notifications` table: syncNotifs() merges them in
 // as 'db-<id>' and marking them read updates the table. In preview mode other readers' are examples (EJEMPLO).
-import { api, loggedIn, accountsOn } from './account';
+import { api, loggedIn, accountsOn, myId } from './account';
 
 export type NotifKind = 'mention' | 'reply' | 'like' | 'badge' | 'mod';
 export type Notif = { id: string; at: number; kind: NotifKind; who?: string; text: string; quote?: string; url?: string; read?: boolean; demo?: boolean };
@@ -23,7 +23,11 @@ const write = (k: string, v: unknown) => { try { localStorage.setItem(k, JSON.st
 export const getNotifs = (): Notif[] => read<Notif[]>(KEY, []).sort((a, b) => b.at - a.at);
 export const unreadCount = () => getNotifs().filter((n) => !n.read).length;
 export const getPrefs = (): Record<NotifKind, boolean> => ({ mention: true, reply: true, like: true, badge: true, mod: true, ...read(PREFS, {}) });
-export const setPrefs = (p: Record<NotifKind, boolean>) => write(PREFS, p);
+export const setPrefs = (p: Record<NotifKind, boolean>) => {
+  write(PREFS, p);
+  // With an account the choice is saved there, and the server stops creating the kinds turned off (wants() in SQL)
+  if (accountsOn() && loggedIn()) void api(`profiles?id=eq.${myId()}`, { method: 'PATCH', body: JSON.stringify({ notif_prefs: p }) });
+};
 
 const changed = (added?: Notif) => dispatchEvent(new CustomEvent('nx-notifs', { detail: { added } }));
 
@@ -48,6 +52,9 @@ export function markRead(id?: string) {
 export async function syncNotifs() {
   if (!accountsOn()) return;
   if (!loggedIn()) { write(KEY, getNotifs().filter((n) => !n.id.startsWith('db-'))); changed(); return; }
+  // The account's notification settings (any device), then its notifications
+  const pr = await api(`profiles?id=eq.${myId()}&select=notif_prefs`);
+  if (pr?.ok) { const row = (await pr.json())[0]; if (row?.notif_prefs && Object.keys(row.notif_prefs).length) write(PREFS, row.notif_prefs); }
   const r = await api('notifications?select=id,kind,actor,text,quote,url,read,created_at&order=created_at.desc&limit=40');
   if (!r?.ok) return;
   const rows: Array<{ id: number; kind: NotifKind; actor: string | null; text: string; quote: string | null; url: string | null; read: boolean; created_at: string }> = await r.json();
