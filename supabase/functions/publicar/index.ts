@@ -6,7 +6,7 @@
 // with "Contents: Read and write". SUPABASE_URL, SUPABASE_ANON_KEY and SUPABASE_SERVICE_ROLE_KEY are built in.
 import { encodeBase64 } from 'jsr:@std/encoding@1/base64';
 
-const REPO = 'publisher-noticel/noticias-xtra';
+const REPO = 'noticiasxtra/noticias-xtra';
 const BRANCH = 'main';
 const DIR = 'src/content/noticias';
 

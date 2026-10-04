@@ -548,7 +548,7 @@ const TOOLS = [
     const y = (v: string) => JSON.stringify(v);
 
     // ---------- open a story that is already on the site (AI or older) in the editor ----------
-    const RAW = 'https://raw.githubusercontent.com/publisher-noticel/noticias-xtra/main/src/content/noticias/';
+    const RAW = 'https://raw.githubusercontent.com/noticiasxtra/noticias-xtra/main/src/content/noticias/';
     const MANAGED = new Set(['title', 'description', 'section', 'league', 'place', 'date', 'author', 'image', 'imageCaption', 'imageCredit',
       'breaking', 'trending', 'featured', 'live', 'pinned', 'homeLead', 'sectionLead', 'sectionPinned', 'aiAssisted', 'draft', 'sources', 'related', 'correction']);
     const unq = (v: string) => { v = v.trim(); try { return v.startsWith('"') ? JSON.parse(v) : v.replace(/^'(.*)'$/, '$1'); } catch { return v; } };

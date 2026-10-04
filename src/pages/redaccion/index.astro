@@ -485,7 +485,7 @@ const TABS = [
       async salud() {
         const box = $('[data-health]');
         box.innerHTML = kpi('Actualización del sitio', 'Cargando…') + kpi('Redactor de noticias (IA)', 'Cargando…');
-        const api = 'https://api.github.com/repos/publisher-noticel/noticias-xtra';
+        const api = 'https://api.github.com/repos/noticiasxtra/noticias-xtra';
         try {
           const [dep, ai, prs, iss] = await Promise.all([
             fetch(`${api}/actions/workflows/deploy.yml/runs?per_page=1`).then((r) => r.json()),
