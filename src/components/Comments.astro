@@ -61,36 +61,6 @@ const STICKER_IMGS = [['wepa', '¡Wepa!'], ['coqui', 'Coquí'], ['bandera', 'Ban
     </div>
   </form>
 
-  <p class="cm-repnote" data-cm-repnote hidden></p>
-  <details class="cm-rep" data-cm-rep>
-    <summary>Tu nivel: <b data-rep-level>Nuevo</b> · <span data-rep-pts>0</span> puntos de reputación · <u>qué significan las insignias</u></summary>
-    <div class="cm-rep-body">
-      <p class="cm-rep-next" data-rep-next></p>
-      <ul class="cm-rep-needs" data-rep-needs></ul>
-      <div class="cm-guide">
-        <p class="cm-guide-h">¿Qué significan las insignias?</p>
-        <p class="cm-guide-sub">Niveles: se muestra uno junto a tu nombre, el más alto que tengas.</p>
-        <ul>
-          {LEVELS.slice(1).map((l) => (
-            <li><span class={`cm-badge cm-b-${l.id}`}><Fragment set:html={BADGE[l.id]} /> {l.name}</span><span><b>{LEVEL_INFO[l.id].means}</b> {LEVEL_INFO[l.id].how}</span></li>
-          ))}
-        </ul>
-        <p class="cm-guide-sub">Insignias especiales: se coleccionan y aparecen en tu perfil.</p>
-        <ul data-specials>
-          {SPECIALS.map((x) => (
-            <li data-special={x.id}><span class={`cm-badge cm-b-${x.id}`}><Fragment set:html={BADGE[x.id]} /> {x.name}</span><span><b>{x.means}</b> {x.how}</span><i class="cm-got" aria-label="Ganada">✓</i></li>
-          ))}
-        </ul>
-      </div>
-      <ul class="cm-rep-rules">
-        <li>+{RULES.comment} por comentario de {RULES.minChars} caracteres o más (+{RULES.reply} si es respuesta); cuentan hasta {RULES.perDay} al día.</li>
-        <li>+{RULES.like} por cada Me gusta de otro lector · +{RULES.featured} si la redacción destaca tu comentario.</li>
-        <li>{RULES.report} si un comentario tuyo es reportado y ocultado. Los comentarios con insultos, amenazas, odio, datos personales o spam se ocultan solos; los dudosos los revisa la redacción. Top comentarista y Diamante se pierden con un reporte.</li>
-        <li>Si borras un comentario, se restan sus puntos. Stickers y respuestas cortas no suman.</li>
-      </ul>
-      <p class="cm-rep-demo">Vista previa: tu reputación se guarda en este dispositivo. Los Me gusta de otros y los destacados llegarán con las cuentas.</p>
-    </div>
-  </details>
 
   <ul class="cm-list" data-cm-list>
     {SAMPLES.map((c) => (
@@ -275,23 +245,10 @@ const STICKER_IMGS = [['wepa', '¡Wepa!'], ['coqui', 'Coquí'], ['bandera', 'Ban
     // Real mode: no examples, no "preview" labels; the reputation panel comes back with accounts' points (phase 2)
     list.replaceChildren();
     root.querySelector('.cm-head .sp-demo')?.remove();
-    // "Tu nivel": counted by the server from real comments and likes (shown when logged in)
-    const repBox = root.querySelector<HTMLElement>('[data-cm-rep]')!;
-    root.querySelector('.cm-rep-demo')?.remove();
+    // Reputation is counted by the server (badges next to names); the reader's own progress is only in Mi perfil
     const BADGES: Record<string, string> = JSON.parse(root.dataset.badges || '{}');
     let reps: Record<string, Rep> = {};
-    const paintRep = () => {
-      repBox.hidden = !loggedIn(); if (!loggedIn()) return;
-      const r = getRep(); const lv = levelOf(r);
-      root.querySelector('[data-rep-level]')!.textContent = lv.name;
-      root.querySelector('[data-rep-pts]')!.textContent = r.points.toLocaleString('es-PR');
-      root.querySelector('[data-rep-next]')!.textContent = lv.next ? `Para llegar a ${lv.next.name} necesitas:` : '¡Eres Diamante! Mantén cero reportes para conservarlo.';
-      root.querySelector('[data-rep-needs]')!.innerHTML = lv.next ? needs(r, lv.next).map((n) => `<li class="${n.have >= n.need ? 'ok' : ''}"><span>${n.have >= n.need ? '✓' : '○'} ${n.label}</span><b>${Math.min(n.have, n.need).toLocaleString('es-PR')}/${n.need.toLocaleString('es-PR')}</b></li>`).join('') : '';
-      const got = specialsOf(r);
-      root.querySelectorAll<HTMLElement>('[data-special]').forEach((li) => li.classList.toggle('won', !!got[li.dataset.special!]));
-    };
-    addEventListener('nx-rep', paintRep);
-    const refreshRep = () => { if (loggedIn()) void syncRep().then(paintRep); else paintRep(); };
+    const refreshRep = () => { if (loggedIn()) void syncRep(); };
     const note = root.querySelector<HTMLElement>('.cm-note')!;
     const pk = setupPicker(root);
     let rows: Row[] = [], liked = new Set<string>(), reported = new Set<string>(), parentId: string | null = null, warned = '';
@@ -610,17 +567,6 @@ const STICKER_IMGS = [['wepa', '¡Wepa!'], ['coqui', 'Coquí'], ['bandera', 'Ban
       });
     });
 
-    // "Tu nivel" panel: level, points and what's missing for the next badge
-    const paintRep = () => {
-      const r = getRep(); const lv = levelOf(r);
-      root.querySelector('[data-rep-level]')!.textContent = lv.name;
-      root.querySelector('[data-rep-pts]')!.textContent = r.points.toLocaleString('es-PR');
-      root.querySelector('[data-rep-next]')!.textContent = lv.next ? `Para llegar a ${lv.next.name} necesitas:` : '¡Eres Diamante! Mantén cero reportes para conservarlo.';
-      root.querySelector('[data-rep-needs]')!.innerHTML = lv.next ? needs(r, lv.next).map((n) => `<li class="${n.have >= n.need ? 'ok' : ''}"><span>${n.have >= n.need ? '✓' : '○'} ${n.label}</span><b>${Math.min(n.have, n.need).toLocaleString('es-PR')}/${n.need.toLocaleString('es-PR')}</b></li>`).join('') : '';
-      const got = specialsOf(r);
-      root.querySelectorAll<HTMLElement>('[data-special]').forEach((li) => li.classList.toggle('won', !!got[li.dataset.special!]));
-    };
-    paintRep(); addEventListener('nx-rep', paintRep);
 
     list.querySelectorAll<HTMLElement>('.cm-item').forEach(wireLike);
     const pk = setupPicker(root);
@@ -652,9 +598,7 @@ const STICKER_IMGS = [['wepa', '¡Wepa!'], ['coqui', 'Coquí'], ['bandera', 'Ban
       SPECIALS.forEach((x) => { if (spAfter[x.id] && !spBefore[x.id]) notify({ id: `sp-${x.id}`, kind: 'badge', text: `Ganaste la insignia ${x.name}: ${x.means.toLowerCase()}`, url: here }); });
       const fan = [...list.querySelectorAll('.cm-item:not(.mine) b')].map((b) => b.textContent).filter(Boolean)[0] || 'lectora_bayamon';
       setTimeout(() => notify({ id: `like-${id}`, kind: 'like', who: fan!, text: 'le gustó tu comentario.', quote: text.slice(0, 80) || 'Sticker', url: here, demo: true }), 6000);
-      const note = root.querySelector<HTMLElement>('[data-cm-repnote]')!;
-      note.textContent = res.pts ? `⭐ ${res.why}` : res.why; note.className = `cm-repnote ${res.pts ? 'ok' : ''}`; note.hidden = false;
-      if (chk.verdict === 'review') note.textContent += ' · La redacción revisará este comentario.';
+      if (chk.verdict === 'review') { err.textContent = 'Publicado. La redacción lo revisará antes de que otros lo vean.'; err.hidden = false; }
       ta.value = ''; ta.style.height = 'auto'; replyTo = undefined; setMedia(undefined); closePicker();
       render();
     });

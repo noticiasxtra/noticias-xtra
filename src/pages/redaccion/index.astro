@@ -1,6 +1,6 @@
 ---
 // Staff panel ("Panel de la redacción"): one login for everything waiting on the newsroom.
-// Tabs: Inicio, Noticias (approve AI drafts, quick look at published ones), Comentarios, Anuncios, Ingresos,
+// Tabs: Inicio, Noticias (approve AI drafts, quick look at published ones), Escribir, Fotos (photo library), Comentarios, Anuncios, Ingresos,
 // Analítica, Salud del sitio, Equipo. What each person sees depends on their role.
 // PREVIEW: there are no accounts yet, so login is a name + role kept on this device ('nx-staff'), the drafts,
 // analytics and revenue are examples (EJEMPLO / DEMO), and Salud reads the real public GitHub status.
@@ -12,6 +12,7 @@ import CommentQueue from '../../components/CommentQueue.astro';
 import SalesDesk from '../../components/panel/SalesDesk.astro';
 import Writer from '../../components/panel/Writer.astro';
 import Tasks from '../../components/panel/Tasks.astro';
+import PhotoLibrary from '../../components/panel/PhotoLibrary.astro';
 import { getStories, url, SECTIONS, SITE } from '../../lib/site';
 import { hasBackend } from '../../lib/backend';
 import sources from '../../../scripts/sources.json';
@@ -36,6 +37,7 @@ const TABS = [
   ['inicio', 'Inicio', '<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/>'],
   ['noticias', 'Noticias', '<path d="M4 5h13v14H6a2 2 0 0 1-2-2zM17 9h3v8a2 2 0 0 1-2 2M8 9h5M8 13h5"/>'],
   ['escribir', 'Escribir', '<path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>'],
+  ['fotos', 'Fotos', '<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="M21 16l-5-5-8 8"/>'],
   ['comentarios', 'Comentarios', '<path d="M4 5h16v11H9l-5 4z"/>'],
   ['ventas', 'Ventas', '<path d="M3 7h18l-2 12H5z"/><path d="M8 7a4 4 0 0 1 8 0"/>'],
   ['anuncios', 'Anuncios', '<path d="M3 11v2l13 5V6L3 11z"/><path d="M16 9a3 3 0 0 1 0 6"/>'],
@@ -117,6 +119,11 @@ const TABS = [
         <!-- Escribir -->
         <section class="pnl-pane" data-pane="escribir" hidden>
           <Writer recent={recent.map(({ id, title }) => ({ id, title }))} published={published} />
+        </section>
+
+        <!-- Fotos -->
+        <section class="pnl-pane" data-pane="fotos" hidden>
+          <PhotoLibrary />
         </section>
 
         <!-- Ventas -->
@@ -225,10 +232,10 @@ const TABS = [
     type Staff = { name: string; role: 'admin' | 'editor' | 'ads' | 'reporter' };
     const ROLE_NAME = { admin: 'Administrador', editor: 'Editor', ads: 'Ventas', reporter: 'Periodista' };
     const ROLE_TABS: Record<Staff['role'], string[]> = {
-      admin: ['inicio', 'noticias', 'escribir', 'ventas', 'comentarios', 'anuncios', 'ingresos', 'analitica', 'salud', 'equipo'],
-      editor: ['inicio', 'noticias', 'escribir', 'comentarios', 'analitica', 'salud'],
+      admin: ['inicio', 'noticias', 'escribir', 'fotos', 'ventas', 'comentarios', 'anuncios', 'ingresos', 'analitica', 'salud', 'equipo'],
+      editor: ['inicio', 'noticias', 'escribir', 'fotos', 'comentarios', 'analitica', 'salud'],
       ads: ['inicio', 'ventas', 'anuncios', 'ingresos', 'comentarios'],
-      reporter: ['inicio', 'escribir'],
+      reporter: ['inicio', 'escribir', 'fotos'],
     };
     const me = () => get<Staff | null>('nx-staff', null);
 

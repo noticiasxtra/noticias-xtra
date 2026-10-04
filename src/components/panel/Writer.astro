@@ -11,6 +11,7 @@
 // Without Supabase it's a preview: articles stay on this device ('nx-articles') and can be downloaded as story files.
 import { SECTIONS, PR_MUNICIPIOS, url } from '../../lib/site';
 import { LEAGUES } from '../../lib/leagues';
+import PhotoLibrary from './PhotoLibrary.astro';
 type Pub = { id: string; title: string; section: string; author: string; date: string; url: string; ai: boolean };
 interface Props { recent: Array<{ id: string; title: string }>; published: Pub[] }
 const { recent, published } = Astro.props;
@@ -70,6 +71,7 @@ const TOOLS = [
         <div class="wr-photo" data-wr-photo>
           <div class="wr-photo-empty" data-photo-empty>
             <label class="adp-btn ghost-dark">Subir foto principal<input type="file" accept="image/*" class="sr" data-photo-file /></label>
+            <button type="button" class="adp-btn ghost-dark" data-photo-lib="main">Elegir de la biblioteca</button>
             <span class="pnl-muted">o pega el enlace de una foto: <input type="url" data-f="imageUrl" placeholder="https://…" aria-label="Enlace de la foto" /></span>
           </div>
           <figure class="wr-photo-full" data-photo-full hidden>
@@ -158,6 +160,7 @@ const TOOLS = [
     <form class="sd-form" data-img-form>
       <header class="sd-dlg-h"><h2 id="wr-img-h" data-img-h>Insertar foto</h2><button type="button" class="sd-x" data-pop-close aria-label="Cerrar">✕</button></header>
       <label data-img-file-wrap>Foto<input type="file" name="file" accept="image/*" /></label>
+      <button type="button" class="pnl-link" data-photo-lib="inline" data-img-lib>o elegir de la biblioteca</button>
       <img class="wr-img-prev" data-img-prev alt="" hidden />
       <label>Pie de foto<input name="cap" maxlength="200" placeholder="Qué se ve en la foto" /></label>
       <label>Crédito<input name="credit" maxlength="120" placeholder="Foto: Nombre / Noticias Xtra" /></label>
@@ -193,6 +196,7 @@ const TOOLS = [
     <div class="wr-prev-stage" data-prev-stage><iframe title="Vista previa de la noticia" data-prev-frame></iframe></div>
   </dialog>
   <div class="apn-toast" data-wr-toast role="status" hidden></div>
+  <PhotoLibrary mode="picker" />
 </section>
 
 <script>
@@ -463,7 +467,7 @@ const TOOLS = [
       }
       if (t === 'doc') { docForm.reset(); $('[data-doc-err]').hidden = true; openPop('doc', b); }
       if (t === 'embed') { editing = null; embedForm.reset(); $('[data-embed-h]').textContent = 'Insertar video o publicación'; $('[data-embed-go]').textContent = 'Insertar'; embedPrev(); openPop('embed', b); }
-      if (t === 'image') { editing = null; imgForm.reset(); imgData = ''; $('[data-img-prev]').hidden = true; $('[data-img-file-wrap]').hidden = false; $('[data-img-h]').textContent = 'Insertar foto'; $('[data-img-go]').textContent = 'Insertar'; openPop('image', b); }
+      if (t === 'image') { editing = null; imgForm.reset(); imgData = ''; $('[data-img-prev]').hidden = true; $('[data-img-file-wrap]').hidden = false; $('[data-img-lib]').hidden = false; $('[data-img-h]').textContent = 'Insertar foto'; $('[data-img-go]').textContent = 'Insertar'; openPop('image', b); }
     }));
     // Paste: plain text only (no stray styles from other sites); a lone supported link becomes an embed
     body.addEventListener('paste', (e) => {
@@ -488,6 +492,22 @@ const TOOLS = [
       try { const data = await shrink(f, 1400); cur.image = await upload(data, 'foto', 'jpg'); cur.imageUrl = ''; field('imageUrl').value = ''; changed(); } catch { toast('No pudimos leer esa imagen.'); }
     });
     $('[data-photo-rm]').addEventListener('click', () => { if (!cur) return; cur.image = ''; field('imageUrl').value = ''; changed(); });
+    // Photo library (PhotoLibrary.astro): the main photo, or a photo inside the story, with its caption and credit
+    let libAnchor: HTMLElement | null = null;
+    $$<HTMLButtonElement>('[data-photo-lib]').forEach((b) => b.addEventListener('click', () => { libAnchor = popAnchor; dispatchEvent(new CustomEvent('nx-photo-open', { detail: { target: b.dataset.photoLib } })); }));
+    addEventListener('nx-photo-pick', (e) => {
+      const { photo, target } = (e as CustomEvent).detail as { photo: { src: string; caption?: string; credit?: string }; target: string };
+      if (!cur) return;
+      if (target === 'main') {
+        cur.image = ''; field('imageUrl').value = photo.src; field('imageCaption').value = photo.caption ?? ''; field('imageCredit').value = photo.credit ?? ''; changed();
+        toast('Foto principal escogida de la biblioteca.'); return;
+      }
+      // A photo inside the story: back to the "Insertar foto" panel with it ready
+      imgData = photo.src; const pv = $<HTMLImageElement>('[data-img-prev]'); pv.src = photo.src; pv.hidden = false;
+      (imgForm.elements.namedItem('cap') as HTMLInputElement).value = photo.caption ?? '';
+      (imgForm.elements.namedItem('credit') as HTMLInputElement).value = photo.credit ?? '';
+      if (libAnchor) openPop('image', libAnchor);
+    });
 
     // ---------- sources and related ----------
     root.addEventListener('click', (e) => {
@@ -710,7 +730,7 @@ const TOOLS = [
       } else {
         imgForm.reset(); (imgForm.elements.namedItem('cap') as HTMLInputElement).value = fig.dataset.cap || ''; (imgForm.elements.namedItem('credit') as HTMLInputElement).value = fig.dataset.credit || '';
         radio(imgForm, 'size', fig.dataset.size || ''); radio(imgForm, 'align', fig.dataset.align || '');
-        const pv = $<HTMLImageElement>('[data-img-prev]'); pv.src = fig.dataset.src!; pv.hidden = false; $('[data-img-file-wrap]').hidden = true;
+        const pv = $<HTMLImageElement>('[data-img-prev]'); pv.src = fig.dataset.src!; pv.hidden = false; $('[data-img-file-wrap]').hidden = true; $('[data-img-lib]').hidden = true;
         $('[data-img-h]').textContent = 'Editar foto'; $('[data-img-go]').textContent = 'Guardar'; openPop('image', b);
       }
     });

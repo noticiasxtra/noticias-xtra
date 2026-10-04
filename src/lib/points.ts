@@ -77,6 +77,6 @@ export function award(game: string, pts: number, why: string, once?: string): nu
   try { localStorage.setItem(KEY, JSON.stringify(s)); } catch { return 0; }
   dispatchEvent(new CustomEvent('nx-points', { detail: { added, total: s.total, why } }));
   const lvl = levelOf(s.total);
-  if (lvl.index > levelOf(s.total - added).index) notify({ id: `pts-${lvl.index}`, kind: 'badge', text: `¡Subiste a ${lvl.name} en Juegos Xtra! Ya tienes ${s.total.toLocaleString('es-PR')} puntos.`, url: `${import.meta.env.BASE_URL.replace(/\/$/, '')}/juegos/#puntos` });
+  if (lvl.index > levelOf(s.total - added).index) notify({ id: `pts-${lvl.index}`, kind: 'badge', text: `¡Subiste a ${lvl.name} en Juegos Xtra! Ya tienes ${s.total.toLocaleString('es-PR')} puntos.`, url: `${import.meta.env.BASE_URL.replace(/\/$/, '')}/perfil/` });
   return added;
 }

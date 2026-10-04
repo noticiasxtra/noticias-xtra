@@ -31,7 +31,7 @@ const BADGES = [
           <li>🔖 Guarda noticias para leerlas después</li>
           <li>💬 Comenta y gana insignias</li>
           <li>🔔 Recibe avisos cuando te mencionen o les guste tu comentario</li>
-          <li>⭐ Suma puntos en Juegos Xtra</li>
+          <li>🎮 Sigue tu progreso en Juegos Xtra</li>
         </ul>
         <label for="pf-name">Tu nombre de usuario</label>
         <input id="pf-name" maxlength="24" placeholder="ej. lector_boricua" autocomplete="nickname" />
@@ -61,7 +61,7 @@ const BADGES = [
 
         <section class="pf-pane" data-pane="resumen">
           <div class="pf-tiles">
-            <a class="pf-tile" href={`${url('juegos')}#puntos`}>
+            <a class="pf-tile" href={url('juegos')}>
               <span class="pf-k">Puntos de juegos</span><b data-v="pts">0</b>
               <span class="pf-bar"><i data-bar="pts"></i></span><small data-v="pts-next"></small>
             </a>
@@ -71,7 +71,7 @@ const BADGES = [
             </a>
             <a class="pf-tile sm" href={url('guardadas')}><span class="pf-k">Guardadas</span><b data-v="saved">0</b></a>
             <a class="pf-tile sm" href="#actividad" data-goto="actividad"><span class="pf-k">Comentarios</span><b data-v="comments">0</b></a>
-            <a class="pf-tile sm" href={`${url('juegos')}#puntos`}><span class="pf-k">Racha de juegos</span><b data-v="streak">0</b></a>
+            <a class="pf-tile sm" href={url('juegos')}><span class="pf-k">Racha de juegos</span><b data-v="streak">0</b></a>
           </div>
           <h2 class="pf-h">Mis insignias <small data-v="badge-n"></small></h2>
           <ul class="pf-badges">
