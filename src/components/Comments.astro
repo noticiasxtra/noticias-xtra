@@ -24,11 +24,12 @@ import { SITE, url } from '../lib/site';
 const STICKER_IMGS = [['wepa', '¡Wepa!'], ['coqui', 'Coquí'], ['bandera', 'Bandera de Puerto Rico'], ['te-quiero-pr', 'Te quiero PR'], ['jajaja', 'Jajaja'], ['fuego', 'Fuego'],
   ['palante', "¡Pa'lante!"], ['que-bueno', '¡Qué bueno!'], ['bravo', '¡Bravo!'], ['cafe', 'Buenos días'], ['capicu', '¡Capicú!']];
 ---
-{/* Phones: a compact bar opens the comments in a panel that slides up from the bottom, like Instagram */}
-<button type="button" class="cm-teaser" data-cm-teaser aria-controls="comentarios" aria-expanded="false">
-  <span class="cm-teaser-h">💬 Comentarios <b data-cm-teaser-n></b></span>
-  <span class="cm-teaser-first" data-cm-teaser-first>Sé la primera persona en comentar.</span>
-</button>
+{/* Phones: a preview card (newest comments + "Añade un comentario…") opens the comments in a panel that slides up, like Instagram */}
+<div class="cm-teaser" data-cm-teaser>
+  <button type="button" class="cm-teaser-h" data-cm-open aria-controls="comentarios" aria-expanded="false">💬 Comentarios <b data-cm-teaser-n></b><span>Ver todos ›</span></button>
+  <ul class="cm-teaser-list" data-cm-teaser-list></ul>
+  <button type="button" class="cm-teaser-write" data-cm-open-write aria-controls="comentarios"><span class="cm-av me" aria-hidden="true">+</span>Añade un comentario…</button>
+</div>
 <div class="cm-backdrop" data-cm-backdrop></div>
 <section class="cm" id="comentarios" data-comments={storyId} data-badges={JSON.stringify(BADGE)} aria-labelledby="cm-h">
   <div class="cm-grab" data-cm-grab aria-hidden="true"><span></span></div>
@@ -194,21 +195,27 @@ const STICKER_IMGS = [['wepa', '¡Wepa!'], ['coqui', 'Coquí'], ['bandera', 'Ban
 
   // Phones: the comments open in a panel that slides up from the bottom (Instagram style); computers keep them in the page
   function sheet(root: HTMLElement) {
-    const backdrop = root.previousElementSibling as HTMLElement, teaser = backdrop.previousElementSibling as HTMLButtonElement;
+    const backdrop = root.previousElementSibling as HTMLElement, teaser = backdrop.previousElementSibling as HTMLElement;
+    const openBtn = teaser.querySelector<HTMLButtonElement>('[data-cm-open]')!;
     const html = document.documentElement, phone = matchMedia('(max-width: 760px)');
     const ta = root.querySelector<HTMLTextAreaElement>('[data-cm-form] textarea')!;
     const isOpen = () => html.classList.contains('cm-open');
     const open = (push = true) => {
       if (!phone.matches || isOpen()) return;
-      html.classList.add('cm-open'); teaser.setAttribute('aria-expanded', 'true');
+      html.classList.add('cm-open'); openBtn.setAttribute('aria-expanded', 'true');
       if (push) history.pushState({ cm: 1 }, ''); // the phone's back button closes the panel
     };
     const close = (fromBack = false) => {
       if (!isOpen()) return;
-      html.classList.remove('cm-open'); teaser.setAttribute('aria-expanded', 'false'); ta.blur();
+      html.classList.remove('cm-open'); openBtn.setAttribute('aria-expanded', 'false'); ta.blur();
       if (!fromBack && history.state?.cm) history.back();
     };
-    teaser.addEventListener('click', () => open());
+    // Any part of the card opens the comments; "Añade un comentario…" opens them ready to write (keyboard up)
+    teaser.addEventListener('click', (e) => {
+      const write = (e.target as HTMLElement).closest('[data-cm-open-write]');
+      open();
+      if (write) ta.focus();
+    });
     backdrop.addEventListener('click', () => close());
     root.querySelector('[data-cm-close]')!.addEventListener('click', () => close());
     addEventListener('popstate', () => close(true));
@@ -223,14 +230,22 @@ const STICKER_IMGS = [['wepa', '¡Wepa!'], ['coqui', 'Coquí'], ['bandera', 'Ban
     // The writing bar stays above the phone's keyboard
     const vv = window.visualViewport;
     vv?.addEventListener('resize', () => html.style.setProperty('--kb', `${Math.max(0, innerHeight - vv.height - vv.offsetTop)}px`));
-    // The bar on the story shows how many comments there are and the newest one
+    // The card on the story: how many comments there are and the newest three
     const paint = () => {
-      const items = [...root.querySelectorAll<HTMLElement>('.cm-item:not(.cm-hidden)')];
+      const items = [...root.querySelectorAll<HTMLElement>('.cm-item:not(.cm-hidden):not(.reply)')].slice(0, 3);
       teaser.querySelector('[data-cm-teaser-n]')!.textContent = root.querySelector('[data-cm-count]')!.textContent || '';
-      const first = items[0];
-      const firstEl = teaser.querySelector('[data-cm-teaser-first]')!;
-      if (first) { firstEl.replaceChildren(); const b = document.createElement('b'); b.textContent = first.querySelector('b')?.textContent ?? ''; const media = first.querySelector<HTMLImageElement>('.cm-media'); firstEl.append(b, ' ', first.querySelector('.cm-text')?.textContent?.trim() || (media ? (media.classList.contains('photo') ? 'envió una foto' : media.alt === 'GIF' ? 'envió un GIF' : 'envió un sticker') : '')); }
-      else firstEl.textContent = 'Sé la primera persona en comentar.';
+      const ul = teaser.querySelector('[data-cm-teaser-list]')!;
+      ul.replaceChildren(...items.map((it) => {
+        const li = document.createElement('li');
+        const b = document.createElement('b'); b.textContent = it.querySelector('b')?.textContent ?? '';
+        const media = it.querySelector<HTMLImageElement>('.cm-media');
+        const txt = it.querySelector('.cm-text')?.textContent?.trim() || (media ? (media.classList.contains('photo') ? '📷 envió una foto' : '🏷️ envió un sticker') : '');
+        li.append(b, ' ', txt);
+        return li;
+      }));
+      if (!items.length) { const li = document.createElement('li'); li.className = 'cm-teaser-empty'; li.textContent = 'Sé la primera persona en comentar.'; ul.append(li); }
+      const av = teaser.querySelector<HTMLElement>('.cm-teaser-write .cm-av')!; const mine = root.querySelector<HTMLElement>('[data-cm-me]')!;
+      av.textContent = mine.textContent; av.style.cssText = mine.style.cssText;
     };
     new MutationObserver(paint).observe(root.querySelector('[data-cm-list]')!, { childList: true, subtree: true, characterData: true });
     paint();
@@ -615,14 +630,22 @@ const STICKER_IMGS = [['wepa', '¡Wepa!'], ['coqui', 'Coquí'], ['bandera', 'Ban
         if (!src) { send.disabled = false; err.textContent = 'No se pudo subir la foto. Intenta otra vez.'; err.hidden = false; return; }
         att = { kind: 'photo', src };
       }
-      const r = await api('comments', { method: 'POST', body: JSON.stringify({ story: sid, url: `${location.pathname}#comentarios`, parent: parentId, body: text, media: att,
+      const r = await api('comments', { method: 'POST', headers: { Prefer: 'return=representation' }, body: JSON.stringify({ story: sid, url: `${location.pathname}#comentarios`, parent: parentId, body: text, media: att,
         status: chk.verdict === 'review' ? 'review' : 'visible', flags: chk.reasons }) });
       send.disabled = false;
       if (!r?.ok) { err.textContent = r?.status === 403 ? 'Tu cuenta no puede comentar ahora mismo.' : 'No se pudo publicar. Intenta otra vez.'; err.hidden = false; return; }
       if (parentId) threads.add(parentId); // show the thread with the new reply
       warned = ''; ta.value = ''; ta.style.height = 'auto'; setReply(null); pk.setMedia(undefined); pk.close();
       if (chk.verdict === 'review') { err.textContent = 'Publicado. La redacción lo revisará antes de que otros lo vean.'; err.hidden = false; }
+      const newId = ((await r.json().catch(() => [])) as Array<{ id: string }>)[0]?.id;
       await load(); refreshRep();
+      // Show the new comment: scroll to it and flash it
+      const mineLi = newId ? list.querySelector<HTMLElement>(`.cm-item[data-id="${newId}"]`) : null;
+      if (mineLi) {
+        mineLi.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        mineLi.classList.add('cm-new'); setTimeout(() => mineLi.classList.remove('cm-new'), 2500);
+        dispatchEvent(new CustomEvent('nx-toast', { detail: chk.verdict === 'review' ? 'Publicado: la redacción lo revisará.' : 'Publicado ✓' }));
+      }
     });
     addEventListener('nx-account', () => { paintMe(); void load(); refreshRep(); });
     addEventListener('nx-profile-change', paintMe);
