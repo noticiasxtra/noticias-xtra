@@ -33,7 +33,7 @@ const label: Record<AdSize, string> = { leaderboard: '728 × 90', rectangle: '30
   const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Puerto_Rico' }); // YYYY-MM-DD
   // PREVIEW: ads approved in the staff panel on this device show here right away (with a "Vista previa" tag), so the
   // employee sees where they go. Everyone else sees them once they're published in CAMPAIGNS.
-  type Req = { id: string; status: string; formats: string[]; link?: string; views?: number; start?: string; client: { business: string }; art?: { files?: Array<{ data: string; w: number; h: number }> } };
+  type Req = { id: string; status: string; formats: string[]; link?: string; views?: number; takeoverViews?: number; start?: string; client: { business: string }; art?: { files?: Array<{ data: string; w: number; h: number }> } };
   // Views counted on this device for preview campaigns (with the backend, views are counted for everyone)
   const VIEWS_KEY = 'nx-ad-views';
   const localViews = (): Record<string, number> => { try { return JSON.parse(localStorage.getItem(VIEWS_KEY) || '{}'); } catch { return {}; } };
@@ -42,7 +42,7 @@ const label: Record<AdSize, string> = { leaderboard: '728 × 90', rectangle: '30
     let reqs: Req[] = []; try { reqs = JSON.parse(localStorage.getItem('nx-ad-requests') || '[]'); } catch { /* storage blocked */ }
     return reqs.filter((r) => r.status === 'aprobada' && r.art?.files?.length).map((r) => {
       const fmts = FORMATS.filter((f) => r.formats.includes(f.id));
-      return { id: r.id, client: r.client.business, start: '0000-00-00', end: '9999-12-31', preview: true, takeover: fmts.some((f) => f.id === 'takeover'), views: r.views,
+      return { id: r.id, client: r.client.business, start: '0000-00-00', end: '9999-12-31', preview: true, takeover: fmts.some((f) => f.id === 'takeover'), views: r.takeoverViews ?? r.views,
         sizes: [...new Set(fmts.flatMap((f) => (f.slots.length ? f.slots : ['leaderboard', 'rectangle', 'halfpage', 'infeed'] as AdSize[])))],
         creatives: r.art!.files!.map((f) => ({ img: f.data, url: r.link || '#', alt: r.client.business, w: f.w, h: f.h })) };
     });

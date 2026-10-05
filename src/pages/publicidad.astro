@@ -6,7 +6,7 @@
 import Base from '../layouts/Base.astro';
 import { SITE, url } from '../lib/site';
 import { FORMATS, REGIONS, AUDIENCE, LAUNCH_DISCOUNT, DURATION_DISCOUNTS, OTHER_DISCOUNTS, MAX_DISCOUNT, REWARDS, VOLUME_TIERS, AGENCY_COMMISSION, WEEK_SHARE, periodCost, VIEW_PACKS, VIEW_DISCOUNTS, LAUNCH_VIEWS,
-  DESIGN_FEE, DESIGN_FREE_FROM_MONTHS, UPLOAD, PAYMENTS, APPROVAL_HOURS, ROTATE_SECONDS } from '../lib/ads';
+  DESIGN_FEE, DESIGN_FREE_FROM_MONTHS, UPLOAD, PAYMENTS, APPROVAL_HOURS, ROTATE_SECONDS, TAKEOVER_CPM, TAKEOVER_VIEW_PACKS } from '../lib/ads';
 import { THEMES } from '../lib/adcreative';
 
 const money = (n: number) => `$${n.toLocaleString('en-US')}`;
@@ -28,7 +28,7 @@ const DURATIONS = [
 const rate = (f: (typeof FORMATS)[number]) => f.per === 'día' ? null : { week: Math.round(periodCost(f.price, 7)), month: f.price, three: Math.round(f.price * 3 * (1 - (DURATION_DISCOUNTS[0]?.pct ?? 0) / 100)) };
 const cfg = { formats: FORMATS.map((f) => ({ id: f.id, name: f.name, price: f.price, per: f.per, art: f.art, cpm: 'cpm' in f ? f.cpm : 0 })), audience: AUDIENCE, launch: LAUNCH_DISCOUNT, duration: DURATION_DISCOUNTS,
   other: OTHER_DISCOUNTS, max: MAX_DISCOUNT, rewards: REWARDS, volume: VOLUME_TIERS, design: DESIGN_FEE, designFree: DESIGN_FREE_FROM_MONTHS, upload: UPLOAD,
-  pay: PAYMENTS, regions: REGIONS.map(({ id, name }) => ({ id, name })) };
+  pay: PAYMENTS, regions: REGIONS.map(({ id, name }) => ({ id, name })), tkCpm: TAKEOVER_CPM };
 const CTAS = ['Llama hoy', 'Visítanos', 'Ordena ya', 'Escríbenos por WhatsApp', 'Ver ofertas'];
 ---
 <Base title="Anúnciate" description={`Anúnciate en Noticias Xtra desde ${money(cheapest)} por ${VIEW_PACKS[0].toLocaleString('en-US')} vistas: crea tu anuncio en 4 pasos, paga en línea y sale en ${APPROVAL_HOURS} horas.`}>
@@ -112,9 +112,20 @@ const CTAS = ['Llama hoy', 'Visítanos', 'Ordena ya', 'Escríbenos por WhatsApp'
             {DURATIONS.map((d) => <label><input type="radio" name="months" value={d.v} checked={d.v === '30'} /><span>{d.label}{d.off > 0 && <small> −{d.off}%</small>}</span></label>)}
           </div>
           </div>
+          <div data-days-wrap hidden>
+            <p class="wiz-q">Toma de portada: ¿por días o por vistas?</p>
+            <div class="wiz-chips">
+              <label><input type="radio" name="tkmode" value="dias" checked /><span>Por días</span></label>
+              <label><input type="radio" name="tkmode" value="vistas" /><span>Por vistas</span></label>
+            </div>
+            <div class="wiz-chips" data-tk-views hidden>
+              {TAKEOVER_VIEW_PACKS.map((v) => <label><input type="radio" name="tkviews" value={v} checked={v === 50000} /><span>{v.toLocaleString('en-US')}</span></label>)}
+            </div>
+            <p class="wiz-help" data-tk-help></p>
+          </div>
           <div class="wiz-row">
             <label>Empieza el<input type="date" name="start" data-start /></label>
-            <label data-days-wrap hidden>Días de toma de portada<input type="number" name="days" min="1" max="14" value="1" /></label>
+            <label data-tk-days>Días de toma de portada<input type="number" name="days" min="1" max="14" value="1" /></label>
           </div>
         </fieldset>
 
@@ -275,7 +286,7 @@ const CTAS = ['Llama hoy', 'Visítanos', 'Ordena ya', 'Escríbenos por WhatsApp'
       <details>
         <summary>Soy una agencia o una marca grande</summary>
         <ul class="adp-list">
-          <li><b>Toma de portada:</b> todo el sitio con tu marca por {money(FORMATS.find((f) => f.id === 'takeover')!.price)} al día.</li>
+          <li><b>Toma de portada:</b> todo el sitio con tu marca por {money(FORMATS.find((f) => f.id === 'takeover')!.price)} al día, o por vistas a {money(TAKEOVER_CPM)} cada 1,000 (termina sola al cumplirlas).</li>
           <li><b>{AGENCY_COMMISSION}% de comisión de agencia</b> en cada orden, factura mensual y un panel para cada cliente.</li>
           <li><b>Descuento por volumen</b> según el tamaño de la orden: {VOLUME_TIERS.map((t) => `${t.pct}% desde ${money(t.from)}`).join(' · ')}.</li>
           <li><b>Pedidos a la medida:</b> artículos patrocinados, menciones en el boletín, redes sociales, video, eventos y fechas exactas. Te preparamos una propuesta.</li>
@@ -344,7 +355,7 @@ const CTAS = ['Llama hoy', 'Visítanos', 'Ordena ya', 'Escríbenos por WhatsApp'
     type Cfg = { formats: Fmt[]; audience: { all: number; island: number; diaspora: number; perRegion: number }; launch: { pct: number; months: number };
       duration: Array<{ months: number; pct: number }>; other: Array<{ id: string; pct: number }>; max: number; rewards: Array<{ at: number; gift: string }>;
       volume: Array<{ from: number; pct: number }>; design: number; designFree: number; upload: { maxMB: number; types: string[] };
-      pay: { stripeLink: string; athMovilToken: string }; regions: Array<{ id: string; name: string }> };
+      pay: { stripeLink: string; athMovilToken: string }; regions: Array<{ id: string; name: string }>; tkCpm: number };
     const wf = document.querySelector<HTMLFormElement>('[data-wiz]')!;
     const cfg: Cfg = JSON.parse(wf.dataset.cfg!);
     const $ = <T extends HTMLElement = HTMLElement>(s: string) => wf.querySelector<T>(s)!;
@@ -353,7 +364,10 @@ const CTAS = ['Llama hoy', 'Visítanos', 'Ordena ya', 'Escríbenos por WhatsApp'
     const timeLabel = () => (wf.querySelector<HTMLInputElement>('[name="months"]:checked')!.nextElementSibling as HTMLElement).textContent!.replace(/\s*−\d+%/, '');
     const viewsPicked = () => (picked().some((f) => f.cpm > 0) ? Number(new FormData(wf).get('views')) || 10000 : 0);
     // What the client bought: views for display ads, time for sponsorship, days for the takeover
-    const durLabel = () => [viewsPicked() ? `${viewsPicked().toLocaleString('en-US')} vistas` : '', picked().some((f) => f.id === 'patrocinio') ? timeLabel() : ''].filter(Boolean).join(' + ') || timeLabel();
+    // Takeover: by days, or by views (it owns every ad space until they're delivered)
+    const tkViews = () => (picked().some((f) => f.id === 'takeover') && new FormData(wf).get('tkmode') === 'vistas' ? Number(new FormData(wf).get('tkviews')) || 50000 : 0);
+    const tkLabel = () => { if (!picked().some((f) => f.id === 'takeover')) return ''; const v = tkViews(), n = Number(new FormData(wf).get('days')) || 1; return v ? `toma de portada hasta ${v.toLocaleString('en-US')} vistas` : `${n} día${n > 1 ? 's' : ''} de toma de portada`; };
+    const durLabel = () => [viewsPicked() ? `${viewsPicked().toLocaleString('en-US')} vistas` : '', picked().some((f) => f.id === 'patrocinio') ? timeLabel() : '', tkLabel()].filter(Boolean).join(' + ') || timeLabel();
     const regs = new Set<string>();
     let step = 1;
     let files: ArtFile[] = [];
@@ -380,7 +394,10 @@ const CTAS = ['Llama hoy', 'Visítanos', 'Ordena ya', 'Escríbenos por WhatsApp'
       if (aud !== 'regions') regs.clear();
       lastAud = aud;
       $('[data-map-wrap]').hidden = aud !== 'regions';
-      $('[data-days-wrap]').hidden = !fmts.some((f) => f.per === 'día');
+      const hasTk = fmts.some((f) => f.per === 'día'), tkByViews = hasTk && d.get('tkmode') === 'vistas';
+      $('[data-days-wrap]').hidden = !hasTk;
+      $('[data-tk-days]').hidden = !hasTk || tkByViews; $('[data-tk-views]').hidden = !tkByViews;
+      $('[data-tk-help]').textContent = tkByViews ? `Tu marca en todos los espacios del sitio desde el día que escojas hasta cumplir las vistas; luego termina sola. $${cfg.tkCpm} por cada 1,000 vistas.` : 'Tu marca en todos los espacios del sitio durante los días que escojas.';
       // Display ads are bought by views; section sponsorship by time; the takeover by days
       const byViews = fmts.some((f) => f.cpm > 0), byTime = fmts.some((f) => f.id === 'patrocinio');
       $('[data-views-wrap]').hidden = !byViews && fmts.length > 0;
@@ -394,7 +411,7 @@ const CTAS = ['Llama hoy', 'Visítanos', 'Ordena ya', 'Escríbenos por WhatsApp'
       $('[data-aud-hint]').textContent = `Toca las regiones donde quieres salir. Pagas ${Math.round(factor * 100)}% del precio.`;
 
       // Price math lives in src/lib/ads.ts (quote), shared with the sales desk
-      const q = quote({ formats: fmts.map((f) => f.id), days: len, takeoverDays: days, views, aud: aud as QuoteInput['aud'], regions: regs.size,
+      const q = quote({ formats: fmts.map((f) => f.id), days: len, takeoverDays: days, takeoverViews: tkByViews ? Number(d.get('tkviews')) || 50000 : 0, views, aud: aud as QuoteInput['aud'], regions: regs.size,
         who: String(d.get('who') || 'retail') as QuoteInput['who'], prepay: !!d.get('prepay'), founder: !!d.get('founder'), design: d.get('mode') === 'design' });
       const { lines, off, design } = q;
       total = q.total;
@@ -562,7 +579,7 @@ const CTAS = ['Llama hoy', 'Visítanos', 'Ordena ya', 'Escríbenos por WhatsApp'
       const sent = await saveRequest({
         id, created: new Date().toISOString(), status: mode === 'design' ? 'disenar' : 'revisar', paid: false,
         client: { name: val('nombre'), business: val('negocio'), email: val('correo'), phone: val('telefono'), who: val('who') },
-        formats: picked().map((f) => f.id), where, start: val('start'), duration: durLabel(), views: viewsPicked() || undefined, total: Math.round(total), lines: summary,
+        formats: picked().map((f) => f.id), where, start: val('start'), duration: durLabel(), views: viewsPicked() || undefined, takeoverViews: tkViews() || undefined, total: Math.round(total), lines: summary,
         art: mode === 'upload' ? { mode, files } : { mode, files: designFiles, logo: logoData, title: val('title'), msg: val('msg'), cta: val('cta'), theme: val('theme'), notes: val('notes') },
         link: val('link'),
       });

@@ -89,6 +89,19 @@ export async function publishCampaign(c: Campaign): Promise<boolean> {
   const r = await fetch(rest('ad_campaigns'), { method: 'POST', headers: { ...head(token), Prefer: 'resolution=merge-duplicates' }, body: JSON.stringify(row) });
   return r.ok;
 }
+/** Every campaign (live, scheduled, paused or ended) with its views and clicks so far, for Ventas → Campañas. */
+export type CampaignRow = { id: string; client: string; sizes: string[]; start: string; end: string; regions: string; takeover: boolean; views: number | null;
+  status: 'active' | 'paused' | 'ended'; delivered: number; clicks: number; created: string };
+export async function allCampaigns(): Promise<CampaignRow[] | null> {
+  if (!hasBackend()) return null;
+  try {
+    const [c, s] = await Promise.all([fetch(rest('ad_campaigns?select=id,client,sizes,start_date,end_date,regions,takeover,views,status,created_at&order=start_date.desc'), { headers: head() }), fetch(rest('ad_stats?select=*'), { headers: head() })]);
+    if (!c.ok) return null;
+    const stats = new Map<string, { views: number; clicks: number }>((s.ok ? await s.json() : []).map((x: any) => [x.campaign_id, x]));
+    return (await c.json()).map((x: any) => ({ id: x.id, client: x.client, sizes: x.sizes ?? [], start: x.start_date, end: x.end_date, regions: x.regions, takeover: !!x.takeover,
+      views: x.views ?? null, status: x.status, delivered: stats.get(x.id)?.views ?? 0, clicks: stats.get(x.id)?.clicks ?? 0, created: x.created_at }));
+  } catch { return null; }
+}
 /** Pause or end a campaign early (staff). */
 export async function setCampaignStatus(id: string, status: 'active' | 'paused' | 'ended') {
   const token = await freshToken(); if (!hasBackend() || !token) return false;

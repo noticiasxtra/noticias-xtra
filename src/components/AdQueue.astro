@@ -62,6 +62,8 @@ const Tag = embedded ? 'section' : 'main';
       link: 'https://example.com' });
   }
 
+  /** Views the client paid for: the takeover's (if bought by views) or the display ads'. */
+  const paidViews = (r: AdRequest) => r.takeoverViews ?? r.views;
   // The campaign an approved request becomes. Paid by views → it runs until they're delivered (end date a year out
   // as a safety stop); by time → it ends on its date.
   function campaignOf(r: AdRequest): Campaign {
@@ -69,11 +71,12 @@ const Tag = embedded ? 'section' : 'main';
     const sizes = [...new Set(fmts.flatMap((f) => (f.slots.length ? f.slots : ['leaderboard', 'rectangle', 'halfpage', 'infeed'])))] as AdSize[];
     const end = new Date(`${r.start}T12:00:00`);
     const m = r.duration.match(/(\d+)\s*(semana|mes|día)/);
-    if (r.views) end.setFullYear(end.getFullYear() + 1);
+    const paid = paidViews(r); // takeover by views counts every ad space it fills
+    if (paid) end.setFullYear(end.getFullYear() + 1);
     else if (m && m[2] === 'semana') end.setDate(end.getDate() + 7 * Number(m[1]) - 1); else if (m && m[2] === 'día') end.setDate(end.getDate() + Number(m[1]) - 1); else if (m) { end.setMonth(end.getMonth() + Number(m[1])); end.setDate(end.getDate() - 1); }
     const regions = r.where === 'Solo la diáspora' ? 'diaspora' : r.where === 'Puerto Rico y la diáspora' ? 'all' : 'island';
     return { id: r.id.toLowerCase(), client: r.client.business, sizes, start: r.start, end: end.toISOString().slice(0, 10), regions, takeover: fmts.some((f) => f.id === 'takeover') || undefined,
-      views: r.views, creatives: r.art.files.map((f) => ({ img: f.data, url: r.link || '#', alt: r.client.business, w: f.w, h: f.h })) };
+      views: paid, creatives: r.art.files.map((f) => ({ img: f.data, url: r.link || '#', alt: r.client.business, w: f.w, h: f.h })) };
   }
   // Campaign entry for src/lib/ads.ts (manual publishing, only while there's no database)
   function campaign(r: AdRequest) {
@@ -85,9 +88,9 @@ const Tag = embedded ? 'section' : 'main';
   let stats: Record<string, { views: number; clicks: number }> = {};
   const delivered = (r: AdRequest) => (hasBackend() ? stats[r.id.toLowerCase()]?.views ?? 0 : (() => { try { return JSON.parse(localStorage.getItem('nx-ad-views') || '{}')[r.id] ?? 0; } catch { return 0; } })());
   const progress = (r: AdRequest) => {
-    if (!r.views) return '';
-    const n = delivered(r), pct = Math.min(100, Math.round((n / r.views) * 100)), done = n >= r.views;
-    return `<div class="apr-views"><p><b>${done ? '✅ Vistas cumplidas: la campaña terminó sola.' : `Vistas: ${n.toLocaleString('es-PR')} de ${r.views.toLocaleString('es-PR')}`}</b>${hasBackend() ? '' : ' <small>(contadas en este dispositivo · vista previa)</small>'}</p><span class="pnl-bar"><i style="width:${pct}%"></i></span></div>`;
+    const goal = paidViews(r); if (!goal) return '';
+    const n = delivered(r), pct = Math.min(100, Math.round((n / goal) * 100)), done = n >= goal;
+    return `<div class="apr-views"><p><b>${done ? '✅ Vistas cumplidas: la campaña terminó sola.' : `Vistas: ${n.toLocaleString('es-PR')} de ${goal.toLocaleString('es-PR')}`}</b>${hasBackend() ? '' : ' <small>(contadas en este dispositivo · vista previa)</small>'}</p><span class="pnl-bar"><i style="width:${pct}%"></i></span></div>`;
   };
 
   let filter = 'revisar';
@@ -125,7 +128,7 @@ const Tag = embedded ? 'section' : 'main';
           <div class="apr-badges"><span class="apn-st ${r.paid ? 'on' : 'wait'}">${r.paid ? `Pagado ${money(r.total)}` : `Sin pagar · ${money(r.total)}`}</span><span class="apn-st ${design ? 'wait' : ''}">${design ? 'Lo diseñamos nosotros' : 'Arte del cliente'}</span>${r.status === 'aprobada' ? '<span class="apn-st on">Aprobado</span>' : r.status === 'rechazada' ? '<span class="apn-st">Rechazado · reembolsar</span>' : ''}</div>
         </header>
         <div class="apr-where"><b>Dónde sale:</b><ul>${FMT.filter((f) => r.formats.includes(f.id)).map((f) => `<li><b>${esc(f.name)}:</b> ${esc(f.where)}</li>`).join('')}</ul>
-          ${r.status === 'aprobada' && !(r.views && delivered(r) >= r.views) ? `<p>✅ Ya puedes verlo en el sitio <b>en este dispositivo</b> (marcado “Vista previa”). <a href="${page.dataset.home}" target="_blank" rel="noopener">Abrir la portada ↗</a></p>` : ''}</div>
+          ${r.status === 'aprobada' && !(paidViews(r) && delivered(r) >= paidViews(r)!) ? `<p>✅ Ya puedes verlo en el sitio <b>en este dispositivo</b> (marcado “Vista previa”). <a href="${page.dataset.home}" target="_blank" rel="noopener">Abrir la portada ↗</a></p>` : ''}</div>
         <p class="apr-meta"><b>${FMT.filter((f) => r.formats.includes(f.id)).map((f) => f.name).join(', ')}</b> · ${esc(r.where)} · ${esc(r.duration)} desde el ${r.start}${r.link ? ` · <a href="${esc(r.link)}" target="_blank" rel="noopener">Abrir enlace ↗</a>` : ' · sin enlace'}</p>
         ${r.note ? `<p class="apr-notes">💬 ${esc(r.note)}</p>` : ''}
         ${art}

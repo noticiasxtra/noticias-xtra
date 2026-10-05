@@ -4210,3 +4210,26 @@ a,button,summary,label{-webkit-tap-highlight-color:transparent}
 .wr-sc-status{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:4px;font-size:13px}
 .wr-sc-status small{display:block;color:var(--muted)}
 .wr-sc-status:empty{display:none}
+/* Ventas → Campañas en el aire */
+.lc{display:grid;gap:12px;margin-bottom:6px}
+.lc-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px}
+.lc-head .pnl-h3{margin:0}
+.lc-head b{margin-left:4px;font-size:12px}
+.lc-head b:empty{display:none}
+.lc-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:10px}
+.lc-card{display:grid;gap:6px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--soft);min-width:0}
+.lc-card header{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.lc-card header b{font-family:var(--head);font-size:15px;margin-right:auto}
+.lc-tag{font-size:11px;font-weight:800;padding:2px 8px;border-radius:999px;background:var(--purple-bg);color:#fff}
+.lc-st{font-size:11.5px;font-weight:800;padding:2px 8px;border-radius:999px;background:#E7F6EE;color:#14663F}
+.lc-card.paused .lc-st{background:#FFF5DB;color:#7A4B00}
+.lc-card.next .lc-st{background:#E8F3FC;color:#0E4A75}
+.lc-card.done .lc-st{background:var(--line);color:var(--muted)}
+.lc-meta{margin:0;font-size:13px;color:var(--muted);overflow-wrap:anywhere}
+.lc-prog p{display:flex;justify-content:space-between;gap:8px;margin:0 0 4px;font-size:13.5px}
+.lc-prog i{display:block;height:9px;border-radius:999px;background:var(--line);overflow:hidden}
+.lc-prog em{display:block;height:100%;border-radius:999px;background:var(--blue)}
+.lc-card.done .lc-prog em{background:#1C9C4A}
+.lc-acts{display:flex;gap:14px}
+.lc-acts .danger{color:var(--red)}
+.sd-leads-h{margin:14px 0 0}

@@ -20,8 +20,8 @@ export const FORMATS = [
     about: 'El espacio más grande; se queda a la vista al bajar. Solo en computadora.', art: [[300, 600]], popular: false },
   { id: 'patrocinio', name: 'Patrocinio de sección', size: 'Juegos, Deportes, Clima…', price: 149, per: 'mes', slots: [] as AdSize[], where: 'Todos los espacios de anuncios, con “Presentado por” tu marca.',
     about: '“Presentado por” tu marca y todos los espacios de una sección.', art: [[300, 250], [728, 90]], popular: false },
-  { id: 'takeover', name: 'Toma de portada', size: 'Todo el sitio por un día', price: 99, per: 'día', slots: [] as AdSize[], where: 'Todos los espacios del sitio durante ese día, solo tu marca.',
-    about: 'Todos los espacios del sitio con tu marca durante 24 horas.', art: [[300, 250], [728, 90], [300, 600]], popular: false },
+  { id: 'takeover', name: 'Toma de portada', size: 'Todo el sitio, por días o por vistas', price: 99, per: 'día', slots: [] as AdSize[], where: 'Todos los espacios del sitio, solo tu marca: por los días que escojas o hasta cumplir las vistas.',
+    about: 'Todos los espacios del sitio con tu marca: por días, o hasta cumplir un número de vistas.', art: [[300, 250], [728, 90], [300, 600]], popular: false },
 ];
 export const DESIGN_FEE = 19; // we create the ad from the client's text and logo
 export const DESIGN_FREE_FROM_MONTHS = 3; // ...free in campaigns this long or longer
@@ -118,7 +118,8 @@ export const APPROVAL_HOURS = 24; // promise shown to clients
 // How a campaign is priced (the "rate card"):
 //  - Monthly formats: a campaign of `days` days. Shorter than a month is billed by the week: each week costs
 //    WEEK_SHARE of the monthly price, and from 3 weeks on you pay the month. A month or longer is prorated by day.
-//  - Per-day formats (takeover): price × days of takeover.
+//  - Per-day formats (takeover): price × days of takeover; or, bought by views, TAKEOVER_CPM per 1,000 views
+//    (it owns every ad space from its start date until the views are delivered, then ends by itself).
 //  - Discounts: length (DURATION_DISCOUNTS) or, for a first-time client, the launch discount on the first 3 months
 //    (never both on the same months); plus combo, prepaid, nonprofit; agencies get the agency commission plus volume.
 //    Together they never pass MAX_DISCOUNT.
@@ -130,6 +131,8 @@ export const WEEK_SHARE = 0.4;
 // are delivered (a view = the ad was at least half on screen), then it stops by itself. Takeover and section
 // sponsorship stay by time (they own the space for a day or a month).
 export const VIEW_PACKS = [5000, 10000, 25000, 50000, 100000];
+export const TAKEOVER_CPM = 15; // takeover bought by views: price per 1,000 views (every ad space is theirs)
+export const TAKEOVER_VIEW_PACKS = [25000, 50000, 100000, 250000];
 export const VIEW_DISCOUNTS = [{ from: 25000, pct: 10 }, { from: 50000, pct: 15 }, { from: 100000, pct: 20 }];
 export const LAUNCH_VIEWS = 10000; // the first-time discount covers the first 10,000 views
 export const isViewFormat = (id: string) => FORMATS.some((f) => f.id === id && 'cpm' in f);
@@ -146,6 +149,7 @@ export const SPECIALS = [ // suggested prices for things clients and agencies as
 export type CustomLine = { name: string; qty: number; price: number; pct: number };
 export type QuoteInput = {
   formats: string[]; days: number; takeoverDays: number; // days: campaign length (time-priced formats); takeoverDays: 1–14
+  takeoverViews?: number; // takeover bought by views instead of days (0 or empty: by days)
   views?: number; // when set: display formats are priced by views (cpm) instead of by time
   aud: 'all' | 'island' | 'diaspora' | 'regions'; regions: number; // number of regions picked when aud = 'regions'
   who: 'retail' | 'agency' | 'nonprofit'; prepay: boolean; founder: boolean; design: boolean;
@@ -180,6 +184,11 @@ export function quote(q: QuoteInput): Quote {
       const cost = (views / 1000) * (f.cpm as number);
       viewCost += cost; cpmSum += f.cpm as number;
       lines.push([`${f.name} · ${views.toLocaleString('en-US')} vistas`, Math.round(cost * 100) / 100]); subtotal += cost;
+      continue;
+    }
+    if (f.id === 'takeover' && (q.takeoverViews ?? 0) > 0) {
+      const tv = Math.round(q.takeoverViews!), cost = (tv / 1000) * TAKEOVER_CPM;
+      lines.push([`${f.name} · ${tv.toLocaleString('en-US')} vistas`, Math.round(cost * 100) / 100]); subtotal += cost;
       continue;
     }
     const wide = f.per === 'día' || f.id === 'patrocinio'; // site-wide formats are not split by region
