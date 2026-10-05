@@ -4,11 +4,12 @@ description: "El dinero sale del Fondo de Mejoras de Medicare y llega por depós
 section: estados-unidos
 place: "Washington"
 date: 2026-10-04T14:00:00.000Z
+image: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/Donald_J._Trump_participates_in_an_announcement_with_EPA_Administrator_Lee_Zeldin%2C_Thursday%2C_May_21%2C_2026%2C_in_the_Oval_Office_-_6.jpg/1280px-Donald_J._Trump_participates_in_an_announcement_with_EPA_Administrator_Lee_Zeldin%2C_Thursday%2C_May_21%2C_2026%2C_in_the_Oval_Office_-_6.jpg"
+imageCaption: "El presidente Donald Trump en la Oficina Oval, en mayo de 2026. Imagen de archivo."
+imageCredit: "Foto: Casa Blanca (dominio público), vía Wikimedia Commons"
+imageCreditUrl: "https://commons.wikimedia.org/wiki/File:Donald_J._Trump_participates_in_an_announcement_with_EPA_Administrator_Lee_Zeldin,_Thursday,_May_21,_2026,_in_the_Oval_Office_-_6.jpg"
+sectionPinned: true
 author: "Noticias Xtra"
-image: "images/casa-blanca.jpg"
-imageCaption: "Imagen de archivo: la Casa Blanca, en Washington D. C."
-imageCredit: "Foto: Nishkid64 (dominio público), vía Wikimedia Commons"
-imageCreditUrl: "https://commons.wikimedia.org/wiki/File:North_Fa%C3%A7ade_White_House.JPG"
 aiAssisted: false
 draft: false
 sources:

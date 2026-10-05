@@ -4,10 +4,11 @@ description: "El paquete incluye protección contra el calor para menores en act
 section: gobierno
 place: "San Juan"
 date: 2026-10-01T17:00:00-04:00
-image: "images/la-fortaleza.jpg"
-imageCaption: "La Fortaleza, sede del Gobierno de Puerto Rico, en el Viejo San Juan. Imagen de archivo."
-imageCredit: "Foto: vxla, CC BY 2.0, vía Wikimedia Commons"
-imageCreditUrl: "https://commons.wikimedia.org/wiki/File:La_Fortaleza_in_San_Juan%2C_Puerto_Rico.jpg"
+image: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Jennifer_Gonzalez-Col%C3%B3n%2C_Governor_of_Puerto_Rico_visit_to_Department_of_Homeland_security_%28DHS%29_Headquarters_in_Washington_D.C._on_February_20%2C_2026_-_1.jpg/1280px-Jennifer_Gonzalez-Col%C3%B3n%2C_Governor_of_Puerto_Rico_visit_to_Department_of_Homeland_security_%28DHS%29_Headquarters_in_Washington_D.C._on_February_20%2C_2026_-_1.jpg"
+imageCaption: "La gobernadora Jenniffer González Colón durante una reunión en Washington D. C., en febrero de 2026. Imagen de archivo."
+imageCredit: "Foto: Departamento de Seguridad Nacional de EE. UU. (dominio público), vía Wikimedia Commons"
+imageCreditUrl: "https://commons.wikimedia.org/wiki/File:Jennifer_Gonzalez-Col%C3%B3n,_Governor_of_Puerto_Rico_visit_to_Department_of_Homeland_security_(DHS)_Headquarters_in_Washington_D.C._on_February_20,_2026_-_1.jpg"
+pinned: true
 sources:
   - name: "NotiCel"
     url: "https://noticel.com/noticias/20261001/firma-ocho-medidas-sobre-salud-deporte-autismo-desarrollo-economico-y-asuntos-comunitarios/"
