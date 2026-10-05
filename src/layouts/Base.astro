@@ -21,7 +21,6 @@ const fullTitle = title ? `${title} | ${SITE.name}` : `${SITE.name} | ${SITE.tag
 const canonical = new URL(Astro.url.pathname, Astro.site).toString();
 // Local images ('images/x.jpg') need the base path; full URLs are used as-is
 const ogImage = new URL(image ? (image.startsWith('http') ? image : url(image)) : url('icon-512.png'), Astro.site).toString();
-const half = Math.ceil(SECTIONS.length / 2);
 const F = SITE.features;
 // Deportes and Entretenimiento pages skip the red bar, except for a real ÚLTIMA HORA alert
 const quietBar = active === 'deportes' || active === 'entretenimiento';
@@ -235,32 +234,31 @@ const TABS = [
     <footer hidden={staff}>
       <div class="wrap">
         <div>
-          <a href={url()} class="flogo" aria-label={SITE.name}><img src={url('logo.svg')} alt="" /></a>
+          <a href={url()} class="flogo" aria-label={SITE.name}><img src={url('logo-dark.svg')} alt="" /></a>
           <p>Noticias de Puerto Rico, Estados Unidos y el mundo: gobierno, política, economía, deportes y más.</p>
         </div>
-        <div><h4>Secciones</h4><ul>{SECTIONS.slice(0, half).map((s) => <li><a href={url(`seccion/${s.id}`)}>{s.name}</a></li>)}</ul></div>
-        <div><h4>Más secciones</h4><ul>{SECTIONS.slice(half).map((s) => <li><a href={url(`seccion/${s.id}`)}>{s.name}</a></li>)}</ul></div>
+        <div class="f-secs"><h4>Secciones</h4><ul>{SECTIONS.map((s) => <li><a href={url(`seccion/${s.id}`)}>{s.name}</a></li>)}</ul></div>
         <div>
           <h4>{SITE.name}</h4>
           <ul>
-            {F.live && <li><a href={url('en-vivo')}>Ver en vivo</a></li>}
-            {F.videos && <li><a href={url('videos')}>Videos</a></li>}
-            <li><a href={url('juegos')}>Juegos Xtra</a></li>
-            <li><a href={url('foro')}>Foro Xtra</a></li>
-            <li><a href={url('perfil')}>Mi perfil</a></li>
-            <li><a href={url('horoscopo')}>Horóscopo</a></li>
             <li><a href={url('quienes-somos')}>Quiénes somos</a></li>
             <li><a href={url('normas-editoriales')}>Normas editoriales y correcciones</a></li>
-            <li><a href={url('ia')}>Cómo usamos la IA</a></li>
-            <li><a href={url('privacidad')}>Política de privacidad</a></li>
-            <li><a href={url('terminos')}>Términos de uso</a></li>
-            <li><a href={url('terminos-anunciantes')}>Términos para anunciantes</a></li>
             <li><a href={url('contacto')}>Envía tu denuncia</a></li>
             <li><a href={url('publicidad')}>Anúnciate con nosotros</a></li>
           </ul>
         </div>
+        <div>
+          <h4>Más</h4>
+          <ul>
+            {F.live && <li><a href={url('en-vivo')}>En vivo</a></li>}
+            {F.videos && <li><a href={url('videos')}>Videos</a></li>}
+            <li><a href={url('juegos')}>Juegos Xtra</a></li>
+            <li><a href={url('foro')}>Foro Xtra</a></li>
+            <li><a href={url('horoscopo')}>Horóscopo</a></li>
+          </ul>
+        </div>
       </div>
-      <div class="legal"><div class="wrap">© {new Date().getFullYear()} {SITE.name}.{SITE.demoMode && ' Sitio de demostración con contenido de ejemplo.'} <a class="legal-staff" href={url('redaccion')}>Acceso de la redacción</a></div></div>
+      <div class="legal"><div class="wrap"><span>© {new Date().getFullYear()} {SITE.name}.{SITE.demoMode && ' Sitio de demostración con contenido de ejemplo.'}</span><span class="legal-links"><a href={url('privacidad')}>Privacidad</a><a href={url('terminos')}>Términos de uso</a><a href={url('terminos-anunciantes')}>Términos para anunciantes</a></span></div></div>
     </footer>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     {!staff && <AuthDialog />}
