@@ -23,6 +23,7 @@ gallery:
     caption: "El American Family Field, en Milwaukee."
     credit: "Foto: DiscoA340, CC BY-SA 4.0, vía Wikimedia Commons"
     creditUrl: "https://commons.wikimedia.org/wiki/File:American_Family_Field_(October_2023)_01.jpg"
+sectionPinned: true
 aiAssisted: false
 draft: false
 sources:
