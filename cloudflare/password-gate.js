@@ -15,6 +15,12 @@
 //   Settings → Variables and Secrets → Add: type Secret, name GUEST_PASSWORD, value: the guest's password.
 //   Add: type Text, name GUEST_UNTIL, value: when it stops working, in UTC, e.g. 2026-10-07T13:00:00Z (9 a.m. in Puerto Rico).
 // To end it early, delete GUEST_PASSWORD (or change GUEST_UNTIL to a past time) and Deploy.
+//
+// Demo address (optional): the same file deployed as a second worker, e.g. "noticiasxtra-demo", with no routes, reached
+// at its workers.dev address. There it shows the site under that address (every "noticiasxtra.com" is swapped for it),
+// only the guest password works, and it is always demo mode. It needs the same three settings: SITE_PASSWORD (to pass
+// the gate of the real site), GUEST_PASSWORD and GUEST_UNTIL.
+const SITE = 'https://noticiasxtra.com';
 
 const COOKIE = 'nx_clave';
 const DAYS = 30;
@@ -34,6 +40,19 @@ const json = (body, status = 200, cookies = []) => {
 /** The guest password's deadline (ms), or 0 when there is no guest access. */
 const guestUntil = (env) => (env.GUEST_PASSWORD && env.GUEST_UNTIL ? Date.parse(env.GUEST_UNTIL) || 0 : 0);
 
+/** Demo address: the real site fetched through the gate, with its address swapped for this one. */
+async function proxy(req, url, good) {
+  const headers = new Headers(req.headers); headers.set('Cookie', `${COOKIE}=${good}`); headers.delete('Host');
+  const res = await fetch(SITE + url.pathname + url.search, { method: req.method, headers, body: ['GET', 'HEAD'].includes(req.method) ? undefined : req.body, redirect: 'manual' });
+  const out = new Headers(res.headers); out.delete('Set-Cookie'); out.set('X-Robots-Tag', 'noindex, nofollow');
+  const loc = out.get('Location'); if (loc) out.set('Location', loc.replace(SITE, url.origin));
+  const type = out.get('Content-Type') || '';
+  if (!/text\/|javascript|json|xml|manifest/.test(type)) return new Response(res.body, { status: res.status, headers: out });
+  out.delete('Content-Length'); out.delete('Content-Encoding');
+  const body = (await res.text()).split(SITE).join(url.origin).split('www.noticiasxtra.com').join(url.host).split('noticiasxtra.com').join(url.host);
+  return new Response(body, { status: res.status, headers: out });
+}
+
 export default {
   async fetch(req, env) {
     const url = new URL(req.url);
@@ -41,12 +60,13 @@ export default {
     const good = await token(env.SITE_PASSWORD);
     const until = guestUntil(env), guestOpen = until > Date.now();
     const guest = until ? await token(`guest:${env.GUEST_PASSWORD}:${env.GUEST_UNTIL}`) : '';
+    const demoHost = url.hostname.endsWith('.workers.dev'); // the separate demo address: guest only, always demo
 
     // The form sends the password here
     if (url.pathname === '/__clave' && req.method === 'POST') {
       const form = await req.formData().catch(() => null);
       const typed = await token(String(form?.get('clave') || ''));
-      if (typed === good) return json({ ok: true }, 200, [`${COOKIE}=${good}; Path=/; Max-Age=${DAYS * 86400}; HttpOnly; Secure; SameSite=Lax`, 'nx_demo=; Path=/; Max-Age=0; Secure; SameSite=Lax']);
+      if (typed === good && !demoHost) return json({ ok: true }, 200, [`${COOKIE}=${good}; Path=/; Max-Age=${DAYS * 86400}; HttpOnly; Secure; SameSite=Lax`, 'nx_demo=; Path=/; Max-Age=0; Secure; SameSite=Lax']);
       if (until && typed === (await token(env.GUEST_PASSWORD))) {
         if (!guestOpen) return json({ ok: false, expired: true }, 401);
         const exp = new Date(until).toUTCString(); // both cookies end exactly at the deadline
@@ -55,7 +75,9 @@ export default {
       return json({ ok: false }, 401);
     }
     const c = cookieOf(req);
-    if (c === good || (guestOpen && c === guest) || OPEN.some((r) => r.test(url.pathname))) return fetch(req);
+    if (demoHost) {
+      if ((guestOpen && c === guest) || OPEN.some((r) => r.test(url.pathname))) return proxy(req, url, good);
+    } else if (c === good || (guestOpen && c === guest) || OPEN.some((r) => r.test(url.pathname))) return fetch(req);
     const h = new Headers({ 'Content-Type': 'text/html; charset=utf-8', 'X-Robots-Tag': 'noindex, nofollow', 'Cache-Control': 'no-store' });
     if (c && c === guest) h.append('Set-Cookie', 'nx_demo=; Path=/; Max-Age=0; Secure; SameSite=Lax'); // guest time is over
     return new Response(PAGE, { status: 401, headers: h });
