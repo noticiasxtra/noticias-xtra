@@ -96,6 +96,11 @@ const TABS = [
   </head>
   <body data-base={url()} class:list={{ staff }}>
     {SITE.demoMode && <div class="demo">Sitio de demostración. Las noticias que aparecen son ejemplos.</div>}
+    <div class="demo demo-guest" data-demo-bar hidden>Modo demostración: los anuncios, los comentarios y los números del panel marcados <b>EJEMPLO</b> o <b>DEMO</b> son de muestra. Las noticias son reales.</div>
+    <script>
+      import { isDemo } from '../lib/demo';
+      if (isDemo()) { document.querySelector<HTMLElement>('[data-demo-bar]')!.hidden = false; document.documentElement.dataset.demo = '1'; }
+    </script>
     <header class="masthead">
       <div class="wrap">
         <Logo holiday={holiday} />

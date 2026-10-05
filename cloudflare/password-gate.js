@@ -9,6 +9,12 @@
 //   3. Settings → Domains & Routes → Add → Route: noticiasxtra.com/*  and another: www.noticiasxtra.com/*  (zone noticiasxtra.com).
 //   4. DNS: the @ and www records must be Proxied (orange cloud) so the visit passes through Cloudflare.
 // Changing SITE_PASSWORD signs everyone out.
+//
+// Guest access (optional, e.g. an investor): a second password that stops working at a set time and opens the site in
+// demo mode (sample ads, comments and a sample staff panel, all labeled; src/lib/demo.ts reads the nx_demo cookie).
+//   Settings → Variables and Secrets → Add: type Secret, name GUEST_PASSWORD, value: the guest's password.
+//   Add: type Text, name GUEST_UNTIL, value: when it stops working, in UTC, e.g. 2026-10-07T13:00:00Z (9 a.m. in Puerto Rico).
+// To end it early, delete GUEST_PASSWORD (or change GUEST_UNTIL to a past time) and Deploy.
 
 const COOKIE = 'nx_clave';
 const DAYS = 30;
@@ -21,23 +27,38 @@ async function token(password) {
   return [...new Uint8Array(hash)].map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 const cookieOf = (req) => (req.headers.get('Cookie') || '').split(/;\s*/).find((c) => c.startsWith(`${COOKIE}=`))?.slice(COOKIE.length + 1) || '';
+const json = (body, status = 200, cookies = []) => {
+  const h = new Headers({ 'Content-Type': 'application/json' }); cookies.forEach((c) => h.append('Set-Cookie', c));
+  return new Response(JSON.stringify(body), { status, headers: h });
+};
+/** The guest password's deadline (ms), or 0 when there is no guest access. */
+const guestUntil = (env) => (env.GUEST_PASSWORD && env.GUEST_UNTIL ? Date.parse(env.GUEST_UNTIL) || 0 : 0);
 
 export default {
   async fetch(req, env) {
     const url = new URL(req.url);
     if (!env.SITE_PASSWORD) return new Response('Falta la variable SITE_PASSWORD en el Worker.', { status: 500 });
     const good = await token(env.SITE_PASSWORD);
+    const until = guestUntil(env), guestOpen = until > Date.now();
+    const guest = until ? await token(`guest:${env.GUEST_PASSWORD}:${env.GUEST_UNTIL}`) : '';
 
     // The form sends the password here
     if (url.pathname === '/__clave' && req.method === 'POST') {
       const form = await req.formData().catch(() => null);
-      const ok = form && (await token(String(form.get('clave') || ''))) === good;
-      if (!ok) return new Response(JSON.stringify({ ok: false }), { status: 401, headers: { 'Content-Type': 'application/json' } });
-      return new Response(JSON.stringify({ ok: true }), { headers: { 'Content-Type': 'application/json',
-        'Set-Cookie': `${COOKIE}=${good}; Path=/; Max-Age=${DAYS * 86400}; HttpOnly; Secure; SameSite=Lax` } });
+      const typed = await token(String(form?.get('clave') || ''));
+      if (typed === good) return json({ ok: true }, 200, [`${COOKIE}=${good}; Path=/; Max-Age=${DAYS * 86400}; HttpOnly; Secure; SameSite=Lax`, 'nx_demo=; Path=/; Max-Age=0; Secure; SameSite=Lax']);
+      if (until && typed === (await token(env.GUEST_PASSWORD))) {
+        if (!guestOpen) return json({ ok: false, expired: true }, 401);
+        const exp = new Date(until).toUTCString(); // both cookies end exactly at the deadline
+        return json({ ok: true }, 200, [`${COOKIE}=${guest}; Path=/; Expires=${exp}; HttpOnly; Secure; SameSite=Lax`, `nx_demo=1; Path=/; Expires=${exp}; Secure; SameSite=Lax`]);
+      }
+      return json({ ok: false }, 401);
     }
-    if (cookieOf(req) === good || OPEN.some((r) => r.test(url.pathname))) return fetch(req);
-    return new Response(PAGE, { status: 401, headers: { 'Content-Type': 'text/html; charset=utf-8', 'X-Robots-Tag': 'noindex, nofollow', 'Cache-Control': 'no-store' } });
+    const c = cookieOf(req);
+    if (c === good || (guestOpen && c === guest) || OPEN.some((r) => r.test(url.pathname))) return fetch(req);
+    const h = new Headers({ 'Content-Type': 'text/html; charset=utf-8', 'X-Robots-Tag': 'noindex, nofollow', 'Cache-Control': 'no-store' });
+    if (c && c === guest) h.append('Set-Cookie', 'nx_demo=; Path=/; Max-Age=0; Secure; SameSite=Lax'); // guest time is over
+    return new Response(PAGE, { status: 401, headers: h });
   },
 };
 
@@ -71,6 +92,7 @@ const PAGE = `<!doctype html>
     ev.preventDefault(); var b = document.getElementById('b'), e = document.getElementById('e'); b.disabled = true; e.textContent = '';
     var r = await fetch('/__clave', { method: 'POST', body: new FormData(this) }).catch(function () { return null; });
     if (r && r.ok) { location.reload(); return; } // keeps the address (and any login link) the visitor came with
-    b.disabled = false; e.textContent = r ? 'Esa clave no es correcta.' : 'No hay conexión. Intenta otra vez.';
+    var out = r ? await r.json().catch(function () { return {}; }) : null;
+    b.disabled = false; e.textContent = !r ? 'No hay conexión. Intenta otra vez.' : out.expired ? 'Esa clave de invitado ya venció.' : 'Esa clave no es correcta.';
   });
 </script></body></html>`;

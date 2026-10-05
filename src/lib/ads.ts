@@ -80,6 +80,19 @@ export const CAMPAIGNS: Campaign[] = [
   //   creatives: [{ img: 'anuncios/panaderia-1.jpg', url: 'https://example.com', alt: 'Pan sobao recién hecho' }] },
 ];
 
+// ---- Sample ads for demo mode only (src/lib/demo.ts): made-up businesses, each image says "ANUNCIO DE EJEMPLO" ----
+// They link to the Anúnciate page and are never counted as views or clicks.
+const demoAd = (id: string, client: string, alt: string): Campaign => ({
+  id: `demo-${id}`, client, sizes: ['leaderboard', 'infeed', 'rectangle', 'halfpage'], start: '2000-01-01', end: '2099-12-31', regions: 'all',
+  creatives: ([[728, 90], [320, 100], [300, 250], [300, 600]] as const).map(([w, h]) => ({ img: `demo-anuncios/${id}-${w}x${h}.svg`, url: '/publicidad/', alt: `Anuncio de ejemplo: ${alt}`, w, h })),
+});
+export const DEMO_CAMPAIGNS: Campaign[] = [
+  demoAd('panaderia', 'Panadería La Esquina', 'Panadería La Esquina, pan sobao caliente'),
+  demoAd('ferreteria', 'Ferretería El Martillo', 'Ferretería El Martillo'),
+  demoAd('dental', 'Clínica Dental Sonrisa', 'Clínica Dental Sonrisa'),
+  demoAd('gimnasio', 'Gimnasio Fuerza', 'Gimnasio Fuerza, primer mes gratis'),
+];
+
 // ---- Google fill: shows only where no direct campaign is running ----
 // Paste the AdSense publisher id (ca-pub-…) and one ad-unit id per size once the account is approved.
 export const GOOGLE = {

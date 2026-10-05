@@ -157,7 +157,7 @@ const TABS = [
 
         <!-- Analítica: real visits from Google Analytics (Edge Function "analitica") -->
         <section class="pnl-pane" data-pane="analitica" hidden>
-          <header class="sd-head"><div><h1 class="pnl-h">Analítica</h1><p class="pnl-muted">Visitas reales del sitio, de Google Analytics. <span data-an-at></span></p></div>
+          <header class="sd-head"><div><h1 class="pnl-h">Analítica <span class="sp-demo" data-an-demo hidden>DEMO</span></h1><p class="pnl-muted"><span data-an-real>Visitas reales del sitio, de Google Analytics.</span> <span data-an-at></span></p><p class="pnl-note" data-an-demo hidden><span class="sp-demo">DEMO</span> Números de ejemplo para mostrar cómo funciona esta pestaña. Con el panel real, aquí salen las visitas de Google Analytics.</p></div>
             <div class="pnl-range" role="group" aria-label="Período"><button type="button" data-range="1">Hoy</button><button type="button" data-range="7" aria-pressed="true">7 días</button><button type="button" data-range="28">28 días</button></div></header>
           <div data-an-msg hidden></div>
           <div data-an-body>
@@ -226,6 +226,7 @@ const TABS = [
     import { ask, askText } from '../../lib/dialogs';
     import { getReports } from '../../lib/moderation';
     import { listRequests, loadRequests } from '../../lib/adrequests';
+    import { isDemo, demoAnalytics } from '../../lib/demo';
     import { BACKEND, getAnalytics, hasBackend, staffApi, staffLogin, staffLogout, staffProfile, syncTeam, addToTeam, removeFromTeam } from '../../lib/backend';
     const root = document.querySelector<HTMLElement>('[data-pnl]')!;
     const RECENT: Array<{ id: string; title: string; section: string; url: string; date: string; author: string }> = JSON.parse(root.dataset.recent!);
@@ -267,6 +268,13 @@ const TABS = [
     const LIVE: { review: Rev[]; prs: Pr[]; comments: number; at: number } = { review: [], prs: [], comments: 0, at: 0 };
     async function loadLive(force = false) {
       if (!force && Date.now() - LIVE.at < 30000) return; LIVE.at = Date.now();
+      if (!hasBackend()) { // preview and demo: the stories waiting for review on this device, plus GitHub
+        LIVE.review = get<Array<{ id: string; status: string; updated: number } & Rev['doc']>>('nx-articles', []).filter((a) => a.status === 'review')
+          .map((a) => ({ id: a.id, updated_at: new Date(a.updated).toISOString(), doc: a }));
+        const pr = await fetch('https://api.github.com/repos/noticiasxtra/noticias-xtra/pulls?state=open&per_page=30').then((r) => (r.ok ? r.json() : [])).catch(() => []);
+        LIVE.prs = Array.isArray(pr) ? pr : [];
+        paintCounts(); if (tab === 'inicio' || tab === 'noticias') paint[tab]?.(); return;
+      }
       const [rv, cm, pr] = await Promise.all([
         staffApi('articles?status=eq.review&select=id,updated_at,doc&order=updated_at.desc'),
         staffApi('comments?status=eq.review&select=id', { headers: { Prefer: 'count=exact' } }),
@@ -305,7 +313,7 @@ const TABS = [
       if (nav.scrollWidth > nav.clientWidth) nav.scrollLeft = cur.offsetLeft - nav.clientWidth / 2 + cur.offsetWidth / 2;
       if (location.hash.slice(1) !== t) history.replaceState(null, '', `#${t}`);
       paint[t]?.();
-      if (hasBackend() && (t === 'inicio' || t === 'noticias')) void loadLive();
+      if (t === 'inicio' || t === 'noticias') void loadLive();
     }
     root.addEventListener('click', (e) => {
       const b = (e.target as HTMLElement).closest<HTMLElement>('[data-tab],[data-go]');
@@ -366,9 +374,10 @@ const TABS = [
     let anRange: 1 | 7 | 28 = 7;
     async function paintAnalytics(fresh = false) {
       const msg = $('[data-an-msg]'), bodyEl = $('[data-an-body]');
-      if (!hasBackend()) { msg.hidden = false; msg.innerHTML = '<p class="pnl-muted">Las visitas se ven cuando el panel está conectado a Supabase.</p>'; bodyEl.hidden = true; return; }
+      const demo = isDemo(); $$('[data-an-demo]').forEach((e) => (e.hidden = !demo)); $('[data-an-real]').hidden = demo;
+      if (!hasBackend() && !demo) { msg.hidden = false; msg.innerHTML = '<p class="pnl-muted">Las visitas se ven cuando el panel está conectado a Supabase.</p>'; bodyEl.hidden = true; return; }
       $('[data-an-kpis]').innerHTML = kpi('Ahora mismo', '…') + kpi('Visitantes', '…') + kpi('Páginas vistas', '…') + kpi('Tiempo promedio', '…');
-      const d = await getAnalytics(anRange, 50, fresh);
+      const d = demo ? demoAnalytics(anRange, PUBLISHED.map((p) => p.id)) : await getAnalytics(anRange, 50, fresh);
       if ('error' in d) {
         msg.hidden = false; bodyEl.hidden = true;
         msg.innerHTML = `<div class="pnl-card"><h2 class="pnl-h3">Las visitas todavía no se pueden mostrar</h2><p class="pnl-muted">${esc(d.error)}</p><button type="button" class="adp-btn ghost-dark" data-an-retry>Intentar otra vez</button></div>`;
@@ -376,12 +385,12 @@ const TABS = [
       }
       msg.hidden = true; bodyEl.hidden = false;
       $('[data-an-at]').textContent = `Actualizado a las ${new Date(d.at).toLocaleTimeString('es-PR', { hour: 'numeric', minute: '2-digit' }).replace(/\.$/, '')}.`;
-      const t = d.totals;
+      const t = d.totals, ex = demo ? 'DEMO · ' : '';
       $('[data-an-kpis]').innerHTML = [
-        kpi('Ahora mismo', num(d.now), 'en los últimos 30 minutos', '', d.now ? 'good' : ''),
-        kpi('Visitantes', num(t.users), anRange === 1 ? 'hoy' : `últimos ${anRange} días · ${num(t.newUsers)} nuevos`),
-        kpi('Páginas vistas', num(t.views), t.users ? `${(t.views / t.users).toFixed(1)} por visitante` : ''),
-        kpi('Tiempo promedio', minSec(t.avgSeconds), 'por visita'),
+        kpi('Ahora mismo', num(d.now), `${ex}en los últimos 30 minutos`, '', d.now ? 'good' : ''),
+        kpi('Visitantes', num(t.users), ex + (anRange === 1 ? 'hoy' : `últimos ${anRange} días · ${num(t.newUsers)} nuevos`)),
+        kpi('Páginas vistas', num(t.views), ex + (t.users ? `${(t.views / t.users).toFixed(1)} por visitante` : '')),
+        kpi('Tiempo promedio', minSec(t.avgSeconds), `${ex}por visita`),
       ].join('');
       // Every day (or every hour today) appears, even with no visits
       let series: Array<{ label: string; value: number; tip: string }>;
@@ -465,7 +474,7 @@ const TABS = [
         const li = $$('[data-lights] li')[i]; if (!li) return;
         li.className = ok ? 'ok' : 'bad'; li.innerHTML = `<i class="sl-dot"></i><span><b>${n}</b><small>${ok ? 'funciona' : 'no responde ahora'} · ${why}</small></span>`;
       }));
-      if (!hasBackend()) return;
+      if (!hasBackend()) { if (isDemo()) saludDemo(); return; }
       const [sc, st, er] = await Promise.all([
         staffApi('articles?status=eq.scheduled&select=id,doc,slug&order=updated_at.desc'),
         staffApi('rpc/panel_stats', { method: 'POST', body: '{}' }),
@@ -492,6 +501,22 @@ const TABS = [
         $('[data-errs]').innerHTML = list.map((x: any) => `<li><span><b>${esc(x.what)}</b><small>${esc(x.who)} · ${ago(Date.parse(x.at))} · ${esc(x.detail)}</small></span></li>`).join('') || '<li><span>🎉 Ningún error.</span></li>';
         $('[data-errs-clear]').hidden = !list.length || me()?.role !== 'admin';
       } else $('[data-errs]').innerHTML = `<li>${missing}</li>`;
+    }
+    /** Demo mode: the same Salud cards with sample numbers, labeled DEMO. */
+    function saludDemo() {
+      const tag = '<span class="sp-demo">DEMO</span>';
+      const local = get<Array<{ title: string; author: string; date: string; status: string }>>('nx-articles', []).filter((a) => a.status === 'scheduled');
+      const all = [...local, ...AHEAD].filter((x) => Date.parse(x.date) > Date.now()).sort((a, b) => Date.parse(a.date) - Date.parse(b.date));
+      $('[data-sched-n]').textContent = all.length ? String(all.length) : '';
+      $('[data-sched]').innerHTML = all.map((x) => `<li><span><b>${esc(x.title)}</b><small>sale el ${fmtDate(x.date)} · ${esc(x.author || '')}</small></span></li>`).join('') || '<li><span>No hay noticias programadas.</span></li>';
+      const n = { comments_today: 148, review_now: 3, review_today: 2, removed_week: 9, signups_week: 212, accounts: 3480, banned: 4 };
+      $('[data-sl-mod]').innerHTML = `<ul class="sl-nums">
+        <li><b>${n.comments_today}</b><span>comentarios hoy</span></li><li><b>${n.review_now}</b><span>esperan revisión (${n.review_today} de hoy)</span></li>
+        <li><b>${n.removed_week}</b><span>quitados esta semana</span></li><li><b>${n.signups_week}</b><span>cuentas nuevas esta semana</span></li>
+        <li><b>${num(n.accounts)}</b><span>cuentas en total</span></li><li><b>${n.banned}</b><span>bloqueadas</span></li></ul><p class="pnl-muted pnl-small">${tag} Números de ejemplo.</p>`;
+      const bar = (label: string, used: number, max: number) => { const pc = Math.round((used / max) * 100); return `<div class="sl-bar"><p><b>${label}</b><span>${mb(used)} de ${mb(max)} · ${pc}%</span></p><i><em style="width:${pc}%"></em></i></div>`; };
+      $('[data-space]').innerHTML = bar('Fotos y archivos', 214e6, 1e9) + bar('Base de datos', 61e6, 5e8) + `<p class="pnl-muted pnl-small">${tag} Números de ejemplo.</p>`;
+      $('[data-errs]').innerHTML = '<li><span>🎉 Ningún error.</span></li>';
     }
     root.addEventListener('click', async (e) => {
       const t = e.target as HTMLElement;
@@ -529,7 +554,7 @@ const TABS = [
         if (s.role === 'reporter') todo.push(`<li><span>✍️ Escribe una noticia nueva o sigue un borrador.</span><button type="button" data-go="escribir">Escribir</button></li>`);
         if (allowed.includes('comentarios') && c.comentarios) todo.push(`<li><span>💬 <b>${c.comentarios}</b> ${c.comentarios === 1 ? 'comentario reportado' : 'comentarios reportados'} por revisar.</span><button type="button" data-go="comentarios">Revisar</button></li>`);
         if (allowed.includes('anuncios') && c.anuncios) todo.push(`<li><span>📣 <b>${c.anuncios}</b> ${c.anuncios === 1 ? 'anuncio espera' : 'anuncios esperan'}. Prometimos responder en 24 horas.</span><button type="button" data-go="anuncios">Abrir</button></li>`);
-        if (s.role === 'admin' && root.dataset.aikey !== 'true') todo.push(`<li><span>🔑 Falta conectar la clave de Anthropic: el redactor automático todavía no redacta noticias.</span><button type="button" data-go="salud">Detalles</button></li>`);
+        if (s.role === 'admin' && root.dataset.aikey !== 'true' && !isDemo()) todo.push(`<li><span>🔑 Falta conectar la clave de Anthropic: el redactor automático todavía no redacta noticias.</span><button type="button" data-go="salud">Detalles</button></li>`);
         $('[data-todo]').innerHTML = todo.join('') || '<li><span>🎉 No hay nada pendiente.</span></li>';
       },
 
@@ -716,10 +741,11 @@ const TABS = [
     });
     // Keep the team list saved once it's first shown, so adding works on top of the examples
     const ensureTeam = () => { if (hasBackend()) { void syncTeam().then((t) => { if (t) { if ((location.hash.slice(1) || 'inicio') === 'equipo') paint.equipo(); dispatchEvent(new Event('nx-team')); } }); return; }
-      if (!localStorage.getItem('nx-staff-team')) { const s = me(); if (s) set('nx-staff-team', [{ name: s.name, mail: 'tú', role: 'admin' }, { name: 'Editora (ejemplo)', mail: 'editora@ejemplo.com', role: 'editor' }, { name: 'Ventas (ejemplo)', mail: 'ventas@ejemplo.com', role: 'ads' }, { name: 'Periodista (ejemplo)', mail: 'periodista@ejemplo.com', role: 'reporter' }]); } };
+      if (!localStorage.getItem('nx-staff-team') || isDemo()) { const s = me(); if (s) set('nx-staff-team', [{ name: s.name, mail: 'tú', role: 'admin' }, { name: 'Editora (ejemplo)', mail: 'editora@ejemplo.com', role: 'editor' }, { name: 'Ventas (ejemplo)', mail: 'ventas@ejemplo.com', role: 'ads' }, { name: 'Periodista (ejemplo)', mail: 'periodista@ejemplo.com', role: 'reporter' }]); } };
 
     // ---------- start ----------
     function start() {
+      if (isDemo() && !me()) { set('nx-staff', { name: 'Invitado', role: 'admin' }); dispatchEvent(new Event('nx-staff-change')); } // demo: straight in, as the administrator
       const s = me();
       $('[data-login]').hidden = !!s; $('[data-pnl-app]').hidden = !s;
       if (!s) return;
@@ -728,7 +754,7 @@ const TABS = [
       $('[data-av]').textContent = s.name[0].toUpperCase();
       $('[data-role]').textContent = ROLE_NAME[s.role];
       paintCounts(); showTab(location.hash.slice(1) || 'inicio');
-      if (hasBackend()) void loadLive(true); // what's really waiting (stories in review, automatic news, reported comments)
+      void loadLive(true); // what's really waiting (stories in review, automatic news, reported comments)
       if (hasBackend()) void loadRequests().then(() => { paintCounts(); if ((location.hash.slice(1) || 'inicio') === 'inicio') showTab('inicio'); }); // real ad requests for the counts and Inicio
     }
     // Real login (once BACKEND is set in src/lib/backend.ts): Supabase email + password, role from the `staff` table

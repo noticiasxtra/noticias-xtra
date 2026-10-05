@@ -14,6 +14,7 @@ Noticias Xtra is a Spanish-language (Puerto Rico) news site built with Astro 7, 
 - Brand colors: purple `#2B1185`, blue `#1F90DA`, red `#D7263D` only for breaking/live. Fonts: Poppins (headings), Noto Sans (body). Styles live in `src/styles/global.css`.
 - No frameworks (React etc.) unless needed; plain Astro components and small inline scripts.
 - Keep it static (no server). Everything must work on GitHub Pages.
+- Demo mode (`src/lib/demo.ts`): a guest password on the Cloudflare gate, or `?demo=1`, shows sample ads, comments and a sample staff panel, all labeled EJEMPLO/DEMO, and turns off the real database (`hasBackend()` is false). Never show sample numbers without a DEMO label. `?demo=0` goes back.
 
 ## Editorial rules for the AI pipeline
 - Only primary/official sources in `scripts/sources.json`. Do not add other news outlets as sources.

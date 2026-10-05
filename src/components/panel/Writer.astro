@@ -213,6 +213,7 @@ const TOOLS = [
   import { docCard } from '../../lib/doccard.mjs';
   import { ask, askText } from '../../lib/dialogs';
   import { hasBackend, listArticles, putArticle, deleteArticle, uploadStoryFile, publishArticle, lastSaveError, logPanelError, getAnalytics } from '../../lib/backend';
+  import { isDemo, demoAnalytics } from '../../lib/demo';
   const root = document.querySelector<HTMLElement>('[data-wr]');
   if (root) {
     type Src = { name: string; url?: string };
@@ -237,6 +238,8 @@ const TOOLS = [
     const canPublish = () => ['admin', 'editor'].includes(me()?.role ?? '');
     // With Supabase (src/lib/backend.ts) articles are shared by the team; without it they stay on this device ('nx-articles')
     const DB = hasBackend();
+    const DEMO = isDemo(); // sample stories, nothing is published (src/lib/demo.ts)
+    const PREV = DEMO ? 'Modo demo: en el panel real' : 'Vista previa: con Supabase';
     const KEY = 'nx-articles';
     let CACHE: Art[] = [];
     const load = (): Art[] => { if (DB) return CACHE; try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch { return []; } };
@@ -313,8 +316,8 @@ const TOOLS = [
     // Real views per story (last 28 days, Google Analytics), for editors and the admin; loaded once
     let VIEWS: Map<string, number> | null = null; let viewsAsked = false;
     function loadViews() {
-      if (viewsAsked || !DB || !canPublish()) return; viewsAsked = true;
-      void getAnalytics(28, 1000).then((d) => {
+      if (viewsAsked || (!DB && !DEMO) || !canPublish()) return; viewsAsked = true;
+      void (DEMO ? Promise.resolve(demoAnalytics(28, PUBLISHED.map((p) => p.id), 1000)) : getAnalytics(28, 1000)).then((d) => {
         if ('error' in d) return;
         VIEWS = new Map(); for (const p of d.pages) { const m = p.path.match(/^\/noticia\/([^/]+)/); if (m) VIEWS.set(m[1], (VIEWS.get(m[1]) ?? 0) + p.views); }
         if (tab === 'published') renderList();
@@ -674,7 +677,7 @@ const TOOLS = [
     async function takeDown(id: string): Promise<boolean> {
       if (!canPublish()) { toast('Solo los editores y el administrador pueden quitar noticias del sitio.'); return false; }
       const a = await storyArt(id); if (!a || !a.slug) return false;
-      if (!DB) { toast('Vista previa: con Supabase conectado, la noticia se quita del sitio.'); return false; }
+      if (!DB) { toast(`${PREV}, la noticia se quita del sitio.`); return false; }
       const file = toFile(a).replace(/^draft: false$/m, 'draft: true');
       const r = await publishArticle({ id: a.id, slug: a.slug, file, title: a.title, scheduled: false });
       if (!r.ok) { toast(`No se pudo quitar: ${r.error}`); void logPanelError(me()?.name ?? '', `Quitar: ${a.title}`, r.error ?? ''); return false; }
@@ -927,7 +930,7 @@ const TOOLS = [
       if (!DB) {
         a.status = future ? 'scheduled' : 'published'; a.updated = Date.now(); await store(a);
         const un = await unpinOthers(a);
-        toast((future ? `Programada para el ${when(a.date)}. Vista previa: con Supabase, sale sola a esa hora.` : 'Publicada. Vista previa: con Supabase, aparece en el sitio en unos 2 minutos.') + unpinNote(un));
+        toast((future ? `Programada para el ${when(a.date)}. ${PREV}, sale sola a esa hora.` : `Publicada. ${PREV}, aparece en el sitio en unos 2 minutos.`) + unpinNote(un));
         return true;
       }
       toast('Publicando…');
@@ -986,6 +989,26 @@ const TOOLS = [
       renderList(); dispatchEvent(new Event('nx-articles-changed'));
     });
     addEventListener('beforeunload', () => { if (cur && dirty) void persist(); });
+    addEventListener('nx-staff-change', () => { if (!cur) renderList(); }); // signed in or out: show that person's list
+    // Demo mode: a few sample stories in every list, the first time (they stay on this device only)
+    if (DEMO && !load().length) {
+      const ago = (h: number) => Date.now() - h * 36e5, at = (h: number) => new Date(Date.now() + h * 36e5 - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+      const p = (t: string) => t.split('\n').map((x) => `<p>${x}</p>`).join('');
+      const S = (o: Partial<Art>): Art => ({ ...blank(), owner: 'Periodista (ejemplo)', author: 'Periodista (ejemplo)', sources: [{ name: 'Comunicado de prensa (ejemplo)' }], ...o } as Art);
+      [
+        S({ id: 'A-EJ1', status: 'review', updated: ago(1), section: 'puerto-rico', title: '(Ejemplo) Municipio inaugura una cancha bajo techo en el barrio Pueblo', description: 'La obra costó $1.2 millones y estará abierta al público desde el lunes, según el alcalde.', place: 'Caguas',
+          body: p('Esta es una noticia de ejemplo para mostrar cómo trabaja el panel. Un periodista la escribió y la envió a revisión.\nEl editor la lee, la corrige si hace falta y la aprueba con un toque. En el panel real, la noticia sale en el sitio en unos 2 minutos.') }),
+        S({ id: 'A-EJ2', status: 'review', updated: ago(3), section: 'deportes', title: '(Ejemplo) Equipo juvenil de voleibol clasifica a la final del torneo regional', description: 'Las jugadoras ganaron en cuatro sets y buscan el título el sábado.', place: 'Ponce',
+          body: p('Noticia de ejemplo de la sección de Deportes, esperando la aprobación de un editor.\nDesde aquí el editor puede aprobarla, abrirla en el editor o devolverla al periodista con una nota.') }),
+        S({ id: 'A-EJ3', status: 'scheduled', updated: ago(5), section: 'economia', date: at(20), title: '(Ejemplo) Feria de empleo con 40 patronos se celebra mañana en el centro de convenciones', description: 'Habrá entrevistas en el momento y talleres para preparar el resumé.', place: 'San Juan',
+          body: p('Noticia de ejemplo programada: sale sola a la hora escogida, sin que nadie tenga que estar despierto para publicarla.') }),
+        S({ id: 'A-EJ4', status: 'draft', updated: ago(0.5), owner: me()?.name ?? 'Invitado', author: me()?.name ?? 'Invitado', section: 'entretenimiento', title: '(Ejemplo) Festival de bomba y plena llena la plaza este fin de semana', description: 'Borrador de ejemplo: el editor guarda solo, cada pocos segundos.', place: 'Loíza',
+          body: p('Borrador de ejemplo. Prueba a escribir aquí: el texto se guarda solo, y puedes añadir fotos, videos y publicaciones de redes.') }),
+        S({ id: 'A-EJ5', status: 'draft', updated: ago(26), section: 'gobierno', title: '(Ejemplo) Agencia anuncia horario extendido para renovar licencias', description: 'Las oficinas abrirán los sábados durante octubre.', place: 'Bayamón',
+          body: p('Otro borrador de ejemplo, de un periodista del equipo.') }),
+      ].forEach((a) => void store(a));
+      setTimeout(() => dispatchEvent(new Event('nx-articles-changed')), 0); // Noticias → Por aprobar picks them up
+    }
     if (DB) { $('[data-wr-list]').innerHTML = '<p class="apr-empty">Cargando las noticias del equipo…</p>'; refresh().then(renderList); } else renderList();
   }
 </script>
