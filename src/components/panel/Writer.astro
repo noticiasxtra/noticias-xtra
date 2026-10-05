@@ -9,7 +9,7 @@
 // photos and PDFs go to the "noticias" storage bucket, and Publicar/Aprobar call the "publicar" Edge Function
 // (supabase/functions/publicar/), which saves the story file in GitHub so the site rebuilds in about 2 minutes.
 // Without Supabase it's a preview: articles stay on this device ('nx-articles') and can be downloaded as story files.
-import { SECTIONS, PR_MUNICIPIOS, url } from '../../lib/site';
+import { SECTIONS, SECTION_IMAGES, PR_MUNICIPIOS, url } from '../../lib/site';
 import { LEAGUES } from '../../lib/leagues';
 import PhotoLibrary from './PhotoLibrary.astro';
 type Pub = { id: string; title: string; section: string; author: string; date: string; url: string; ai: boolean };
@@ -17,6 +17,7 @@ interface Props { recent: Array<{ id: string; title: string }>; published: Pub[]
 const { recent, published } = Astro.props;
 const secs = SECTIONS.map(({ id, name }) => ({ id, name }));
 const leagues = LEAGUES.map(({ id, name }) => ({ id, name }));
+const secPhotos = Object.fromEntries(Object.entries(SECTION_IMAGES).map(([k, v]) => [k, { src: v.src, credit: v.credit }])); // social image when a story has no photo
 const I = (d: string) => `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
 const TOOLS = [
   ['bold', 'Negrita (Ctrl+B)', '<path d="M7 5h6a3.5 3.5 0 0 1 0 7H7zM7 12h7a3.5 3.5 0 0 1 0 7H7z"/>'],
@@ -34,7 +35,7 @@ const TOOLS = [
   ['clear', 'Quitar formato', '<path d="M6 5h12M12 5l-3 14M4 20L20 4"/>'],
 ];
 ---
-<section class="wr" data-wr data-secs={JSON.stringify(secs)} data-recent={JSON.stringify(recent)} data-published={JSON.stringify(published)} data-base={url()}>
+<section class="wr" data-wr data-secs={JSON.stringify(secs)} data-recent={JSON.stringify(recent)} data-published={JSON.stringify(published)} data-base={url()} data-sec-photos={JSON.stringify(secPhotos)}>
   <!-- List of my articles -->
   <div data-wr-list-view>
     <header class="sd-head">
@@ -108,6 +109,19 @@ const TOOLS = [
           <label>Autor<input data-f="author" maxlength="60" /></label>
           <label>Fecha y hora de publicación<input type="datetime-local" data-f="date" /></label>
           <p class="pnl-muted pnl-small">Déjala en el pasado o ahora para publicar ya; ponla en el futuro para programarla.</p>
+        </div>
+        <div class="pnl-card wr-social"><h2 class="pnl-h3">Redes sociales</h2>
+          <label class="adb-check"><input type="checkbox" data-sc="ig" /> Instagram: imagen y texto automáticos</label>
+          <div class="wr-ig" data-ig-box hidden>
+            <canvas class="wr-ig-prev" data-ig-canvas width="1080" height="1350" aria-label="Imagen para Instagram"></canvas>
+            <textarea data-sc-text="ig" rows="7" maxlength="2200" aria-label="Texto para Instagram"></textarea>
+            <button type="button" class="pnl-link" data-ig-dl>Descargar la imagen</button>
+          </div>
+          <label class="adb-check"><input type="checkbox" data-sc="fb" /> Facebook: el enlace, con foto, titular y resumen</label>
+          <textarea data-sc-text="fb" rows="3" maxlength="1000" aria-label="Texto para Facebook" hidden></textarea>
+          <button type="button" class="adp-btn ghost-dark wr-x" data-sc-x>Publicar en 𝕏</button>
+          <p class="pnl-muted pnl-small">Instagram y Facebook salen solos al publicar la noticia (o a la hora programada). 𝕏 abre el mensaje listo: solo tocas “Post”.</p>
+          <ul class="wr-sc-status" data-sc-status></ul>
         </div>
         <div class="pnl-card" data-editor-only><h2 class="pnl-h3">Etiquetas</h2>
           <label class="adb-check"><input type="checkbox" data-f="breaking" /> Última hora (barra roja)</label>
@@ -212,8 +226,9 @@ const TOOLS = [
   import { embedFor } from '../../lib/embeds.mjs';
   import { docCard } from '../../lib/doccard.mjs';
   import { ask, askText } from '../../lib/dialogs';
-  import { hasBackend, listArticles, putArticle, deleteArticle, uploadStoryFile, publishArticle, lastSaveError, logPanelError, getAnalytics } from '../../lib/backend';
+  import { hasBackend, listArticles, putArticle, deleteArticle, uploadStoryFile, publishArticle, lastSaveError, logPanelError, getAnalytics, queueSocial, staffApi } from '../../lib/backend';
   import { isDemo, demoAnalytics } from '../../lib/demo';
+  import { drawInstagram, instagramCaption, facebookMessage, xComposeUrl, type SocialStory } from '../../lib/social';
   const root = document.querySelector<HTMLElement>('[data-wr]');
   if (root) {
     type Src = { name: string; url?: string };
@@ -225,6 +240,7 @@ const TOOLS = [
       sources: Src[]; related: string[]; correction: string; body: string; slug?: string;
       gallery?: Gal[]; // extra photos shown as a slideshow with the main one
       aiAssisted?: boolean; fmExtra?: string; // kept from an existing story file: the AI label and fields the editor doesn't show
+      social?: { ig?: boolean; fb?: boolean; igText?: string; fbText?: string }; // Redes sociales: saved with the article, never in the story file
     };
     const SECS: Array<{ id: string; name: string }> = JSON.parse(root.dataset.secs!);
     const RECENT: Array<{ id: string; title: string }> = JSON.parse(root.dataset.recent!);
@@ -357,6 +373,7 @@ const TOOLS = [
       $$('[data-editor-only]').forEach((e) => (e.hidden = !canPublish()));
       $('[data-wr-list-view]').hidden = true; $('[data-wr-editor]').hidden = false;
       sync(); dirty = false; $('[data-wr-saved]').textContent = ''; scrollTo({ top: 0 });
+      paintSocial(true); void paintSocialStatus();
       ($('[data-f="title"]') as HTMLTextAreaElement).focus();
     }
     function closeEditor() { if (dirty) void persist(); cur = null; $('[data-wr-editor]').hidden = true; $('[data-wr-list-view]').hidden = false; renderList(); }
@@ -930,7 +947,8 @@ const TOOLS = [
       if (!DB) {
         a.status = future ? 'scheduled' : 'published'; a.updated = Date.now(); await store(a);
         const un = await unpinOthers(a);
-        toast((future ? `Programada para el ${when(a.date)}. ${PREV}, sale sola a esa hora.` : `Publicada. ${PREV}, aparece en el sitio en unos 2 minutos.`) + unpinNote(un));
+        toast((future ? `Programada para el ${when(a.date)}. ${PREV}, sale sola a esa hora.` : `Publicada. ${PREV}, aparece en el sitio en unos 2 minutos.`) + unpinNote(un)
+          + (a.social?.ig || a.social?.fb ? ` ${DEMO ? 'Modo demo' : 'Vista previa'}: Instagram y Facebook no se envían.` : ''));
         return true;
       }
       toast('Publicando…');
@@ -941,7 +959,73 @@ const TOOLS = [
       const un = await unpinOthers(a);
       if (un.length) await refresh();
       toast((future ? `Programada: sale sola el ${when(a.date)}.` : 'Publicada. Aparece en el sitio en unos 2 minutos.') + unpinNote(un));
+      if (a.social?.ig || a.social?.fb) void sendSocial(a);
       return true;
+    }
+
+    // ---------- Redes sociales: Instagram (image + caption) and Facebook (link) go out with the story; X opens ready to post ----------
+    const SEC_PHOTOS: Record<string, { src: string; credit: string }> = JSON.parse(root.dataset.secPhotos || '{}');
+    const absUrl = (p: string) => (/^(https?:|data:)/.test(p) ? p : new URL(`${root.dataset.base!.replace(/\/$/, '')}/${p.replace(/^\//, '')}`, location.origin).href);
+    function socialStory(a: Art): SocialStory {
+      const own = a.imageUrl || a.image, def = SEC_PHOTOS[a.section];
+      return { title: a.title || 'Sin titular', description: a.description, section: a.section, sectionName: SECS.find((x) => x.id === a.section)?.name ?? '',
+        photo: own ? absUrl(own) : def ? absUrl(def.src) : '', credit: own ? a.imageCredit : def?.credit ?? '',
+        url: new URL(`${root.dataset.base!.replace(/\/$/, '')}/noticia/${a.slug || slug(a)}/`, location.origin).href };
+    }
+    const igCanvas = $<HTMLCanvasElement>('[data-ig-canvas]'); let igTimer = 0;
+    /** Shows the social settings of the open story; fills the texts unless someone edited them. */
+    function paintSocial(redraw = false) {
+      if (!cur) return;
+      const sc = (cur.social ??= {}), st = socialStory(cur);
+      $<HTMLInputElement>('[data-sc="ig"]').checked = !!sc.ig; $<HTMLInputElement>('[data-sc="fb"]').checked = !!sc.fb;
+      $('[data-ig-box]').hidden = !sc.ig; $('[data-sc-text="fb"]').hidden = !sc.fb;
+      const ig = $<HTMLTextAreaElement>('[data-sc-text="ig"]'), fb = $<HTMLTextAreaElement>('[data-sc-text="fb"]');
+      if (document.activeElement !== ig) ig.value = sc.igText ?? instagramCaption(st);
+      if (document.activeElement !== fb) fb.value = sc.fbText ?? facebookMessage(st);
+      if (sc.ig && redraw) { clearTimeout(igTimer); igTimer = window.setTimeout(() => void drawInstagram(igCanvas, socialStory(cur!), absUrl('logo-dark.svg')), 400); }
+    }
+    root.addEventListener('change', (e) => {
+      const t = e.target as HTMLInputElement; const k = t.dataset.sc as 'ig' | 'fb' | undefined;
+      if (!k || !cur) return;
+      (cur.social ??= {})[k] = t.checked; paintSocial(true); changed();
+    });
+    root.addEventListener('input', (e) => {
+      const t = e.target as HTMLTextAreaElement; const k = t.dataset.scText as 'ig' | 'fb' | undefined;
+      if (!k || !cur) return;
+      (cur.social ??= {})[k === 'ig' ? 'igText' : 'fbText'] = t.value; // edited by hand: keep it as written
+    });
+    // The image follows the headline, section and photo as they change
+    ['title', 'description', 'section', 'imageUrl', 'imageCredit'].forEach((k) => field(k).addEventListener('input', () => { if (cur?.social?.ig) { readEditor(); paintSocial(true); } }));
+    $('[data-ig-dl]').addEventListener('click', () => { const a = document.createElement('a'); a.href = igCanvas.toDataURL('image/jpeg', 0.92); a.download = `${cur ? slug(cur) : 'noticia'}-instagram.jpg`; a.click(); });
+    $('[data-sc-x]').addEventListener('click', () => {
+      if (!cur) return; readEditor();
+      if (cur.status !== 'published' && cur.status !== 'scheduled' && !cur.slug) { toast('Primero publica la noticia; luego abre 𝕏 con el enlace listo.'); return; }
+      window.open(xComposeUrl(socialStory(cur)), '_blank', 'noopener');
+    });
+    /** After publishing: makes the Instagram image, saves it, and asks the server to post (now, or at the scheduled time). */
+    async function sendSocial(a: Art) {
+      const sc = a.social ?? {}, st = socialStory(a);
+      let image = '';
+      if (sc.ig) {
+        const c = document.createElement('canvas'); await drawInstagram(c, st, absUrl('logo-dark.svg'));
+        let data = ''; try { data = c.toDataURL('image/jpeg', 0.9); } catch { /* a photo that blocks reuse */ }
+        image = (data && (await uploadStoryFile(`social/${a.slug}-${Date.now().toString(36)}.jpg`, data))) || '';
+        if (!image) { toast('No se pudo preparar la imagen de Instagram. Descárgala desde Redes sociales y súbela a mano.'); }
+      }
+      const r = await queueSocial({ id: a.id, slug: a.slug!, due: new Date(a.date || Date.now()).toISOString(),
+        ig: sc.ig && image ? { image, caption: sc.igText ?? instagramCaption(st) } : undefined,
+        fb: sc.fb ? { message: sc.fbText ?? facebookMessage(st), link: st.url } : undefined });
+      if (r.error) { toast(`Redes sociales: ${r.error}`); void logPanelError(me()?.name ?? '', `Redes: ${a.title}`, r.error); }
+      else if (r.note) toast(r.note);
+    }
+    async function paintSocialStatus() {
+      const ul = $('[data-sc-status]'); ul.innerHTML = '';
+      if (!DB || !cur) return;
+      const res = await staffApi(`social_posts?article_id=eq.${encodeURIComponent(cur.id)}&select=network,status,result,due_at,sent_at`);
+      const rows: Array<{ network: string; status: string; result: string; due_at: string; sent_at: string | null }> = res?.ok ? await res.json() : [];
+      const NAME: Record<string, string> = { instagram: 'Instagram', facebook: 'Facebook' };
+      const ST: Record<string, string> = { sent: '✓ publicada', pending: '⏳ sale', error: '⚠ no salió', skipped: '— no se envió' };
+      ul.innerHTML = rows.map((x) => `<li><b>${NAME[x.network] ?? x.network}</b> ${ST[x.status] ?? x.status}${x.status === 'pending' ? ` el ${when(x.due_at)}` : x.sent_at ? ` el ${when(x.sent_at)}` : ''}${x.result && x.status !== 'sent' ? `<small>${esc(x.result)}</small>` : ''}</li>`).join('');
     }
     const goBtn = $<HTMLButtonElement>('[data-wr-go]');
     goBtn.addEventListener('click', async () => {

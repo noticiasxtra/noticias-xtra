@@ -157,6 +157,19 @@ export function getAnalytics(days: 1 | 7 | 28, top = 20, fresh = false): Promise
   return p;
 }
 
+/** Redes sociales: asks the Edge Function "redes" to post a story to Instagram and/or Facebook, now or at `due`.
+ *  Returns a note for the editor (e.g. accounts not connected yet) or an error. */
+export async function queueSocial(p: { id: string; slug: string; due: string; ig?: { image: string; caption: string }; fb?: { message: string; link: string } }): Promise<{ note?: string; error?: string }> {
+  if (!p.ig && !p.fb) return {};
+  const token = await freshToken(); if (!token) return { error: 'Tu sesión venció. Sal y vuelve a entrar al panel.' };
+  try {
+    const r = await fetch(`${BACKEND.url.replace(/\/$/, '')}/functions/v1/redes`, { method: 'POST', headers: head(token), body: JSON.stringify({ action: 'queue', ...p }) });
+    if (r.status === 404) return { error: 'Falta instalar la función "redes" en Supabase.' };
+    const out = await r.json().catch(() => ({}));
+    return r.ok ? { note: out.note } : { error: out.error || `Error ${r.status}` };
+  } catch { return { error: 'No hay conexión con el servidor.' }; }
+}
+
 /** Notes a failed publish, schedule or take-down for Salud del sitio (supabase/salud.sql). Never blocks the panel. */
 export async function logPanelError(who: string, what: string, detail: string): Promise<void> {
   await staffApi('panel_errors', { method: 'POST', body: JSON.stringify({ who: who.slice(0, 60), what: what.slice(0, 200), detail: detail.slice(0, 500) }) }).catch(() => null);

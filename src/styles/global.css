@@ -4202,3 +4202,11 @@ a,button,summary,label{-webkit-tap-highlight-color:transparent}
 .sl-tools a{font-weight:700;color:var(--blue)}
 /* Escribir list: room between the header (title, "Nueva noticia") and the status tabs */
 [data-wr-list-view] > .sd-head{margin-bottom:16px}
+/* Escribir → Redes sociales */
+.wr-social textarea{width:100%;font:inherit;font-size:13.5px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);margin:6px 0 10px;resize:vertical}
+.wr-ig{display:grid;gap:4px;margin:4px 0 10px}
+.wr-ig-prev{width:100%;max-width:260px;height:auto;aspect-ratio:1080/1350;border-radius:10px;border:1px solid var(--line);background:#1E0B5E}
+.wr-x{width:100%;margin:2px 0 8px}
+.wr-sc-status{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:4px;font-size:13px}
+.wr-sc-status small{display:block;color:var(--muted)}
+.wr-sc-status:empty{display:none}
