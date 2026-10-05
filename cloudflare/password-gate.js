@@ -109,14 +109,14 @@ const PAGE = `<!doctype html>
   <p class="logo">Noticias <b>Xtra</b></p>
   <h1>Muy pronto</h1>
   <p>Estamos preparando el nuevo Noticias Xtra. Si tienes la clave de acceso, escríbela para entrar.</p>
-  <form id="f"><input id="c" name="clave" type="password" autocomplete="current-password" placeholder="Clave de acceso" aria-label="Clave de acceso" required autofocus>
+  <form id="f" method="post" action="/__clave"><input id="c" name="clave" type="password" autocomplete="current-password" placeholder="Clave de acceso" aria-label="Clave de acceso" required autofocus>
   <button id="b" type="submit">Entrar</button><p class="err" id="e" role="alert"></p></form>
 </main>
 <script>
   document.getElementById('f').addEventListener('submit', async function (ev) {
     ev.preventDefault(); var b = document.getElementById('b'), e = document.getElementById('e'); b.disabled = true; e.textContent = '';
     var r = await fetch('/__clave', { method: 'POST', body: new FormData(this) }).catch(function () { return null; });
-    if (r && r.ok) { if (/^\/entrar\/?$/.test(location.pathname)) location.href = '/'; else location.reload(); return; } // keeps the address (and any login link) the visitor came with
+    if (r && r.ok) { if (location.pathname.indexOf('/entrar') === 0) location.href = '/'; else location.reload(); return; } // keeps the address (and any login link) the visitor came with
     var out = r ? await r.json().catch(function () { return {}; }) : null;
     b.disabled = false; e.textContent = !r ? 'No hay conexión. Intenta otra vez.' : out.expired ? 'Esa clave de invitado ya venció.' : 'Esa clave no es correcta.';
   });
