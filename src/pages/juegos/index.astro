@@ -27,7 +27,6 @@ const rest = GAMES.filter((g) => g.id !== featured.id);
       </a>
     </section>
 
-    <GameBoard title="Líderes de Juegos Xtra" />
 
     <div class="jh-grid jh-all">
       {rest.map((g) => (
@@ -41,6 +40,8 @@ const rest = GAMES.filter((g) => g.id !== featured.id);
         </a>
       ))}
     </div>
+
+    <GameBoard title="Líderes de Juegos Xtra" />
     <AdSlot size="infeed" />
   </main>
 </Base>
