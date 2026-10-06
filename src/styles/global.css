@@ -1366,6 +1366,54 @@ main.wrap,.home-grid,.ys-page,.tb-page{padding-top:var(--gap)}
 .fo-cats{list-style:none;margin:8px 0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
 .fo-cats button,.fo-all{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:5px 12px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer}
 @media (max-width:860px){ .fo-grid{grid-template-columns:1fr} }
+/* Foro Xtra, Reddit style: topic pages, sorting, reply trees */
+.fo-head h1 a{color:inherit}
+.fo-sort{flex-wrap:wrap}
+.fo-catnow{align-self:center;margin-left:auto;font-size:13px;color:var(--muted)}
+.fo-body h3 a{color:inherit}
+.fo-body h3 a:hover{color:var(--purple)}
+.fo-text{white-space:pre-wrap;overflow-wrap:anywhere}
+.fo-text.clip{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.fo-actions{flex-wrap:wrap;gap:8px}
+.fo-actions a{background:var(--soft);border-radius:999px;padding:5px 12px;font-weight:700;font-size:13px;color:var(--ink)}
+.fo-actions a:hover,.fo-actions button:hover{background:#E6E2F6}
+.fo-vote.on-up b{color:#E8590C}
+.fo-vote.on-dn b{color:var(--blue)}
+.fo-up{display:inline-block;margin-bottom:10px;font-weight:700;color:var(--purple)}
+.fo-title{margin:4px 0 8px;font-size:24px;line-height:1.25}
+.fo-answer{display:grid;gap:8px;margin-top:12px}
+.fo-answer textarea,.rt-form textarea{font:inherit;font-size:15px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--card);color:var(--ink);resize:vertical}
+/* Reply tree: each level indented, with a line per level (click a line or − to fold that conversation) */
+.rt{--ind:20px;list-style:none;margin:6px 0 0;padding:0}
+.rt-item{display:grid;grid-template-columns:14px minmax(0,1fr);column-gap:8px;padding:8px 0 4px calc(var(--d,0) * var(--ind));background:repeating-linear-gradient(to right,transparent 0 6px,var(--line) 6px 8px,transparent 8px var(--ind)) 0 0/calc(var(--d,0) * var(--ind)) 100% no-repeat}
+.rt-item[hidden]{display:none}
+.rt-line{border:0;padding:0;margin-top:26px;background:linear-gradient(var(--line),var(--line)) center/2px 100% no-repeat;cursor:pointer}
+.rt-line:hover{background-image:linear-gradient(var(--blue),var(--blue))}
+.rt-head{display:flex;align-items:center;flex-wrap:wrap;gap:5px;margin:0;font-size:12.5px;color:var(--muted)}
+.rt-head b{font-family:var(--head);color:var(--ink)}
+.rt-item.mine .rt-head b{color:var(--purple)}
+.rt-head .sp-demo{font-size:9px;padding:1px 4px}
+.rt-fold{width:18px;height:18px;margin-left:-24px;padding:0;border:1px solid var(--line);border-radius:5px;background:var(--card);font-weight:800;font-size:13px;line-height:14px;color:var(--muted);cursor:pointer}
+.rt-fold:hover{border-color:var(--blue);color:var(--blue)}
+.rt-kids{display:none}
+.rt-item.folded .rt-kids{display:inline}
+.rt-item.folded .rt-text,.rt-item.folded .rt-acts,.rt-item.folded .rt-form,.rt-item.folded .rt-line{display:none}
+.rt-text{margin:3px 0 4px;font-size:15px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+.rt-text.gone{font-style:italic;color:var(--muted)}
+.rt-acts{display:flex;align-items:center;flex-wrap:wrap;gap:4px}
+.rt-acts>button{padding:4px 8px;border:0;border-radius:6px;background:transparent;font-weight:700;font-size:12.5px;color:var(--muted);cursor:pointer}
+.rt-acts>button:hover{background:var(--soft);color:var(--ink)}
+.rt-form{display:grid;gap:6px;margin:6px 0 4px}
+.rt-cancel{margin-left:auto;border:0;background:transparent;font-weight:700;color:var(--muted);cursor:pointer}
+.rt-item>.rt-main{grid-column:2}
+/* ▲ score ▼ */
+.rv{display:inline-flex;align-items:center;gap:1px;padding:1px;border-radius:999px;background:var(--soft)}
+.rv button{display:grid;place-items:center;width:26px;height:24px;border:0;border-radius:999px;background:transparent;font-size:11px;line-height:1;color:var(--muted);cursor:pointer}
+.rv button:hover{background:var(--card)}
+.rv .up[aria-pressed="true"],.rv.on-up b{color:#E8590C}
+.rv .dn[aria-pressed="true"],.rv.on-dn b{color:var(--blue)}
+.rv b{min-width:16px;font-family:var(--head);font-size:13px;text-align:center}
+@media (max-width:600px){ .rt{--ind:14px} .rt-item{grid-template-columns:12px minmax(0,1fr);column-gap:6px} .fo-title{font-size:21px} }
 
 /* Mi perfil */
 .pf{max-width:720px;margin:0 auto}
@@ -3061,7 +3109,7 @@ html.nx-en .pf-menu .lang-tag{background:var(--red)}
 
 /* Comments: report a comment, hidden comments */
 .cm-meta button[disabled]{cursor:default;opacity:.7}
-.cm-hidden .cm-body > p:not(.cm-hid-note),.cm-hidden .cm-media,.cm-hidden .cm-like,.cm-hidden [data-reply],.cm-hidden [data-report]{display:none}
+.cm-hidden .cm-body > p:not(.cm-hid-note),.cm-hidden .cm-media,.cm-hidden .cm-like,.cm-hidden .rv,.cm-hidden [data-reply],.cm-hidden [data-report]{display:none}
 .cm-hidden .cm-av{filter:grayscale(1);opacity:.5}
 .cm-hid-note{margin:6px 0 0 !important;padding:8px 12px;border-radius:12px;background:var(--soft);color:var(--muted);font-size:14px !important;font-style:italic}
 .cm-rp{margin-top:8px;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--card)}
@@ -4261,3 +4309,17 @@ a,button,summary,label{-webkit-tap-highlight-color:transparent}
 .sw-ic{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;overflow:hidden;background:#000;transition:transform .15s}
 .sw-ic img{width:100%;height:100%;object-fit:contain;transform:scale(.86) translateY(4%)}
 .sw-btn:hover .sw-ic{transform:scale(1.08)}
+
+/* Story comments, Reddit style: replies to replies indented with a line per level, ▲▼ votes in the line under the text */
+.cm-list{--ind:28px;--lx:16px}
+.cm-item[data-depth],.cm-item.reply[data-depth]{padding-left:calc(var(--d,0) * var(--ind));background:repeating-linear-gradient(to right,transparent 0 var(--lx),var(--line) var(--lx) calc(var(--lx) + 2px),transparent calc(var(--lx) + 2px) var(--ind)) 0 0/calc(var(--d,0) * var(--ind)) 100% no-repeat}
+.cm-item[hidden]{display:none}
+.cm-meta{align-items:center}
+.cm-meta .rv button{width:26px;height:24px;margin:0;padding:0;font-size:11px}
+.cm-meta .rv b{font-size:12.5px}
+.cm-meta .cm-fold{color:var(--blue)}
+.cm-text.gone{font-style:italic;color:var(--muted)}
+.cm-item.gone .cm-av{background:var(--soft);color:var(--muted)}
+.cm-burst.up{color:#E8590C;font-size:30px}
+.cm-sort{margin:14px 0 2px}
+@media (max-width:600px){ .cm-list{--ind:18px;--lx:8px} }
