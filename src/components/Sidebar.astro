@@ -1,5 +1,5 @@
 ---
-// Right column: optional live video box (section pages, see SECTION_LIVE), Clima, Tendencias (numbered photos), ad, Lo último, newsletter, and a tall ad
+// Right column: optional live video box (section pages, see SECTION_LIVE), Clima and Lotería (home page only), Tendencias (numbered photos), ad, Lo último, newsletter, and a tall ad
 // that stays in view while scrolling so the column never leaves an empty gap.
 import Ph from './Ph.astro';
 import Time from './Time.astro';
@@ -27,8 +27,9 @@ const hhmm = (d: Date) => d.toLocaleTimeString('es-PR', { hour: 'numeric', minut
 ---
 <aside class="right">
   {live && <LiveBox source={live} />}
-  <WeatherBox />
-  <LotteryBox />
+  {/* Clima and Lotería only on the home page */}
+  {extras && <WeatherBox />}
+  {extras && <LotteryBox />}
   {top.length > 0 && (
     <section class="tr-box">
       <h2 class="tr-h"><svg width="22" height="22" viewBox="0 0 24 24" fill="#B9A7F5" stroke="var(--purple)" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z" /></svg>Tendencias</h2>
