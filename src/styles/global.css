@@ -4256,21 +4256,8 @@ a,button,summary,label{-webkit-tap-highlight-color:transparent}
 .lt-row{display:grid;gap:4px;padding-top:10px;border-top:1px solid var(--line)}
 .lt-src{margin:2px 0 0;font-size:11.5px;color:var(--muted);line-height:1.4}
 .lt-src a{color:inherit;text-decoration:underline}
-/* Header: "Nuestros medios" switch (Noticias Xtra ⇄ NotiCel) */
-.sw-wrap{position:relative}
+/* Header: NotiCel button (opens noticel.com) */
 /* NotiCel's icon is a speech bubble: the whole bubble (tail included) sits centered on a black circle */
 .sw-ic{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;overflow:hidden;background:#000;transition:transform .15s}
 .sw-ic img{width:100%;height:100%;object-fit:contain;transform:scale(.86) translateY(4%)}
-.sw-ic.lg{width:34px;height:34px}
-.sw-btn:hover .sw-ic,.sw-btn[aria-expanded="true"] .sw-ic{transform:scale(1.08)}
-.sw-menu{position:absolute;right:0;top:calc(100% + 10px);z-index:60;width:260px;padding:8px;border:1px solid var(--line);border-radius:14px;background:var(--card);box-shadow:0 12px 32px rgba(0,0,0,.18)}
-.sw-menu[hidden]{display:none}
-.sw-h{margin:4px 8px 6px;font-size:11.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
-.sw-item{display:grid;grid-template-columns:34px 1fr auto;align-items:center;gap:10px;padding:8px;border-radius:10px;color:var(--ink)}
-.sw-item:hover{background:var(--soft)}
-.sw-item img{width:34px;height:34px;border-radius:50%;background:#fff;object-fit:contain}
-.sw-item span{display:grid;gap:1px;min-width:0}
-.sw-item b{font-family:var(--head);font-size:14.5px}
-.sw-item small{font-size:12px;color:var(--muted)}
-.sw-item.on svg{color:var(--purple)}
-.sw-item svg{color:var(--muted)}
+.sw-btn:hover .sw-ic{transform:scale(1.08)}
