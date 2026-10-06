@@ -18,6 +18,9 @@ const stories = await getStories();
 const trend = await getBreaking();
 const trendStory = trend ? stories.find((s) => s.id === trend.id) : undefined;
 const moreTrending = mostRead(stories, 8).filter((s) => s.id !== trend?.id).slice(0, 5);
+// Without a trending headline, the first card is "Lo último": the newest story, and the next five in its panel
+const latest = trend ? undefined : stories.find((s) => s.data.section !== 'opinion');
+const moreLatest = latest ? stories.filter((s) => s.id !== latest.id && s.data.section !== 'opinion').slice(0, 5) : [];
 
 // Featured game: a live local game first, then the next upcoming, then the latest final
 const allGames = scores();
@@ -33,7 +36,7 @@ const signText = horoscope(signIndex);
 
 // "Para ti": default is the newest story outside the trending one; the browser swaps it for
 // one from the reader's most-read section (stored only in their own browser).
-const forYou = stories.find((s) => s.id !== trendStory?.id && s.data.section !== 'opinion') ?? stories[0];
+const forYou = stories.find((s) => s.id !== trendStory?.id && s.id !== latest?.id && s.data.section !== 'opinion') ?? stories[0];
 const forYouMore = forYou ? stories.filter((s) => s.data.section === forYou.data.section && s.id !== forYou.id).slice(0, 3) : [];
 
 const today = new Date().toLocaleDateString('es-PR', { day: 'numeric', month: 'long', timeZone: 'America/Puerto_Rico' });
@@ -69,6 +72,20 @@ const mkt = MKT_KEYS.map((k) => mktAll.find((q) => q.key === k)).filter((q): q i
           <div class="hs-pop">
             <p class="hs-pop-h">Más noticias destacadas</p>
             <ol class="hs-pop-list">{moreTrending.map((s, i) => <li><b>{i + 1}</b><a href={url(`noticia/${s.id}`)}>{s.data.title}</a></li>)}</ol>
+          </div>
+        </div>
+      )}
+
+      {latest && (
+        <div class="hs-item">
+          <a class="hs-card" href={url(`noticia/${latest.id}`)}>
+            <div class="hs-text"><span class="hs-label">Lo último · <em>{section(latest.data.section).name}</em></span><strong>{latest.data.title}</strong></div>
+            <span class="hs-thumb"><Ph sectionId={latest.data.section} image={latest.data.image} league={latest.data.league} sizes="120px" /></span>
+          </a>
+          <div class="hs-pop">
+            <p class="hs-pop-h">Lo último</p>
+            <ul class="hs-pop-list plain">{moreLatest.map((s) => <li><a href={url(`noticia/${s.id}`)}>{s.data.title}</a></li>)}</ul>
+            <a class="hs-pop-more" href={url('noticias')}>Todas las noticias <Fragment set:html={chev} /></a>
           </div>
         </div>
       )}
