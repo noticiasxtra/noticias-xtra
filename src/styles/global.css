@@ -4233,3 +4233,26 @@ a,button,summary,label{-webkit-tap-highlight-color:transparent}
 .lc-acts{display:flex;gap:14px}
 .lc-acts .danger{color:var(--red)}
 .sd-leads-h{margin:14px 0 0}
+/* Lotería box (right column, under Clima): Powerball shows; hover or tap opens the rest */
+.lt-box{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-top:12px}
+.lt-box:hover,.lt-box.open{border-color:#CFC6EE}
+.lt-head{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:4px 10px;width:100%;padding:10px 14px;border:0;background:none;font:inherit;color:var(--ink);text-align:left;cursor:pointer}
+.lt-title{grid-row:1 / span 2;font-family:var(--head);font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--purple);writing-mode:vertical-rl;transform:rotate(180deg)}
+.lt-head .lt-game{grid-column:2}
+.lt-head .lt-balls{grid-column:2;grid-row:2}
+.lt-head .lt-extra{grid-column:2;grid-row:3}
+.lt-chev{grid-column:3;grid-row:1 / span 2;color:var(--muted);transition:transform .2s}
+.lt-box.open .lt-chev{transform:rotate(180deg)}
+.lt-game{font-family:var(--head);font-weight:700;font-size:14px}
+.lt-game small{font-family:var(--body);font-weight:400;font-size:12px;color:var(--muted);margin-left:4px}
+.lt-balls{display:flex;flex-wrap:wrap;gap:4px}
+.lt-balls i{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;border:1.5px solid var(--line);background:var(--bg);font-style:normal;font-family:var(--head);font-weight:700;font-size:12px;color:var(--ink)}
+.lt-balls i.pb,.lt-balls i.mb,.lt-balls i.plus{background:var(--purple-bg);border-color:var(--purple-bg);color:#fff}
+.lt-extra{font-size:12px;color:var(--muted)}
+.lt-extra:empty{display:none}
+.lt-more{display:none;gap:10px;padding:0 14px 12px}
+.lt-box.open .lt-more{display:grid}
+@media (hover:hover){.lt-box:hover .lt-more,.lt-box:focus-within .lt-more{display:grid}}
+.lt-row{display:grid;gap:4px;padding-top:10px;border-top:1px solid var(--line)}
+.lt-src{margin:2px 0 0;font-size:11.5px;color:var(--muted);line-height:1.4}
+.lt-src a{color:inherit;text-decoration:underline}
