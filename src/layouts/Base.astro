@@ -98,7 +98,11 @@ const TABS = [
     <div class="demo demo-guest" data-demo-bar hidden>Modo demostración: los anuncios, los comentarios y los números del panel marcados <b>EJEMPLO</b> o <b>DEMO</b> son de muestra. Las noticias son reales.</div>
     <script>
       import { isDemo } from '../lib/demo';
-      if (isDemo()) { document.querySelector<HTMLElement>('[data-demo-bar]')!.hidden = false; document.documentElement.dataset.demo = '1'; }
+      if (isDemo()) {
+        document.querySelector<HTMLElement>('[data-demo-bar]')!.hidden = false; document.documentElement.dataset.demo = '1';
+        // Guests see the new NotiCel being built, not the current noticel.com
+        document.querySelectorAll<HTMLAnchorElement>('a[data-noticel-preview]').forEach((a) => (a.href = a.dataset.noticelPreview!));
+      }
     </script>
     <header class="masthead">
       <div class="wrap">
@@ -117,9 +121,9 @@ const TABS = [
  {staff && <a class="mh-site" href={url()}>Ver el sitio ↗</a>}
           {F.live && !staff && <a href={url('en-vivo')} class="live-btn" aria-current={active === 'en-vivo' ? 'page' : undefined}><span class="dot" aria-hidden="true"></span>En vivo</a>}
           <div class="mh-icons">
-            {/* Our sister site: the NotiCel logo opens noticel.com in a new tab */}
+            {/* Our sister site: the NotiCel logo opens noticel.com in a new tab (in demo mode, the new NotiCel's preview when set) */}
             {!staff && (
-              <a href="https://noticel.com/" class="mh-ico sw-btn" target="_blank" rel="noopener" aria-label="Ir a NotiCel (se abre en otra pestaña)" title="NotiCel">
+              <a href="https://noticel.com/" data-noticel-preview={SITE.noticelPreviewUrl || undefined} class="mh-ico sw-btn" target="_blank" rel="noopener" aria-label="Ir a NotiCel (se abre en otra pestaña)" title="NotiCel">
                 <span class="sw-ic"><img src={url('logos/sitios/noticel-icono.png')} alt="" width="28" height="28" /></span>
               </a>
             )}
