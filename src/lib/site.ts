@@ -41,7 +41,7 @@ export const SITE = {
   forecastUrl: 'https://www.weather.gov/sju/',
   // Preview address of the new NotiCel site (built in its own project). In demo mode only, the header's NotiCel
   // button opens it instead of noticel.com. Empty = everyone goes to noticel.com.
-  noticelPreviewUrl: '',
+  noticelPreviewUrl: 'https://nc-r7q4m.pages.dev/entrar',
 };
 
 export const SECTIONS = [
