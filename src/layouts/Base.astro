@@ -235,8 +235,9 @@ const TABS = [
         <div class="wrap"><b>{breaking.label}</b><a href={url(`noticia/${breaking.id}`)}>{breaking.text}</a></div>
       </div>
     )}
-    {/* Top banner (Valla digital / Banner exclusivo): appears only when an ad fills it */}
-    {!staff && <div class="wrap"><AdSlot size="leaderboard" class="ad-top" quiet /></div>}
+    {/* Top banner (Valla digital / Banner exclusivo): appears only when an ad fills it. Not on the home page,
+        where the ad sits at the top of the right column instead (Sidebar.astro) */}
+    {!staff && active !== 'home' && <div class="wrap"><AdSlot size="leaderboard" class="ad-top" quiet /></div>}
 
     <slot />
 
