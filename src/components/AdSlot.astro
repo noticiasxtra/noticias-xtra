@@ -90,27 +90,48 @@ const label: Record<AdSize, string> = { leaderboard: '728 × 90', rectangle: '30
     ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
   }
 
+  const esc = (t: string) => t.replace(/"/g, '&quot;');
+  const file = (p: string) => (/^data:/.test(p) ? p : src(p));
+  // A still or animated image, or a video (muted, plays only while on screen; `img` is its first picture)
+  const media = (cr: Creative) => cr.video
+    ? `<video src="${file(cr.video)}" poster="${file(cr.img)}" muted playsinline preload="none" aria-label="${esc(cr.alt)}"></video>`
+    : `<img src="${file(cr.img)}" alt="${esc(cr.alt)}" loading="lazy" />`;
+
   function direct(slot: HTMLElement, size: AdSize, pool: Array<{ c: Campaign; cr: Creative }>) {
     const box = document.createElement('div');
     box.className = 'ad-rot';
-    box.innerHTML = pool.map(({ c, cr }, i) => `<a href="${cr.url}" target="_blank" rel="sponsored noopener" data-k="${i}"${i ? ' hidden' : ''}>${(c as any).demo ? '' /* the image itself says "ANUNCIO DE EJEMPLO" */ : (c as any).preview ? '<span class="ad-prev">Vista previa · solo en este dispositivo</span>' : ''}<img src="${/^data:/.test(cr.img) ? cr.img : src(cr.img)}" alt="${cr.alt.replace(/"/g, '&quot;')}" loading="lazy" /></a>`).join('')
+    box.innerHTML = pool.map(({ c, cr }, i) => `<a href="${cr.url}" target="_blank" rel="sponsored noopener" data-k="${i}"${i ? ' hidden' : ''}>${(c as any).demo ? '' /* the image itself says "ANUNCIO DE EJEMPLO" */ : (c as any).preview ? '<span class="ad-prev">Vista previa · solo en este dispositivo</span>' : ''}${media(cr)}</a>`).join('')
+      + (pool.some(({ cr }) => cr.video) ? '<button type="button" class="ad-snd" aria-label="Activar sonido" aria-pressed="false" hidden>🔇</button>' : '')
       + (pool.length > 1 ? `<span class="ad-dots" aria-hidden="true">${pool.map((_, i) => `<i${i ? '' : ' class="on"'}></i>`).join('')}</span>` : '');
     slot.querySelector('.ad-box')?.replaceWith(box);
     const links = [...box.querySelectorAll<HTMLAnchorElement>('a')];
     const dots = [...box.querySelectorAll('.ad-dots i')];
     const seen = new Set<number>();
     let k = 0, visible = false, hover = false;
+    const vids = links.map((a) => a.querySelector('video'));
+    const snd = box.querySelector<HTMLButtonElement>('.ad-snd');
+    let sound = false;
+    // Only the video on screen plays; the sound button shows while a video is the ad being shown
+    const playback = () => {
+      vids.forEach((v, i) => { if (!v) return; v.muted = !sound; if (i === k && visible && !document.hidden) void v.play().catch(() => {}); else v.pause(); });
+      if (snd) { snd.hidden = !vids[k]; snd.textContent = sound ? '🔊' : '🔇'; snd.setAttribute('aria-pressed', String(sound)); snd.setAttribute('aria-label', sound ? 'Quitar sonido' : 'Activar sonido'); }
+    };
+    snd?.addEventListener('click', () => { sound = !sound; playback(); });
+    document.addEventListener('visibilitychange', playback);
     const show = (n: number) => {
       links[k].hidden = true; dots[k]?.classList.remove('on');
       k = n; links[k].hidden = false; dots[k]?.classList.add('on');
       if (visible && !seen.has(k)) { seen.add(k); track('ad_impression', pool[k].c, size); }
+      playback();
     };
+    // A video plays to the end before the next ad rotates in
+    vids.forEach((v, i) => v?.addEventListener('ended', () => { if (pool.length > 1 && i === k) show((k + 1) % pool.length); else void v.play().catch(() => {}); }));
     links.forEach((a, i) => a.addEventListener('click', () => track('ad_click', pool[i].c, size)));
-    new IntersectionObserver(([e]) => { visible = e.isIntersecting; if (visible) show(k); }, { threshold: 0.5 }).observe(box);
+    new IntersectionObserver(([e]) => { visible = e.isIntersecting; if (visible) show(k); else playback(); }, { threshold: 0.5 }).observe(box);
     if (pool.length > 1) {
       box.addEventListener('pointerenter', () => (hover = true));
       box.addEventListener('pointerleave', () => (hover = false));
-      setInterval(() => { if (visible && !hover && !document.hidden) show((k + 1) % pool.length); }, ROTATE_SECONDS * 1000);
+      setInterval(() => { if (visible && !hover && !document.hidden && !vids[k]) show((k + 1) % pool.length); }, ROTATE_SECONDS * 1000);
     }
   }
 

@@ -68,7 +68,9 @@ export const AGENCY_COMMISSION = 15;
 // One entry per campaign. `regions`: 'all' | 'island' (readers in Puerto Rico) | 'diaspora'.
 // `takeover: true` gives that campaign every ad space while it runs (and `skin`, an optional page background).
 // Images go in public/anuncios/. Several creatives in one campaign rotate like a billboard.
-export type Creative = { img: string; url: string; alt: string; w?: number; h?: number }; // w/h: the image size (also read from names like ...-300x250.png)
+export type Creative = { img: string; url: string; alt: string; w?: number; h?: number; video?: string }; // w/h: the image size (also read from names like ...-300x250.png)
+// video: an optional MP4 or WebM (up to ~30 seconds, a few MB). It plays muted when on screen, the reader can turn the
+// sound on, and `img` is the still picture shown before it loads. Animated images (GIF or animated SVG) also work in `img`.
 export type Campaign = {
   id: string; client: string; sizes: AdSize[]; start: string; end: string;
   regions?: 'all' | 'island' | 'diaspora'; creatives: Creative[]; weight?: number; takeover?: boolean; skin?: string;
@@ -91,6 +93,7 @@ export const DEMO_CAMPAIGNS: Campaign[] = [
   demoAd('ferreteria', 'Ferretería El Martillo', 'Ferretería El Martillo'),
   demoAd('dental', 'Clínica Dental Sonrisa', 'Clínica Dental Sonrisa'),
   demoAd('gimnasio', 'Gimnasio Fuerza', 'Gimnasio Fuerza, primer mes gratis'),
+  demoAd('cafe', 'Café del Barrio', 'Café del Barrio, anuncio animado'), // animated sample (moving SVG)
 ];
 
 // ---- Google fill: shows only where no direct campaign is running ----
