@@ -21,6 +21,9 @@
 // at its workers.dev address. There it shows the site under that address (every "noticiasxtra.com" is swapped for it),
 // only the guest password works, and it is always demo mode. It needs the same three settings: SITE_PASSWORD (to pass
 // the gate of the real site), GUEST_PASSWORD and GUEST_UNTIL.
+// Open demo address (no password at all): on that second worker, add type Text, name NO_PASSWORD, value 1. Anyone with
+// the link sees the site in demo mode (no real logins or comments, samples labeled DEMO); search engines are still told
+// not to list it. Delete NO_PASSWORD (and Deploy) to close it again.
 const SITE = 'https://noticiasxtra.com';
 
 const COOKIE = 'nx_clave';
@@ -78,6 +81,11 @@ export default {
     }
     const c = cookieOf(req);
     if (demoHost) {
+      if (env.NO_PASSWORD === '1') { // open demo: no password, always demo mode
+        const res = await proxy(req, url, good);
+        res.headers.append('Set-Cookie', 'nx_demo=1; Path=/; Max-Age=86400; Secure; SameSite=Lax');
+        return res;
+      }
       if ((guestOpen && c === guest) || OPEN.some((r) => r.test(url.pathname))) return proxy(req, url, good);
     } else if (c === good || (guestOpen && c === guest) || OPEN.some((r) => r.test(url.pathname))) return fetch(req);
     const h = new Headers({ 'Content-Type': 'text/html; charset=utf-8', 'X-Robots-Tag': 'noindex, nofollow', 'Cache-Control': 'no-store' });
