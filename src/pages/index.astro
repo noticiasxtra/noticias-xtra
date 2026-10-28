@@ -21,8 +21,8 @@ const F = SITE.features;
 const ordered = pinTop(topOrder(stories)); // a pinned story (📌) keeps the main spot; the editor's pick comes next
 const lead = ordered[0];
 // Each story appears once in the top area. Spots are filled in order of importance: the headlines under the main
-// story (the editor's related stories, or else the next stories in line), the left column, the row of cards, the
-// block, then two more under the main story. Editors' picks ("Principal") are first in line after the main story.
+// story (the editor's related stories, or else the next stories in line), the three cards under the main photo, the
+// row of cards, then the block. Editors' picks ("Principal") are first in line after the main story.
 const related = (lead?.data.related ?? []).map((id) => stories.find((s) => s.id === id)).filter((s) => s !== undefined && s.id !== lead?.id);
 const inLine = ordered.filter((s) => s.id !== lead?.id && !related.includes(s));
 const take = (n: number) => inLine.splice(0, n);
@@ -30,9 +30,8 @@ const leadRelated = related.length ? related : take(3);
 const left = take(3);
 const row = take(3);
 const more = take(5);
-const extra = take(2);
 // Section boxes further down skip what's already in the top area
-const topIds = new Set([lead, ...leadRelated, ...left, ...row, ...more, ...extra].filter(Boolean).map((s) => s!.id));
+const topIds = new Set([lead, ...leadRelated, ...left, ...row, ...more].filter(Boolean).map((s) => s!.id));
 const restStories = stories.filter((s) => !topIds.has(s.id));
 // Section blocks in the order a Puerto Rico reader cares about: island news first (government,
 // politics, sports, the economy and bills, entertainment, health, weather), then the United States,
@@ -58,27 +57,20 @@ while (queue.length) {
     <main class="home-main">
       {!lead && <div class="empty"><p>Muy pronto publicaremos las primeras noticias.</p></div>}
       {lead && (
-        <div class="home-hero">
+        <div class="home-hero hero-wide">
           <article class="lead">
-            {/* Headline sits on the photo so it is visible without scrolling */}
+            {/* Big photo across the main column, headline on the photo so it is visible without scrolling */}
             <a class="lead-media" href={url(`noticia/${lead.id}`)}>
-              <Ph sectionId={lead.data.section} image={lead.data.image} place={lead.data.place} league={lead.data.league} sizes="(max-width:760px) 100vw, 640px" priority />
+              <Ph sectionId={lead.data.section} image={lead.data.image} place={lead.data.place} league={lead.data.league} sizes="(max-width:760px) 100vw, 900px" priority />
               <div class="lead-over"><Label story={lead} /><h1>{lead.data.title}</h1></div>
             </a>
             <p class="dek">{lead.data.description}</p>
             <ul class="related">{leadRelated.map((s) => <li><a href={url(`noticia/${s.id}`)} class="hl">{s.data.title}</a></li>)}</ul>
-            {/* Fills the space under the main story (the left column is taller): two more headlines and an ad */}
-            {extra.length > 0 && (
-              <div class="lead-extra">
-                <h2 class="lead-extra-h">Más titulares</h2>
-                <div class="lead-extra-grid">{extra.map((s) => <StoryCard story={s} variant="item" />)}</div>
-              </div>
-            )}
-            <AdSlot size="infeed" class="lead-ad" />
           </article>
-          <div class="stack left">{left.map((s) => <StoryCard story={s} variant="mini" />)}</div>
         </div>
       )}
+
+      {left.length > 0 && <div class="home-row">{left.map((s) => <StoryCard story={s} />)}</div>}
 
       {row.length > 0 && <div class="home-row">{row.map((s) => <StoryCard story={s} />)}</div>}
 

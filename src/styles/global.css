@@ -4325,3 +4325,10 @@ a,button,summary,label{-webkit-tap-highlight-color:transparent}
 .cm-burst.up{color:#E8590C;font-size:30px}
 .cm-sort{margin:14px 0 2px}
 @media (max-width:600px){ .cm-list{--ind:18px;--lx:8px} }
+
+/* Home: big main photo across the main column, three cards underneath (2026-10-28) */
+.home-hero.hero-wide{grid-template-columns:1fr}
+.hero-wide .lead-media .ph{aspect-ratio:16/8;max-height:min(62vh,560px)}
+.hero-wide .lead-over{padding:90px 26px 22px}
+.hero-wide .lead-over h1{font-size:clamp(26px,3vw,44px)}
+@media (max-width:760px){ .hero-wide .lead-media .ph{aspect-ratio:4/3} .hero-wide .lead-over{padding:50px 14px 12px} .hero-wide .lead-over h1{font-size:23px} }
