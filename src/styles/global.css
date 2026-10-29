@@ -4330,7 +4330,8 @@ a,button,summary,label{-webkit-tap-highlight-color:transparent}
 .home-hero.hero-wide{grid-template-columns:minmax(0,2.1fr) minmax(0,1fr);align-items:start}
 .hero-side{border-left:1px solid var(--line);padding-left:var(--gap)}
 .hero-side{gap:0}
-.hero-side .item{grid-template-columns:104px minmax(0,1fr);gap:12px;padding:12px 0;align-items:start}
+.hero-side .item{grid-template-columns:104px minmax(0,1fr);gap:12px;padding:12px 0;align-items:center}
+.hero-side .item > a:first-child{align-self:center}
 .hero-side .item:first-child{padding-top:0}
 .hero-side .item:last-child{border-bottom:0}
 .hero-side .item .ph{border-radius:6px}
