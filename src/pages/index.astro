@@ -61,7 +61,7 @@ while (queue.length) {
           <article class="lead">
             {/* Big photo across the main column, headline on the photo so it is visible without scrolling */}
             <a class="lead-media" href={url(`noticia/${lead.id}`)}>
-              <Ph sectionId={lead.data.section} image={lead.data.image} place={lead.data.place} league={lead.data.league} sizes="(max-width:760px) 100vw, 900px" priority />
+              <Ph sectionId={lead.data.section} image={lead.data.image} place={lead.data.place} league={lead.data.league} sizes="(max-width:760px) 100vw, 900px" priority whole />
               <div class="lead-over"><Label story={lead} /><h1>{lead.data.title}</h1></div>
             </a>
             <p class="dek">{lead.data.description}</p>
