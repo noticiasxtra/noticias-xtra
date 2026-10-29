@@ -12,7 +12,7 @@ import Comments from '../../components/Comments.astro';
 import GamesTeaser from '../../components/GamesTeaser.astro';
 import DocViewer from '../../components/DocViewer.astro';
 import { getStories, section, url, defaultPhoto, type Story } from '../../lib/site';
-import { columnistOf } from '../../lib/columnists';
+import { columnistOf, photoSrc } from '../../lib/columnists';
 
 export async function getStaticPaths() {
   const stories = await getStories();
@@ -57,7 +57,7 @@ const columnist = d.section === 'opinion' ? columnistOf(d.author) : undefined;
         <p class="dek">{d.description}</p>
         {/* One line: who and when on the left; reading tools and sharing on the right */}
         <div class="byline">
-          {columnist?.photo && <a class="by-pic" href={url(`opinion/${columnist.slug}`)} tabindex="-1" aria-hidden="true"><img src={url(columnist.photo)} alt="" /></a>}
+          {columnist?.photo && <a class="by-pic" href={url(`opinion/${columnist.slug}`)} tabindex="-1" aria-hidden="true"><img src={photoSrc(columnist.photo)} alt="" /></a>}
           <div class="by-who">
             <strong>Por {columnist ? <a href={url(`opinion/${columnist.slug}`)}>{d.author}</a> : d.author}</strong>
             <span><Time date={d.date} />, <span class="notranslate" translate="no">{d.place}</span> · {minutes} min de lectura</span>

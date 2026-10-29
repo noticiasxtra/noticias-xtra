@@ -1,12 +1,12 @@
 ---
 // Opinión: half the page for the columnists (each links to their profile), half for the latest columns in order
-// and the most read. Phones: columnists in a sideways row, then the columns. Columnists: src/data/columnistas.json.
+// and the most read. Phones: columnists in a sideways row, then the columns. Columnists: panel → Columnistas (src/lib/columnists.ts).
 import Base from '../../layouts/Base.astro';
 import AdSlot from '../../components/AdSlot.astro';
 import GamesTeaser from '../../components/GamesTeaser.astro';
 import Time from '../../components/Time.astro';
 import { getStories, mostRead, SITE, url } from '../../lib/site';
-import { COLUMNISTS, columnistOf, columnsBy, initials } from '../../lib/columnists';
+import { COLUMNISTS, columnistOf, columnsBy, initials, photoSrc } from '../../lib/columnists';
 
 const all = await getStories();
 const columns = all.filter((s) => s.data.section === 'opinion');
@@ -29,7 +29,7 @@ const pic = (author: string) => columnistOf(author)?.photo;
             return (
               <li>
                 <a class="op-person" href={url(`opinion/${c.slug}`)}>
-                  {c.photo ? <img class="col-pic" src={url(c.photo)} alt="" /> : <span class="col-pic col-ini" aria-hidden="true">{initials(c.name)}</span>}
+                  {c.photo ? <img class="col-pic" src={photoSrc(c.photo)} alt="" /> : <span class="col-pic col-ini" aria-hidden="true">{initials(c.name)}</span>}
                   <span class="op-person-t">
                     <b>{c.name}{c.demo && <span class="sp-demo">EJEMPLO</span>}</b>
                     {c.role && <span class="col-role">{c.role}</span>}
@@ -58,7 +58,7 @@ const pic = (author: string) => columnistOf(author)?.photo;
                 <li>
                   <a class="op-col" href={url(`noticia/${s.id}`)}>
                     <span class="op-by">
-                      {pic(s.data.author) ? <img src={url(pic(s.data.author)!)} alt="" /> : <span class="col-ini" aria-hidden="true">{initials(s.data.author)}</span>}
+                      {pic(s.data.author) ? <img src={photoSrc(pic(s.data.author)!)} alt="" /> : <span class="col-ini" aria-hidden="true">{initials(s.data.author)}</span>}
                       <span><b>{s.data.author}</b>{c?.role && <small>{c.role}</small>}</span>
                     </span>
                     <h3 class="hl">{s.data.title}</h3>
