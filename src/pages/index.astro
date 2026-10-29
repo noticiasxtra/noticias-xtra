@@ -68,7 +68,13 @@ while (queue.length) {
             <ul class="related">{leadRelated.map((s) => <li><a href={url(`noticia/${s.id}`)} class="hl">{s.data.title}</a></li>)}</ul>
           </article>
           {/* Three smaller top stories next to the main one (under it on phones) */}
-          {left.length > 0 && <div class="stack hero-side">{left.map((s) => <StoryCard story={s} variant="item" />)}</div>}
+          {left.length > 0 && (
+            <div class="stack hero-side">
+              {left.map((s) => <StoryCard story={s} variant="item" />)}
+              {/* Fills the space under the three stories; hidden when the column is narrower than the ad */}
+              <AdSlot size="rectangle" class="hero-ad" />
+            </div>
+          )}
         </div>
       )}
 

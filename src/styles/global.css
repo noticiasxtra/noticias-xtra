@@ -4402,3 +4402,12 @@ a,button,summary,label{-webkit-tap-highlight-color:transparent}
 .cp-links{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
 .cp-links a{display:inline-block;padding:6px 14px;border-radius:999px;border:1px solid var(--line);font-weight:700;font-size:13.5px;color:var(--ink)}
 .cp-links a:hover{border-color:var(--blue);color:var(--blue)}
+/* Home top: spacing and the square ad under the three smaller stories (2026-10-29) */
+.hero-wide .lead-over{padding-top:14px}
+.hero-wide .lead-over h1{margin:10px 0 0;line-height:1.12}
+.hero-wide .lead-media + .dek{margin:14px 0 16px;line-height:1.55}
+.hero-wide .related li{padding:11px 0 11px 18px}
+.hero-side{container-type:inline-size;align-self:stretch}
+.hero-side .hero-ad{margin:18px auto 0}
+@container (max-width:299px){ .hero-side .hero-ad{display:none} }
+@media (max-width:760px){ .hero-side .hero-ad{display:none} }
