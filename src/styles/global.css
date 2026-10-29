@@ -4328,14 +4328,17 @@ a,button,summary,label{-webkit-tap-highlight-color:transparent}
 
 /* Home: big main photo across the main column, three cards underneath (2026-10-28) */
 .home-hero.hero-wide{grid-template-columns:1fr}
-.hero-wide .lead-media .ph{aspect-ratio:16/9;max-height:min(56vh,470px)}
-.hero-wide .lead-over{padding:70px 22px 18px}
-.hero-wide .lead-over h1{font-size:clamp(24px,2.5vw,36px)}
+/* The whole photo, nothing on top of it; the headline sits right under it. The photo shrinks on short screens
+   so the photo and the headline fit on the screen together. */
+.hero-wide .lead-media .ph{aspect-ratio:16/9;max-height:clamp(240px,calc(100vh - 360px),470px);border-radius:4px}
+.hero-wide .lead-over{position:static;background:none;padding:12px 0 0}
+.hero-wide .lead-over h1{font-size:clamp(24px,2.4vw,34px);color:var(--ink);text-shadow:none}
+.hero-wide .lead-media:hover h1{color:var(--purple)}
+[data-theme="dark"] .hero-wide .lead-media:hover h1{color:var(--ink)}
 /* Phones: the whole photo on top, the headline under it so it doesn't cover the picture */
 @media (max-width:760px){
   .hero-wide .lead-media .ph{aspect-ratio:3/2;border-radius:4px}
-  .hero-wide .lead-over{position:static;background:none;padding:10px 0 0}
-  .hero-wide .lead-over h1{font-size:23px;color:var(--ink);text-shadow:none}
+  .hero-wide .lead-over h1{font-size:23px}
 }
 /* Whole photo (no cropping): the photo fits inside the box, a blurred copy of it fills the sides */
 .ph-whole img{object-fit:contain}
