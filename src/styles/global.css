@@ -4327,7 +4327,15 @@ a,button,summary,label{-webkit-tap-highlight-color:transparent}
 @media (max-width:600px){ .cm-list{--ind:18px;--lx:8px} }
 
 /* Home: big main photo across the main column, three cards underneath (2026-10-28) */
-.home-hero.hero-wide{grid-template-columns:1fr}
+.home-hero.hero-wide{grid-template-columns:minmax(0,2.1fr) minmax(0,1fr);align-items:start}
+.hero-side{border-left:1px solid var(--line);padding-left:var(--gap)}
+.hero-side{gap:0}
+.hero-side .item{grid-template-columns:104px minmax(0,1fr);gap:12px;padding:12px 0;align-items:start}
+.hero-side .item:first-child{padding-top:0}
+.hero-side .item:last-child{border-bottom:0}
+.hero-side .item .ph{border-radius:6px}
+.hero-side .item .ph .place{display:none}
+.hero-side .item h3{font-size:15px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
 /* The whole photo, nothing on top of it; the headline sits right under it. The photo shrinks on short screens
    so the photo and the headline fit on the screen together. */
 .hero-wide .lead-media .ph{aspect-ratio:16/9;max-height:clamp(240px,calc(100vh - 360px),470px);border-radius:4px}
@@ -4337,6 +4345,8 @@ a,button,summary,label{-webkit-tap-highlight-color:transparent}
 [data-theme="dark"] .hero-wide .lead-media:hover h1{color:var(--ink)}
 /* Phones: the whole photo on top, the headline under it so it doesn't cover the picture */
 @media (max-width:760px){
+  .home-hero.hero-wide{grid-template-columns:1fr}
+  .hero-side{border-left:0;padding-left:0}
   .hero-wide .lead-media .ph{aspect-ratio:3/2;border-radius:4px}
   .hero-wide .lead-over h1{font-size:23px}
 }

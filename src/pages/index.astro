@@ -21,7 +21,7 @@ const F = SITE.features;
 const ordered = pinTop(topOrder(stories)); // a pinned story (📌) keeps the main spot; the editor's pick comes next
 const lead = ordered[0];
 // Each story appears once in the top area. Spots are filled in order of importance: the headlines under the main
-// story (the editor's related stories, or else the next stories in line), the three cards under the main photo, the
+// story (the editor's related stories, or else the next stories in line), the three smaller stories next to the main photo, the
 // row of cards, then the block. Editors' picks ("Principal") are first in line after the main story.
 const related = (lead?.data.related ?? []).map((id) => stories.find((s) => s.id === id)).filter((s) => s !== undefined && s.id !== lead?.id);
 const inLine = ordered.filter((s) => s.id !== lead?.id && !related.includes(s));
@@ -67,10 +67,10 @@ while (queue.length) {
             <p class="dek">{lead.data.description}</p>
             <ul class="related">{leadRelated.map((s) => <li><a href={url(`noticia/${s.id}`)} class="hl">{s.data.title}</a></li>)}</ul>
           </article>
+          {/* Three smaller top stories next to the main one (under it on phones) */}
+          {left.length > 0 && <div class="stack hero-side">{left.map((s) => <StoryCard story={s} variant="item" />)}</div>}
         </div>
       )}
-
-      {left.length > 0 && <div class="home-row">{left.map((s) => <StoryCard story={s} />)}</div>}
 
       {row.length > 0 && <div class="home-row">{row.map((s) => <StoryCard story={s} />)}</div>}
 
