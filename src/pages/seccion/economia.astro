@@ -9,7 +9,10 @@ import GamesTeaser from '../../components/GamesTeaser.astro';
 import Markets from '../../components/economia/Markets.astro';
 import { getStories, topOrder, sectionTop, SITE, url } from '../../lib/site';
 
-const list = sectionTop(topOrder((await getStories()).filter((s) => s.data.section === 'economia')));
+const all = await getStories();
+const list = sectionTop(topOrder(all.filter((s) => s.data.section === 'economia')));
+// Newest stories from the other sections at the end, so the main column doesn't stop short of the right column
+const others = topOrder(all.filter((s) => s.data.section !== 'economia' && s.data.section !== 'opinion')).slice(0, list.length > 5 ? 6 : 9);
 ---
 <Base title="Economía" active="economia" description={`Economía de Puerto Rico en ${SITE.name}: negocios, empleos, tu bolsillo y los mercados (Popular, FirstBank, petróleo, oro y cripto).`}>
   <main class="wrap eco" id="main">
@@ -40,6 +43,12 @@ const list = sectionTop(topOrder((await getStories()).filter((s) => s.data.secti
         )}
         <AdSlot size="infeed" />
         <GamesTeaser />
+        {others.length > 0 && (
+          <section>
+            <div class="sec-h"><h2>Más noticias</h2><a href={url('noticias')}>Ver todas</a></div>
+            <div class="grid3">{others.map((s) => <StoryCard story={s} />)}</div>
+          </section>
+        )}
       </div>
       <Sidebar />
     </div>

@@ -15,6 +15,9 @@ const { sec } = Astro.props;
 const all = await getStories();
 const list = sectionTop(topOrder(all.filter((s) => s.data.section === sec.id)));
 const vids = SITE.features.videos ? VIDEOS.filter((v) => v.section === sec.id) : [];
+// The right column is long, so the page ends with the newest stories from the other sections (no opinion) instead of
+// leaving a blank space next to it; fewer section stories means more of these
+const others = topOrder(all.filter((s) => s.data.section !== sec.id && s.data.section !== 'opinion')).slice(0, list.length > 5 ? 9 : 18);
 ---
 <Base title={sec.name} active={sec.id} description={`Noticias de ${sec.name} en ${SITE.name}.`}>
   <main class="wrap" id="main">
@@ -45,6 +48,12 @@ const vids = SITE.features.videos ? VIDEOS.filter((v) => v.section === sec.id) :
             <div class="sec-h"><h2>Videos de {sec.name}</h2></div>
             <div class="autogrid">{vids.map((v) => <VideoCard video={v} />)}</div>
           </>
+        )}
+        {others.length > 0 && (
+          <section>
+            <div class="sec-h"><h2>Más noticias</h2><a href={url('noticias')}>Ver todas</a></div>
+            <div class="grid3">{others.map((s) => <StoryCard story={s} />)}</div>
+          </section>
         )}
       </div>
       <Sidebar live={SECTION_LIVE[sec.id]} />
