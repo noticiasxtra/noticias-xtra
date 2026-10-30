@@ -4412,3 +4412,13 @@ a,button,summary,label{-webkit-tap-highlight-color:transparent}
 .hero-side .hero-ad{margin:18px auto 0}
 @container (max-width:299px){ .hero-side .hero-ad{display:none} }
 @media (max-width:760px){ .hero-side .hero-ad{display:none} }
+/* Tablets (iPad portrait and landscape, small laptops): the main story takes the full width and the three smaller
+   stories sit in a row of three under it, photo on top, instead of a squeezed column beside it */
+@media (min-width:761px) and (max-width:1199px){
+  .home-hero.hero-wide{grid-template-columns:minmax(0,1fr)}
+  .hero-side{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--gap);border-left:0;padding-left:0;border-top:1px solid var(--line);padding-top:var(--gap)}
+  .hero-side .item,.hero-side .item:first-child{grid-template-columns:minmax(0,1fr);gap:8px;padding:0;border-bottom:0;align-items:start}
+  .hero-side .item .ph{aspect-ratio:16/10}
+  .hero-side .item h3{-webkit-line-clamp:3}
+  .hero-side .hero-ad{display:none}
+}
