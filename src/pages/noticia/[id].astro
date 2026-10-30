@@ -103,6 +103,16 @@ const columnist = d.section === 'opinion' ? columnistOf(d.author) : undefined;
           <p class="caption">{caption}{credit && <> {creditUrl ? <a href={creditUrl} rel="noopener" target="_blank">{credit}</a> : credit}</>}</p>
         </>)}
         <div class="body">{bodyHtml !== undefined ? <Fragment set:html={bodyHtml.replace(DOC, '')} /> : <Content />}</div>
+        {/* One square ad inside the story, after the 2nd paragraph (3rd in longer stories), only when at least 3 more follow
+            (the most-seen ad space: readers who came for this story scroll through it). Moved before the ad script runs. */}
+        <AdSlot size="rectangle" class="ad-inart" />
+        <script is:inline>
+          (function () {
+            var ad = document.currentScript.previousElementSibling, body = ad.previousElementSibling;
+            var ps = [].filter.call(body.children, function (e) { return e.tagName === 'P' && e.textContent.trim().length > 40; });
+            if (ps.length >= 5) ps[ps.length >= 6 ? 2 : 1].after(ad); else ad.remove();
+          })();
+        </script>
         {docs.length > 0 && <section class="doc-attach" aria-label="Documentos"><h2 class="doc-attach-h">{docs.length === 1 ? 'Documento' : 'Documentos'}</h2><Fragment set:html={docs.join('')} /></section>}
         <AdSlot size="infeed" />
 

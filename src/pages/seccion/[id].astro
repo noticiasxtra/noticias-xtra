@@ -52,7 +52,10 @@ const others = topOrder(all.filter((s) => s.data.section !== sec.id && s.data.se
         {others.length > 0 && (
           <section>
             <div class="sec-h"><h2>Más noticias</h2><a href={url('noticias')}>Ver todas</a></div>
-            <div class="grid3">{others.map((s) => <StoryCard story={s} />)}</div>
+            <div class="grid3">{others.map((s, i) => (<>
+              <StoryCard story={s} />
+              {i === 5 && others.length > 8 && <AdSlot size="rectangle" class="ad-mob-only ad-grid" />}
+            </>))}</div>
           </section>
         )}
       </div>

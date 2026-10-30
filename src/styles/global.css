@@ -4411,7 +4411,6 @@ a,button,summary,label{-webkit-tap-highlight-color:transparent}
 .hero-side{container-type:inline-size;align-self:stretch}
 .hero-side .hero-ad{margin:18px auto 0}
 @container (max-width:299px){ .hero-side .hero-ad{display:none} }
-@media (max-width:760px){ .hero-side .hero-ad{display:none} }
 /* Tablets (iPad portrait and landscape, small laptops): the main story takes the full width and the three smaller
    stories sit in a row of three under it, photo on top, instead of a squeezed column beside it */
 @media (min-width:761px) and (max-width:1199px){
@@ -4422,3 +4421,8 @@ a,button,summary,label{-webkit-tap-highlight-color:transparent}
   .hero-side .item h3{-webkit-line-clamp:3}
   .hero-side .hero-ad{display:none}
 }
+/* Ad placement pass (2026-10-30) */
+.body + .ad-inart,.body .ad-inart{margin:26px auto}
+.ad-inart{clear:both}
+.ad-grid{grid-column:1/-1;margin:6px auto}
+@media (min-width:761px){ .ad-mob-only{display:none} }

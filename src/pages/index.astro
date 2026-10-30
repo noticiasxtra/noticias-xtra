@@ -120,6 +120,7 @@ while (queue.length) {
             {row.map((id) => <div class:list={{ 'sec-wide': row.length === 1 }}><SectionBlock sectionId={id} stories={restStories} /></div>)}
             {i === 1 && i < rows.length - 1 && <AdSlot size="infeed" class="ad-span" />}
             {i === 3 && i < rows.length - 1 && <div class="ad-span"><GamesTeaser /></div>}
+            {i === 4 && i < rows.length - 1 && <AdSlot size="infeed" class="ad-span" />}
           </>
         ))}
       </div>
