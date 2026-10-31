@@ -409,7 +409,7 @@ const TABS = [
       const d = demo ? demoAnalytics(anRange, PUBLISHED.map((p) => p.id)) : await getAnalytics(anRange, 50, fresh);
       if ('error' in d) {
         msg.hidden = false; bodyEl.hidden = true;
-        msg.innerHTML = `<div class="pnl-card"><h2 class="pnl-h3">Las visitas todavía no se pueden mostrar</h2><p class="pnl-muted">${esc(d.error)}</p><button type="button" class="adp-btn ghost-dark" data-an-retry>Intentar otra vez</button></div>`;
+        msg.innerHTML = `<div class="pnl-card"><h2 class="pnl-h3">Las visitas todavía no se pueden mostrar</h2><p class="pnl-muted">${esc(d.error)}</p><button type="button" class="adp-btn ghost-dark" data-an-retry>Intentar otra vez</button><p class="pnl-muted pnl-small">Último intento: ${new Date().toLocaleTimeString('es-PR', { hour: 'numeric', minute: '2-digit', second: '2-digit' })}</p></div>`;
         return;
       }
       msg.hidden = true; bodyEl.hidden = false;
@@ -445,7 +445,8 @@ const TABS = [
       const t = e.target as HTMLElement;
       const rg = t.closest<HTMLElement>('[data-range]');
       if (rg) { anRange = Number(rg.dataset.range) as 1 | 7 | 28; $$('[data-range]').forEach((b) => b.setAttribute('aria-pressed', String(b === rg))); void paintAnalytics(); return; }
-      if (t.closest('[data-an-retry]')) void paintAnalytics(true);
+      const retry = t.closest<HTMLButtonElement>('[data-an-retry]');
+      if (retry) { retry.disabled = true; retry.textContent = 'Revisando…'; void paintAnalytics(true); } // the message is redrawn with the time of this try
     });
 
     // ---------- Salud del sitio ----------
