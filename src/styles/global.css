@@ -4538,3 +4538,4 @@ a,button,summary,label{-webkit-tap-highlight-color:transparent}
 .pnl-pane[hidden]{display:none!important}
 .apr-tools{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 14px;border:1px dashed var(--line);border-radius:12px;margin-bottom:12px}
 .apr-tools p{margin:0;flex:1 1 260px}
+.sl-acts{display:flex;align-items:center;gap:6px;flex:none}

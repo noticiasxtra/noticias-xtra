@@ -36,7 +36,7 @@ export const SITE = {
   // GIPHY key for GIF search in comments (free account at developers.giphy.com). Empty = only our own animated GIFs Xtra.
   giphyKey: '',
   // Set to true once the ANTHROPIC_API_KEY secret is added in GitHub (the staff panel's Salud tab reads it)
-  aiKeyConnected: false,
+  aiKeyConnected: true, // ANTHROPIC_API_KEY is in GitHub (2026-10-31)
   // Official National Weather Service forecast for Puerto Rico
   forecastUrl: 'https://www.weather.gov/sju/',
   // Preview address of the new NotiCel site (built in its own project). In demo mode only, the header's NotiCel

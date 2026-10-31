@@ -190,7 +190,7 @@ const TABS = [
             <div class="pnl-card"><h2 class="pnl-h3">Comentarios y cuentas</h2><div data-sl-mod><p class="pnl-muted">Cargando…</p></div></div>
             <div class="pnl-card"><h2 class="pnl-h3">Espacio usado <small>plan gratis de Supabase</small></h2><div data-space><p class="pnl-muted">Cargando…</p></div></div>
           </div>
-          <div class="pnl-card"><h2 class="pnl-h3">Noticias con problemas <small data-prob-n></small></h2><p class="pnl-muted pnl-small">Les falta algo: foto, crédito de la foto, texto o fuentes. Toca “Corregir” para arreglarla en Escribir.</p><ul class="sl-list" data-prob></ul><button type="button" class="pnl-link" data-prob-more hidden>Ver todas</button></div>
+          <div class="pnl-card"><h2 class="pnl-h3">Noticias con problemas <small data-prob-n></small></h2><p class="pnl-muted pnl-small">Les falta algo: foto, crédito de la foto, texto o fuentes. Toca “Corregir” para arreglarla en Escribir.</p><ul class="sl-list" data-prob></ul><button type="button" class="pnl-link" data-prob-more hidden>Ver todas</button> <button type="button" class="pnl-link" data-prob-hidden hidden></button></div>
           <div class="pnl-grid2">
             <div class="pnl-card"><h2 class="pnl-h3">Fotos rotas</h2><p class="pnl-muted pnl-small" data-ph-note></p><ul class="sl-list" data-sl-ph></ul><button type="button" class="adp-btn ghost-dark" data-ph-run>Revisar las fotos</button></div>
             <div class="pnl-card"><h2 class="pnl-h3">Errores al publicar</h2><p class="pnl-muted pnl-small">Si publicar, programar o quitar una noticia falla, queda anotado aquí.</p><ul class="sl-list" data-errs></ul><button type="button" class="pnl-link" data-errs-clear hidden>Borrar la lista</button></div>
@@ -466,13 +466,21 @@ const TABS = [
       try { const r = await fetch(u, { cache: 'no-store', ...init, signal: ctl.signal }); return r.ok; } catch { return false; } finally { clearTimeout(t); }
     }
     let photoRun: Array<{ id: string; title: string; src: string }> | null = null; let probAll = false;
+    // "Ignorar" hides a story's problems on this device; if its problems change, it comes back
+    const probKey = (x: { id: string; p: string[] }) => `${x.id}|${x.p.join(',')}`;
+    const ignored = () => new Set(get<string[]>('nx-prob-ignored', []));
     function paintProblems() {
-      const list = PROBLEMS.slice().sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
+      const skip = ignored();
+      const all = PROBLEMS.slice().sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
+      const list = all.filter((x) => !skip.has(probKey(x)));
+      const hidden = all.length - list.length;
       $('[data-prob-n]').textContent = list.length ? `${list.length} de ${PUBLISHED.length}` : '';
       const show = probAll ? list : list.slice(0, 8);
-      $('[data-prob]').innerHTML = show.map((x) => `<li><span><b>${esc(x.title)}</b><small>${x.p.map(esc).join(' · ')}</small></span><button type="button" class="adp-btn ghost-dark" data-fix="${esc(x.id)}">Corregir</button></li>`).join('')
-        || '<li><span>🎉 Todas las noticias tienen foto, crédito, texto y fuentes.</span></li>';
+      $('[data-prob]').innerHTML = show.map((x) => `<li><span><b>${esc(x.title)}</b><small>${x.p.map(esc).join(' · ')}</small></span><span class="sl-acts"><button type="button" class="adp-btn ghost-dark" data-fix="${esc(x.id)}">Corregir</button><button type="button" class="pnl-link" data-prob-ignore="${esc(probKey(x))}">Ignorar</button></span></li>`).join('')
+        || '<li><span>🎉 No hay noticias con problemas pendientes.</span></li>';
       $('[data-prob-more]').hidden = probAll || list.length <= 8;
+      $('[data-prob-hidden]').hidden = !hidden;
+      $('[data-prob-hidden]').textContent = `Mostrar ${hidden} ${hidden === 1 ? 'ignorada' : 'ignoradas'}`;
     }
     function paintPhotos() {
       const btn = $<HTMLButtonElement>('[data-ph-run]');
@@ -553,6 +561,9 @@ const TABS = [
       const fix = t.closest<HTMLElement>('[data-fix]');
       if (fix) { dispatchEvent(new CustomEvent('nx-edit-story', { detail: { id: fix.dataset.fix } })); showTab('escribir'); scrollTo({ top: 0 }); return; }
       if (t.closest('[data-prob-more]')) { probAll = true; paintProblems(); return; }
+      const ign = t.closest<HTMLElement>('[data-prob-ignore]');
+      if (ign) { set('nx-prob-ignored', [...ignored(), ign.dataset.probIgnore!]); paintProblems(); toast('Ignorada. Vuelve a salir si cambia su problema.'); return; }
+      if (t.closest('[data-prob-hidden]')) { set('nx-prob-ignored', []); paintProblems(); return; }
       if (t.closest('[data-ph-run]')) { void checkPhotos(); return; }
       if (t.closest('[data-errs-clear]') && (await ask('¿Borrar la lista de errores?', { ok: 'Borrar' }))) { await staffApi('panel_errors?id=gt.0', { method: 'DELETE' }); void saludLive(); }
     });
@@ -628,23 +639,25 @@ const TABS = [
         void saludLive();
         const api = 'https://api.github.com/repos/noticiasxtra/noticias-xtra';
         try {
-          const [dep, ai, prs, iss] = await Promise.all([
+          const [dep, ai, prs, iss, sc] = await Promise.all([
             fetch(`${api}/actions/workflows/deploy.yml/runs?per_page=1`).then((r) => r.json()),
             fetch(`${api}/actions/workflows/daily-news.yml/runs?per_page=1`).then((r) => r.json()),
             fetch(`${api}/pulls?state=open&per_page=50`).then((r) => r.json()),
             fetch(`${api}/issues?state=open&per_page=50`).then((r) => r.json()),
+            fetch(`${api}/actions/workflows/scores.yml/runs?per_page=1`).then((r) => r.json()),
           ]);
           const run = (x: any) => x?.workflow_runs?.[0];
-          const d = run(dep), a = run(ai);
+          const d = run(dep), a = run(ai), m = run(sc);
           const state = (r: any) => (!r ? ['Sin datos', ''] : r.status !== 'completed' ? ['Trabajando ahora', ''] : r.conclusion === 'success' ? ['Funciona ✓', 'good'] : ['Falló ✗', 'bad']);
-          const [ds, dt] = state(d); let [as, at] = state(a);
+          const [ds, dt] = state(d); let [as, at] = state(a); const [ms, mt] = state(m);
           if (root.dataset.aikey !== 'true' && at === 'good') [as, at] = ['Sin clave ⚠', 'bad']; // runs, but writes nothing yet
           const openPrs = Array.isArray(prs) ? prs.length : 0; const checks = Array.isArray(iss) ? iss.filter((i: any) => !i.pull_request && /Vistazo/.test(i.title)).length : 0;
           box.innerHTML = [
             lastStoryKpi(),
             kpi('Actualización del sitio', ds, d ? `cada 15 minutos · última ${ago(Date.parse(d.updated_at))}` : '', '', dt),
-            kpi('Redactor de noticias (IA)', as, root.dataset.aikey !== 'true' ? 'corre a las 7 a.m. y 5 p.m., pero no redacta hasta conectar la clave' : a ? `7 a.m. y 5 p.m. · última ${ago(Date.parse(a.updated_at))}` : '', '', at),
-            kpi('Esperan aprobación en GitHub', String(openPrs), 'noticias reales por aprobar'),
+            kpi('Redactor de noticias (IA)', as, root.dataset.aikey !== 'true' ? 'no redacta hasta conectar la clave' : a ? `cada 2 horas, 6 a.m.–10 p.m. · última ${ago(Date.parse(a.updated_at))}` : '', '', at),
+            kpi('Marcadores', ms, m ? `cada 30 minutos · última ${ago(Date.parse(m.updated_at))}` : '', '', mt),
+            kpi('Esperan aprobación', String(LIVE.ai.length + LIVE.review.length + openPrs), 'en Noticias → Por aprobar', 'noticias'),
             kpi('Vistazos rápidos abiertos', String(checks), 'avisos en GitHub'),
           ].join('');
         } catch { box.innerHTML = lastStoryKpi() + kpi('Estado', 'No se pudo consultar GitHub', 'intenta en unos minutos', '', 'bad'); }
