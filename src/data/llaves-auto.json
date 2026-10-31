@@ -1,1 +1,94 @@
-{}
+{
+  "mlb": {
+    "name": "Postemporada MLB 2026",
+    "updated": "31 de octubre de 2026. Fuente: Highlightly",
+    "rounds": [
+      {
+        "name": "Serie de Comodines",
+        "series": [
+          {
+            "a": "Atlanta Braves",
+            "b": "Philadelphia Phillies",
+            "aWins": 2,
+            "bWins": 1
+          },
+          {
+            "a": "Chicago White Sox",
+            "b": "Houston Astros",
+            "aWins": 2,
+            "bWins": 0
+          },
+          {
+            "a": "Boston Red Sox",
+            "b": "New York Yankees",
+            "aWins": 0,
+            "bWins": 2
+          },
+          {
+            "a": "Chicago Cubs",
+            "b": "San Diego Padres",
+            "aWins": 0,
+            "bWins": 2
+          }
+        ]
+      },
+      {
+        "name": "Serie Divisional",
+        "series": [
+          {
+            "a": "Chicago White Sox",
+            "b": "Cleveland Guardians",
+            "aWins": 2,
+            "bWins": 3
+          },
+          {
+            "a": "Atlanta Braves",
+            "b": "Los Angeles Dodgers",
+            "aWins": 1,
+            "bWins": 3
+          },
+          {
+            "a": "New York Yankees",
+            "b": "Tampa Bay Rays",
+            "aWins": 0,
+            "bWins": 3
+          },
+          {
+            "a": "Milwaukee Brewers",
+            "b": "San Diego Padres",
+            "aWins": 3,
+            "bWins": 1
+          }
+        ]
+      },
+      {
+        "name": "Serie de Campeonato",
+        "series": [
+          {
+            "a": "Los Angeles Dodgers",
+            "b": "Milwaukee Brewers",
+            "aWins": 0,
+            "bWins": 4
+          },
+          {
+            "a": "Cleveland Guardians",
+            "b": "Tampa Bay Rays",
+            "aWins": 2,
+            "bWins": 4
+          }
+        ]
+      },
+      {
+        "name": "Serie Mundial",
+        "series": [
+          {
+            "a": "Milwaukee Brewers",
+            "b": "Tampa Bay Rays",
+            "aWins": 4,
+            "bWins": 1
+          }
+        ]
+      }
+    ]
+  }
+}
