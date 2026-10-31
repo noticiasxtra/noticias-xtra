@@ -3,8 +3,9 @@
  * Real scores and standings from Highlightly (https://highlightly.net), run by .github/workflows/scores.yml.
  * Writes src/data/marcadores-auto.json (games) and src/data/posiciones-auto.json (standings), the same shapes as the
  * hand-typed marcadores.json and posiciones.json (src/lib/scores.ts merges them; these win for the leagues they cover).
- * Covered on the account (checked 2026-10-31, scripts/sports-discovery.json): BSN and NBA; NFL once its plan is added. Highlightly has no
- * La Pro, Doble A or Puerto Rico volleyball; those stay hand-typed.
+ * Covered on the account (checked 2026-10-31, scripts/sports-discovery.json): BSN, NBA, NFL and MLB. Highlightly has no
+ * La Pro, Doble A or Puerto Rico volleyball: La Pro and Doble A are read from the leagues' own websites (readLaPro,
+ * readDobleA, about once an hour, no Highlightly requests); volleyball stays hand-typed.
  * Free plan: 100 requests a day per sport. Each run asks for today's games (1 request per league); the first run of
  * the day also asks for yesterday's finals and the standings; each finished game is asked once more for its team
  * stats and arena (game page), at most DETAILS_PER_RUN per run.
@@ -224,6 +225,80 @@ function toTable(data, season) {
   return groups.length ? { updated: `Temporada ${season}. Fuente: Highlightly`, groups } : null;
 }
 
+/* ---------- Puerto Rico leagues from their own websites (public pages, read about once an hour) ---------- */
+
+const MONTHS = { enero: 0, febrero: 1, marzo: 2, abril: 3, mayo: 4, junio: 5, julio: 6, agosto: 7, septiembre: 8, octubre: 9, noviembre: 10, diciembre: 11 };
+const text = (h) => h.replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(Number(n))).replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
+const shortName = (n) => n.split(/\s+de\s+/i)[0]; // "Azucareros de Yabucoa" -> "Azucareros"
+async function page(url) {
+  const r = await fetch(url, { headers: { 'User-Agent': 'NoticiasXtraBot/0.1 (+https://noticiasxtra.com)' }, signal: AbortSignal.timeout(20000) });
+  if (!r.ok) throw new Error(`${r.status} en ${url}`);
+  return r.text();
+}
+
+// La Pro (ligapr.com): every game of the season is listed on its BoxScores pages ("Boxscore CAN - LEO 599", home team on
+// the left, date, visitor on the right, and the score once played); the standings come from its positions table.
+const LAPRO = 'https://www.ligapr.com';
+async function readLaPro() {
+  const games = [];
+  for (let n = 1; n <= 12; n++) {
+    const html = await page(`${LAPRO}/estadisticas/boxscores${n > 1 ? `?page=${n}` : ''}`);
+    const blocks = html.split('<h6>Boxscore ').slice(1);
+    if (!blocks.length) break;
+    for (const b of blocks) {
+      const num = b.match(/^[A-Z]+\s*-\s*[A-Z]+\s+(\d+)/)?.[1];
+      const names = [...b.matchAll(/class="name">([^<]+)</g)].map((m) => m[1].trim());
+      const when = text(b.match(/class="date">([\s\S]*?)<\/div>/)?.[1] ?? '').match(/(\d{1,2}) (\w+) (\d{4}) \/ (\d{1,2}):(\d{2}) ([ap])/i);
+      if (!num || names.length < 2 || !when) continue;
+      let h = Number(when[4]) % 12 + (when[6].toLowerCase() === 'p' ? 12 : 0);
+      const date = new Date(Date.UTC(Number(when[3]), MONTHS[when[2].toLowerCase()], Number(when[1]), h + 4, Number(when[5]))).toISOString(); // PR is UTC-4
+      const score = text(b.match(/class="score">([\s\S]*?)<\/div>\s*<\/div>/)?.[1] ?? '').replace(/\d{1,2} \w+ \d{4}.*$/, '').match(/(\d+)\s*-\s*(\d+)/);
+      const [homeFull, awayFull] = names;
+      const g = { league: 'invernal', date, away: awayFull.split(/\s+de\s+/i)[0], home: homeFull.split(/\s+de\s+/i)[0], awayFull, homeFull, src: `ligapr:${num}`, status: 'programado' };
+      if (score) { g.homeScore = Number(score[1]); g.awayScore = Number(score[2]); g.status = Date.parse(date) + 5 * 36e5 < Date.now() ? 'final' : 'en-vivo'; }
+      games.push(g);
+    }
+    if (!html.includes(`page=${n + 1}`)) break;
+  }
+  // Standings: the current season's table (its id is the first option of the season list)
+  const home = await page(`${LAPRO}/estadisticas`);
+  const season = home.match(/id="league-select"[\s\S]*?<option value="(\d+)"[^>]*>([^<]+)/);
+  let table = null;
+  if (season) {
+    const t = JSON.parse(await page(`${LAPRO}/subleagues/${season[1]}/positions_table`)).html;
+    const rows = [...t.matchAll(/<tr>([\s\S]*?)<\/tr>/g)].map((m) => [...m[1].matchAll(/<td[^>]*>([\s\S]*?)<\/td>/g)].map((c) => text(c[1])))
+      .filter((c) => c.length >= 5 && /\d/.test(c[2] ?? ''))
+      .map((c) => { const off = /^\d+$/.test(c[0]) && !/^\d+$/.test(c[1]) ? 1 : 0; return { team: c[off], w: Number(c[off + 2]) || 0, l: Number(c[off + 3]) || 0, gb: c[off + 5] && c[off + 5] !== '-' ? c[off + 5] : '—' }; });
+    if (rows.some((r) => r.w + r.l > 0)) table = { updated: `${season[2].trim()}. Fuente: ligapr.com`, groups: [{ rows }] };
+  }
+  return { games, table };
+}
+
+// Doble A (beisboldobleapr.com, SportsPress): games with runs by inning
+const DOBLEA = 'https://beisboldobleapr.com/wp-json/sportspress/v2';
+const INN = ['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen'];
+async function readDobleA() {
+  const events = JSON.parse(await page(`${DOBLEA}/events?per_page=40&orderby=date&order=desc&_fields=id,date_gmt,title,teams,main_results,results`));
+  const ids = [...new Set(events.flatMap((e) => e.teams || []))];
+  const teams = ids.length ? JSON.parse(await page(`${DOBLEA}/teams?per_page=100&include=${ids.join(',')}&_fields=id,title`)) : [];
+  const name = (id) => text(teams.find((t) => t.id === id)?.title?.rendered ?? '') || 'Equipo';
+  return events.filter((e) => (e.teams || []).length === 2).map((e) => {
+    const [homeId, awayId] = e.teams; // SportsPress lists the home team first
+    const date = `${e.date_gmt}Z`;
+    const g = { league: 'doble-a', date, away: shortName(name(awayId)), home: shortName(name(homeId)), awayFull: name(awayId), homeFull: name(homeId), src: `dobleapr:${e.id}`, status: 'programado',
+      note: text(e.title?.rendered ?? '').replace(/^.*\s[–-]\s/, '') };
+    const r = e.results || {};
+    if ((e.main_results || []).some((x) => x !== '')) {
+      g.homeScore = Number(r[homeId]?.r ?? e.main_results[0]); g.awayScore = Number(r[awayId]?.r ?? e.main_results[1]);
+      g.status = Date.parse(date) + 5 * 36e5 < Date.now() ? 'final' : 'en-vivo';
+      const inn = INN.filter((k) => r[homeId]?.[k] !== '' || r[awayId]?.[k] !== '').filter((k) => r[homeId]?.[k] !== undefined);
+      if (inn.length) g.linescore = { labels: inn.map((_, i) => String(i + 1)), away: inn.map((k) => r[awayId]?.[k] ?? ''), home: inn.map((k) => r[homeId]?.[k] ?? ''), totals: ['C', 'H', 'E'],
+        awayTotals: [g.awayScore, r[awayId]?.h ?? '', r[awayId]?.e ?? ''], homeTotals: [g.homeScore, r[homeId]?.h ?? '', r[homeId]?.e ?? ''] };
+    }
+    return g;
+  });
+}
+
 async function main() {
   if (!KEY) { console.log('HIGHLIGHTLY_API_KEY no está configurada. No se buscaron marcadores.'); return; }
   const games = await readJson(GAMES_FILE, []);
@@ -273,6 +348,19 @@ async function main() {
         console.log(`${l.id}: posiciones ${t ? 'actualizadas' : 'sin datos'} (temporada ${season})`);
       }
     } catch (e) { console.warn(`${l.id}: ${e.message}`); }
+  }
+
+  // Puerto Rico leagues from their own sites: about once an hour (the first run of each hour), free
+  if (firstOfDay || new Date().getUTCMinutes() < 30) {
+    for (const [id, read] of [['invernal', readLaPro], ['doble-a', readDobleA]]) {
+      try {
+        const r = await read();
+        const list = Array.isArray(r) ? r : r.games;
+        for (const g of list) { g.id = `${id}-${g.src.split(':')[1]}`; byKey.set(g.src, g); }
+        if (r.table) tables[id] = r.table;
+        console.log(`${id}: ${list.length} juegos leídos${r.table ? ', posiciones actualizadas' : ''}`);
+      } catch (e) { console.warn(`${id}: ${e.message}`); }
+    }
   }
 
   // Finished games: team stats and arena once (one request each), so the game page has more than the score
