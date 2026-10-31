@@ -15,7 +15,7 @@ import TeamStatsTable from '../../components/deportes/TeamStatsTable.astro';
 import AdSlot from '../../components/AdSlot.astro';
 import { getStories, url } from '../../lib/site';
 import { LEAGUES, type League } from '../../lib/leagues';
-import { standings, isDemoTable } from '../../lib/scores';
+import { standings, isDemoTable, scores, recent } from '../../lib/scores';
 import { TEAMS } from '../../lib/teams';
 import teamsData from '../../data/equipos.json';
 
@@ -30,6 +30,8 @@ const named = new RegExp(`\\b(${[l.abbr, ...new Set(nick)].map((w) => w.replace(
 const tagged = sports.filter((s) => s.data.league === l.id);
 const news = tagged.length ? tagged : sports.filter((s) => named.test(`${s.data.title} ${s.data.description}`));
 const top = news[0];
+// The score bar at the top holds this week's games; the full list below only shows when the bar is empty (between seasons)
+const inBar = recent(scores(l.id, 60), 7).length > 0;
 const more = news.slice(1);
 const season = 'season' in l ? l.season : undefined;
 const official = 'url' in l ? l.url : undefined;
@@ -89,7 +91,7 @@ const tabs: Array<[keyof typeof ICON, string]> = individual ? [['noticias', 'Not
           <section class="ys-card">
             <div class="ys-card-h"><h2>Titulares</h2></div>
             {news.length ? (
-              <ul class="lg-heads">{news.slice(0, 6).map((s) => <li><a href={url(`noticia/${s.id}`)} class="hd-row"><span class="hd-ph"><Ph sectionId={s.data.section} image={s.data.image} league={s.data.league} sizes="72px" /></span><span>{s.data.title}</span></a></li>)}</ul>
+              <ul class="lg-heads">{news.slice(0, 6).map((s) => <li><a href={url(`noticia/${s.id}`)} class="hd-row"><span class="hd-ph"><Ph sectionId={s.data.section} image={s.data.image} league={s.data.league} sizes="72px" /></span><span class="hd-t"><span>{s.data.title}</span><Time date={s.data.date} /></span></a></li>)}</ul>
             ) : <p class="sp-note">Todavía no hay noticias de {l.name}.</p>}
           </section>
           {!individual && <section class="ys-card" id="equipos">
@@ -119,7 +121,7 @@ const tabs: Array<[keyof typeof ICON, string]> = individual ? [['noticias', 'Not
             </section>
           )}
 
-          {!individual && <GamesList league={l.id} season={season} />}
+          {!individual && !inBar && <GamesList league={l.id} season={season} />}
 
           {more.length > 0 && (
             <section class="ys-card">

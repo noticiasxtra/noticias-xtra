@@ -4469,3 +4469,6 @@ a,button,summary,label{-webkit-tap-highlight-color:transparent}
 .lg-heads li:has(.hd-row)::before{display:none}
 /* League page games: team logos next to the names */
 .sp-games-teams span i{display:flex;align-items:center;gap:8px;font-style:normal;min-width:0}
+/* Deportes: time under each headline in Tendencias and Titulares */
+.ys-li-t,.hd-t{display:grid;gap:3px;min-width:0}
+.ys-li-t .time,.hd-t .time{font-family:var(--body,inherit);font-weight:400;font-size:12px;color:var(--muted)}

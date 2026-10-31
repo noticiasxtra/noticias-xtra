@@ -31,12 +31,12 @@ const LEAGUES = [
 const DETAILS_PER_RUN = 6;
 // Team stats on the game page, in this order (Highlightly's names → Spanish); anything else is left out
 const STAT = [
-  ['Points', 'Puntos'], ['Field Goals', 'Tiros de campo'], ['Field Goal %', '% tiros de campo'], ['Field Goals %', '% tiros de campo'],
-  ['3 Pointers', 'Triples'], ['Three Pointers', 'Triples'], ['3 Point %', '% de triples'], ['Three Point %', '% de triples'],
-  ['Free Throws', 'Tiros libres'], ['Free Throw %', '% tiros libres'], ['Rebounds', 'Rebotes'], ['Total Rebounds', 'Rebotes'],
+  ['Points', 'Puntos'], ['Successful Field Goals', 'Tiros de campo anotados'], ['Field Goals', 'Tiros de campo intentados'], ['Field Goal %', '% tiros de campo'], ['Field Goals %', '% tiros de campo'],
+  ['Successful 3 Pointers', 'Triples anotados'], ['3 Pointers', 'Triples intentados'], ['Three Pointers', 'Triples intentados'], ['3 Point %', '% de triples'], ['Three Point %', '% de triples'],
+  ['Successful Free Throws', 'Tiros libres anotados'], ['Free Throws', 'Tiros libres intentados'], ['Free Throw %', '% tiros libres'], ['Rebounds', 'Rebotes'], ['Total Rebounds', 'Rebotes'],
   ['Offensive Rebounds', 'Rebotes ofensivos'], ['Defensive Rebounds', 'Rebotes defensivos'], ['Assists', 'Asistencias'],
   ['Steals', 'Robos'], ['Blocks', 'Tapones'], ['Turnovers', 'Pérdidas'], ['Fouls', 'Faltas'], ['Personal Fouls', 'Faltas'],
-  ['Points In Paint', 'Puntos en la pintura'], ['Fast Break Points', 'Puntos de contraataque'], ['Largest Lead', 'Mayor ventaja'],
+  ['Points In Paint', 'Puntos en la pintura'], ['Fast Break Points', 'Puntos de contraataque'], ['Points Off Turnovers', 'Puntos tras pérdidas'], ['Largest Lead', 'Mayor ventaja'],
 ];
 const statLabel = new Map(STAT.map(([en, es]) => [en.toLowerCase(), es]));
 const fmt = (v) => (typeof v === 'number' && !Number.isInteger(v) ? v.toFixed(1) : String(v));
@@ -51,7 +51,7 @@ function toStats(g, list) {
   }
   // Stats with a name not in the list still show (with Highlightly's name) so nothing is lost; translate them above
   for (const a of away) {
-    if (out.length >= 16 || statLabel.has(a.displayName?.toLowerCase())) continue;
+    if (out.length >= 20 || statLabel.has(a.displayName?.toLowerCase())) continue;
     const h = home.find((s) => s.displayName === a.displayName);
     if (h) out.push({ label: a.displayName, away: fmt(a.value), home: fmt(h.value) });
   }
@@ -179,7 +179,10 @@ async function main() {
 
   for (const l of LEAGUES) {
     try {
-      for (const d of firstOfDay ? [day(-1), day()] : [day()]) {
+      // Today on every run; the first run of the day also yesterday's finals and the coming days' games
+      // (NFL: the next 6 days, since it plays mostly on Sundays; basketball: tomorrow)
+      const ahead = Array.from({ length: l.football ? 6 : 1 }, (_, i) => day(i + 1));
+      for (const d of firstOfDay ? [day(-1), day(), ...ahead] : [day()]) {
         const r = await get(l.base, `/matches?${l.football ? `league=${l.league}` : `leagueId=${l.leagueId}`}&date=${d}&timezone=${encodeURIComponent(TZ)}&limit=100`);
         for (const m of r.data || []) {
           const old = byKey.get(`highlightly:${m.id}`), g = l.football ? toFootball(l.id, m) : toGame(l.id, m);

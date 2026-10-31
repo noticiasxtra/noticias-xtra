@@ -9,7 +9,8 @@ import { url } from '../../lib/site';
 import TeamLogo from './TeamLogo.astro';
 interface Props { only?: string; title?: boolean; theme?: string }
 const { only } = Astro.props;
-const games = recent(scores(only, 40)).slice(0, 16); // current games only
+// Current games only, live first, then upcoming, then results (a league's own page looks a week each way)
+const games = recent(scores(only, 60), only ? 7 : 4).slice(0, 20);
 const link = (g: Game) => url(g.id ? `deportes/juego/${g.id}` : `deportes/${g.league}`);
 
 const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Puerto_Rico' });

@@ -42,17 +42,32 @@
     },
     "stats": [
       {
-        "label": "Tiros de campo",
+        "label": "Tiros de campo anotados",
+        "away": "30",
+        "home": "28"
+      },
+      {
+        "label": "Tiros de campo intentados",
         "away": "101",
         "home": "73"
       },
       {
-        "label": "Triples",
+        "label": "Triples anotados",
+        "away": "12",
+        "home": "10"
+      },
+      {
+        "label": "Triples intentados",
         "away": "56",
         "home": "30"
       },
       {
-        "label": "Tiros libres",
+        "label": "Tiros libres anotados",
+        "away": "7",
+        "home": "29"
+      },
+      {
+        "label": "Tiros libres intentados",
         "away": "12",
         "home": "35"
       },
@@ -102,22 +117,7 @@
         "home": "11"
       },
       {
-        "label": "Successful Field Goals",
-        "away": "30",
-        "home": "28"
-      },
-      {
-        "label": "Successful 3 Pointers",
-        "away": "12",
-        "home": "10"
-      },
-      {
-        "label": "Successful Free Throws",
-        "away": "7",
-        "home": "29"
-      },
-      {
-        "label": "Points Off Turnovers",
+        "label": "Puntos tras pérdidas",
         "away": "10",
         "home": "9"
       }
@@ -168,17 +168,32 @@
     },
     "stats": [
       {
-        "label": "Tiros de campo",
+        "label": "Tiros de campo anotados",
+        "away": "35",
+        "home": "37"
+      },
+      {
+        "label": "Tiros de campo intentados",
         "away": "86",
         "home": "75"
       },
       {
-        "label": "Triples",
+        "label": "Triples anotados",
+        "away": "13",
+        "home": "12"
+      },
+      {
+        "label": "Triples intentados",
         "away": "41",
         "home": "34"
       },
       {
-        "label": "Tiros libres",
+        "label": "Tiros libres anotados",
+        "away": "10",
+        "home": "12"
+      },
+      {
+        "label": "Tiros libres intentados",
         "away": "14",
         "home": "16"
       },
@@ -228,22 +243,7 @@
         "home": "10"
       },
       {
-        "label": "Successful Field Goals",
-        "away": "35",
-        "home": "37"
-      },
-      {
-        "label": "Successful 3 Pointers",
-        "away": "13",
-        "home": "12"
-      },
-      {
-        "label": "Successful Free Throws",
-        "away": "10",
-        "home": "12"
-      },
-      {
-        "label": "Points Off Turnovers",
+        "label": "Puntos tras pérdidas",
         "away": "21",
         "home": "23"
       }
@@ -294,17 +294,32 @@
     },
     "stats": [
       {
-        "label": "Tiros de campo",
+        "label": "Tiros de campo anotados",
+        "away": "38",
+        "home": "31"
+      },
+      {
+        "label": "Tiros de campo intentados",
         "away": "90",
         "home": "77"
       },
       {
-        "label": "Triples",
+        "label": "Triples anotados",
+        "away": "12",
+        "home": "11"
+      },
+      {
+        "label": "Triples intentados",
         "away": "41",
         "home": "37"
       },
       {
-        "label": "Tiros libres",
+        "label": "Tiros libres anotados",
+        "away": "22",
+        "home": "21"
+      },
+      {
+        "label": "Tiros libres intentados",
         "away": "28",
         "home": "26"
       },
@@ -354,22 +369,7 @@
         "home": "11"
       },
       {
-        "label": "Successful Field Goals",
-        "away": "38",
-        "home": "31"
-      },
-      {
-        "label": "Successful 3 Pointers",
-        "away": "12",
-        "home": "11"
-      },
-      {
-        "label": "Successful Free Throws",
-        "away": "22",
-        "home": "21"
-      },
-      {
-        "label": "Points Off Turnovers",
+        "label": "Puntos tras pérdidas",
         "away": "27",
         "home": "14"
       }
@@ -420,17 +420,32 @@
     },
     "stats": [
       {
-        "label": "Tiros de campo",
+        "label": "Tiros de campo anotados",
+        "away": "44",
+        "home": "54"
+      },
+      {
+        "label": "Tiros de campo intentados",
         "away": "91",
         "home": "93"
       },
       {
-        "label": "Triples",
+        "label": "Triples anotados",
+        "away": "17",
+        "home": "18"
+      },
+      {
+        "label": "Triples intentados",
         "away": "37",
         "home": "40"
       },
       {
-        "label": "Tiros libres",
+        "label": "Tiros libres anotados",
+        "away": "20",
+        "home": "19"
+      },
+      {
+        "label": "Tiros libres intentados",
         "away": "27",
         "home": "23"
       },
@@ -480,22 +495,7 @@
         "home": "15"
       },
       {
-        "label": "Successful Field Goals",
-        "away": "44",
-        "home": "54"
-      },
-      {
-        "label": "Successful 3 Pointers",
-        "away": "17",
-        "home": "18"
-      },
-      {
-        "label": "Successful Free Throws",
-        "away": "20",
-        "home": "19"
-      },
-      {
-        "label": "Points Off Turnovers",
+        "label": "Puntos tras pérdidas",
         "away": "26",
         "home": "21"
       }
@@ -546,17 +546,32 @@
     },
     "stats": [
       {
-        "label": "Tiros de campo",
+        "label": "Tiros de campo anotados",
+        "away": "40",
+        "home": "42"
+      },
+      {
+        "label": "Tiros de campo intentados",
         "away": "96",
         "home": "81"
       },
       {
-        "label": "Triples",
+        "label": "Triples anotados",
+        "away": "7",
+        "home": "12"
+      },
+      {
+        "label": "Triples intentados",
         "away": "29",
         "home": "33"
       },
       {
-        "label": "Tiros libres",
+        "label": "Tiros libres anotados",
+        "away": "24",
+        "home": "20"
+      },
+      {
+        "label": "Tiros libres intentados",
         "away": "33",
         "home": "27"
       },
@@ -606,22 +621,7 @@
         "home": "28"
       },
       {
-        "label": "Successful Field Goals",
-        "away": "40",
-        "home": "42"
-      },
-      {
-        "label": "Successful 3 Pointers",
-        "away": "7",
-        "home": "12"
-      },
-      {
-        "label": "Successful Free Throws",
-        "away": "24",
-        "home": "20"
-      },
-      {
-        "label": "Points Off Turnovers",
+        "label": "Puntos tras pérdidas",
         "away": "17",
         "home": "20"
       }
@@ -672,17 +672,32 @@
     },
     "stats": [
       {
-        "label": "Tiros de campo",
+        "label": "Tiros de campo anotados",
+        "away": "35",
+        "home": "51"
+      },
+      {
+        "label": "Tiros de campo intentados",
         "away": "85",
         "home": "96"
       },
       {
-        "label": "Triples",
+        "label": "Triples anotados",
+        "away": "12",
+        "home": "18"
+      },
+      {
+        "label": "Triples intentados",
         "away": "30",
         "home": "43"
       },
       {
-        "label": "Tiros libres",
+        "label": "Tiros libres anotados",
+        "away": "19",
+        "home": "7"
+      },
+      {
+        "label": "Tiros libres intentados",
         "away": "22",
         "home": "11"
       },
@@ -732,22 +747,7 @@
         "home": "18"
       },
       {
-        "label": "Successful Field Goals",
-        "away": "35",
-        "home": "51"
-      },
-      {
-        "label": "Successful 3 Pointers",
-        "away": "12",
-        "home": "18"
-      },
-      {
-        "label": "Successful Free Throws",
-        "away": "19",
-        "home": "7"
-      },
-      {
-        "label": "Points Off Turnovers",
+        "label": "Puntos tras pérdidas",
         "away": "16",
         "home": "28"
       }
