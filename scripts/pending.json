@@ -1,47 +1,20 @@
 [
   {
-    "id": "2026-10-31-asem-pide-prudencia-en-halloween-y-asegura-que-la-actualizacion-de-sus",
-    "title": "ASEM pide prudencia en Halloween y asegura que la actualización de sus sistemas no afectará a pacientes",
-    "section": "puerto-rico",
-    "source": "NotiCel",
-    "link": "https://noticel.com/noticias/20261030/director-de-centro-medico-hace-un-llamado-a-la-prudencia-y-prevencion-en-halloween/",
-    "note": "El texto de la fuente atribuye la cita sobre la actualización tecnológica al secretario de Salud, Dr. Víctor Ramos, pero el cierre de esa misma cita lo adjudica a Colón Alsina; verificar quién habló. Por eso se atribuyó la información a la agencia en general y no se usaron esas citas. Tampoco se precisó en qué fechas exactas ocurrirá la actualización, solo 'este fin de semana'.",
-    "created": "2026-10-31T20:24:00.490Z"
+    "id": "2026-10-31-onu-prorroga-un-ano-su-mision-en-colombia-y-pide-ayuda-para-el-inviern",
+    "title": "ONU prorroga un año su misión en Colombia y pide ayuda para el invierno de refugiados en cuatro países",
+    "section": "mundo",
+    "source": "Noticias ONU (Naciones Unidas)",
+    "link": "https://news.un.org/feed/view/es/story/2026/10/1542127",
+    "note": "Resumen de varias noticias de la ONU; el titular prioriza dos temas. Verificar si se prefiere separar Gaza en una nota propia. La fuente no indica ni conexión con Puerto Rico ni la fecha exacta del ataque más allá del 25 de octubre. Confirmar que el texto sobre Gaza refleja que las afirmaciones son de la Oficina de Derechos Humanos de la ONU y no hay respuesta de Israel en la fuente. La fuente no precisa quién representa a Hyde (cargo). El texto original menciona Barbados 'entre 2022 y 2024' y 'cuarto invierno' en Gaza; verificar.",
+    "created": "2026-10-31T22:25:44.883Z"
   },
   {
-    "id": "2026-10-31-gobernadora-ice-puede-hacer-cumplir-la-ley-migratoria-sin-entrar-a-igl",
-    "title": "Gobernadora: ICE puede hacer cumplir la ley migratoria sin entrar a iglesias ni comercios",
-    "section": "puerto-rico",
-    "source": "NotiCel",
-    "link": "https://noticel.com/ultima-hora/20261030/gobernadora-dice-que-estan-de-mas-las-intervenciones-de-ice-en-iglesias-y-comercios/",
-    "note": "Incluye declaraciones de políticos y denuncias sobre intervenciones por color de piel; revisar atribuciones. La fuente no precisa fechas ni lugares de los operativos denunciados.",
-    "created": "2026-10-31T20:24:00.489Z"
-  },
-  {
-    "id": "2026-10-31-junta-fiscal-advierte-que-suspender-el-ivu-a-alimentos-preparados-cost",
-    "title": "Junta Fiscal advierte que suspender el IVU a alimentos preparados costaría $56.8 millones; gobernadora defiende su propuesta",
+    "id": "2026-10-31-gobernadora-asigna-598-261-para-asfaltar-la-pr-346-y-reinaugura-el-col",
+    "title": "Gobernadora asigna $598,261 para asfaltar la PR-346 y reinaugura el coliseo de Hormigueros",
     "section": "gobierno",
     "source": "NotiCel",
-    "link": "https://noticel.com/ultima-hora/20261030/jenniffer-gonzalez-dice-que-la-junta-se-esmando-con-su-carta-sobre-suspender-el-ivu/",
-    "note": "Incluye declaraciones de la gobernadora y críticas de la Junta Fiscal sobre política pública; verificar el tono. La Junta calcula $56.8 millones por la suspensión en noviembre y diciembre. No se precisó la fecha de inicio de la medida.",
-    "created": "2026-10-31T20:24:00.489Z"
-  },
-  {
-    "id": "2026-10-31-gobernadora-defiende-a-secretaria-de-la-familia-ante-pedido-del-senado",
-    "title": "Gobernadora defiende a secretaria de la Familia ante pedido del Senado de explicar sus viajes",
-    "section": "gobierno",
-    "source": "NotiCel",
-    "link": "https://noticel.com/noticias/20261030/gonzalez-colon-defiende-nuevamente-a-suzanne-roig-y-arremete-contra-rivera-schatz/",
-    "note": "Política partidista y acusaciones entre la gobernadora y el presidente del Senado; revisar que las críticas queden atribuidas. La fuente no incluye respuesta de Rivera Schatz ni de Roig Fuertes. Verificar el nombre completo de la comisión y que la frase sobre los viajes a Luisiana y España se mantenga como dato de NotiCel (la fuente los llama 'presuntos' en un pasaje).",
-    "created": "2026-10-31T20:24:00.489Z"
-  },
-  {
-    "id": "2026-10-31-rivera-schatz-releva-al-senador-hector-joaquin-sanchez-de-una-comision",
-    "title": "Rivera Schatz releva al senador Héctor Joaquín Sánchez de una comisión y ordena proceso ético",
-    "section": "politica",
-    "source": "NotiCel",
-    "link": "https://noticel.com/noticias/20261031/rivera-schatz-releva-a-hector-joaquin-sanchez-de-presidencia-de-comision-por-querella-etica/",
-    "note": "Involucra a menores de edad, una querella ética y declaraciones de políticos en un contexto partidista. La fuente no detalla el contenido de la querella ni quién la presentó. Verificar los datos con el Senado. No se incluyeron los enlaces relacionados sobre Roig y los destaques, que no se explican en el texto.",
-    "created": "2026-10-31T20:24:00.489Z"
+    "link": "https://noticel.com/noticias/20261031/nuevos-proyectos-inaugurados-y-otras-obras-en-camino-para-hormigueros/",
+    "note": "La fuente no aclara si los $600,000 en CDBG-DR de la carta de agosto de 2025 se destinaron al cine teatro, al coliseo o a otros proyectos. Verificar. Tampoco precisa cuál es la fecha de la visita.",
+    "created": "2026-10-31T22:25:44.883Z"
   }
 ]
