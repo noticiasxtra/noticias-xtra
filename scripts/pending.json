@@ -1,56 +1,47 @@
 [
   {
-    "id": "2026-10-31-casa-blanca-presenta-estrategia-para-la-pesca-de-ee-uu-y-un-sello-volu",
-    "title": "Casa Blanca presenta estrategia para la pesca de EE.UU. y un sello voluntario para mariscos nacionales",
-    "section": "estados-unidos",
-    "source": "La Casa Blanca",
-    "link": "https://www.whitehouse.gov/releases/2026/10/what-they-are-saying-president-trump-puts-americas-fishermen-first-and-secures-american-seafood-dominance/",
-    "note": "",
-    "created": "2026-10-31T19:22:00Z"
-  },
-  {
-    "id": "2026-10-31-dana-rodriguez-y-arialeey-serrano-pierden-su-debut-en-voleibol-de-play",
-    "title": "Dana Rodríguez y Arialeey Serrano pierden su debut en voleibol de playa en Dakar 2026",
-    "section": "deportes",
-    "source": "NotiCel",
-    "link": "",
-    "note": "",
-    "created": "2026-10-31T19:22:00Z"
-  },
-  {
-    "id": "2026-10-31-familia-reubica-a-tres-adultos-mayores-de-un-posible-hogar-clandestino",
-    "title": "Familia reubica a tres adultos mayores de un posible hogar clandestino en Carolina",
-    "section": "gobierno",
-    "source": "NotiCel",
-    "link": "",
-    "note": "",
-    "created": "2026-10-31T19:22:00Z"
-  },
-  {
-    "id": "2026-10-31-investigan-el-asesinato-de-un-hombre-baleado-en-la-calle-modesto-velez",
-    "title": "Investigan el asesinato de un hombre baleado en la calle Modesto Vélez de Santa Isabel",
+    "id": "2026-10-31-asem-pide-prudencia-en-halloween-y-asegura-que-la-actualizacion-de-sus",
+    "title": "ASEM pide prudencia en Halloween y asegura que la actualización de sus sistemas no afectará a pacientes",
     "section": "puerto-rico",
     "source": "NotiCel",
-    "link": "",
-    "note": "",
-    "created": "2026-10-31T19:22:00Z"
+    "link": "https://noticel.com/noticias/20261030/director-de-centro-medico-hace-un-llamado-a-la-prudencia-y-prevencion-en-halloween/",
+    "note": "El texto de la fuente atribuye la cita sobre la actualización tecnológica al secretario de Salud, Dr. Víctor Ramos, pero el cierre de esa misma cita lo adjudica a Colón Alsina; verificar quién habló. Por eso se atribuyó la información a la agencia en general y no se usaron esas citas. Tampoco se precisó en qué fechas exactas ocurrirá la actualización, solo 'este fin de semana'.",
+    "created": "2026-10-31T20:24:00.490Z"
   },
   {
-    "id": "2026-10-31-puerto-rico-cierra-con-tres-victorias-y-cuatro-derrotas-su-primera-cop",
-    "title": "Puerto Rico cierra con tres victorias y cuatro derrotas su primera Copa Mundial Sub-15 de fútbol",
-    "section": "deportes",
+    "id": "2026-10-31-gobernadora-ice-puede-hacer-cumplir-la-ley-migratoria-sin-entrar-a-igl",
+    "title": "Gobernadora: ICE puede hacer cumplir la ley migratoria sin entrar a iglesias ni comercios",
+    "section": "puerto-rico",
     "source": "NotiCel",
-    "link": "",
-    "note": "",
-    "created": "2026-10-31T19:22:00Z"
+    "link": "https://noticel.com/ultima-hora/20261030/gobernadora-dice-que-estan-de-mas-las-intervenciones-de-ice-en-iglesias-y-comercios/",
+    "note": "Incluye declaraciones de políticos y denuncias sobre intervenciones por color de piel; revisar atribuciones. La fuente no precisa fechas ni lugares de los operativos denunciados.",
+    "created": "2026-10-31T20:24:00.489Z"
   },
   {
-    "id": "2026-10-31-retiran-del-mercado-capsulas-de-ashwagandha-de-365-whole-foods-market-",
-    "title": "Retiran del mercado cápsulas de ashwagandha de 365 Whole Foods Market por posible salmonela",
-    "section": "salud",
-    "source": "FDA (retiros de productos del mercado)",
-    "link": "http://www.fda.gov/safety/recalls-market-withdrawals-safety-alerts/vitality-works-inc-recalls-365-whole-foods-market-ashwagandha-capsules-sold-nationwide-due-potential",
-    "note": "",
-    "created": "2026-10-31T19:22:00Z"
+    "id": "2026-10-31-junta-fiscal-advierte-que-suspender-el-ivu-a-alimentos-preparados-cost",
+    "title": "Junta Fiscal advierte que suspender el IVU a alimentos preparados costaría $56.8 millones; gobernadora defiende su propuesta",
+    "section": "gobierno",
+    "source": "NotiCel",
+    "link": "https://noticel.com/ultima-hora/20261030/jenniffer-gonzalez-dice-que-la-junta-se-esmando-con-su-carta-sobre-suspender-el-ivu/",
+    "note": "Incluye declaraciones de la gobernadora y críticas de la Junta Fiscal sobre política pública; verificar el tono. La Junta calcula $56.8 millones por la suspensión en noviembre y diciembre. No se precisó la fecha de inicio de la medida.",
+    "created": "2026-10-31T20:24:00.489Z"
+  },
+  {
+    "id": "2026-10-31-gobernadora-defiende-a-secretaria-de-la-familia-ante-pedido-del-senado",
+    "title": "Gobernadora defiende a secretaria de la Familia ante pedido del Senado de explicar sus viajes",
+    "section": "gobierno",
+    "source": "NotiCel",
+    "link": "https://noticel.com/noticias/20261030/gonzalez-colon-defiende-nuevamente-a-suzanne-roig-y-arremete-contra-rivera-schatz/",
+    "note": "Política partidista y acusaciones entre la gobernadora y el presidente del Senado; revisar que las críticas queden atribuidas. La fuente no incluye respuesta de Rivera Schatz ni de Roig Fuertes. Verificar el nombre completo de la comisión y que la frase sobre los viajes a Luisiana y España se mantenga como dato de NotiCel (la fuente los llama 'presuntos' en un pasaje).",
+    "created": "2026-10-31T20:24:00.489Z"
+  },
+  {
+    "id": "2026-10-31-rivera-schatz-releva-al-senador-hector-joaquin-sanchez-de-una-comision",
+    "title": "Rivera Schatz releva al senador Héctor Joaquín Sánchez de una comisión y ordena proceso ético",
+    "section": "politica",
+    "source": "NotiCel",
+    "link": "https://noticel.com/noticias/20261031/rivera-schatz-releva-a-hector-joaquin-sanchez-de-presidencia-de-comision-por-querella-etica/",
+    "note": "Involucra a menores de edad, una querella ética y declaraciones de políticos en un contexto partidista. La fuente no detalla el contenido de la querella ni quién la presentó. Verificar los datos con el Senado. No se incluyeron los enlaces relacionados sobre Roig y los destaques, que no se explican en el texto.",
+    "created": "2026-10-31T20:24:00.489Z"
   }
 ]
