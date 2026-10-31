@@ -3,10 +3,13 @@ title: "Casa Blanca presenta estrategia para la pesca de EE.UU. y un sello volun
 description: "La Casa Blanca divulgó reacciones de funcionarios y grupos de pescadores a su estrategia de mariscos, que incluye un sello voluntario y más de $5,000 millones en préstamos garantizados."
 section: estados-unidos
 place: "Washington, D.C."
-date: 2026-10-30T20:28:51.000Z
+date: 2026-10-30T20:28:00.000Z
+author: "Noticias Xtra"
+pinned: true
+homeLead: true
+sectionPinned: true
 aiAssisted: true
-draft: true
-pending: true
+draft: false
 sources:
   - name: "La Casa Blanca"
     url: "https://www.whitehouse.gov/releases/2026/10/what-they-are-saying-president-trump-puts-americas-fishermen-first-and-secures-american-seafood-dominance/"
