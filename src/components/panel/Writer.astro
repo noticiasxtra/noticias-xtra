@@ -124,15 +124,23 @@ const TOOLS = [
           <ul class="wr-sc-status" data-sc-status></ul>
         </div>
         <div class="pnl-card" data-editor-only><h2 class="pnl-h3">Etiquetas</h2>
-          <label class="adb-check"><input type="checkbox" data-f="breaking" /> Última hora (barra roja)</label>
-          <label class="adb-check"><input type="checkbox" data-f="trending" /> Tendencia (puede ir arriba aunque no sea local)</label>
-          <label class="adb-check"><input type="checkbox" data-f="featured" /> Destacada en portada</label>
-          <p class="pnl-muted pnl-small wr-lead-h">Noticia principal (dura hasta 2 días o hasta que marques otra):</p>
-          <label class="adb-check"><input type="checkbox" data-f="pinned" /> 📌 Fijar arriba en la Portada (se queda hasta que la desfijes)</label>
-          <label class="adb-check"><input type="checkbox" data-f="homeLead" /> Principal de la Portada</label>
-          <label class="adb-check"><input type="checkbox" data-f="sectionPinned" /> 📌 Fijar arriba en su sección (se queda hasta que la desfijes)</label>
-          <label class="adb-check"><input type="checkbox" data-f="sectionLead" /> Principal de su sección</label>
-          <label class="adb-check"><input type="checkbox" data-f="live" /> En vivo / en desarrollo</label>
+          <p class="pnl-muted pnl-small">Para una noticia normal no marques nada: el sitio la ordena solo.</p>
+          <label class="adb-check"><input type="checkbox" data-f="breaking" /> <span><b>Última hora</b> · barra roja arriba, hasta 12 horas</span></label>
+          <label class="adb-check"><input type="checkbox" data-f="live" /> <span><b>En vivo</b> · noticia que sigue desarrollándose</span></label>
+          <label class="adb-check"><input type="checkbox" data-f="trending" /> <span><b>Tendencia</b> · de EE.UU. o el mundo, puede ir arriba de las locales</span></label>
+          {/* One choice per page. The radios set the story's flags (featured, homeLead, pinned, sectionLead, sectionPinned). */}
+          <fieldset class="wr-place"><legend>Lugar en la Portada</legend>
+            <label><input type="radio" name="wr-home" value="" checked /> Normal</label>
+            <label><input type="radio" name="wr-home" value="featured" /> Destacada <small>un buen lugar</small></label>
+            <label><input type="radio" name="wr-home" value="homeLead" /> Principal <small>la grande arriba, 2 días</small></label>
+            <label><input type="radio" name="wr-home" value="pinned" /> Fijada 📌 <small>arriba hasta que la cambies</small></label>
+          </fieldset>
+          <fieldset class="wr-place"><legend>Lugar en su sección</legend>
+            <label><input type="radio" name="wr-sec" value="" checked /> Normal</label>
+            <label><input type="radio" name="wr-sec" value="sectionLead" /> Principal <small>2 días</small></label>
+            <label><input type="radio" name="wr-sec" value="sectionPinned" /> Fijada 📌 <small>hasta que la cambies</small></label>
+          </fieldset>
+          <div hidden>{['featured', 'homeLead', 'pinned', 'sectionLead', 'sectionPinned'].map((k) => <input type="checkbox" data-f={k} tabindex="-1" />)}</div>
         </div>
         <div class="pnl-card"><h2 class="pnl-h3">Fuentes</h2>
           <ul class="wr-srcs" data-srcs></ul>
@@ -363,11 +371,26 @@ const TOOLS = [
       place: '', author: me()?.name ?? 'Noticias Xtra', date: localNow(), image: '', imageUrl: '', imageCaption: '', imageCredit: '', breaking: false, trending: false, featured: false, live: false, pinned: false, homeLead: false, sectionLead: false, sectionPinned: false,
       sources: [], related: [], correction: '', body: '' });
     const field = (k: string) => $<HTMLInputElement>(`[data-f="${k}"]`);
+    // "Lugar en la Portada / en su sección": one choice each, stored as the story's flags (the strongest one wins)
+    const PLACE = { 'wr-home': ['featured', 'homeLead', 'pinned'], 'wr-sec': ['sectionLead', 'sectionPinned'] } as const;
+    function syncPlace() {
+      for (const [name, keys] of Object.entries(PLACE)) {
+        const on = [...keys].reverse().find((k) => field(k).checked) ?? '';
+        root.querySelectorAll<HTMLInputElement>(`input[name="${name}"]`).forEach((r) => (r.checked = r.value === on));
+      }
+    }
+    root.addEventListener('change', (e) => {
+      const r = e.target as HTMLInputElement; const keys = PLACE[r.name as keyof typeof PLACE];
+      if (!keys || r.type !== 'radio') return;
+      keys.forEach((k) => (field(k).checked = k === r.value));
+      field(keys[0]).dispatchEvent(new Event('input', { bubbles: true })); // counts as an edit (autosave)
+    });
     function openEditor(a: Art) {
       cur = structuredClone(a);
       $('[data-gal-list]').dataset.sig = ''; ($('[data-wr-gal]') as HTMLDetailsElement).open = !!cur.gallery?.length;
       (['title', 'description', 'section', 'league', 'place', 'author', 'date', 'imageUrl', 'imageCaption', 'imageCredit', 'correction'] as const).forEach((k) => (field(k).value = String(cur![k] ?? '')));
       (['breaking', 'trending', 'featured', 'live', 'pinned', 'homeLead', 'sectionLead', 'sectionPinned'] as const).forEach((k) => (field(k).checked = !!cur![k]));
+      syncPlace();
       body.innerHTML = cur.body || '<p><br></p>';
       body.querySelectorAll<HTMLElement>('figure.wr-embed').forEach(paintEmbed);
       $$('[data-editor-only]').forEach((e) => (e.hidden = !canPublish()));

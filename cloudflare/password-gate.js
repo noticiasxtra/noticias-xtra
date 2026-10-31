@@ -9,7 +9,8 @@
 //   3. Settings → Domains & Routes → Add → Route: noticiasxtra.com/*  and another: www.noticiasxtra.com/*  (zone noticiasxtra.com).
 //   4. DNS: the @ and www records must be Proxied (orange cloud) so the visit passes through Cloudflare.
 // Changing SITE_PASSWORD signs everyone out.
-// Low profile: noticiasxtra.com shows a plain, unbranded page; the password page is only at /entrar (the staff door).
+// Every address shows the password page (user, 2026-10-31; before, strangers saw a plain page and the box was only at
+// /entrar, which still works). After the password, the visitor lands on the page they asked for.
 //
 // Guest access (optional, e.g. an investor): a second password that stops working at a set time and opens the site in
 // demo mode (sample ads, comments and a sample staff panel, all labeled; src/lib/demo.ts reads the nx_demo cookie).
@@ -27,7 +28,6 @@
 const SITE = 'https://noticiasxtra.com';
 
 const COOKIE = 'nx_clave';
-const DOOR = '/entrar'; // where the staff types the password on the real address
 const DAYS = 30;
 // Always open: certificate renewal for GitHub Pages and the icon of this page
 const OPEN = [/^\/\.well-known\//, /^\/favicon\.(svg|png)$/];
@@ -90,7 +90,6 @@ export default {
     } else if (c === good || (guestOpen && c === guest) || OPEN.some((r) => r.test(url.pathname))) return fetch(req);
     const h = new Headers({ 'Content-Type': 'text/html; charset=utf-8', 'X-Robots-Tag': 'noindex, nofollow', 'Cache-Control': 'no-store' });
     if (c && c === guest) h.append('Set-Cookie', 'nx_demo=; Path=/; Max-Age=0; Secure; SameSite=Lax'); // guest time is over
-    if (!demoHost && url.pathname.replace(/\/$/, '') !== DOOR) return new Response(PLAIN(url.hostname), { status: 404, headers: h }); // looks unused
     return new Response(PAGE, { status: 401, headers: h });
   },
 };
@@ -129,9 +128,3 @@ const PAGE = `<!doctype html>
     b.disabled = false; e.textContent = !r ? 'No hay conexión. Intenta otra vez.' : out.expired ? 'Esa clave de invitado ya venció.' : 'Esa clave no es correcta.';
   });
 </script></body></html>`;
-
-// What strangers see on the real address: just the domain name, nothing about the site
-const PLAIN = (host) => `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="robots" content="noindex, nofollow"><title>${host}</title>
-<style>body{margin:0;min-height:100vh;display:grid;place-items:center;font-family:system-ui,sans-serif;background:#fff;color:#9A9CA8;font-size:15px}
-@media (prefers-color-scheme:dark){body{background:#111;color:#666}}</style></head><body>${host}</body></html>`;

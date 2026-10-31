@@ -4430,3 +4430,16 @@ a,button,summary,label{-webkit-tap-highlight-color:transparent}
 .via{margin:14px 0 0;font-size:12px;color:var(--muted);opacity:.85}
 .fx-box .fx-empty{font-size:14px;line-height:1.45;opacity:.85}
 .sp-demo[hidden]{display:none}
+/* Home main photo, final (user, 2026-10-31): the box takes the photo's own shape, so the picture fills it edge to edge
+   with nothing cut and no blurred strips. Only a very tall (portrait) photo is trimmed, so it never fills the screen. */
+.hero-wide .lead-media .ph.ph-whole{aspect-ratio:auto;max-height:none;display:block}
+.hero-wide .ph-whole img:not(.ph-blur){position:relative;inset:auto;display:block;width:100%;height:auto;max-height:min(70vh,640px);object-fit:cover}
+.hero-wide .ph-whole .ph-blur{display:none}
+/* Escribir → Etiquetas: one choice per page for where the story goes */
+.wr-place{border:0;margin:12px 0 0;padding:0;display:grid;gap:4px}
+.wr-place legend{font-weight:700;font-size:14px;margin-bottom:4px;padding:0}
+.wr-place label{display:flex;align-items:baseline;gap:8px;font-size:14.5px;cursor:pointer}
+.wr-place small{color:var(--muted);font-size:12.5px}
+.pnl-card .wr-place label{display:flex;align-items:baseline;justify-content:flex-start;flex-wrap:wrap;gap:4px 8px;text-align:left;font-weight:600}
+.pnl-card .wr-place input[type=radio]{flex:none;width:auto;margin:0;align-self:center}
+.pnl-card .wr-place small{font-weight:400}
