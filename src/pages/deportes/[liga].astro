@@ -83,7 +83,7 @@ const tabs: Array<[keyof typeof ICON, string]> = individual ? [['noticias', 'Not
           <section class="ys-card">
             <div class="ys-card-h"><h2>Titulares</h2></div>
             {news.length ? (
-              <ul class="lg-heads">{news.slice(0, 6).map((s) => <li><a href={url(`noticia/${s.id}`)}>{s.data.title}</a></li>)}</ul>
+              <ul class="lg-heads">{news.slice(0, 6).map((s) => <li><a href={url(`noticia/${s.id}`)} class="hd-row"><span class="hd-ph"><Ph sectionId={s.data.section} image={s.data.image} league={s.data.league} sizes="72px" /></span><span>{s.data.title}</span></a></li>)}</ul>
             ) : <p class="sp-note">Todavía no hay noticias de {l.name}.</p>}
           </section>
           {!individual && <section class="ys-card" id="equipos">
