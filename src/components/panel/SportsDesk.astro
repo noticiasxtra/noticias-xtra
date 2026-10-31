@@ -1,0 +1,142 @@
+---
+// Panel → Deportes (2026-10-31, the owner's request): what no data service covers, typed by the newsroom. Boxing: the
+// card of fights with Puerto Ricans and their results, and the current Puerto Rican champions. Tennis: Puerto Rican
+// players to follow and the tournament calendar. Saved in Supabase (supabase/deportes-panel.sql); the Boxeo and Tenis
+// pages show the items that are on at the next site update (about 15 minutes). Preview and demo: this device only.
+import seed from '../../data/deportes-desk.json';
+---
+<div class="dk-desk" data-dk data-seed={JSON.stringify(seed)}>
+  <header class="cl-head">
+    <div>
+      <h1 class="pnl-h">Deportes</h1>
+      <p class="pnl-muted">Lo que no llega solo: peleas y campeones boricuas de boxeo, y tenistas y torneos de tenis. Sale en las páginas de Boxeo y Tenis.</p>
+    </div>
+  </header>
+  <p class="pnl-note" data-dk-note></p>
+  <p class="cl-missing" data-dk-missing hidden>Falta preparar la base de datos: en Supabase → SQL Editor, corre el archivo <b>supabase/deportes-panel.sql</b> (una sola vez).</p>
+  <nav class="apn-tabs pnl-sub" role="tablist" aria-label="Tipo">
+    <button type="button" role="tab" aria-selected="true" data-dk-tab="fight">🥊 Peleas</button>
+    <button type="button" role="tab" aria-selected="false" data-dk-tab="champion">🏆 Campeones</button>
+    <button type="button" role="tab" aria-selected="false" data-dk-tab="player">🎾 Tenistas</button>
+    <button type="button" role="tab" aria-selected="false" data-dk-tab="tournament">📅 Torneos</button>
+  </nav>
+  <button type="button" class="adp-btn" data-dk-new>+ Añadir</button>
+  <ul class="cl-list" data-dk-list></ul>
+  <form class="cl-form" data-dk-form hidden novalidate>
+    <h2 class="pnl-h2" data-dk-form-h></h2>
+    <div class="cl-fields" data-dk-fields></div>
+    <label class="adb-check"><input type="checkbox" name="active" checked /> Mostrar en el sitio</label>
+    <p class="cm-err" data-dk-err hidden></p>
+    <div class="cl-actions">
+      <button type="submit" class="adp-btn">Guardar</button>
+      <button type="button" class="adp-btn ghost-dark" data-dk-cancel>Cancelar</button>
+      <button type="button" class="apr-reject" data-dk-del hidden>Borrar</button>
+    </div>
+  </form>
+</div>
+
+<script>
+  import { hasBackend, listDesk, saveDesk, deleteDesk, type DeskRow } from '../../lib/backend';
+  const root = document.querySelector<HTMLElement>('[data-dk]');
+  if (root) {
+    const $ = <T extends HTMLElement = HTMLElement>(s: string) => root.querySelector<T>(s)!;
+    const form = $<HTMLFormElement>('[data-dk-form]');
+    const LOCAL = 'nx-sports-desk';
+    const esc = (s: unknown) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
+    const toast = (m: string) => { const t = document.querySelector<HTMLElement>('[data-ptoast]'); if (!t) return; t.textContent = m; t.hidden = false; clearTimeout((t as any).tm); (t as any).tm = setTimeout(() => (t.hidden = true), 3800); };
+    const live = () => hasBackend();
+    type Kind = DeskRow['kind'];
+    // The fields of each kind: [name, label, type, placeholder]; "a.name" saves inside data.a
+    const FIELDS: Record<Kind, Array<[string, string, string, string?]>> = {
+      fight: [['date', 'Fecha y hora', 'datetime-local'], ['a.name', 'Boxeador(a) 1', 'text', 'Stephanie Piñeiro'], ['a.record', 'Récord 1', 'text', '10-1, 3 KO'], ['a.country', 'País 1', 'text', 'Puerto Rico'],
+        ['b.name', 'Boxeador(a) 2', 'text'], ['b.record', 'Récord 2', 'text'], ['b.country', 'País 2', 'text'], ['venue', 'Lugar', 'text', 'Coliseo Rubén Rodríguez'], ['city', 'Pueblo o ciudad', 'text', 'Bayamón'],
+        ['weight', 'División', 'text', '140 libras'], ['titles', 'Título en juego', 'text', 'Campeonato mundial AMB'], ['tv', 'Dónde verla', 'text'],
+        ['status', 'Estado', 'select:programada|final|cancelada'], ['winner', 'Ganador (si terminó)', 'select:|a|b|empate'], ['method', 'Cómo ganó', 'text', 'KO, nocaut técnico, decisión unánime…'], ['round', 'Asalto', 'text'], ['note', 'Nota', 'text']],
+      champion: [['name', 'Nombre', 'text'], ['weight', 'División', 'text', '108 libras'], ['org', 'Organización', 'text', 'CMB, AMB, FIB, OMB…'], ['since', 'Campeón desde', 'text', 'marzo de 2026']],
+      player: [['name', 'Nombre', 'text'], ['tour', 'Circuito', 'text', 'ATP, WTA, ITF, universitario…'], ['ranking', 'Ranking', 'text', 'n.º 245'], ['next', 'Próximo torneo', 'text'], ['note', 'Nota', 'text']],
+      tournament: [['name', 'Torneo', 'text', 'Abierto de Australia'], ['start', 'Empieza', 'date'], ['end', 'Termina', 'date'], ['place', 'Lugar', 'text'], ['surface', 'Superficie', 'text', 'dura, arcilla, césped'], ['level', 'Categoría', 'text', 'Grand Slam, ATP 500, LAI…']],
+    };
+    const SPORT: Record<Kind, DeskRow['sport']> = { fight: 'boxeo', champion: 'boxeo', player: 'tenis', tournament: 'tenis' };
+    const NAMES: Record<Kind, string> = { fight: 'pelea', champion: 'campeón', player: 'tenista', tournament: 'torneo' };
+    const getp = (o: any, k: string) => k.split('.').reduce((x, p) => x?.[p], o);
+    const setp = (o: any, k: string, v: unknown) => { const ps = k.split('.'); const last = ps.pop()!; ps.reduce((x, p) => (x[p] ??= {}), o)[last] = v; };
+    let rows: DeskRow[] = []; let kind: Kind = 'fight'; let editing: DeskRow | null = null;
+
+    const readLocal = (): DeskRow[] => { try { const v = JSON.parse(localStorage.getItem(LOCAL) || 'null'); if (Array.isArray(v)) return v; } catch { /* storage blocked */ } return JSON.parse(root.dataset.seed || '[]').map((r: DeskRow) => ({ active: true, ...r })); };
+    const writeLocal = () => { try { localStorage.setItem(LOCAL, JSON.stringify(rows)); } catch { /* storage blocked */ } };
+    const summary = (r: DeskRow) => {
+      const d = r.data as any;
+      if (r.kind === 'fight') return [`${d.a?.name ?? '?'} vs. ${d.b?.name ?? '?'}`, [d.date && new Date(d.date).toLocaleString('es-PR', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit', timeZone: 'America/Puerto_Rico' }), d.city, d.status].filter(Boolean).join(' · ')];
+      if (r.kind === 'champion') return [d.name, [d.weight, d.org].filter(Boolean).join(' · ')];
+      if (r.kind === 'player') return [d.name, [d.tour, d.ranking].filter(Boolean).join(' · ')];
+      return [d.name, [d.start, d.place].filter(Boolean).join(' · ')];
+    };
+
+    async function load() {
+      $('[data-dk-note]').textContent = live() ? 'Los cambios salen en el sitio en la próxima actualización (unos 15 minutos).' : 'VISTA PREVIA: sin la base de datos, los cambios se guardan solo en este dispositivo.';
+      if (!live()) { rows = readLocal(); return paint(); }
+      $('[data-dk-list]').innerHTML = '<li class="cl-empty">Cargando…</li>';
+      const r = await listDesk();
+      $('[data-dk-missing]').hidden = r !== 'missing';
+      if (r === 'missing') { rows = readLocal(); return paint(); }
+      if (!r) { $('[data-dk-list]').innerHTML = '<li class="cl-empty">No se pudo cargar. Revisa tu conexión.</li>'; return; }
+      rows = r; paint();
+    }
+    function paint() {
+      const list = rows.filter((r) => r.kind === kind);
+      $('[data-dk-list]').innerHTML = list.map((r) => { const [h, s] = summary(r); return `<li class="cl-card${r.active ? '' : ' off'}"><span class="cl-who"><b>${esc(h)}</b><small>${esc(s)}</small></span><span class="pnl-muted pnl-small">${r.active ? 'En el sitio' : 'Apagado'}</span><button type="button" class="pnl-link" data-dk-edit="${esc(r.id)}">Editar</button></li>`; }).join('')
+        || `<li class="cl-empty">Todavía no hay ${NAMES[kind] === 'campeón' ? 'campeones' : NAMES[kind] + 's'}. Añade el primero con «+ Añadir».</li>`;
+    }
+    function open(r: DeskRow | null) {
+      editing = r;
+      $('[data-dk-form-h]').textContent = r ? `Editar ${NAMES[kind]}` : `Nuevo ${NAMES[kind]}`;
+      $('[data-dk-fields]').innerHTML = FIELDS[kind].map(([k, label, type, ph]) => {
+        const v = r ? getp(r.data, k) ?? '' : k === 'a.country' ? 'Puerto Rico' : '';
+        if (type.startsWith('select:')) return `<label>${label}<select name="${k}">${type.slice(7).split('|').map((o) => `<option value="${o}"${o === v ? ' selected' : ''}>${o === '' ? '—' : o === 'a' ? 'Boxeador(a) 1' : o === 'b' ? 'Boxeador(a) 2' : o}</option>`).join('')}</select></label>`;
+        const val = type === 'datetime-local' && v ? new Date(new Date(v).valueOf() - new Date(v).getTimezoneOffset() * 6e4).toISOString().slice(0, 16) : v;
+        return `<label>${label}<input name="${k}" type="${type}" value="${esc(val)}" placeholder="${esc(ph ?? '')}" /></label>`;
+      }).join('');
+      (form.elements.namedItem('active') as HTMLInputElement).checked = r ? r.active : true;
+      $('[data-dk-del]').hidden = !r; $('[data-dk-err]').hidden = true;
+      form.hidden = false; form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    root.addEventListener('click', async (e) => {
+      const t = e.target as HTMLElement;
+      const tab = t.closest<HTMLElement>('[data-dk-tab]');
+      if (tab) { kind = tab.dataset.dkTab as Kind; root.querySelectorAll('[data-dk-tab]').forEach((b) => b.setAttribute('aria-selected', String(b === tab))); form.hidden = true; paint(); return; }
+      if (t.closest('[data-dk-new]')) return open(null);
+      const ed = t.closest<HTMLElement>('[data-dk-edit]'); if (ed) return open(rows.find((r) => r.id === ed.dataset.dkEdit) ?? null);
+      if (t.closest('[data-dk-cancel]')) { form.hidden = true; editing = null; return; }
+      if (t.closest('[data-dk-del]') && editing && confirm('¿Borrar esto del todo? Si solo quieres esconderlo, desmarca «Mostrar en el sitio».')) {
+        if (live() && !(await deleteDesk(editing.id))) return toast('No se pudo borrar.');
+        rows = rows.filter((r) => r.id !== editing!.id); if (!live()) writeLocal(); form.hidden = true; editing = null; paint(); toast('Borrado.');
+      }
+    });
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data: Record<string, unknown> = editing ? structuredClone(editing.data) : {};
+      for (const [k, , type] of FIELDS[kind]) {
+        const el = form.elements.namedItem(k) as HTMLInputElement; let v: string = el.value.trim();
+        if (type === 'datetime-local' && v) v = new Date(v).toISOString();
+        setp(data, k, v);
+      }
+      const err = (m: string) => { const el = $('[data-dk-err]'); el.textContent = m; el.hidden = false; };
+      const d = data as any;
+      if (kind === 'fight' && (!d.date || !d.a?.name || !d.b?.name)) return err('Escribe la fecha y los dos nombres.');
+      if (kind !== 'fight' && !d.name) return err('Escribe el nombre.');
+      if (kind === 'tournament' && !d.start) return err('Escribe cuándo empieza.');
+      if (kind === 'fight' && !d.status) d.status = 'programada';
+      const slug = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60);
+      const id = editing?.id ?? `${kind}-${slug(kind === 'fight' ? `${d.a.name}-${d.b.name}-${String(d.date).slice(0, 10)}` : d.name)}-${Date.now().toString(36).slice(-4)}`;
+      const row: DeskRow = { id, sport: SPORT[kind], kind, data, active: (form.elements.namedItem('active') as HTMLInputElement).checked, sort: editing?.sort ?? rows.length + 1 };
+      const problem = live() ? await saveDesk(row) : '';
+      if (problem) return err(problem);
+      rows = [...rows.filter((r) => r.id !== id), row]; if (!live()) writeLocal();
+      form.hidden = true; editing = null; paint(); toast('Guardado.');
+    });
+    const pane = root.closest<HTMLElement>('[data-pane]'); let loaded = false;
+    const check = () => { if (pane && !pane.hidden && !loaded) { loaded = true; void load(); } };
+    if (pane) new MutationObserver(check).observe(pane, { attributes: true, attributeFilter: ['hidden'] });
+    check();
+  }
+</script>

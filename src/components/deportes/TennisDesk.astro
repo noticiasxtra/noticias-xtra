@@ -1,0 +1,33 @@
+---
+// Tenis page: Puerto Rican players to follow and the tournament calendar. Typed by the newsroom in the panel
+// (Deportes tab; src/lib/desk.ts).
+import { players, tournaments } from '../../lib/desk';
+const ps = players();
+const ts = tournaments();
+const span = (a: string, b?: string) => {
+  const f = (d: string) => new Date(d).toLocaleDateString('es-PR', { day: 'numeric', month: 'short', timeZone: 'America/Puerto_Rico' });
+  return b ? `${f(a)} – ${f(b)}` : f(a);
+};
+---
+<section class="ys-card dk" id="boricuas">
+  <div class="ys-card-h"><h2>Boricuas a seguir</h2></div>
+  {ps.length ? (
+    <ul class="dk-champs">
+      {ps.map((p) => <li><b>{p.name}</b><span>{[p.tour, p.ranking && `Ranking: ${p.ranking}`].filter(Boolean).join(' · ')}</span>{p.next && <small>Próximo: {p.next}</small>}{p.note && <small>{p.note}</small>}</li>)}
+    </ul>
+  ) : <p class="sp-note">Muy pronto publicaremos los tenistas puertorriqueños a seguir.</p>}
+</section>
+
+<section class="ys-card dk" id="calendario">
+  <div class="ys-card-h"><h2>Calendario</h2></div>
+  {ts.length ? (
+    <ul class="dk-fights">
+      {ts.map((x) => (
+        <li class="dk-fight">
+          <div class="dk-vs"><b>{x.name}</b>{x.level && <small>{x.level}</small>}</div>
+          <div class="dk-meta"><strong>{span(x.start, x.end)}</strong>{x.place && <span>{x.place}</span>}{x.surface && <span>Superficie: {x.surface}</span>}</div>
+        </li>
+      ))}
+    </ul>
+  ) : <p class="sp-note">Muy pronto publicaremos el calendario de torneos.</p>}
+</section>

@@ -270,3 +270,24 @@ export async function uploadColumnistPhoto(name: string, file: Blob): Promise<st
   const r = await fetch(`${base}/storage/v1/object/columnistas/${name}`, { method: 'POST', headers: { apikey: BACKEND.anonKey, Authorization: `Bearer ${token}`, 'Content-Type': file.type || 'image/jpeg' }, body: file }).catch(() => null);
   return r?.ok ? `${base}/storage/v1/object/public/columnistas/${name}` : null;
 }
+
+// ---- Sports items typed by the newsroom (panel → Deportes); supabase/deportes-panel.sql: table "sports_desk" ----
+export type DeskRow = { id: string; sport: 'boxeo' | 'tenis'; kind: 'fight' | 'champion' | 'player' | 'tournament'; data: Record<string, unknown>; active: boolean; sort: number };
+/** Every item, on and off (admins and editors). 'missing' = supabase/deportes-panel.sql hasn't been run yet. */
+export async function listDesk(): Promise<DeskRow[] | 'missing' | null> {
+  const r = await staffApi('sports_desk?select=id,sport,kind,data,active,sort&order=sort.asc');
+  if (!r) return null;
+  if (r.status === 404 || r.status === 400) return 'missing';
+  return r.ok ? r.json() : null;
+}
+/** Creates or updates an item (by its id). Returns an error message, or '' when it was saved. */
+export async function saveDesk(row: DeskRow): Promise<string> {
+  const r = await staffApi('sports_desk?on_conflict=id', { method: 'POST', headers: { Prefer: 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify({ ...row, updated_at: new Date().toISOString() }) });
+  if (!r) return 'Tu sesión venció o no hay conexión. Sal y vuelve a entrar al panel.';
+  if (r.ok) return '';
+  return r.status === 401 || r.status === 403 ? 'Solo un administrador o editor puede cambiar esto.' : r.status === 404 ? 'Falta preparar la base de datos (supabase/deportes-panel.sql).' : `No se pudo guardar (error ${r.status}).`;
+}
+export async function deleteDesk(id: string): Promise<boolean> {
+  const r = await staffApi(`sports_desk?id=eq.${encodeURIComponent(id)}`, { method: 'DELETE' });
+  return !!r?.ok;
+}

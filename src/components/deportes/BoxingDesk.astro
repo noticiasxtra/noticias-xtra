@@ -1,0 +1,57 @@
+---
+// Boxeo page: the card of upcoming fights with Puerto Ricans, recent results and the current Puerto Rican world
+// champions. Typed by the newsroom in the panel (Deportes tab; src/lib/desk.ts).
+import { fights, champions } from '../../lib/desk';
+const { next, done } = fights();
+const champs = champions();
+const when = (d: string) => new Date(d).toLocaleString('es-PR', { weekday: 'short', day: 'numeric', month: 'long', hour: 'numeric', minute: '2-digit', timeZone: 'America/Puerto_Rico' });
+const day = (d: string) => new Date(d).toLocaleDateString('es-PR', { day: 'numeric', month: 'short', timeZone: 'America/Puerto_Rico' });
+---
+<section class="ys-card dk" id="cartelera">
+  <div class="ys-card-h"><h2>Cartelera boricua</h2></div>
+  {next.length ? (
+    <ul class="dk-fights">
+      {next.map((f) => (
+        <li class:list={['dk-fight', { off: f.status === 'cancelada' }]}>
+          <div class="dk-vs"><b>{f.a.name}</b>{f.a.record && <small>{f.a.record}{f.a.country && ` · ${f.a.country}`}</small>}<i>vs.</i><b>{f.b.name}</b>{f.b.record && <small>{f.b.record}{f.b.country && ` · ${f.b.country}`}</small>}</div>
+          <div class="dk-meta">
+            {f.status === 'cancelada' ? <strong class="dk-cancel">Cancelada</strong> : <strong>{when(f.date)}</strong>}
+            {(f.venue || f.city) && <span>{[f.venue, f.city].filter(Boolean).join(', ')}</span>}
+            {(f.weight || f.titles) && <span>{[f.weight, f.titles].filter(Boolean).join(' · ')}</span>}
+            {f.tv && <span>Por {f.tv}</span>}
+            {f.note && <span>{f.note}</span>}
+          </div>
+        </li>
+      ))}
+    </ul>
+  ) : <p class="sp-note">Muy pronto publicaremos las próximas peleas de boxeadores boricuas.</p>}
+</section>
+
+{done.length > 0 && (
+  <section class="ys-card dk">
+    <div class="ys-card-h"><h2>Resultados recientes</h2></div>
+    <ul class="dk-fights">
+      {done.map((f) => {
+        const w = f.winner === 'a' ? f.a.name : f.winner === 'b' ? f.b.name : '';
+        return (
+          <li class="dk-fight">
+            <div class="dk-vs"><b class:list={{ win: f.winner === 'a' }}>{f.a.name}</b><i>vs.</i><b class:list={{ win: f.winner === 'b' }}>{f.b.name}</b></div>
+            <div class="dk-meta">
+              <strong>{f.winner === 'empate' ? 'Empate' : w ? `Ganó ${w}` : 'Final'}{f.method && ` · ${f.method}`}{f.round && ` · asalto ${f.round}`}</strong>
+              <span>{day(f.date)}{f.city && ` · ${f.city}`}{f.weight && ` · ${f.weight}`}</span>
+            </div>
+          </li>
+        );
+      })}
+    </ul>
+  </section>
+)}
+
+{champs.length > 0 && (
+  <section class="ys-card dk">
+    <div class="ys-card-h"><h2>Campeones boricuas</h2></div>
+    <ul class="dk-champs">
+      {champs.map((c) => <li><b>{c.name}</b><span>{c.weight} · {c.org}</span>{c.since && <small>Desde {c.since}</small>}</li>)}
+    </ul>
+  </section>
+)}

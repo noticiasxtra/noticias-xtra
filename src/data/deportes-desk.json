@@ -1,0 +1,19 @@
+[
+  {
+    "id": "fight-pineiro-vazquez-2026-12-05",
+    "sport": "boxeo",
+    "kind": "fight",
+    "sort": 1,
+    "data": {
+      "date": "2026-12-05T20:00:00-04:00",
+      "venue": "Coliseo Rubén Rodríguez",
+      "city": "Bayamón",
+      "a": { "name": "Stephanie Piñeiro", "record": "10-1, 3 KO", "country": "Puerto Rico" },
+      "b": { "name": "Litzy Vázquez", "record": "9-0, 6 KO", "country": "México" },
+      "weight": "140 libras",
+      "titles": "Dos títulos mundiales vacantes",
+      "status": "programada",
+      "tv": "Wynn Records Network"
+    }
+  }
+]

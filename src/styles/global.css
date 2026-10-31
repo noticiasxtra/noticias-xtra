@@ -4494,3 +4494,24 @@ a,button,summary,label{-webkit-tap-highlight-color:transparent}
 .lg-teams li > a{display:flex;align-items:center;gap:inherit;flex:1;min-width:0;color:inherit}
 .lg-teams li > a:hover span{color:var(--purple);text-decoration:underline}
 .lg-team-go{margin-left:auto;font-style:normal;font-size:12px;color:var(--muted)}
+/* Boxeo and Tenis pages: card of fights, results, champions, players and tournaments (src/lib/desk.ts) */
+.dk-fights,.dk-champs{list-style:none;margin:0;padding:0}
+.dk-fight{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;padding:12px 0;border-top:1px solid var(--line)}
+.dk-fight:first-child{border-top:0;padding-top:0}
+.dk-fight.off{opacity:.6}
+.dk-vs{display:grid;gap:2px;font-family:var(--head)}
+.dk-vs b{font-size:16px;font-weight:700}
+.dk-vs b.win::after{content:" ✓";color:#13804A}
+.dk-vs i{font-style:normal;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin:2px 0}
+.dk-vs small,.dk-champs small{font-size:12.5px;color:var(--muted)}
+.dk-meta{display:grid;gap:3px;font-size:13.5px;color:var(--muted);align-content:start}
+.dk-meta strong{color:var(--ink);font-size:14px}
+.dk-cancel{color:var(--red)!important}
+.dk-champs li{display:grid;gap:2px;padding:10px 0;border-top:1px solid var(--line)}
+.dk-champs li:first-child{border-top:0;padding-top:0}
+.dk-champs b{font-family:var(--head);font-size:15px}
+.dk-champs span{font-size:13.5px}
+@media (max-width:560px){ .dk-fight{grid-template-columns:1fr;gap:6px} }
+.dk-desk{display:grid;gap:14px}
+.dk-desk [data-dk-new]{justify-self:start}
+.dk-desk .cl-fields select{font:inherit;font-weight:400;font-size:15px;border:1px solid var(--line);border-radius:10px;padding:9px 12px;background:var(--card);color:var(--ink)}
