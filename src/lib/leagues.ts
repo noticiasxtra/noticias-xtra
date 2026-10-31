@@ -13,7 +13,8 @@
 export const LEAGUES = [
   // Puerto Rico
   { id: 'bsn', youtube: 'UCZOFf3DbBqAMSwmzYl8RPnA', name: 'BSN', abbr: 'BSN', full: 'Baloncesto Superior Nacional', local: true, color: '#F26B1D', photo: 'basketball',
-    about: 'La liga de baloncesto profesional de Puerto Rico.', url: 'https://www.bsnpr.com' },
+    about: 'La liga de baloncesto profesional de Puerto Rico.', url: 'https://www.bsnpr.com',
+    season: 'Temporada 2027: arranca el sábado, 20 de marzo de 2027; cada equipo juega 34 partidos en la serie regular.', starts: '2027-03-20T00:00:00-04:00' },
   { id: 'doble-a', name: 'Doble A', abbr: 'LBSDA', full: 'Liga de Béisbol Superior Doble A', local: true, color: '#1B3A8C', photo: 'baseball',
     about: 'El béisbol de los pueblos, organizado por la Federación de Béisbol de Puerto Rico.', season: 'Campeón 2026: Comerío.', url: 'https://beisboldobleapr.com' },
   { id: 'invernal', youtube: 'UCyX4hGEy4iXVW5q8H_jf2jg', name: 'La Pro', abbr: 'LBPRC', full: 'Liga de Béisbol Profesional Roberto Clemente', local: true, color: '#C8202F', logoBg: '#14213D', photo: 'baseball',

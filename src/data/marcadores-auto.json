@@ -9,7 +9,8 @@
     "status": "final",
     "src": "highlightly:442183788",
     "homeScore": 95,
-    "awayScore": 79
+    "awayScore": 79,
+    "id": "nba-442183788"
   },
   {
     "league": "nba",
@@ -21,7 +22,8 @@
     "status": "final",
     "src": "highlightly:442186341",
     "homeScore": 98,
-    "awayScore": 93
+    "awayScore": 93,
+    "id": "nba-442186341"
   },
   {
     "league": "nba",
@@ -33,7 +35,8 @@
     "status": "final",
     "src": "highlightly:442185490",
     "homeScore": 94,
-    "awayScore": 110
+    "awayScore": 110,
+    "id": "nba-442185490"
   },
   {
     "league": "nba",
@@ -45,7 +48,8 @@
     "status": "final",
     "src": "highlightly:442189745",
     "homeScore": 145,
-    "awayScore": 125
+    "awayScore": 125,
+    "id": "nba-442189745"
   },
   {
     "league": "nba",
@@ -57,7 +61,8 @@
     "status": "final",
     "src": "highlightly:442188894",
     "homeScore": 116,
-    "awayScore": 111
+    "awayScore": 111,
+    "id": "nba-442188894"
   },
   {
     "league": "nba",
@@ -69,7 +74,8 @@
     "status": "final",
     "src": "highlightly:442188043",
     "homeScore": 127,
-    "awayScore": 101
+    "awayScore": 101,
+    "id": "nba-442188043"
   },
   {
     "league": "nba",
@@ -81,7 +87,8 @@
     "status": "final",
     "src": "highlightly:442191447",
     "homeScore": 120,
-    "awayScore": 127
+    "awayScore": 127,
+    "id": "nba-442191447"
   },
   {
     "league": "nba",
@@ -93,7 +100,8 @@
     "status": "final",
     "src": "highlightly:442190596",
     "homeScore": 112,
-    "awayScore": 95
+    "awayScore": 95,
+    "id": "nba-442190596"
   },
   {
     "league": "nba",
@@ -106,7 +114,8 @@
     "src": "highlightly:442192298",
     "homeScore": 64,
     "awayScore": 88,
-    "note": "3er cuarto · 10'"
+    "note": "3er cuarto · 10'",
+    "id": "nba-442192298"
   },
   {
     "league": "nba",
@@ -116,7 +125,8 @@
     "awayFull": "Philadelphia 76ers",
     "homeFull": "Charlotte Hornets",
     "status": "programado",
-    "src": "highlightly:442193149"
+    "src": "highlightly:442193149",
+    "id": "nba-442193149"
   },
   {
     "league": "nba",
@@ -126,7 +136,8 @@
     "awayFull": "Atlanta Hawks",
     "homeFull": "New Orleans Pelicans",
     "status": "programado",
-    "src": "highlightly:442194000"
+    "src": "highlightly:442194000",
+    "id": "nba-442194000"
   },
   {
     "league": "nba",
@@ -136,7 +147,8 @@
     "awayFull": "Cleveland Cavaliers",
     "homeFull": "Milwaukee Bucks",
     "status": "programado",
-    "src": "highlightly:442196553"
+    "src": "highlightly:442196553",
+    "id": "nba-442196553"
   },
   {
     "league": "nba",
@@ -146,7 +158,8 @@
     "awayFull": "Sacramento Kings",
     "homeFull": "Memphis Grizzlies",
     "status": "programado",
-    "src": "highlightly:442195702"
+    "src": "highlightly:442195702",
+    "id": "nba-442195702"
   },
   {
     "league": "nba",
@@ -156,7 +169,8 @@
     "awayFull": "Minnesota Timberwolves",
     "homeFull": "San Antonio Spurs",
     "status": "programado",
-    "src": "highlightly:442194851"
+    "src": "highlightly:442194851",
+    "id": "nba-442194851"
   },
   {
     "league": "nba",
@@ -166,7 +180,8 @@
     "awayFull": "Oklahoma City Thunder",
     "homeFull": "Houston Rockets",
     "status": "programado",
-    "src": "highlightly:442197404"
+    "src": "highlightly:442197404",
+    "id": "nba-442197404"
   },
   {
     "_checked": "2026-10-31"

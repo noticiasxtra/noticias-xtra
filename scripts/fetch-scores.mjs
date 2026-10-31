@@ -53,20 +53,31 @@ function toGame(league, m) {
     awayFull: m.awayTeam.name, homeFull: m.homeTeam.name,
     status: final ? 'final' : live ? 'en-vivo' : 'programado',
     src: `highlightly:${m.id}`,
+    id: `${league}-${m.id}`, // its own page: /deportes/juego/<id>/
   };
   if ((final || live) && Number.isFinite(home) && Number.isFinite(away)) { g.homeScore = home; g.awayScore = away; }
   if (live) g.note = PERIOD[st] + (m.state.clock && st.endsWith('quarter') ? ` · ${m.state.clock}'` : '');
   if (st === 'Finished after over time') g.note = 'Final · tiempo extra';
+  // Score by quarter (Highlightly gives "home - away" for each one played)
+  const sc = m.state?.score ?? {};
+  const parts = [['q1', '1'], ['q2', '2'], ['q3', '3'], ['q4', '4'], ['overTime', 'TE']].filter(([k]) => sc[k]);
+  if (parts.length && (final || live)) {
+    const split = (k) => String(sc[k]).split('-').map((x) => Number.parseInt(x, 10));
+    g.linescore = { labels: parts.map(([, n]) => n), home: parts.map(([k]) => split(k)[0]), away: parts.map(([k]) => split(k)[1]), totals: ['T'], homeTotals: [g.homeScore ?? ''], awayTotals: [g.awayScore ?? ''] };
+  }
   if (OFF[st]) g.note = OFF[st];
   return g;
 }
 
+const GROUP = { 'Eastern Conference': 'Conferencia Este', 'Western Conference': 'Conferencia Oeste' };
 function toTable(data, season) {
-  const groups = (data.groups || []).map((grp) => {
+  let src = data.groups || [];
+  if (src.some((g) => /Conference$/.test(g.name))) src = src.filter((g) => /Conference$/.test(g.name)); // NBA: the two conferences, not divisions
+  const groups = src.map((grp) => {
     const rows = [...grp.standings].sort((a, b) => a.position - b.position);
     const top = rows[0];
     return {
-      ...(data.groups.length > 1 ? { name: grp.name } : {}),
+      ...(src.length > 1 ? { name: GROUP[grp.name] ?? grp.name.replace(/^Group /, 'Grupo ') } : {}),
       rows: rows.map((r) => {
         const gb = top ? ((top.wins - r.wins) + (r.loses - top.loses)) / 2 : 0;
         return { team: r.team.name, w: r.wins, l: r.loses, gb: gb === 0 ? '—' : String(gb) };

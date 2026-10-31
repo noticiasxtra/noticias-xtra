@@ -11,7 +11,7 @@ import LeagueBadge from '../../components/deportes/LeagueBadge.astro';
 import AdSlot from '../../components/AdSlot.astro';
 import GamesTeaser from '../../components/GamesTeaser.astro';
 import TeamLogo from '../../components/deportes/TeamLogo.astro';
-import { scores, gameTime } from '../../lib/scores';
+import { scores, recent, gameTime } from '../../lib/scores';
 import { getStories, topOrder, sectionTop, url, ICONS, type Story } from '../../lib/site';
 import { LEAGUES, league } from '../../lib/leagues';
 
@@ -29,7 +29,7 @@ const fresh = (list: Story[]) => list.filter((s) => !shown.has(s));
 const latest = fresh(stories).slice(0, 10); // the newest 10, in order; the rest are on /deportes/noticias/
 const headlines = fresh(stories).slice(10, 16); // the next ones after "Últimas noticias" (no repeats)
 // Side columns: recent results and next games (real and DEMO), so the columns stay full while scrolling
-const all = scores(undefined, 60);
+const all = recent(scores(undefined, 60), 7); // current games only (a finished season leaves these columns)
 const results = all.filter((g) => g.status === 'final').slice(0, 4);
 const nextGames = all.filter((g) => g.status === 'programado').slice(0, 4);
 const gameHref = (g: (typeof all)[number]) => url(g.id ? `deportes/juego/${g.id}` : `deportes/${g.league}`);

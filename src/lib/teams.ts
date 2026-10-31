@@ -144,6 +144,7 @@ export const TEAMS: Record<string, Team> = {
   'nba:Utah Jazz': { abbr: 'UTA', color: '#002B5C' },
   'nba:Golden State Warriors': { abbr: 'GSW', color: '#1D428A' },
   'nba:LA Clippers': { abbr: 'LAC', color: '#C8102E' },
+  'nba:Los Angeles Clippers': { abbr: 'LAC', color: '#C8102E' }, // the name the automatic scores use
   'nba:Los Angeles Lakers': { abbr: 'LAL', color: '#552583' },
   'nba:Phoenix Suns': { abbr: 'PHX', color: '#1D1160' },
   'nba:Sacramento Kings': { abbr: 'SAC', color: '#5A2D81' },
@@ -194,5 +195,7 @@ export function team(league: string, name: string): Team {
   const fallback = { abbr: short.normalize('NFD').replace(/\p{M}/gu, '').slice(0, 3).toUpperCase(), color: '#5C5F6E' };
   // A short name ("Criollas") also finds the full entry ("Criollas de Caguas")
   const byPrefix = Object.keys(TEAMS).find((k) => k.startsWith(`${league}:${short} de `));
-  return TEAMS[`${league}:${name}`] ?? TEAMS[`${league}:${short}`] ?? (byPrefix ? TEAMS[byPrefix] : undefined) ?? fallback;
+  // …and a nickname ("Lakers", from the automatic scores) finds the city + nickname entry ("Los Angeles Lakers")
+  const bySuffix = Object.keys(TEAMS).find((k) => k.startsWith(`${league}:`) && k.endsWith(` ${name}`));
+  return TEAMS[`${league}:${name}`] ?? TEAMS[`${league}:${short}`] ?? (byPrefix ? TEAMS[byPrefix] : undefined) ?? (bySuffix ? TEAMS[bySuffix] : undefined) ?? fallback;
 }

@@ -11,7 +11,7 @@ import TeamLogo from './deportes/TeamLogo.astro';
 import { getStories, mostRead, section, url, SITE } from '../lib/site';
 import { WEATHER_URL } from '../lib/weather';
 import { getBreaking } from '../lib/breaking';
-import { scores } from '../lib/scores';
+import { scores, recent } from '../lib/scores';
 import { team } from '../lib/teams';
 import { LEAGUES, league } from '../lib/leagues';
 import { SIGNS, signOfTheDay, horoscope } from '../lib/daily';
@@ -25,7 +25,7 @@ const latest = trend ? undefined : stories.find((s) => s.data.section !== 'opini
 const moreLatest = latest ? stories.filter((s) => s.id !== latest.id && s.data.section !== 'opinion').slice(0, 5) : [];
 
 // Featured game: a live local game first, then the next upcoming, then the latest final
-const allGames = scores();
+const allGames = recent(scores()); // only current games: a finished season leaves the card
 const g = allGames.find((x) => league(x.league)?.local && x.status === 'en-vivo') ?? allGames.find((x) => league(x.league)?.local);
 const shortTime = (d: string) =>
   new Date(d).toLocaleString('es-PR', { weekday: 'short', hour: 'numeric', minute: '2-digit', timeZone: 'America/Puerto_Rico' }).replace(',', '');

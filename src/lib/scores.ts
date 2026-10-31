@@ -72,6 +72,12 @@ export function scores(league?: string, max = 16): Game[] {
   return [...live, ...next, ...done].slice(0, max);
 }
 
+/** Only what's current: live games, results from the last `days` days and games in the next `days` days. Used by the
+ *  home page and the score strips, so a league whose season ended (e.g. MLB in October) leaves them on its own.
+ *  League pages keep their full list. */
+export const recent = (list: Game[], days = 4): Game[] =>
+  list.filter((g) => g.status === 'en-vivo' || Math.abs(t(g) - Date.now()) < days * 864e5);
+
 export const games = (): Game[] => allGames().filter((g) => g.id);
 export const standings = (league: string): Standings | undefined =>
   (autoStandings as Record<string, Standings>)[league] ?? (standingsData as Record<string, Standings>)[league] ?? (demo ? DEMO_STANDINGS[league] : undefined);

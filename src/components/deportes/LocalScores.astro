@@ -3,12 +3,12 @@
 // most recent results (upcoming games only when a league has nothing else). Each tab links to its league.
 import TeamLogo from './TeamLogo.astro';
 import LeagueBadge from './LeagueBadge.astro';
-import { scores, gameTime, type Game } from '../../lib/scores';
+import { scores, recent, gameTime, type Game } from '../../lib/scores';
 import { league } from '../../lib/leagues';
 import { url } from '../../lib/site';
 const IDS = ['bsn', 'doble-a', 'invernal', 'mlb', 'nba', 'nfl'] as const;
 const tabs = IDS.map((id) => {
-  const all = scores(id, 40);
+  const all = recent(scores(id, 40)); // a league with nothing recent (season over) has no tab
   const live = all.filter((g) => g.status === 'en-vivo');
   const done = all.filter((g) => g.status === 'final');
   const next = all.filter((g) => g.status === 'programado');
