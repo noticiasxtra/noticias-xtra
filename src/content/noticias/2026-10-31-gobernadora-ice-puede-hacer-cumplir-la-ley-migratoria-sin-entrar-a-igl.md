@@ -3,13 +3,13 @@ title: "Gobernadora: ICE puede hacer cumplir la ley migratoria sin entrar a igle
 description: "Jenniffer González Colón dijo que las intervenciones federales en iglesias y negocios \"están de más\". Aclaró que las agencias federales pueden hacer su trabajo sin crear caos entre residentes de largo tiempo en la Isla."
 section: puerto-rico
 place: "Puerto Rico"
-date: 2026-10-30T21:32:41.000Z
-aiAssisted: true
-draft: true
-pending: true
+date: 2026-10-30T21:32:00.000Z
+author: "Noticias Xtra"
 image: "https://cdn.noticel.com/2026/10/30173447/ice.png"
 imageCaption: "Las expresiones ocurren en medio de denuncias públicas sobre operativos de ICE en comunidades, establecimientos comerciales y otros espacios de Puerto Rico"
 imageCredit: "Foto: Archivo/NotiCel"
+aiAssisted: true
+draft: false
 ---
 
 La gobernadora Jenniffer González Colón afirmó el viernes que las intervenciones del Servicio de Inmigración y Control de Aduanas (ICE) en iglesias y comercios están de más. Dijo que las autoridades federales pueden hacer cumplir las leyes migratorias sin provocar situaciones de caos en Puerto Rico.
