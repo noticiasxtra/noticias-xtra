@@ -1057,9 +1057,9 @@
     "status": "en-vivo",
     "src": "highlightly:442192298",
     "id": "nba-442192298",
-    "homeScore": 73,
-    "awayScore": 96,
-    "note": "4to cuarto · 4'",
+    "homeScore": 90,
+    "awayScore": 112,
+    "note": "4to cuarto · 9'",
     "linescore": {
       "labels": [
         "1",
@@ -1071,22 +1071,22 @@
         18,
         24,
         22,
-        9
+        26
       ],
       "away": [
         27,
         32,
         29,
-        8
+        24
       ],
       "totals": [
         "T"
       ],
       "homeTotals": [
-        73
+        90
       ],
       "awayTotals": [
-        96
+        112
       ]
     }
   },
