@@ -3,12 +3,13 @@ title: "Investigan el asesinato de un hombre baleado en la calle Modesto Vélez 
 description: "La Policía halló el cuerpo de un hombre con heridas de bala en la madrugada del sábado. El Cuerpo de Investigaciones Criminales de Ponce lleva el caso."
 section: puerto-rico
 place: "Santa Isabel"
-date: 2026-10-31T14:29:52.000Z
-aiAssisted: true
-draft: true
-pending: true
+date: 2026-10-31T14:29:00.000Z
+author: "Noticias Xtra"
 image: "https://cdn.noticel.com/2026/09/30081421/LLM04763.jpg"
 imageCredit: "Foto: Archivo/NotiCel"
+sectionLead: true
+aiAssisted: true
+draft: false
 ---
 
 La Policía investiga el asesinato de un hombre en la calle Modesto Vélez, en Santa Isabel. El hecho se reportó a eso de las 12:38 de la madrugada del sábado.
