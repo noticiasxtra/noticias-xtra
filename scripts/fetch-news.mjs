@@ -178,7 +178,7 @@ async function readNotiCel(src) {
     const credit = /\/|NotiCel|suministrada|cortes[ií]a/i.test(tail) && tail.length <= 70 ? tail.replace(/^\(|\)$/g, '') : '';
     const photo = media?.source_url && !WIRE_PHOTO.test(credit) && !WIRE_PHOTO.test(caption) ? {
       image: media.source_url,
-      imageCaption: (credit ? caption.slice(0, caption.length - credit.length) : caption).replace(/[\s.]+$/, '').slice(0, 220),
+      imageCaption: (credit ? caption.slice(0, caption.lastIndexOf(tail)) : caption).replace(/[\s.(]+$/, '').slice(0, 220),
       imageCredit: /^(foto\s+)?suministrada$/i.test(credit) ? 'Foto suministrada' : `Foto: ${credit.replace(/^Foto:?\s*/i, '') || 'NotiCel'}`,
     } : undefined;
     const section = (p.categories || []).map((c) => hints[c]).find(Boolean);
@@ -260,7 +260,7 @@ const NOTICEL = `
 
 INSTRUCCIONES ESPECIALES: esta fuente es una noticia de NotiCel, un periódico de Puerto Rico que autorizó a Noticias Xtra a reescribir y publicar sus noticias.
 - Reescribe la noticia completa con la voz propia de Noticias Xtra: titular nuevo, subtítulo (description) nuevo y cuerpo nuevo. No copies oraciones de NotiCel; las citas textuales de las personas sí se mantienen exactas, entre comillas y con su autor.
-- La firma es de Noticias Xtra. Cuando un dato viene del reportaje de NotiCel (algo que NotiCel supo, preguntó u obtuvo), atribúyelo con naturalidad dentro del texto, como haría cualquier periódico: "según NotiCel", "informó NotiCel", "de acuerdo con NotiCel", "reveló NotiCel", "le dijo a NotiCel". Varía la forma, úsalo una o dos veces como máximo y solo donde haga falta; no en cada párrafo ni en hechos públicos (anuncios oficiales, conferencias de prensa, resultados, el tiempo).
+- La firma es de Noticias Xtra. Cuando un dato viene del reportaje de NotiCel (algo que NotiCel supo, preguntó u obtuvo), atribúyelo con naturalidad dentro del texto, como haría cualquier periódico: "según NotiCel", "informó NotiCel", "de acuerdo con NotiCel", "reveló NotiCel", "le dijo a NotiCel". Varía la forma y úsalo una vez, como mucho dos. NUNCA lo uses para hechos públicos: anuncios y comunicados (incluidas fotos o datos "suministrados"), conferencias de prensa, declaraciones públicas, resultados deportivos, el tiempo, decisiones de tribunales o agencias. Si dudas, no lo pongas: la mayoría de las noticias no lo llevan.
 - Voz de Noticias Xtra: un periódico conservador, sobrio y serio. Titular y subtítulo también en ese tono.
   - Pon primero los hechos que más importan a la familia puertorriqueña: la seguridad, la ley y el orden, el trabajo y el costo de vida, la fe, la educación de los hijos, el buen uso del dinero del pueblo y el respeto a las instituciones.
   - Puedes cambiar el enfoque del titular y el orden de la noticia para ese tono: qué hecho va primero, qué se destaca y qué palabras se usan (por ejemplo, destacar el costo para el contribuyente, el cumplimiento de la ley o el impacto en las familias, si la noticia lo contiene).

@@ -7,7 +7,7 @@ date: 2026-10-31T17:35:36.000Z
 aiAssisted: true
 draft: false
 image: "https://cdn.noticel.com/2026/10/31134036/1-8.jpg"
-imageCaption: "En el centro el rector Miguel A. Muñoz, a su izquierda el doctor Manuel Rodríguez, investigador principal de la propuesto. Le acompañan los coinvestigadores del proyecto. (F"
+imageCaption: "En el centro el rector Miguel A. Muñoz, a su izquierda el doctor Manuel Rodríguez, investigador principal de la propuesto. Le acompañan los coinvestigadores del proyecto"
 imageCredit: "Foto suministrada"
 ---
 
@@ -17,7 +17,7 @@ El proyecto durará cuatro años y podrá renovarse por tres años más. Partici
 
 Según Rodríguez Martínez, la meta es mejorar la calidad de las células, evitar pérdidas durante su fabricación y lograr que los tratamientos lleguen a más personas. "Queremos desarrollar tecnologías que nos permitan optimizar la calidad de las células, evitar pérdidas durante los procesos de manufactura y hacer posible que estos tratamientos estén disponibles para una mayor cantidad de personas", explicó.
 
-La propuesta contempla más de $1 millón en becas para estudiantes graduados y subgraduados. También incluye apoyo para matrículas, experiencias de investigación, seminarios, campamentos de verano para estudiantes de escuela superior y programas de capacitación para maestros, informó NotiCel.
+La propuesta contempla más de $1 millón en becas para estudiantes graduados y subgraduados. También incluye apoyo para matrículas, experiencias de investigación, seminarios, campamentos de verano para estudiantes de escuela superior y programas de capacitación para maestros.
 
 Cada año habrá fondos semilla para profesores que no forman parte del equipo principal. Con ellos podrán desarrollar ideas y obtener resultados iniciales para nuevas propuestas. Además, el centro adquirirá equipos de laboratorio, plataformas de computación avanzada e infraestructura tecnológica.
 

@@ -2,7 +2,7 @@
 # Each source has a review level ("review" in sources.json):
 #   auto / check -> published right away; "check" stories are also listed in an issue for a quick look
 #   always       -> a pull request the editor approves (political, legal, crime, sensitive, low confidence)
-# The repository owner is assigned to both, so GitHub sends an email and a phone notification.
+# The reviewer (REVIEWER below) is assigned to both, so GitHub sends an email and a phone notification.
 #
 # Setup (one time):
 #  1. Settings > Secrets and variables > Actions > New repository secret: ANTHROPIC_API_KEY
@@ -48,7 +48,8 @@ jobs:
           REVIEW: ${{ steps.fetch.outputs.review }}
           CHECK: ${{ steps.fetch.outputs.check }}
           AUTO: ${{ steps.fetch.outputs.auto }}
-          OWNER: ${{ github.repository_owner }}
+          # The person notified (an organization can't be assigned): repository variable REVIEWER, or the publisher's account
+          REVIEWER: ${{ vars.REVIEWER || 'publisher-noticiasxtra' }}
         run: |
           git config user.name "noticias-xtra-ia"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -68,7 +69,8 @@ jobs:
 
           # 2) Routine stories already published: an issue for a quick look
           if [ "${CHECK:-0}" != "0" ]; then
-            gh issue create --title "Vistazo rápido: $CHECK publicadas ($WHEN)" --body-file check-body.md --assignee "$OWNER"
+            URL=$(gh issue create --title "Vistazo rápido: $CHECK publicadas ($WHEN)" --body-file check-body.md)
+            gh issue edit "$URL" --add-assignee "$REVIEWER" || echo "No se pudo asignar a $REVIEWER (el aviso sí se creó)"
           fi
 
           # 3) Stories that wait for approval: a separate branch + pull request
@@ -80,5 +82,6 @@ jobs:
             git push origin "$BRANCH"
             gh pr create --base main --head "$BRANCH" \
               --title "Noticias para aprobar: $REVIEW ($WHEN)" \
-              --body-file pr-body.md --assignee "$OWNER"
+              --body-file pr-body.md
+            gh pr edit "$BRANCH" --add-assignee "$REVIEWER" || echo "No se pudo asignar a $REVIEWER (la pull request sí se creó)"
           fi
