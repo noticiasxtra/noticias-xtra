@@ -4,9 +4,9 @@ description: "El Consejo de Seguridad extendió hasta octubre de 2027 la misión
 section: mundo
 place: "Nueva York, Estados Unidos"
 date: 2026-10-30T12:00:00.000Z
+author: "Noticias Xtra"
 aiAssisted: true
-draft: true
-pending: true
+draft: false
 sources:
   - name: "Noticias ONU (Naciones Unidas)"
     url: "https://news.un.org/feed/view/es/story/2026/10/1542127"
