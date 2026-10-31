@@ -5,6 +5,8 @@ section: puerto-rico
 place: "San Juan"
 date: 2026-10-31T13:37:41.000Z
 aiAssisted: true
+origin:
+  name: "NotiCel"
 draft: false
 image: "https://cdn.noticel.com/2026/10/30162159/silve.jpg"
 imageCredit: "Foto: Silverio Pérez/Foto suministrada"

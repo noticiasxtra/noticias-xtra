@@ -10,6 +10,8 @@ imageCaption: "“El problema no es la cifra de esta propuesta; el problema es l
 imageCredit: "Foto: Archivo/NotiCel"
 sectionLead: true
 aiAssisted: true
+origin:
+  name: "NotiCel"
 draft: false
 ---
 

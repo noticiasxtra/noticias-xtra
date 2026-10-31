@@ -9,6 +9,8 @@ image: "https://cdn.noticel.com/2026/10/31164054/coliseo.jpg"
 imageCaption: "Imagen de la ceremonia de reinuaguración del Coliseo Dr. Wilfredo Toro Vázquez . (Foto tomada de redes)"
 imageCredit: "Foto: NotiCel"
 aiAssisted: true
+origin:
+  name: "NotiCel"
 draft: false
 ---
 

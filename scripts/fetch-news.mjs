@@ -335,6 +335,7 @@ async function saveStory(story, item, src, pending = false) {
     ...(src.breaking ? ['breaking: true'] : []), // e.g. weather alerts can go in the red ÚLTIMA HORA bar
     ...photo,
     ...(rewrite && story.creditNeeded ? [`via: ${yaml('Con información de NotiCel')}`] : []),
+    ...(rewrite ? ['origin:', `  name: ${yaml(src.name)}`, ...(item.link ? [`  url: ${yaml(item.link)}`] : [])] : []), // newsroom only (panel), not shown
     ...(sources.length ? ['sources:', ...sources] : []),
     '---',
     '',

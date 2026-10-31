@@ -10,6 +10,8 @@ imageCredit: "Foto: Archivo/NotiCel"
 trending: true
 sectionLead: true
 aiAssisted: true
+origin:
+  name: "NotiCel"
 draft: false
 ---
 

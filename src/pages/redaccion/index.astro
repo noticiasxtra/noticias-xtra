@@ -46,7 +46,7 @@ const problems = stories.map((s) => {
   else if (!d.imageCredit) p.push('foto sin crédito');
   if (d.gallery.some((g) => !g.credit)) p.push('galería sin crédito');
   const w = words(s.body); if (w < 150) p.push(`solo ${w} palabras`);
-  if (!d.sources.length && d.section !== 'opinion') p.push('sin fuentes');
+  if (!d.sources.length && !d.origin && d.section !== 'opinion') p.push('sin fuentes'); // NotiCel rewrites keep their source in origin
   return p.length ? { id: s.id, title: d.title, date: d.date.toISOString(), p } : null;
 }).filter(Boolean);
 const webPhotos = stories.flatMap((s) => [s.data.image ?? '', ...s.data.gallery.map((g) => g.src)].filter(isWeb).map((src) => ({ id: s.id, title: s.data.title, src })));

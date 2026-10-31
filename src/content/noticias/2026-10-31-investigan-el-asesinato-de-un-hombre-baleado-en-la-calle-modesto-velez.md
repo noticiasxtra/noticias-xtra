@@ -9,6 +9,8 @@ image: "https://cdn.noticel.com/2026/09/30081421/LLM04763.jpg"
 imageCredit: "Foto: Archivo/NotiCel"
 sectionLead: true
 aiAssisted: true
+origin:
+  name: "NotiCel"
 draft: false
 ---
 

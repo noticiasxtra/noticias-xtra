@@ -10,6 +10,8 @@ imageCaption: "Suzanne Roig Fuertes es investigada por la Comisión de Familia, 
 imageCredit: "Foto: Juan Costa / NotiCel"
 featured: true
 aiAssisted: true
+origin:
+  name: "NotiCel"
 draft: false
 ---
 

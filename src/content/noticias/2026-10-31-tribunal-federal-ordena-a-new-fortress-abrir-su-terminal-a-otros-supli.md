@@ -5,6 +5,8 @@ section: puerto-rico
 place: "Puerto Rico"
 date: 2026-10-31T13:10:33.000Z
 aiAssisted: true
+origin:
+  name: "NotiCel"
 draft: false
 image: "https://cdn.noticel.com/2026/10/31091635/21-11-27-CP-COMBUSTIBLE-AEE-CENTRAL-TERMOELECTRICA-SAN-JUAN-JRCR-265794.jpg"
 imageCaption: "Central Termoeléctrica de San Juan. (Archivo/Juan R. Costa)"

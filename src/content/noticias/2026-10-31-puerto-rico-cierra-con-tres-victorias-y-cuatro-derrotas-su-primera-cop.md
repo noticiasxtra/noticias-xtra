@@ -10,6 +10,8 @@ imageCaption: "Acción del partido entre Puerto Rico y Kuwait. (Foto tomada de r
 imageCredit: "Foto: NotiCel"
 sectionPinned: true
 aiAssisted: true
+origin:
+  name: "NotiCel"
 draft: false
 ---
 

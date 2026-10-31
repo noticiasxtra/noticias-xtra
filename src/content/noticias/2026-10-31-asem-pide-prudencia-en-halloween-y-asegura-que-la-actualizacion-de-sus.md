@@ -8,6 +8,8 @@ author: "Noticias Xtra"
 image: "https://cdn.noticel.com/2026/10/30162816/regino.jpg"
 imageCredit: "Foto: Regino Colón Alsina/Foto suministrada"
 aiAssisted: true
+origin:
+  name: "NotiCel"
 draft: false
 ---
 

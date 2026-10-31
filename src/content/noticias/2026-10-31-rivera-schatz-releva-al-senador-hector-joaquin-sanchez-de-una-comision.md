@@ -10,6 +10,8 @@ imageCaption: "El senador Héctor Joaquín Sánchez Álvarez fue relevado de la 
 imageCredit: "Foto: Archivo/NotiCel"
 sectionLead: true
 aiAssisted: true
+origin:
+  name: "NotiCel"
 draft: false
 ---
 

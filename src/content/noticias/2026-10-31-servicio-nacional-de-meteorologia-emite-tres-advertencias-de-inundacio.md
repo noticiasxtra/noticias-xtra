@@ -5,6 +5,8 @@ section: clima
 place: "Puerto Rico"
 date: 2026-10-31T20:22:02.000Z
 aiAssisted: true
+origin:
+  name: "NotiCel"
 draft: false
 image: "https://cdn.noticel.com/2026/10/31162634/20-07-30-TORMENTA-TROPICAL-ISAIAS-JRCR-26416.jpg"
 imageCredit: "Foto: Archivo/NotiCel"

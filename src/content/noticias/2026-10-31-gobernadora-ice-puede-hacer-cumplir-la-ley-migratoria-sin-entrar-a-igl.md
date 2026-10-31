@@ -9,6 +9,8 @@ image: "https://cdn.noticel.com/2026/10/30173447/ice.png"
 imageCaption: "Las expresiones ocurren en medio de denuncias públicas sobre operativos de ICE en comunidades, establecimientos comerciales y otros espacios de Puerto Rico"
 imageCredit: "Foto: Archivo/NotiCel"
 aiAssisted: true
+origin:
+  name: "NotiCel"
 draft: false
 ---
 

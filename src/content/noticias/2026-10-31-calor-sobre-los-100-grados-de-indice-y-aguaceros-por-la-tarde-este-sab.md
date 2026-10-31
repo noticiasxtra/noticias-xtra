@@ -5,6 +5,8 @@ section: clima
 place: "Puerto Rico"
 date: 2026-10-31T13:41:29.000Z
 aiAssisted: true
+origin:
+  name: "NotiCel"
 draft: false
 image: "https://cdn.noticel.com/2026/10/31094600/soleado-Cropped-1.jpg"
 imageCredit: "Foto: Archivo/NotiCel"

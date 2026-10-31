@@ -5,6 +5,8 @@ section: estados-unidos
 place: "Nueva York, Estados Unidos"
 date: 2026-10-31T14:26:13.000Z
 aiAssisted: true
+origin:
+  name: "NotiCel"
 draft: false
 image: "https://cdn.noticel.com/2026/10/31080823/SPT-lleva-ante-candidata-al-Congreso-reclamos-sobre-la-Junta-de-Control-Fiscal-y-los-derechos-laborales-en-Puerto-Rico.jpeg"
 imageCaption: "SPT lleva ante candidata al Congreso reclamos sobre la Junta de Control Fiscal y los derechos laborales en Puerto Rico"

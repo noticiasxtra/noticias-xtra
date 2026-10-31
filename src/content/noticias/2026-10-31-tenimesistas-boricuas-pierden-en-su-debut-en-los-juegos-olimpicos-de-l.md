@@ -5,6 +5,8 @@ section: deportes
 place: "Dakar, Senegal"
 date: 2026-10-31T17:22:12.000Z
 aiAssisted: true
+origin:
+  name: "NotiCel"
 draft: false
 image: "https://cdn.noticel.com/2026/10/31132313/unnamed-6.jpg"
 imageCaption: "Los boricuas cayeron ante sus rivales de Corea"

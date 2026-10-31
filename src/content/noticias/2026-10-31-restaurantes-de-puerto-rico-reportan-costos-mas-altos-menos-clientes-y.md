@@ -5,6 +5,8 @@ section: economia
 place: "Puerto Rico"
 date: 2026-10-31T13:39:02.000Z
 aiAssisted: true
+origin:
+  name: "NotiCel"
 draft: false
 image: "https://cdn.noticel.com/2026/10/30143708/21-07-28-CP-THE-BAY-DRACO-ROSA-JRCR-204049.jpg"
 imageCaption: "El 51% de los restaurantes identificó a la electricidad como su principal costo, mientras que el 54% la señaló como su mayor preocupación local"

@@ -10,6 +10,8 @@ imageCaption: "Carátula del nuevo sencillo de Kany García"
 imageCredit: "Foto suministrada"
 sectionLead: true
 aiAssisted: true
+origin:
+  name: "NotiCel"
 draft: false
 ---
 

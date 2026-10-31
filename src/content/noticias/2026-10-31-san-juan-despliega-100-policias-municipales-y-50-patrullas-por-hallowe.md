@@ -5,6 +5,8 @@ section: puerto-rico
 place: "San Juan"
 date: 2026-10-31T14:55:46.000Z
 aiAssisted: true
+origin:
+  name: "NotiCel"
 draft: false
 image: "https://cdn.noticel.com/2026/10/31105932/25-08-11-ALCALDE-DE-SAN-JUAN-SE-REUNE-CON-EL-COMPONENTE-DE-LA-POLICIA-MUNICIPAL-EJMM-0003-.jpg"
 imageCaption: "El componente principal del operativo será la prevención mediante patrullaje visible y una distribución estratégica de los recursos disponibles"

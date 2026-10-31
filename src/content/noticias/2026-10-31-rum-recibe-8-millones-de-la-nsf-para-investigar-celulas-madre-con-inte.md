@@ -5,6 +5,8 @@ section: puerto-rico
 place: "Mayagüez"
 date: 2026-10-31T17:35:36.000Z
 aiAssisted: true
+origin:
+  name: "NotiCel"
 draft: false
 image: "https://cdn.noticel.com/2026/10/31134036/1-8.jpg"
 imageCaption: "En el centro el rector Miguel A. Muñoz, a su izquierda el doctor Manuel Rodríguez, investigador principal de la propuesto. Le acompañan los coinvestigadores del proyecto"

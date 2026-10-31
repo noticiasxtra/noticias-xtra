@@ -10,6 +10,8 @@ imageCaption: "La dupla puertorriqueña de Dana Rodríguez y Arialeey Serrano pe
 imageCredit: "Foto suministrada"
 sectionLead: true
 aiAssisted: true
+origin:
+  name: "NotiCel"
 draft: false
 ---
 
