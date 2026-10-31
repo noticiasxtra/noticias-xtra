@@ -112,12 +112,13 @@ function toFootball(league, m) {
 // NFL standings: Highlightly gives each conference (AFC, NFC) with its teams' season stats. Returns the table and the
 // "points per game" stats table built from the same numbers.
 function nflTables(data) {
-  // One table per conference: Highlightly can send more than one (e.g. preseason labeled as regular); keep the one that
-  // runs latest (the regular season ends in January)
+  // One table per conference: Highlightly can send more than one (e.g. preseason labeled as regular, with confusing
+  // dates); keep the one with the most games played, which is the season in progress
+  const played = (c) => (c.data || []).reduce((n, t) => n + (t.statistics || []).filter((s) => /^(wins|losses)$/i.test(s.displayName)).reduce((m, s) => m + (Number.parseFloat(s.value) || 0), 0), 0);
   const latest = new Map();
   for (const c of (data.data || []).filter((c) => /regular/i.test(c.seasonType ?? '') && /^(AFC|NFC)$/.test(c.abbreviation))) {
     const prev = latest.get(c.abbreviation);
-    if (!prev || Date.parse(c.endDate) > Date.parse(prev.endDate)) latest.set(c.abbreviation, c);
+    if (!prev || played(c) > played(prev)) latest.set(c.abbreviation, c);
   }
   const confs = [...latest.values()].sort((a, b) => a.abbreviation.localeCompare(b.abbreviation));
   if (!confs.length) return null;
