@@ -624,7 +624,7 @@ const TOOLS = [
     // ---------- open a story that is already on the site (AI or older) in the editor ----------
     const RAW = 'https://raw.githubusercontent.com/noticiasxtra/noticias-xtra/main/src/content/noticias/';
     const MANAGED = new Set(['title', 'description', 'section', 'league', 'place', 'date', 'author', 'image', 'imageCaption', 'imageCredit',
-      'breaking', 'trending', 'featured', 'live', 'pinned', 'homeLead', 'sectionLead', 'sectionPinned', 'aiAssisted', 'draft', 'sources', 'related', 'correction', 'gallery']);
+      'breaking', 'trending', 'featured', 'live', 'pinned', 'homeLead', 'sectionLead', 'sectionPinned', 'aiAssisted', 'draft', 'pending', 'sources', 'related', 'correction', 'gallery']);
     const unq = (v: string) => { v = v.trim(); try { return v.startsWith('"') ? JSON.parse(v) : v.replace(/^'(.*)'$/, '$1'); } catch { return v; } };
     const inline = (t: string) => esc(t.replace(/\\([*_`[\]\\])/g, '$1'))
       .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/(^|[^*])\*([^*\s][^*]*?)\*/g, '$1<i>$2</i>')
@@ -666,7 +666,10 @@ const TOOLS = [
       }
       const yes = (k: string) => fm[k] === 'true';
       const d = new Date(unq(fm.date || '')); const local = isNaN(+d) ? localNow() : new Date(+d - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
-      return { id: `A-${Date.now().toString(36)}`, status: 'published', updated: Date.now(), owner: me()?.name ?? '', slug: id,
+      // The automatic writer's story still waiting for approval opens as a draft (it isn't on the site yet)
+      const waiting = fm.pending === 'true';
+      return { id: `A-${Date.now().toString(36)}`, status: waiting ? 'draft' : 'published', updated: Date.now(), owner: me()?.name ?? '', slug: id,
+        ...(waiting ? { note: 'Del redactor automático: revísala y publícala.' } : {}),
         title: unq(fm.title || ''), description: unq(fm.description || ''), section: unq(fm.section || 'puerto-rico'), league: unq(fm.league || ''),
         place: unq(fm.place || ''), author: unq(fm.author || 'Noticias Xtra'), date: local, image: unq(fm.image || ''), imageUrl: '',
         imageCaption: unq(fm.imageCaption || ''), imageCredit: unq(fm.imageCredit || ''),
@@ -710,6 +713,23 @@ const TOOLS = [
     });
     root.addEventListener('click', (e) => { const b = (e.target as HTMLElement).closest<HTMLElement>('[data-import]'); if (b) void importStory(b.dataset.import!); });
     addEventListener('nx-edit-story', (e) => void importStory((e as CustomEvent).detail.id)); // "Editar" in Noticias → Vistazo rápido
+
+    /** Noticias → Por aprobar, the automatic writer's stories (scripts/pending.json): publish as is, or keep it off the
+     *  site for good. Either way the file loses "pending", so it leaves the list. Editors and the admin only. */
+    addEventListener('nx-ai-story', async (e) => {
+      const { id, act } = (e as CustomEvent).detail as { id: string; act: 'approve' | 'reject' };
+      const done = (ok: boolean) => dispatchEvent(new CustomEvent('nx-ai-story-done', { detail: { id, ok } }));
+      if (!canPublish()) { toast('Solo los editores y el administrador pueden aprobar noticias.'); return done(false); }
+      const a = await storyArt(id); if (!a) return done(false);
+      if (act === 'approve') { const ok = await goLive(a); if (ok) await store(a); renderList(); dispatchEvent(new Event('nx-articles-changed')); return done(ok); }
+      if (!DB) { toast(`${PREV}, la noticia se rechaza.`); return done(false); }
+      const r = await publishArticle({ id: a.id, slug: id, file: toFile(a).replace(/^draft: false$/m, 'draft: true'), title: a.title, scheduled: false });
+      if (!r.ok) { toast(`No se pudo rechazar: ${r.error}`); return done(false); }
+      await store({ ...a, status: 'draft', updated: Date.now(), note: 'Rechazada en Por aprobar: no salió en el sitio. Puedes corregirla y publicarla si cambias de idea.' });
+      renderList(); dispatchEvent(new Event('nx-articles-changed'));
+      toast('Rechazada. No sale en el sitio.');
+      done(true);
+    });
 
     /** The gallery in the story file. Without a main photo, the first gallery photo becomes the main one (toFile). */
     const galleryYaml = (a: Art) => {

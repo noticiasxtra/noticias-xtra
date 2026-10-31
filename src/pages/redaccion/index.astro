@@ -272,7 +272,20 @@ const TABS = [
     // ---------- real work waiting: stories sent for review (Supabase), automatic news (GitHub), reported comments ----------
     type Rev = { id: string; updated_at: string; doc: { title?: string; author?: string; owner?: string; section?: string; date?: string } };
     type Pr = { number: number; title: string; html_url: string; created_at: string };
-    const LIVE: { review: Rev[]; prs: Pr[]; comments: number; at: number } = { review: [], prs: [], comments: 0, at: 0 };
+    // The automatic writer's stories waiting for approval (scripts/pending.json, written by scripts/fetch-news.mjs).
+    // One already opened, approved or rejected in Escribir has an article with that slug, so it leaves this list.
+    type Ai = { id: string; title: string; section: string; source: string; link: string; note: string; created: string };
+    const LIVE: { review: Rev[]; prs: Pr[]; ai: Ai[]; comments: number; at: number } = { review: [], prs: [], ai: [], comments: 0, at: 0 };
+    const aiDone = new Set<string>(); // handled on this device, until the list catches up
+    async function loadAi(): Promise<Ai[]> {
+      const list: Ai[] = await fetch(`https://api.github.com/repos/noticiasxtra/noticias-xtra/contents/scripts/pending.json?ref=main&t=${Date.now()}`, { headers: { Accept: 'application/vnd.github.raw+json' } })
+        .then((r) => (r.ok ? r.json() : [])).catch(() => []);
+      if (!Array.isArray(list) || !list.length) return [];
+      const ids = list.map((p) => p.id).filter((id) => /^[a-z0-9-]+$/.test(id));
+      const r = ids.length ? await staffApi(`articles?slug=in.(${ids.join(',')})&select=slug`) : null;
+      const opened = new Set<string>(r?.ok ? (await r.json()).map((x: { slug: string }) => x.slug) : []);
+      return list.filter((p) => !opened.has(p.id) && !aiDone.has(p.id));
+    }
     async function loadLive(force = false) {
       if (!force && Date.now() - LIVE.at < 30000) return; LIVE.at = Date.now();
       if (!hasBackend()) { // preview and demo: the stories waiting for review on this device, plus GitHub
@@ -282,11 +295,13 @@ const TABS = [
         LIVE.prs = Array.isArray(pr) ? pr : [];
         paintCounts(); if (tab === 'inicio' || tab === 'noticias') paint[tab]?.(); return;
       }
-      const [rv, cm, pr] = await Promise.all([
+      const [rv, cm, pr, ai] = await Promise.all([
         staffApi('articles?status=eq.review&select=id,updated_at,doc&order=updated_at.desc'),
         staffApi('comments?status=eq.review&select=id', { headers: { Prefer: 'count=exact' } }),
         fetch('https://api.github.com/repos/noticiasxtra/noticias-xtra/pulls?state=open&per_page=30').then((r) => (r.ok ? r.json() : [])).catch(() => []),
+        loadAi().catch(() => LIVE.ai),
       ]);
+      LIVE.ai = ai;
       if (rv?.ok) LIVE.review = await rv.json();
       if (cm?.ok) LIVE.comments = Number(cm.headers.get('content-range')?.split('/')[1]) || 0;
       LIVE.prs = Array.isArray(pr) ? pr : [];
@@ -303,7 +318,7 @@ const TABS = [
       const ads = listRequests().filter((r) => r.status === 'revisar' || r.status === 'disenar').length;
       const td = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Puerto_Rico' });
       const leads = get<Array<{ stage: string; follow: string }>>('nx-leads', []).filter((l) => !['won', 'lost'].includes(l.stage) && l.follow && l.follow <= td).length;
-      const review = LIVE.review.length; const pending = review + LIVE.prs.length;
+      const review = LIVE.review.length; const pending = review + LIVE.prs.length + LIVE.ai.length;
       return { noticias: pending + checkList().length, pending, check: checkList().length, comentarios: rep, anuncios: ads, ventas: leads, escribir: review };
     };
 
@@ -578,7 +593,10 @@ const TABS = [
             <div class="pnl-row-acts">${canApprove ? '<button type="button" class="adp-btn" data-rv="approve">Aprobar y publicar</button>' : ''}<button type="button" class="adp-btn ghost-dark" data-rv="open">Revisar en Escribir</button>${canApprove ? '<button type="button" class="pnl-link" data-rv="return">Devolver</button>' : ''}</div></article>`).join('');
           const prs = LIVE.prs.map((p) => `<article class="pnl-row"><div><p class="pnl-muted">✍️ Redactada por <b>NX</b> (automático) · ${ago(Date.parse(p.created_at))}</p><h2>${esc(p.title)}</h2></div>
             <div class="pnl-row-acts"><a class="adp-btn ghost-dark" href="${p.html_url}" target="_blank" rel="noopener">Revisar y aprobar en GitHub ↗</a></div></article>`).join('');
-          box.innerHTML = (revs ? `<h2 class="pnl-h3">De periodistas</h2>${revs}` : '') + (prs ? `<h2 class="pnl-h3">Del redactor automático</h2>${prs}` : '')
+          const ais = LIVE.ai.map((p) => `<article class="pnl-row" data-ai="${esc(p.id)}">
+            <div><p class="pnl-muted">🤖 Redactor automático · ${esc(SEC_NAME[p.section] ?? p.section)} · ${ago(Date.parse(p.created))} · fuente: ${p.link ? `<a href="${esc(p.link)}" target="_blank" rel="noopener">${esc(p.source)} ↗</a>` : esc(p.source)}</p><h2>${esc(p.title)}</h2>${p.note ? `<p class="pnl-muted pnl-small">📝 ${esc(p.note)}</p>` : ''}</div>
+            <div class="pnl-row-acts">${canApprove ? '<button type="button" class="adp-btn" data-ai-act="approve">Aprobar y publicar</button>' : ''}<button type="button" class="adp-btn ghost-dark" data-ai-act="edit">${canApprove ? 'Leer y editar' : 'Leer'}</button>${canApprove ? '<button type="button" class="apr-reject" data-ai-act="reject">Rechazar</button>' : ''}</div></article>`).join('');
+          box.innerHTML = (revs ? `<h2 class="pnl-h3">De periodistas</h2>${revs}` : '') + (ais || prs ? `<h2 class="pnl-h3">Del redactor automático</h2>${ais}${prs}` : '')
             || '<p class="apr-empty">🎉 No hay noticias esperando aprobación.</p>';
         } else if (nf === 'check') {
           box.innerHTML = checkList().map((r) => `<article class="pnl-row" data-id="c-${r.id}">
@@ -694,6 +712,25 @@ const TABS = [
           return;
         }
         const team = get<unknown[]>('nx-staff-team', []); team.splice(Number(rm.dataset.rm), 1); set('nx-staff-team', team); paint.equipo(); return;
+      }
+      const aiAct = t.closest<HTMLElement>('[data-ai-act]');
+      if (aiAct) {
+        const row = aiAct.closest<HTMLElement>('[data-ai]')!; const id = row.dataset.ai!; const p = LIVE.ai.find((x) => x.id === id); const act = aiAct.dataset.aiAct!;
+        if (act === 'edit') { aiDone.add(id); dispatchEvent(new CustomEvent('nx-edit-story', { detail: { id } })); showTab('escribir'); scrollTo({ top: 0 }); return; }
+        const yes = act === 'approve'
+          ? await ask(`¿Aprobar y publicar “${p?.title || 'esta noticia'}” tal como está? Aparece en el sitio en unos 2 minutos.`, { ok: 'Aprobar y publicar' })
+          : await ask(`¿Rechazar “${p?.title || 'esta noticia'}”? No saldrá en el sitio.`, { ok: 'Rechazar', danger: true });
+        if (!yes) return;
+        row.querySelectorAll('button').forEach((b) => (b.disabled = true)); aiAct.textContent = act === 'approve' ? 'Publicando…' : 'Rechazando…';
+        const ok = await new Promise<boolean>((done) => {
+          const on = (e: Event) => { const d = (e as CustomEvent).detail; if (d.id === id) { removeEventListener('nx-ai-story-done', on); done(d.ok); } };
+          addEventListener('nx-ai-story-done', on);
+          dispatchEvent(new CustomEvent('nx-ai-story', { detail: { id, act } }));
+        });
+        if (!ok) { row.querySelectorAll('button').forEach((b) => (b.disabled = false)); paint.noticias(); return; }
+        aiDone.add(id); LIVE.ai = LIVE.ai.filter((x) => x.id !== id);
+        row.classList.add('pnl-gone'); setTimeout(() => { paint.noticias(); paintCounts(); }, 250);
+        return;
       }
       const rv = t.closest<HTMLElement>('[data-rv]');
       if (rv) {

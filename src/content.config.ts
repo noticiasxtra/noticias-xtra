@@ -35,6 +35,7 @@ const noticias = defineCollection({
     sources: z.array(z.object({ name: z.string(), url: z.string().optional() })).default([]),
     related: z.array(z.string()).default([]),
     draft: z.boolean().default(false),
+    pending: z.boolean().default(false), // the automatic writer's story waiting for an editor (panel → Noticias → Por aprobar); always with draft: true
     league: z.enum(LEAGUE_IDS).optional(), // sports stories only: bsn, doble-a, invernal... (src/lib/leagues.ts)
     correction: z.string().optional(), // shown at the end of the story, e.g. "2 de octubre: se corrigió la cifra de..." 
   }),

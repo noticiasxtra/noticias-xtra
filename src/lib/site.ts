@@ -19,7 +19,7 @@ export const SITE = {
     | null,
   // Sample scores, standings, stats and game pages, labeled "DEMO" everywhere they appear.
   // Turn off (false) before relying on real data; see src/lib/demo-sports.ts.
-  sportsDemo: true,
+  sportsDemo: false,
   // Turn parts of the site on (true) or off (false). Off parts are hidden everywhere.
   features: {
     videos: true, // video section and pages (VIDEOS below: NotiCel and BSN YouTube channels)

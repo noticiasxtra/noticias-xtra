@@ -4428,3 +4428,5 @@ a,button,summary,label{-webkit-tap-highlight-color:transparent}
 @media (min-width:761px){ .ad-mob-only{display:none} }
 /* Small credit at the end of a story ("Con información de NotiCel"), kept discreet */
 .via{margin:14px 0 0;font-size:12px;color:var(--muted);opacity:.85}
+.fx-box .fx-empty{font-size:14px;line-height:1.45;opacity:.85}
+.sp-demo[hidden]{display:none}

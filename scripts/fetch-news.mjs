@@ -12,7 +12,8 @@
  * Test without AI or saving:  DRY_RUN=1 node scripts/fetch-news.mjs
  *
  * In GitHub Actions (.github/workflows/daily-news.yml) routine stories publish right away (review "auto"/"check")
- * and the rest go to a pull request so an editor approves them first. See levelFor() below.
+ * and the rest are saved hidden (draft + pending) and listed in scripts/pending.json, so an editor approves them
+ * in the staff panel (Noticias → Por aprobar). See levelFor() below.
  */
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -22,7 +23,8 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SOURCES_FILE = path.join(ROOT, 'scripts/sources.json');
 const SEEN_FILE = path.join(ROOT, 'scripts/seen.json');
 const OUT_DIR = path.join(ROOT, 'src/content/noticias');
-const PR_BODY = path.join(ROOT, 'pr-body.md'); // pull request: stories that wait for approval
+const PR_BODY = path.join(ROOT, 'pr-body.md'); // notice: stories that wait for approval in the panel
+const PENDING_FILE = path.join(ROOT, 'scripts/pending.json'); // the panel's "Por aprobar" list (see savePending)
 const CHECK_BODY = path.join(ROOT, 'check-body.md'); // issue: published stories for a quick look afterwards
 const AUTO_LIST = path.join(ROOT, 'ai-auto.txt'); // files published right away (one path per line)
 
@@ -303,7 +305,7 @@ ${item.text.slice(0, 9000)}
 
 const yaml = (v) => JSON.stringify(v); // JSON strings are valid YAML
 
-async function saveStory(story, item, src) {
+async function saveStory(story, item, src, pending = false) {
   const now = new Date();
   const date = item.published && !Number.isNaN(Date.parse(item.published)) ? new Date(item.published) : now;
   const day = now.toISOString().slice(0, 10);
@@ -327,7 +329,8 @@ async function saveStory(story, item, src) {
     `place: ${yaml(story.place || src.place || 'Puerto Rico')}`,
     `date: ${date.toISOString()}`,
     'aiAssisted: true',
-    'draft: false', // set to true to take the story off the site
+    // Waiting for approval: hidden from the site until an editor approves it in the panel
+    ...(pending ? ['draft: true', 'pending: true'] : ['draft: false']), // draft: true takes a story off the site
     ...(src.breaking ? ['breaking: true'] : []), // e.g. weather alerts can go in the red ÚLTIMA HORA bar
     ...photo,
     ...(rewrite && story.creditNeeded ? [`via: ${yaml('Con información de NotiCel')}`] : []),
@@ -339,6 +342,25 @@ async function saveStory(story, item, src) {
   ].join('\n');
   await fs.writeFile(file, md, 'utf8');
   return path.relative(ROOT, file);
+}
+
+/* ---------------- the panel's approval list ---------------- */
+
+// scripts/pending.json: the stories waiting for approval. The panel shows them under Noticias → Por aprobar; approving
+// publishes the file (draft: false), rejecting keeps it hidden. Entries whose file was approved, rejected or deleted
+// (no "pending: true" left) are dropped here on every run.
+async function savePending(created) {
+  const list = await readJson(PENDING_FILE, []);
+  const still = [];
+  for (const p of list) {
+    const text = await fs.readFile(path.join(OUT_DIR, `${p.id}.md`), 'utf8').catch(() => '');
+    if (/^pending: true$/m.test(text)) still.push(p);
+  }
+  for (const c of created.filter((c) => c.level === 'always')) {
+    still.unshift({ id: path.basename(c.file, '.md'), title: c.title, section: c.section, source: c.source, link: c.link || '', note: c.note || '', created: new Date().toISOString() });
+  }
+  await fs.writeFile(PENDING_FILE, JSON.stringify(still, null, 2) + '\n');
+  return still.length;
 }
 
 /* ---------------- main ---------------- */
@@ -410,11 +432,11 @@ async function main() {
         callsHere++;
         const story = await draftWithClaude(item, src);
         if (story.skip || story.investigation) { skipped.push(`${item.title} (${story.investigation ? 'investigación de NotiCel: no se usa' : story.skipReason || 'descartada por la IA'})`); continue; }
-        const file = await saveStory(story, item, src);
-        fromThis++;
         const section = SECTIONS.includes(story.section) ? story.section : item.section || src.section || 'puerto-rico';
         const level = levelFor(story, src, section);
-        created.push({ file, level, title: story.title, source: src.name, link: item.link, note: story.editorNote });
+        const file = await saveStory(story, item, src, level === 'always');
+        fromThis++;
+        created.push({ file, level, title: story.title, section, source: src.name, link: item.link, note: story.editorNote });
         if (story.needsHumanCheck) flagged.push(story.title);
         console.log(`  ✓ ${story.title}`);
       } catch (e) {
@@ -428,14 +450,17 @@ async function main() {
 
   const review = created.filter((c) => c.level === 'always');
   const check = created.filter((c) => c.level === 'check');
-  const auto = created.filter((c) => c.level !== 'always');
+  const auto = created; // every new file goes to main: approval ones stay hidden (draft + pending) until the panel approves them
+  const waiting = DRY_RUN ? 0 : await savePending(created);
   const line = (c) => `- **${c.title}**  \n  Fuente: ${c.link ? `[${c.source}](${c.link})` : c.source}  \n  Archivo: \`${c.file}\`${c.note ? `  \n  Nota para el editor: ${c.note}` : ''}`;
 
-  // Pull request: stories that wait for approval
+  // Notice (issue): stories waiting for approval in the panel
   const body = [
-    `La IA preparó **${review.length}** ${review.length === 1 ? 'noticia que necesita' : 'noticias que necesitan'} tu aprobación.`,
+    `La IA preparó **${review.length}** ${review.length === 1 ? 'noticia que necesita' : 'noticias que necesitan'} tu aprobación${waiting > review.length ? ` (${waiting} en total esperando)` : ''}.`,
     '',
-    'Revisa cada una contra su fuente. Para publicar, aprueba y haz **Merge**. Para corregir, edita el archivo en esta misma pull request.',
+    '**Apruébalas en el panel:** [Panel de la redacción → Noticias → Por aprobar](https://noticiasxtra.com/redaccion/#noticias). Cada una tiene **Aprobar y publicar**, **Editar** y **Rechazar**. No salen en el sitio hasta que alguien las apruebe.',
+    '',
+    'Cierra este aviso cuando termines.',
     '',
     ...(flagged.length ? ['### ⚠️ Revisar con cuidado', ...flagged.map((t) => `- ${t}`), ''] : []),
     '### Noticias',

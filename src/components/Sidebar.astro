@@ -74,12 +74,32 @@ const hhmm = (d: Date) => d.toLocaleTimeString('es-PR', { hour: 'numeric', minut
     </div>
   )}
   {showForo && (
-    <section class="fx-box">
-      <h2 class="fx-h"><span aria-hidden="true">💬</span> Foro Xtra <span class="sp-demo">DEMO</span></h2>
-      <ul>{foroTop.map((t) => <li><a href={url('foro')}><span class="fx-v">▲ {t.votes}</span>{t.title}</a></li>)}</ul>
+    <section class="fx-box" data-fx data-demo-topics={JSON.stringify(foroTop.map((t) => ({ title: t.title, votes: t.votes })))}>
+      <h2 class="fx-h"><span aria-hidden="true">💬</span> Foro Xtra <span class="sp-demo" data-fx-demo hidden>DEMO</span></h2>
+      {/* The most-voted real topics (filled in by the script below); samples only in demo mode */}
+      <ul data-fx-list><li class="fx-empty">Comparte lo que piensas sobre las noticias del día y lee lo que opinan otros lectores.</li></ul>
       <a class="fx-go" href={url('foro')}>Únete a la conversación ›</a>
     </section>
   )}
   {extras && <HomeExtras />}
   <AdSlot size="halfpage" sticky />
 </aside>
+
+<script>
+  import { BACKEND, hasBackend } from '../lib/backend';
+  import { isDemo } from '../lib/demo';
+  const box = document.querySelector<HTMLElement>('[data-fx]');
+  if (box) {
+    const list = box.querySelector<HTMLElement>('[data-fx-list]')!;
+    const base = document.querySelector<HTMLAnchorElement>('.fx-go')!.getAttribute('href')!;
+    const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
+    const show = (rows: Array<{ id?: string; title: string; votes: number }>) => {
+      if (rows.length) list.innerHTML = rows.map((t) => `<li><a href="${base}${t.id ? `?t=${encodeURIComponent(t.id)}` : ''}"><span class="fx-v">▲ ${t.votes}</span>${esc(t.title)}</a></li>`).join('');
+    };
+    if (isDemo()) { box.querySelector<HTMLElement>('[data-fx-demo]')!.hidden = false; show(JSON.parse(box.dataset.demoTopics || '[]')); }
+    else if (hasBackend()) {
+      fetch(`${BACKEND.url}/rest/v1/forum_threads?select=id,title,votes&status=eq.visible&order=votes.desc,created_at.desc&limit=3`, { headers: { apikey: BACKEND.anonKey, Authorization: `Bearer ${BACKEND.anonKey}` } })
+        .then((r) => (r.ok ? r.json() : [])).then(show).catch(() => {});
+    }
+  }
+</script>

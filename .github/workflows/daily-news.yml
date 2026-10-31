@@ -1,14 +1,13 @@
 # Every 2 hours from 6 a.m. to 10 p.m. (Puerto Rico): the AI checks the sources in scripts/sources.json and drafts new stories.
 # Each source has a review level ("review" in sources.json):
 #   auto / check -> published right away; "check" stories are also listed in an issue for a quick look
-#   always       -> a pull request the editor approves (political, legal, crime, sensitive, low confidence)
+#   always       -> saved hidden (draft + pending) for an editor to approve in the panel (Noticias → Por aprobar):
+#                   political, legal, crime, sensitive, low confidence. An issue tells the reviewer they're waiting.
 # The reviewer (REVIEWER below) is assigned to both, so GitHub sends an email and a phone notification.
 #
 # Setup (one time):
 #  1. Settings > Secrets and variables > Actions > New repository secret: ANTHROPIC_API_KEY
-#  2. Settings > Actions > General > Workflow permissions: check
-#     "Allow GitHub Actions to create and approve pull requests"
-#  3. Optional repository variables: ANTHROPIC_MODEL, MAX_ARTICLES
+#  2. Optional repository variables: ANTHROPIC_MODEL, MAX_ARTICLES, REVIEWER
 name: Noticias con IA
 
 on:
@@ -18,7 +17,6 @@ on:
 
 permissions:
   contents: write
-  pull-requests: write
   issues: write
   actions: write # to start the site rebuild right after publishing
 
@@ -55,8 +53,8 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           WHEN="$(TZ=America/Puerto_Rico date +'%d/%m %I:%M %p')"
 
-          # 1) Checked sources, plus the stories that publish right away, go straight to main
-          git add scripts/seen.json
+          # 1) Checked sources and every new story go straight to main (the ones that need approval stay hidden)
+          git add scripts/seen.json scripts/pending.json
           if [ "${AUTO:-0}" != "0" ]; then xargs -a ai-auto.txt git add --; fi
           if ! git diff --cached --quiet; then
             git commit -m "IA: ${AUTO:-0} noticias publicadas y fuentes revisadas"
@@ -73,15 +71,8 @@ jobs:
             gh issue edit "$URL" --add-assignee "$REVIEWER" || echo "No se pudo asignar a $REVIEWER (el aviso sí se creó)"
           fi
 
-          # 3) Stories that wait for approval: a separate branch + pull request
+          # 3) Stories waiting for approval in the panel: an issue so the reviewer gets an email
           if [ "${REVIEW:-0}" != "0" ]; then
-            BRANCH="ia/noticias-$(date -u +%Y%m%d-%H%M)"
-            git checkout -b "$BRANCH"
-            git add src/content/noticias
-            git commit -m "IA: $REVIEW noticias para revisión"
-            git push origin "$BRANCH"
-            gh pr create --base main --head "$BRANCH" \
-              --title "Noticias para aprobar: $REVIEW ($WHEN)" \
-              --body-file pr-body.md
-            gh pr edit "$BRANCH" --add-assignee "$REVIEWER" || echo "No se pudo asignar a $REVIEWER (la pull request sí se creó)"
+            URL=$(gh issue create --title "Noticias para aprobar: $REVIEW ($WHEN)" --body-file pr-body.md)
+            gh issue edit "$URL" --add-assignee "$REVIEWER" || echo "No se pudo asignar a $REVIEWER (el aviso sí se creó)"
           fi
