@@ -25,6 +25,7 @@ jobs:
         env:
           HIGHLIGHTLY_API_KEY: ${{ secrets.HIGHLIGHTLY_API_KEY }}
           FULL: ${{ github.event_name == 'workflow_dispatch' && '1' || '' }} # a manual run also refreshes standings and yesterday's results
+          LIVE_STATS: ${{ vars.LIVE_STATS }} # 1 = stats of games in progress too (needs the Pro plan)
         run: node scripts/fetch-scores.mjs
       - name: Save and rebuild the site if anything changed
         env:

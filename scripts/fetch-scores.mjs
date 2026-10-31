@@ -22,13 +22,17 @@ const TZ = 'America/Puerto_Rico';
 
 // Highlightly league ids (from scripts/sports-discovery.json)
 const LEAGUES = [
-  { id: 'bsn', base: 'https://basketball.highlightly.net', leagueId: 65460 },
+  // starts: between seasons the league isn't asked about until 3 days before its opener (src/lib/leagues.ts), to save requests
+  { id: 'bsn', base: 'https://basketball.highlightly.net', leagueId: 65460, starts: '2027-03-20', ends: '2026-08-31' },
   { id: 'nba', base: 'https://basketball.highlightly.net', leagueId: 10996 },
   // NFL is Highlightly's separate "NFL API" product (its own free plan, same key); until it's added it's skipped
   { id: 'nfl', base: 'https://american-football.highlightly.net', league: 'NFL', football: true },
 ];
 
-const DETAILS_PER_RUN = 6;
+const DETAILS_PER_RUN = 5; // each one is 2 requests: the game's stats and its video highlights
+// Stats of games in progress, refreshed on every run: turn on with the repository variable LIVE_STATS=1 once the plan
+// allows it (Pro: 7,500 requests a day). On the free plan a game gets its stats once, when it ends.
+const LIVE_STATS = process.env.LIVE_STATS === '1';
 // Team stats on the game page, in this order (Highlightly's names → Spanish); anything else is left out
 const STAT = [
   ['Points', 'Puntos'], ['Successful Field Goals', 'Tiros de campo anotados'], ['Field Goals', 'Tiros de campo intentados'], ['Field Goal %', '% tiros de campo'], ['Field Goals %', '% tiros de campo'],
@@ -104,7 +108,14 @@ function toFootball(league, m) {
 // NFL standings: Highlightly gives each conference (AFC, NFC) with its teams' season stats. Returns the table and the
 // "points per game" stats table built from the same numbers.
 function nflTables(data) {
-  const confs = (data.data || []).filter((c) => /regular/i.test(c.seasonType ?? '') && /^(AFC|NFC)$/.test(c.abbreviation));
+  // One table per conference: Highlightly can send more than one (e.g. preseason labeled as regular); keep the one that
+  // runs latest (the regular season ends in January)
+  const latest = new Map();
+  for (const c of (data.data || []).filter((c) => /regular/i.test(c.seasonType ?? '') && /^(AFC|NFC)$/.test(c.abbreviation))) {
+    const prev = latest.get(c.abbreviation);
+    if (!prev || Date.parse(c.endDate) > Date.parse(prev.endDate)) latest.set(c.abbreviation, c);
+  }
+  const confs = [...latest.values()].sort((a, b) => a.abbreviation.localeCompare(b.abbreviation));
   if (!confs.length) return null;
   const val = (t, ...names) => { const s = t.statistics?.find((x) => names.some((n) => x.displayName?.toLowerCase() === n)); return s ? String(s.value) : ''; };
   const num = (v) => Number.parseFloat(v) || 0;
@@ -177,7 +188,9 @@ async function main() {
   const firstOfDay = !games.some((g) => g._checked === day()) || process.env.FULL === '1';
   const byKey = new Map(games.filter((g) => !g._checked).map((g) => [g.src, g]));
 
+  const now = Date.now();
   for (const l of LEAGUES) {
+    if (l.starts && now > Date.parse(l.ends) && now < Date.parse(l.starts) - 3 * 864e5) { console.log(`${l.id}: fuera de temporada`); continue; }
     try {
       // Today on every run; the first run of the day also yesterday's finals and the coming days' games
       // (NFL: the next 6 days, since it plays mostly on Sundays; basketball: tomorrow)
@@ -186,7 +199,7 @@ async function main() {
         const r = await get(l.base, `/matches?${l.football ? `league=${l.league}` : `leagueId=${l.leagueId}`}&date=${d}&timezone=${encodeURIComponent(TZ)}&limit=100`);
         for (const m of r.data || []) {
           const old = byKey.get(`highlightly:${m.id}`), g = l.football ? toFootball(l.id, m) : toGame(l.id, m);
-          if (old?.statsChecked && g.status === 'final') Object.assign(g, { stats: old.stats, venue: old.venue, statsChecked: true });
+          if (old?.statsChecked && g.status === 'final') Object.assign(g, { stats: old.stats, venue: old.venue, videos: old.videos, statsChecked: true });
           byKey.set(`highlightly:${m.id}`, g);
         }
         console.log(`${l.id} ${d}: ${(r.data || []).length} juegos`);
@@ -213,6 +226,17 @@ async function main() {
 
   // Finished games: team stats and arena once (one request each), so the game page has more than the score
   let details = 0;
+  if (LIVE_STATS) for (const g of byKey.values()) {
+    if (g.status !== 'en-vivo' || !g.src) continue;
+    const l = LEAGUES.find((x) => x.id === g.league); if (!l || l.football) continue;
+    try {
+      const r = await get(l.base, `/matches/${g.src.split(':')[1]}`);
+      const m = Array.isArray(r) ? r[0] : r.data?.[0] ?? r;
+      const stats = toStats(g, m?.statistics ?? []);
+      if (stats.length) g.stats = stats;
+      if (m?.venue?.name) g.venue = [m.venue.name, m.venue.city].filter(Boolean).join(', ');
+    } catch (e) { console.warn(`en vivo ${g.id}: ${e.message}`); }
+  }
   for (const g of byKey.values()) {
     if (g.status !== 'final' || g.statsChecked || details >= DETAILS_PER_RUN || !g.src) continue;
     const l = LEAGUES.find((x) => x.id === g.league); if (!l) continue;
@@ -223,6 +247,10 @@ async function main() {
       const stats = toStats(g, m?.statistics ?? []);
       if (stats.length) g.stats = stats;
       if (m?.venue?.name) g.venue = [m.venue.name, m.venue.city].filter(Boolean).join(', ');
+      // The game's video highlights (official channels on YouTube and the like), up to 3
+      const hl = await get(l.base, `/highlights?matchId=${g.src.split(':')[1]}&limit=10`).catch(() => null);
+      const vids = (hl?.data ?? []).filter((v) => v.url && (v.embedUrl || /youtu/.test(v.url))).slice(0, 3);
+      if (vids.length) g.videos = vids.map((v) => ({ title: v.title, url: v.url, embed: v.embedUrl ?? '', img: v.imgUrl ?? '', channel: v.channel ?? '' }));
       g.statsChecked = true;
     } catch (e) { console.warn(`detalles de ${g.id}: ${e.message}`); }
   }

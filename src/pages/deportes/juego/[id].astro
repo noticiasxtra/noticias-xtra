@@ -68,6 +68,20 @@ const title = `${g.awayFull ?? g.away} vs. ${g.homeFull ?? g.home}`;
             </section>
           )}
 
+          {g.videos && g.videos.length > 0 && (
+            <section class="sp-panel">
+              <h2>Videos del juego</h2>
+              <div class="gm-vids">
+                {g.videos.map((v) => (
+                  <a class="gm-vid" href={v.url} target="_blank" rel="noopener">
+                    <span class="gm-vid-img">{v.img && <img src={v.img} alt="" loading="lazy" />}<i aria-hidden="true">▶</i></span>
+                    <b>{v.title}</b>{v.channel && <small>{v.channel}</small>}
+                  </a>
+                ))}
+              </div>
+            </section>
+          )}
+
           {g.stats && (
             <section class="sp-panel">
               <h2>Estadísticas del juego</h2>

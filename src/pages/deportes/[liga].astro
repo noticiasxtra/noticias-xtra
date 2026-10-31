@@ -9,7 +9,6 @@ import LeagueBadge from '../../components/deportes/LeagueBadge.astro';
 import TeamLogo from '../../components/deportes/TeamLogo.astro';
 import ScoreStrip from '../../components/deportes/ScoreStrip.astro';
 import GamesList from '../../components/deportes/GamesList.astro';
-import StandingsTable from '../../components/deportes/StandingsTable.astro';
 import BracketView from '../../components/deportes/BracketView.astro';
 import TeamStatsTable from '../../components/deportes/TeamStatsTable.astro';
 import AdSlot from '../../components/AdSlot.astro';
@@ -141,7 +140,7 @@ const tabs: Array<[keyof typeof ICON, string]> = individual ? [['noticias', 'Not
           {!individual && (
             <>
               <div id="estadisticas"><TeamStatsTable league={l.id} /></div>
-              <StandingsTable league={l.id} />
+              {/* Standings: in the right column only (no second, bigger copy here) */}
               <BracketView league={l.id} />
             </>
           )}

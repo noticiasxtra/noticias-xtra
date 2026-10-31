@@ -35,6 +35,7 @@ export type Game = {
   linescore?: { labels: string[]; away: Array<number | string>; home: Array<number | string>; totals: string[]; awayTotals: Array<number | string>; homeTotals: Array<number | string> };
   stats?: Array<{ label: string; away: string; home: string }>;
   plays?: Array<{ when: string; text: string }>; // newest first
+  videos?: Array<{ title: string; url: string; embed: string; img: string; channel: string }>; // highlights (scripts/fetch-scores.mjs)
 };
 
 export type TeamStats = { columns: string[]; rows: Array<{ team: string; values: string[] }> };
@@ -60,7 +61,16 @@ export type Bracket = {
 const t = (g: Game) => new Date(g.date).valueOf();
 const demo = SITE.sportsDemo;
 /** Real data plus, while SITE.sportsDemo is on, the demo data. */
-const auto = (autoGames as Array<Game & { _checked?: string }>).filter((g) => g.league);
+// Each team's record and place, from the automatic standings ("4-1 · 2.º en la Conferencia Este")
+const recordOf = (league: string, name?: string) => {
+  for (const grp of (autoStandings as Record<string, Standings>)[league]?.groups ?? []) {
+    const i = grp.rows.findIndex((r) => r.team === name);
+    if (i >= 0) return `${grp.rows[i].w}-${grp.rows[i].l}${grp.name ? ` · ${i + 1}.º en ${/^Grupo/.test(grp.name) ? 'el' : 'la'} ${grp.name}` : ''}`;
+  }
+  return undefined;
+};
+const auto = (autoGames as Array<Game & { _checked?: string }>).filter((g) => g.league)
+  .map((g) => ({ ...g, awayRecord: g.awayRecord ?? recordOf(g.league, g.awayFull), homeRecord: g.homeRecord ?? recordOf(g.league, g.homeFull) }));
 const autoLeagues = new Set(auto.map((g) => g.league));
 const allGames = (): Game[] => [...auto, ...(realGames as Game[]).filter((g) => !autoLeagues.has(g.league)), ...(demo ? DEMO_GAMES : [])];
 
