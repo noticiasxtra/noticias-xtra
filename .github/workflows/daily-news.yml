@@ -59,6 +59,8 @@ jobs:
           if [ "${AUTO:-0}" != "0" ]; then xargs -a ai-auto.txt git add --; fi
           if ! git diff --cached --quiet; then
             git commit -m "IA: ${AUTO:-0} noticias publicadas y fuentes revisadas"
+            # Someone may have published (panel, another change) while the AI was writing: catch up first
+            git pull --rebase origin main
             git push origin HEAD:main
             # Pushes made with GITHUB_TOKEN don't start other workflows, so start the rebuild directly
             if [ "${AUTO:-0}" != "0" ]; then gh workflow run deploy.yml --ref main; fi
