@@ -1,0 +1,39 @@
+# Real scores and standings (BSN, NBA) from Highlightly, every 30 minutes from 10 a.m. to 1 a.m. Puerto Rico time.
+# Setup (one time): Settings > Secrets and variables > Actions > New repository secret: HIGHLIGHTLY_API_KEY
+# The free plan allows 100 requests a day per sport; this uses about 70.
+name: Marcadores
+
+on:
+  schedule:
+    - cron: "*/30 14-23,0-5 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write # to start the site rebuild when scores change
+
+concurrency:
+  group: scores
+  cancel-in-progress: false
+
+jobs:
+  scores:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Get scores and standings
+        env:
+          HIGHLIGHTLY_API_KEY: ${{ secrets.HIGHLIGHTLY_API_KEY }}
+        run: node scripts/fetch-scores.mjs
+      - name: Save and rebuild the site if anything changed
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "noticias-xtra-ia"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/data/marcadores-auto.json src/data/posiciones-auto.json
+          if git diff --cached --quiet; then echo "Sin cambios"; exit 0; fi
+          git commit -m "Marcadores: actualizados"
+          git pull --rebase origin main
+          git push origin HEAD:main
+          gh workflow run deploy.yml --ref main

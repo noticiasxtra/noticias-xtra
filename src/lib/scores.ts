@@ -1,9 +1,12 @@
 /* Sports data for the score strips, league pages and home page.
-   Today these files are typed by an editor; later a licensed data provider can
-   fill the same files (same shapes) from a script, without changing the pages.
+   Two sources, same shapes: files typed by an editor (marcadores.json, posiciones.json…) and the automatic ones
+   that scripts/fetch-scores.mjs fills from Highlightly (marcadores-auto.json, posiciones-auto.json: BSN and NBA).
+   For a league the automatic files cover, theirs win.
    Every section hides itself or shows a note when its file is empty,
    so we never show made-up results. */
 import realGames from '../data/marcadores.json';
+import autoGames from '../data/marcadores-auto.json';
+import autoStandings from '../data/posiciones-auto.json';
 import standingsData from '../data/posiciones.json';
 import bracketsData from '../data/llaves.json';
 import statsData from '../data/estadisticas.json';
@@ -56,7 +59,9 @@ export type Bracket = {
 const t = (g: Game) => new Date(g.date).valueOf();
 const demo = SITE.sportsDemo;
 /** Real data plus, while SITE.sportsDemo is on, the demo data. */
-const allGames = (): Game[] => [...(realGames as Game[]), ...(demo ? DEMO_GAMES : [])];
+const auto = (autoGames as Array<Game & { _checked?: string }>).filter((g) => g.league);
+const autoLeagues = new Set(auto.map((g) => g.league));
+const allGames = (): Game[] => [...auto, ...(realGames as Game[]).filter((g) => !autoLeagues.has(g.league)), ...(demo ? DEMO_GAMES : [])];
 
 /** Live games first, then upcoming (soonest first), then finals (newest first). */
 export function scores(league?: string, max = 16): Game[] {
@@ -69,14 +74,14 @@ export function scores(league?: string, max = 16): Game[] {
 
 export const games = (): Game[] => allGames().filter((g) => g.id);
 export const standings = (league: string): Standings | undefined =>
-  (standingsData as Record<string, Standings>)[league] ?? (demo ? DEMO_STANDINGS[league] : undefined);
+  (autoStandings as Record<string, Standings>)[league] ?? (standingsData as Record<string, Standings>)[league] ?? (demo ? DEMO_STANDINGS[league] : undefined);
 export const bracket = (league: string): Bracket | undefined =>
   (bracketsData as Record<string, Bracket>)[league] ?? (demo ? DEMO_BRACKETS[league] : undefined);
 export const teamStats = (league: string): TeamStats | undefined =>
   (statsData as Record<string, TeamStats>)[league] ?? (demo ? DEMO_STATS[league] : undefined);
 /** True when this league's tables are showing demo numbers. */
 export const isDemoTable = (kind: 'standings' | 'brackets' | 'stats', league: string) =>
-  demo && !({ standings: standingsData, brackets: bracketsData, stats: statsData }[kind] as Record<string, unknown>)[league];
+  demo && !({ standings: { ...standingsData, ...autoStandings }, brackets: bracketsData, stats: statsData }[kind] as Record<string, unknown>)[league];
 
 export const gameTime = (d: string) =>
   new Date(d).toLocaleString('es-PR', { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit', timeZone: 'America/Puerto_Rico' });
