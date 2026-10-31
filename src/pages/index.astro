@@ -33,16 +33,19 @@ const more = take(5);
 // Section boxes further down skip what's already in the top area
 const topIds = new Set([lead, ...leadRelated, ...left, ...row, ...more].filter(Boolean).map((s) => s!.id));
 const restStories = stories.filter((s) => !topIds.has(s.id));
+// Deportes always shows its newest stories, even one already in the top area (user, 2026-10-31)
+const NEWEST_FIRST = ['deportes'];
+const boxStories = (id: string) => (NEWEST_FIRST.includes(id) ? [...stories].sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf()) : restStories);
 // Section blocks in the order a Puerto Rico reader cares about: island news first (government,
 // politics, sports, the economy and bills, entertainment, health, weather), then the United States,
 // the world and opinion. Only sections with stories appear (Puerto Rico news is already up top).
 const HOME_ORDER = ['gobierno', 'politica', 'deportes', 'economia', 'entretenimiento', 'salud', 'clima', 'estados-unidos', 'mundo', 'opinion'] as const;
 const sectionIds = [...HOME_ORDER, ...SECTIONS.map((s) => s.id).filter((id) => id !== 'puerto-rico' && !(HOME_ORDER as readonly string[]).includes(id))]
-  .filter((id) => restStories.some((s) => s.data.section === id)) as Array<(typeof SECTIONS)[number]['id']>;
+  .filter((id) => boxStories(id).some((s) => s.data.section === id)) as Array<(typeof SECTIONS)[number]['id']>;
 // Section boxes sit side by side in pairs. To avoid blank space under a shorter box, each section is
 // paired with the next one (in priority order) that shows the same number of stories (a box shows up to 4).
 // A section with no match gets a full-width row of its own.
-const shown = (id: string) => Math.min(4, restStories.filter((s) => s.data.section === id).length);
+const shown = (id: string) => Math.min(4, boxStories(id).filter((s) => s.data.section === id).length);
 const rows: Array<typeof sectionIds> = [];
 const queue = [...sectionIds];
 while (queue.length) {
@@ -117,7 +120,7 @@ while (queue.length) {
       <div class="home-sections">
         {rows.map((row, i) => (
           <>
-            {row.map((id) => <div class:list={{ 'sec-wide': row.length === 1 }}><SectionBlock sectionId={id} stories={restStories} /></div>)}
+            {row.map((id) => <div class:list={{ 'sec-wide': row.length === 1 }}><SectionBlock sectionId={id} stories={boxStories(id)} /></div>)}
             {i === 1 && i < rows.length - 1 && <AdSlot size="infeed" class="ad-span" />}
             {i === 3 && i < rows.length - 1 && <div class="ad-span"><GamesTeaser /></div>}
             {i === 4 && i < rows.length - 1 && <AdSlot size="infeed" class="ad-span" />}

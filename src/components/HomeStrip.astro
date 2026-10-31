@@ -1,13 +1,15 @@
 ---
 // Home page card strip (portal style): Tendencia, Para ti, Marcador destacado, a season countdown,
-// Mercados (rotating prices), Juegos Xtra (Dominó + every game) and Horóscopo. (Weather lives in the right column: WeatherBox.)
+// Mercados (rotating prices), Juegos Xtra (Dominó + every game), Horóscopo and Clima (San Juan, live from the National
+// Weather Service; moved here from the right column on 2026-10-31).
 // Computers (1000px+): all cards fit in one row, and hovering (or tabbing to) a card opens a panel
 // with more. Phones: the row swipes and tapping a card opens its page.
 import Ph from './Ph.astro';
 import Time from './Time.astro';
 import LeagueBadge from './deportes/LeagueBadge.astro';
 import TeamLogo from './deportes/TeamLogo.astro';
-import { getStories, mostRead, section, url } from '../lib/site';
+import { getStories, mostRead, section, url, SITE } from '../lib/site';
+import { WEATHER_URL } from '../lib/weather';
 import { getBreaking } from '../lib/breaking';
 import { scores } from '../lib/scores';
 import { team } from '../lib/teams';
@@ -219,6 +221,14 @@ const mkt = MKT_KEYS.map((k) => mktAll.find((q) => q.key === k)).filter((q): q i
           <div class="hs-signs">{SIGNS.map((s) => <a href={url(`horoscopo#${s.id}`)}><span class="hs-zodiac">{s.symbol}{'︎'}</span>{s.name}</a>)}</div>
         </div>
       </div>
+
+      {/* Clima: live conditions at San Juan (filled in by the script below); the card opens the official forecast */}
+      <div class="hs-item">
+        <a class="hs-card hs-wxc" href={SITE.forecastUrl} rel="noopener" target="_blank" data-weather={WEATHER_URL} aria-label="Clima en San Juan: ver pronóstico">
+          <span class="hs-sign hs-wx" data-w-icon aria-hidden="true"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18h10a4 4 0 0 0 0-8 6 6 0 0 0-11.5 1.5A3.3 3.3 0 0 0 7 18z" /></svg></span>
+          <div class="hs-text"><span class="hs-label">Clima · San Juan</span><strong class="hs-temp" data-w-temp>—</strong><small data-w-feels-line>Ver pronóstico</small></div>
+        </a>
+      </div>
     </div>
     <button type="button" class="sc-arrow next" aria-label="Ver más tarjetas" hidden>
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg>
@@ -290,5 +300,17 @@ const mkt = MKT_KEYS.map((k) => mktAll.find((q) => q.key === k)).filter((q): q i
         more.forEach((i) => { const li = document.createElement('li'); const a = document.createElement('a'); a.href = i.url; a.textContent = i.title; li.append(a); list.append(li); });
       }
     } catch { /* keep the default story */ }
+  });
+</script>
+
+<script>
+  import { getWeather, weatherIcon } from '../lib/weather';
+  const wx = document.querySelector<HTMLElement>('.hs-wxc[data-weather]');
+  if (wx) void getWeather().then((w) => {
+    const set = (sel: string, v: string) => { const el = wx.querySelector(sel); if (el) el.textContent = v; };
+    if (!w) { set('[data-w-feels-line]', 'Ver pronóstico oficial'); return; }
+    set('[data-w-temp]', w.temp);
+    set('[data-w-feels-line]', `${w.sky || 'Pronóstico'} · Sensación ${w.feels}`);
+    wx.querySelector('[data-w-icon]')!.innerHTML = weatherIcon(w.desc, 26);
   });
 </script>

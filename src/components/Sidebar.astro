@@ -3,7 +3,6 @@
 // that stays in view while scrolling so the column never leaves an empty gap.
 import Ph from './Ph.astro';
 import Time from './Time.astro';
-import WeatherBox from './WeatherBox.astro';
 import LotteryBox from './LotteryBox.astro';
 import AdSlot from './AdSlot.astro';
 import DominoBox from './DominoBox.astro';
@@ -30,7 +29,6 @@ const hhmm = (d: Date) => d.toLocaleTimeString('es-PR', { hour: 'numeric', minut
   {/* Home page: the ad box goes first, above Clima (instead of the wide banner under the menu) */}
   {extras && <AdSlot size="rectangle" />}
   {/* Clima and Lotería only on the home page */}
-  {extras && <WeatherBox />}
   {extras && <LotteryBox />}
   {top.length > 0 && (
     <section class="tr-box">
