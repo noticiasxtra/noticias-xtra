@@ -3,12 +3,14 @@ title: "Cinco estrenos del pop boricua: Kany García, Pedro Capó, Yele y Wisín
 description: "Artistas puertorriqueños lanzaron nuevas canciones con temas como la familia, la fe, la amistad y la superación personal. Estos son cinco de los estrenos recientes del género."
 section: entretenimiento
 place: "Puerto Rico"
-date: 2026-10-31T20:51:13.000Z
-aiAssisted: true
-draft: false
+date: 2026-10-31T20:51:00.000Z
+author: "Noticias Xtra"
 image: "https://cdn.noticel.com/2026/10/31170233/kany.jpg"
 imageCaption: "Carátula del nuevo sencillo de Kany García"
 imageCredit: "Foto suministrada"
+sectionLead: true
+aiAssisted: true
+draft: false
 ---
 
 Varios artistas puertorriqueños presentaron nuevos sencillos de pop en las últimas semanas. Según NotiCel, entre ellos figuran Kany García, Pedro Capó, Yele junto a Wisín, Amonette y Lemuel Amaury con Daniela Isabelle.
