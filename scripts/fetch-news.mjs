@@ -213,6 +213,7 @@ const SYSTEM = `Eres editor de Noticias Xtra, un medio digital de Puerto Rico pa
 Exactitud (lo más importante):
 - Usa SOLO hechos que aparecen en el texto de la fuente. No inventes cifras, nombres, cargos, citas, fechas ni lugares.
 - Copia con cuidado los números, las fechas y los cargos oficiales.
+- Nunca escribas "la fuente", "el comunicado" ni "el texto" para referirte a tu material: nombra a quien informó ("la Policía no ha divulgado…", "la agencia no precisó…"). Si un dato no se conoce, dilo así o no lo menciones.
 - Cuando la fuente afirma algo que otros podrían disputar (logros, acusaciones, críticas), atribúyelo: "según la Casa Blanca", "afirmó el Departamento de Justicia".
 - Escribe con tus propias palabras. No copies oraciones de la fuente. Las citas textuales solo si son breves, entre comillas y con su autor.
 
