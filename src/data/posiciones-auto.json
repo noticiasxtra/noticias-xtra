@@ -1,45 +1,45 @@
 {
   "bsn": {
-    "updated": "Temporada 2025. Fuente: Highlightly",
+    "updated": "Temporada 2026. Fuente: Highlightly",
     "groups": [
       {
         "name": "Group A",
         "rows": [
           {
-            "team": "Indios de Mayaguez",
+            "team": "San German Atleticos",
             "w": 21,
             "l": 13,
             "gb": "—"
           },
           {
-            "team": "Piratas de Quebradillas",
-            "w": 20,
-            "l": 14,
-            "gb": "1"
-          },
-          {
-            "team": "Leones De Ponce",
-            "w": 18,
-            "l": 16,
-            "gb": "3"
-          },
-          {
             "team": "Capitanes de Arecibo",
-            "w": 18,
-            "l": 16,
-            "gb": "3"
+            "w": 17,
+            "l": 17,
+            "gb": "4"
           },
           {
-            "team": "San German",
+            "team": "Aguada Santeros",
+            "w": 17,
+            "l": 17,
+            "gb": "4"
+          },
+          {
+            "team": "Leones de Ponce",
             "w": 15,
             "l": 19,
             "gb": "6"
           },
           {
-            "team": "Aguada Santeros",
-            "w": 11,
-            "l": 23,
-            "gb": "10"
+            "team": "Indios de Mayaguez",
+            "w": 13,
+            "l": 21,
+            "gb": "8"
+          },
+          {
+            "team": "Piratas de Quebradillas",
+            "w": 10,
+            "l": 24,
+            "gb": "11"
           }
         ]
       },
@@ -47,305 +47,235 @@
         "name": "Group B",
         "rows": [
           {
-            "team": "Vaqueros de Bayamon",
-            "w": 24,
-            "l": 10,
+            "team": "Criollos de Caguas",
+            "w": 23,
+            "l": 11,
             "gb": "—"
           },
           {
-            "team": "Cangrejeros",
+            "team": "Vaqueros de Bayamón",
             "w": 22,
             "l": 12,
-            "gb": "2"
+            "gb": "1"
           },
           {
-            "team": "Criollos de Caguas",
-            "w": 18,
-            "l": 16,
-            "gb": "6"
+            "team": "Cangrejeros",
+            "w": 19,
+            "l": 15,
+            "gb": "4"
           },
           {
             "team": "Gigantes de Carolina",
-            "w": 16,
-            "l": 18,
+            "w": 18,
+            "l": 16,
+            "gb": "5"
+          },
+          {
+            "team": "Osos de Manatí",
+            "w": 15,
+            "l": 19,
             "gb": "8"
           },
           {
             "team": "Mets de Guaynabo",
-            "w": 13,
-            "l": 21,
-            "gb": "11"
-          },
-          {
-            "team": "Osos de Manati",
-            "w": 8,
-            "l": 26,
-            "gb": "16"
+            "w": 14,
+            "l": 20,
+            "gb": "9"
           }
         ]
       }
     ]
   },
   "nba": {
-    "updated": "Temporada 2025. Fuente: Highlightly",
+    "updated": "Temporada 2026-27. Fuente: Highlightly",
     "groups": [
-      {
-        "name": "Western Conference",
-        "rows": [
-          {
-            "team": "Oklahoma City Thunder",
-            "w": 64,
-            "l": 18,
-            "gb": "—"
-          },
-          {
-            "team": "San Antonio Spurs",
-            "w": 62,
-            "l": 20,
-            "gb": "2"
-          },
-          {
-            "team": "Denver Nuggets",
-            "w": 54,
-            "l": 28,
-            "gb": "10"
-          },
-          {
-            "team": "Los Angeles Lakers",
-            "w": 53,
-            "l": 29,
-            "gb": "11"
-          },
-          {
-            "team": "Houston Rockets",
-            "w": 52,
-            "l": 30,
-            "gb": "12"
-          },
-          {
-            "team": "Minnesota Timberwolves",
-            "w": 49,
-            "l": 33,
-            "gb": "15"
-          },
-          {
-            "team": "Phoenix Suns",
-            "w": 45,
-            "l": 37,
-            "gb": "19"
-          },
-          {
-            "team": "Portland Trail Blazers",
-            "w": 42,
-            "l": 40,
-            "gb": "22"
-          },
-          {
-            "team": "Los Angeles Clippers",
-            "w": 42,
-            "l": 40,
-            "gb": "22"
-          },
-          {
-            "team": "Golden State Warriors",
-            "w": 37,
-            "l": 45,
-            "gb": "27"
-          },
-          {
-            "team": "New Orleans Pelicans",
-            "w": 26,
-            "l": 56,
-            "gb": "38"
-          },
-          {
-            "team": "Dallas Mavericks",
-            "w": 26,
-            "l": 56,
-            "gb": "38"
-          },
-          {
-            "team": "Memphis Grizzlies",
-            "w": 25,
-            "l": 57,
-            "gb": "39"
-          },
-          {
-            "team": "Sacramento Kings",
-            "w": 22,
-            "l": 60,
-            "gb": "42"
-          },
-          {
-            "team": "Utah Jazz",
-            "w": 22,
-            "l": 60,
-            "gb": "42"
-          }
-        ]
-      },
       {
         "name": "Eastern Conference",
         "rows": [
           {
             "team": "Detroit Pistons",
-            "w": 60,
-            "l": 22,
+            "w": 4,
+            "l": 1,
             "gb": "—"
           },
           {
-            "team": "Boston Celtics",
-            "w": 56,
-            "l": 26,
-            "gb": "4"
+            "team": "Philadelphia 76ers",
+            "w": 4,
+            "l": 1,
+            "gb": "—"
           },
           {
-            "team": "New York Knicks",
-            "w": 53,
-            "l": 29,
-            "gb": "7"
+            "team": "Toronto Raptors",
+            "w": 3,
+            "l": 1,
+            "gb": "0.5"
+          },
+          {
+            "team": "Boston Celtics",
+            "w": 3,
+            "l": 1,
+            "gb": "0.5"
           },
           {
             "team": "Cleveland Cavaliers",
-            "w": 52,
-            "l": 30,
-            "gb": "8"
-          },
-          {
-            "team": "Toronto Raptors",
-            "w": 46,
-            "l": 36,
-            "gb": "14"
-          },
-          {
-            "team": "Atlanta Hawks",
-            "w": 46,
-            "l": 36,
-            "gb": "14"
-          },
-          {
-            "team": "Philadelphia 76ers",
-            "w": 45,
-            "l": 37,
-            "gb": "15"
-          },
-          {
-            "team": "Orlando Magic",
-            "w": 45,
-            "l": 37,
-            "gb": "15"
+            "w": 3,
+            "l": 1,
+            "gb": "0.5"
           },
           {
             "team": "Charlotte Hornets",
-            "w": 44,
-            "l": 38,
-            "gb": "16"
-          },
-          {
-            "team": "Miami Heat",
-            "w": 43,
-            "l": 39,
-            "gb": "17"
-          },
-          {
-            "team": "Milwaukee Bucks",
-            "w": 32,
-            "l": 50,
-            "gb": "28"
-          },
-          {
-            "team": "Chicago Bulls",
-            "w": 31,
-            "l": 51,
-            "gb": "29"
-          },
-          {
-            "team": "Brooklyn Nets",
-            "w": 20,
-            "l": 62,
-            "gb": "40"
-          },
-          {
-            "team": "Indiana Pacers",
-            "w": 19,
-            "l": 63,
-            "gb": "41"
-          },
-          {
-            "team": "Washington Wizards",
-            "w": 17,
-            "l": 65,
-            "gb": "43"
-          }
-        ]
-      },
-      {
-        "name": "Atlantic Division",
-        "rows": [
-          {
-            "team": "Boston Celtics",
-            "w": 56,
-            "l": 26,
-            "gb": "—"
-          },
-          {
-            "team": "New York Knicks",
-            "w": 53,
-            "l": 29,
-            "gb": "3"
-          },
-          {
-            "team": "Toronto Raptors",
-            "w": 46,
-            "l": 36,
-            "gb": "10"
-          },
-          {
-            "team": "Philadelphia 76ers",
-            "w": 45,
-            "l": 37,
-            "gb": "11"
-          },
-          {
-            "team": "Brooklyn Nets",
-            "w": 20,
-            "l": 62,
-            "gb": "36"
-          }
-        ]
-      },
-      {
-        "name": "Southeast Division",
-        "rows": [
-          {
-            "team": "Atlanta Hawks",
-            "w": 46,
-            "l": 36,
-            "gb": "—"
-          },
-          {
-            "team": "Orlando Magic",
-            "w": 45,
-            "l": 37,
+            "w": 3,
+            "l": 2,
             "gb": "1"
           },
           {
-            "team": "Charlotte Hornets",
-            "w": 44,
-            "l": 38,
+            "team": "Atlanta Hawks",
+            "w": 2,
+            "l": 3,
             "gb": "2"
           },
           {
-            "team": "Miami Heat",
-            "w": 43,
-            "l": 39,
-            "gb": "3"
+            "team": "New York Knicks",
+            "w": 2,
+            "l": 3,
+            "gb": "2"
           },
           {
             "team": "Washington Wizards",
-            "w": 17,
-            "l": 65,
-            "gb": "29"
+            "w": 2,
+            "l": 3,
+            "gb": "2"
+          },
+          {
+            "team": "Indiana Pacers",
+            "w": 2,
+            "l": 3,
+            "gb": "2"
+          },
+          {
+            "team": "Orlando Magic",
+            "w": 1,
+            "l": 3,
+            "gb": "2.5"
+          },
+          {
+            "team": "Chicago Bulls",
+            "w": 1,
+            "l": 4,
+            "gb": "3"
+          },
+          {
+            "team": "Milwaukee Bucks",
+            "w": 1,
+            "l": 4,
+            "gb": "3"
+          },
+          {
+            "team": "Miami Heat",
+            "w": 1,
+            "l": 4,
+            "gb": "3"
+          },
+          {
+            "team": "Brooklyn Nets",
+            "w": 0,
+            "l": 4,
+            "gb": "3.5"
+          }
+        ]
+      },
+      {
+        "name": "Western Conference",
+        "rows": [
+          {
+            "team": "Houston Rockets",
+            "w": 5,
+            "l": 0,
+            "gb": "—"
+          },
+          {
+            "team": "Memphis Grizzlies",
+            "w": 4,
+            "l": 0,
+            "gb": "0.5"
+          },
+          {
+            "team": "Portland Trail Blazers",
+            "w": 3,
+            "l": 0,
+            "gb": "1"
+          },
+          {
+            "team": "Los Angeles Lakers",
+            "w": 4,
+            "l": 1,
+            "gb": "1"
+          },
+          {
+            "team": "Oklahoma City Thunder",
+            "w": 4,
+            "l": 1,
+            "gb": "1"
+          },
+          {
+            "team": "San Antonio Spurs",
+            "w": 3,
+            "l": 2,
+            "gb": "2"
+          },
+          {
+            "team": "Dallas Mavericks",
+            "w": 3,
+            "l": 2,
+            "gb": "2"
+          },
+          {
+            "team": "Minnesota Timberwolves",
+            "w": 3,
+            "l": 2,
+            "gb": "2"
+          },
+          {
+            "team": "Denver Nuggets",
+            "w": 2,
+            "l": 2,
+            "gb": "2.5"
+          },
+          {
+            "team": "Golden State Warriors",
+            "w": 2,
+            "l": 3,
+            "gb": "3"
+          },
+          {
+            "team": "Phoenix Suns",
+            "w": 1,
+            "l": 2,
+            "gb": "3"
+          },
+          {
+            "team": "Los Angeles Clippers",
+            "w": 1,
+            "l": 3,
+            "gb": "3.5"
+          },
+          {
+            "team": "Utah Jazz",
+            "w": 1,
+            "l": 4,
+            "gb": "4"
+          },
+          {
+            "team": "New Orleans Pelicans",
+            "w": 0,
+            "l": 4,
+            "gb": "4.5"
+          },
+          {
+            "team": "Sacramento Kings",
+            "w": 0,
+            "l": 4,
+            "gb": "4.5"
           }
         ]
       },
@@ -354,33 +284,103 @@
         "rows": [
           {
             "team": "Detroit Pistons",
-            "w": 60,
-            "l": 22,
+            "w": 4,
+            "l": 1,
             "gb": "—"
           },
           {
             "team": "Cleveland Cavaliers",
-            "w": 52,
-            "l": 30,
-            "gb": "8"
-          },
-          {
-            "team": "Milwaukee Bucks",
-            "w": 32,
-            "l": 50,
-            "gb": "28"
-          },
-          {
-            "team": "Chicago Bulls",
-            "w": 31,
-            "l": 51,
-            "gb": "29"
+            "w": 3,
+            "l": 1,
+            "gb": "0.5"
           },
           {
             "team": "Indiana Pacers",
-            "w": 19,
-            "l": 63,
-            "gb": "41"
+            "w": 2,
+            "l": 3,
+            "gb": "2"
+          },
+          {
+            "team": "Chicago Bulls",
+            "w": 1,
+            "l": 4,
+            "gb": "3"
+          },
+          {
+            "team": "Milwaukee Bucks",
+            "w": 1,
+            "l": 4,
+            "gb": "3"
+          }
+        ]
+      },
+      {
+        "name": "Atlantic Division",
+        "rows": [
+          {
+            "team": "Philadelphia 76ers",
+            "w": 4,
+            "l": 1,
+            "gb": "—"
+          },
+          {
+            "team": "Toronto Raptors",
+            "w": 3,
+            "l": 1,
+            "gb": "0.5"
+          },
+          {
+            "team": "Boston Celtics",
+            "w": 3,
+            "l": 1,
+            "gb": "0.5"
+          },
+          {
+            "team": "New York Knicks",
+            "w": 2,
+            "l": 3,
+            "gb": "2"
+          },
+          {
+            "team": "Brooklyn Nets",
+            "w": 0,
+            "l": 4,
+            "gb": "3.5"
+          }
+        ]
+      },
+      {
+        "name": "Southeast Division",
+        "rows": [
+          {
+            "team": "Charlotte Hornets",
+            "w": 3,
+            "l": 2,
+            "gb": "—"
+          },
+          {
+            "team": "Atlanta Hawks",
+            "w": 2,
+            "l": 3,
+            "gb": "1"
+          },
+          {
+            "team": "Washington Wizards",
+            "w": 2,
+            "l": 3,
+            "gb": "1"
+          },
+          {
+            "team": "Orlando Magic",
+            "w": 1,
+            "l": 3,
+            "gb": "1.5"
+          },
+          {
+            "team": "Miami Heat",
+            "w": 1,
+            "l": 4,
+            "gb": "2"
           }
         ]
       },
@@ -388,34 +388,34 @@
         "name": "Northwest Division",
         "rows": [
           {
-            "team": "Oklahoma City Thunder",
-            "w": 64,
-            "l": 18,
+            "team": "Portland Trail Blazers",
+            "w": 3,
+            "l": 0,
             "gb": "—"
           },
           {
-            "team": "Denver Nuggets",
-            "w": 54,
-            "l": 28,
-            "gb": "10"
+            "team": "Oklahoma City Thunder",
+            "w": 4,
+            "l": 1,
+            "gb": "—"
           },
           {
             "team": "Minnesota Timberwolves",
-            "w": 49,
-            "l": 33,
-            "gb": "15"
+            "w": 3,
+            "l": 2,
+            "gb": "1"
           },
           {
-            "team": "Portland Trail Blazers",
-            "w": 42,
-            "l": 40,
-            "gb": "22"
+            "team": "Denver Nuggets",
+            "w": 2,
+            "l": 2,
+            "gb": "1.5"
           },
           {
             "team": "Utah Jazz",
-            "w": 22,
-            "l": 60,
-            "gb": "42"
+            "w": 1,
+            "l": 4,
+            "gb": "3"
           }
         ]
       },
@@ -424,33 +424,33 @@
         "rows": [
           {
             "team": "Los Angeles Lakers",
-            "w": 53,
-            "l": 29,
+            "w": 4,
+            "l": 1,
             "gb": "—"
           },
           {
+            "team": "Golden State Warriors",
+            "w": 2,
+            "l": 3,
+            "gb": "2"
+          },
+          {
             "team": "Phoenix Suns",
-            "w": 45,
-            "l": 37,
-            "gb": "8"
+            "w": 1,
+            "l": 2,
+            "gb": "2"
           },
           {
             "team": "Los Angeles Clippers",
-            "w": 42,
-            "l": 40,
-            "gb": "11"
-          },
-          {
-            "team": "Golden State Warriors",
-            "w": 37,
-            "l": 45,
-            "gb": "16"
+            "w": 1,
+            "l": 3,
+            "gb": "2.5"
           },
           {
             "team": "Sacramento Kings",
-            "w": 22,
-            "l": 60,
-            "gb": "31"
+            "w": 0,
+            "l": 4,
+            "gb": "3.5"
           }
         ]
       },
@@ -458,34 +458,219 @@
         "name": "Southwest Division",
         "rows": [
           {
-            "team": "San Antonio Spurs",
-            "w": 62,
-            "l": 20,
+            "team": "Houston Rockets",
+            "w": 5,
+            "l": 0,
             "gb": "—"
           },
           {
-            "team": "Houston Rockets",
-            "w": 52,
-            "l": 30,
-            "gb": "10"
+            "team": "Memphis Grizzlies",
+            "w": 4,
+            "l": 0,
+            "gb": "0.5"
           },
           {
-            "team": "New Orleans Pelicans",
-            "w": 26,
-            "l": 56,
-            "gb": "36"
+            "team": "San Antonio Spurs",
+            "w": 3,
+            "l": 2,
+            "gb": "2"
           },
           {
             "team": "Dallas Mavericks",
-            "w": 26,
-            "l": 56,
-            "gb": "36"
+            "w": 3,
+            "l": 2,
+            "gb": "2"
+          },
+          {
+            "team": "New Orleans Pelicans",
+            "w": 0,
+            "l": 4,
+            "gb": "4.5"
+          }
+        ]
+      },
+      {
+        "name": "NBA 26/27",
+        "rows": [
+          {
+            "team": "Houston Rockets",
+            "w": 5,
+            "l": 0,
+            "gb": "—"
           },
           {
             "team": "Memphis Grizzlies",
-            "w": 25,
-            "l": 57,
-            "gb": "37"
+            "w": 4,
+            "l": 0,
+            "gb": "0.5"
+          },
+          {
+            "team": "Portland Trail Blazers",
+            "w": 3,
+            "l": 0,
+            "gb": "1"
+          },
+          {
+            "team": "Detroit Pistons",
+            "w": 4,
+            "l": 1,
+            "gb": "1"
+          },
+          {
+            "team": "Los Angeles Lakers",
+            "w": 4,
+            "l": 1,
+            "gb": "1"
+          },
+          {
+            "team": "Oklahoma City Thunder",
+            "w": 4,
+            "l": 1,
+            "gb": "1"
+          },
+          {
+            "team": "Philadelphia 76ers",
+            "w": 4,
+            "l": 1,
+            "gb": "1"
+          },
+          {
+            "team": "Boston Celtics",
+            "w": 3,
+            "l": 1,
+            "gb": "1.5"
+          },
+          {
+            "team": "Cleveland Cavaliers",
+            "w": 3,
+            "l": 1,
+            "gb": "1.5"
+          },
+          {
+            "team": "Toronto Raptors",
+            "w": 3,
+            "l": 1,
+            "gb": "1.5"
+          },
+          {
+            "team": "Charlotte Hornets",
+            "w": 3,
+            "l": 2,
+            "gb": "2"
+          },
+          {
+            "team": "Dallas Mavericks",
+            "w": 3,
+            "l": 2,
+            "gb": "2"
+          },
+          {
+            "team": "Minnesota Timberwolves",
+            "w": 3,
+            "l": 2,
+            "gb": "2"
+          },
+          {
+            "team": "San Antonio Spurs",
+            "w": 3,
+            "l": 2,
+            "gb": "2"
+          },
+          {
+            "team": "Denver Nuggets",
+            "w": 2,
+            "l": 2,
+            "gb": "2.5"
+          },
+          {
+            "team": "Atlanta Hawks",
+            "w": 2,
+            "l": 3,
+            "gb": "3"
+          },
+          {
+            "team": "Golden State Warriors",
+            "w": 2,
+            "l": 3,
+            "gb": "3"
+          },
+          {
+            "team": "Indiana Pacers",
+            "w": 2,
+            "l": 3,
+            "gb": "3"
+          },
+          {
+            "team": "New York Knicks",
+            "w": 2,
+            "l": 3,
+            "gb": "3"
+          },
+          {
+            "team": "Washington Wizards",
+            "w": 2,
+            "l": 3,
+            "gb": "3"
+          },
+          {
+            "team": "Phoenix Suns",
+            "w": 1,
+            "l": 2,
+            "gb": "3"
+          },
+          {
+            "team": "Los Angeles Clippers",
+            "w": 1,
+            "l": 3,
+            "gb": "3.5"
+          },
+          {
+            "team": "Orlando Magic",
+            "w": 1,
+            "l": 3,
+            "gb": "3.5"
+          },
+          {
+            "team": "Chicago Bulls",
+            "w": 1,
+            "l": 4,
+            "gb": "4"
+          },
+          {
+            "team": "Miami Heat",
+            "w": 1,
+            "l": 4,
+            "gb": "4"
+          },
+          {
+            "team": "Milwaukee Bucks",
+            "w": 1,
+            "l": 4,
+            "gb": "4"
+          },
+          {
+            "team": "Utah Jazz",
+            "w": 1,
+            "l": 4,
+            "gb": "4"
+          },
+          {
+            "team": "Brooklyn Nets",
+            "w": 0,
+            "l": 4,
+            "gb": "4.5"
+          },
+          {
+            "team": "New Orleans Pelicans",
+            "w": 0,
+            "l": 4,
+            "gb": "4.5"
+          },
+          {
+            "team": "Sacramento Kings",
+            "w": 0,
+            "l": 4,
+            "gb": "4.5"
           }
         ]
       }
