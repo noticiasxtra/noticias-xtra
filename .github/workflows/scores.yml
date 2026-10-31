@@ -24,6 +24,7 @@ jobs:
       - name: Get scores and standings
         env:
           HIGHLIGHTLY_API_KEY: ${{ secrets.HIGHLIGHTLY_API_KEY }}
+          FULL: ${{ github.event_name == 'workflow_dispatch' && '1' || '' }} # a manual run also refreshes standings and yesterday's results
         run: node scripts/fetch-scores.mjs
       - name: Save and rebuild the site if anything changed
         env:

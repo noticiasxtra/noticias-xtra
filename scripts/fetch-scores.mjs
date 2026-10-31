@@ -91,10 +91,13 @@ async function main() {
         console.log(`${l.id} ${d}: ${(r.data || []).length} juegos`);
       }
       if (firstOfDay) {
-        const lg = await get(l.base, `/leagues/${l.leagueId}`);
-        const seasons = (lg.seasons || lg.data?.[0]?.seasons || []).map((s) => Number(s.season ?? s)).filter(Boolean);
-        const season = Math.max(...seasons, new Date().getFullYear() - 1);
-        const t = toTable(await get(l.base, `/standings?leagueId=${l.leagueId}&season=${season}`), season);
+        // The current season first (NBA 2026 = 2026-27); before it has a table, the one before
+        const year = Number(day().slice(0, 4));
+        let t = null, season = year;
+        for (season of [year, year - 1]) {
+          t = toTable(await get(l.base, `/standings?leagueId=${l.leagueId}&season=${season}`), l.id === 'nba' ? `${season}-${String(season + 1).slice(2)}` : String(season));
+          if (t) break;
+        }
         if (t) tables[l.id] = t;
         console.log(`${l.id}: posiciones ${t ? 'actualizadas' : 'sin datos'} (temporada ${season})`);
       }
