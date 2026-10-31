@@ -31,6 +31,7 @@ const noticias = defineCollection({
     sectionLead: z.boolean().default(false), // editor's pick for the top story of its section page
     sectionPinned: z.boolean().default(false), // 📌 locked at the top of its section page until an editor unpins it (sectionTop)
     aiAssisted: z.boolean().default(true),
+    via: z.string().optional(), // small credit at the end, e.g. "Con información de NotiCel" (only when the story relies on NotiCel's own reporting)
     sources: z.array(z.object({ name: z.string(), url: z.string().optional() })).default([]),
     related: z.array(z.string()).default([]),
     draft: z.boolean().default(false),

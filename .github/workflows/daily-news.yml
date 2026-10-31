@@ -1,4 +1,4 @@
-# Twice a day: the AI checks the sources in scripts/sources.json and drafts new stories.
+# Every 2 hours from 6 a.m. to 10 p.m. (Puerto Rico): the AI checks the sources in scripts/sources.json and drafts new stories.
 # Each source has a review level ("review" in sources.json):
 #   auto / check -> published right away; "check" stories are also listed in an issue for a quick look
 #   always       -> a pull request the editor approves (political, legal, crime, sensitive, low confidence)
@@ -13,7 +13,7 @@ name: Noticias con IA
 
 on:
   schedule:
-    - cron: "0 11,21 * * *"   # 7:00 a.m. and 5:00 p.m. Puerto Rico time
+    - cron: "0 10,12,14,16,18,20,22,0,2 * * *"   # 6 a.m. to 10 p.m. Puerto Rico time, every 2 hours (NotiCel publishes all day)
   workflow_dispatch:           # adds a "Run workflow" button in the Actions tab
 
 permissions:

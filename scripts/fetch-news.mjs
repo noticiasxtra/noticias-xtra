@@ -5,6 +5,7 @@
  * 1. Reads the list of sources in scripts/sources.json
  * 2. Finds items it hasn't seen before (tracked in scripts/seen.json)
  * 3. Sends each one to Claude, which writes a short news story in Spanish using ONLY facts from the source
+ *    (NotiCel stories, used with NotiCel's permission, are rewritten in Noticias Xtra's own voice: see readNotiCel)
  * 4. Saves each story as a Markdown file in src/content/noticias/
  *
  * Run locally:   ANTHROPIC_API_KEY=sk-... node scripts/fetch-news.mjs
@@ -41,7 +42,7 @@ const API_KEY = process.env.ANTHROPIC_API_KEY;
 // Current model names: https://docs.claude.com/en/docs/about-claude/models/overview
 const MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-5-5';
 const API_URL = process.env.ANTHROPIC_API_URL || 'https://api.anthropic.com/v1/messages';
-const MAX_ARTICLES = Number(process.env.MAX_ARTICLES || 6);
+const MAX_ARTICLES = Number(process.env.MAX_ARTICLES || 8);
 // Hard cap on paid AI requests per run (drafted + discarded), to keep costs predictable.
 const MAX_AI_CALLS = Number(process.env.MAX_AI_CALLS || 15);
 // Items older than this are marked as seen and ignored, so old news is never drafted.
@@ -154,7 +155,45 @@ async function readWordPress(src) {
   }));
 }
 
-const READERS = { rss: readFeed, 'nws-alerts': readNwsAlerts, page: readPage, wordpress: readWordPress };
+// NotiCel (noticel.com), used with NotiCel's permission (user, 2026-10-31). Its public posts API gives the story,
+// its sections and its main photo. Never used: investigations (NotiCel Investiga), opinion and editorials, sponsored
+// content, Fact Check, and video or photo galleries; see `excludeCategories` in sources.json. Nor EFE wire stories that
+// NotiCel republishes (its "EFE" author, `excludeAuthors`, plus the "(EFE)" datelines in `skipIf`): EFE licenses them
+// to NotiCel only (user, 2026-10-31).
+// Photos: NotiCel's own photo with its credit. Agency photos (AP, EFE, Reuters…) are licensed to NotiCel only, so those
+// stories use the section's default photo instead.
+// (also TV networks and screenshots: their pictures aren't NotiCel's to share)
+const WIRE_PHOTO = /\b(AP|EFE|AFP|CNN|CBS|NBC|ABC|NASA)\b|\b(Reuters|Getty|Shutterstock|Bloomberg|Associated Press|Europa Press|Fox News|Telemundo|Univision|WAPA|captura)\b/i;
+async function readNotiCel(src) {
+  const base = src.url.replace(/\/$/, '');
+  const skip = (src.excludeCategories || []).join(','), authors = (src.excludeAuthors || []).join(',');
+  const api = `${base}/wp-json/wp/v2/posts?per_page=20${skip ? `&categories_exclude=${skip}` : ''}${authors ? `&author_exclude=${authors}` : ''}&_embed=wp:featuredmedia&_fields=id,date_gmt,link,title,content,categories,_links,_embedded`;
+  const posts = await (await get(api, 'application/json')).json();
+  const hints = src.sectionFor || {};
+  return posts.map((p) => {
+    const media = p._embedded?.['wp:featuredmedia']?.[0];
+    const caption = stripHtml(media?.caption?.rendered || '').replace(/\s+/g, ' ').trim();
+    // NotiCel puts the photo credit at the end of the caption ("… Archivo/NotiCel.", "(Foto suministrada)")
+    const tail = (caption.match(/(?:^|\.\s)([^.]{2,70})\.?$/)?.[1] || caption).trim();
+    const credit = /\/|NotiCel|suministrada|cortes[ií]a/i.test(tail) && tail.length <= 70 ? tail.replace(/^\(|\)$/g, '') : '';
+    const photo = media?.source_url && !WIRE_PHOTO.test(credit) && !WIRE_PHOTO.test(caption) ? {
+      image: media.source_url,
+      imageCaption: (credit ? caption.slice(0, caption.length - credit.length) : caption).replace(/[\s.]+$/, '').slice(0, 220),
+      imageCredit: /^(foto\s+)?suministrada$/i.test(credit) ? 'Foto suministrada' : `Foto: ${credit.replace(/^Foto:?\s*/i, '') || 'NotiCel'}`,
+    } : undefined;
+    const section = (p.categories || []).map((c) => hints[c]).find(Boolean);
+    return {
+      key: `${base}#${p.id}`,
+      title: stripHtml(p.title?.rendered || ''),
+      link: p.link,
+      text: stripHtml(p.content?.rendered || ''),
+      published: p.date_gmt ? `${p.date_gmt}Z` : '',
+      section, photo,
+    };
+  });
+}
+
+const READERS = { rss: readFeed, 'nws-alerts': readNwsAlerts, page: readPage, wordpress: readWordPress, noticel: readNotiCel };
 
 // Optionally load the full page text for more detail (only for official/primary sources)
 async function fullText(link) {
@@ -216,9 +255,24 @@ Confianza (confidence):
 Responde SOLO con un objeto JSON válido, sin texto adicional, con esta forma:
 {"skip": false, "skipReason": "", "title": "titular de máximo 110 caracteres", "description": "resumen de 1 o 2 oraciones", "section": "una de: ${SECTIONS.join(', ')}", "place": "pueblo de Puerto Rico, ciudad y estado de EE.UU. o ciudad y país; si no se sabe, 'Puerto Rico', 'Estados Unidos' o el país", "body": "3 a 5 párrafos cortos separados por una línea en blanco, 250 a 400 palabras en total", "league": "solo si la sección es deportes: una de ${LEAGUES.join(', ')}, o vacío si no aplica", "needsHumanCheck": false, "confidence": "alta o baja", "editorNote": "dudas o datos que el editor debe verificar"}`;
 
+// NotiCel stories: a full rewrite in Noticias Xtra's voice, signed by Noticias Xtra (NotiCel's permission, 2026-10-31)
+const NOTICEL = `
+
+INSTRUCCIONES ESPECIALES: esta fuente es una noticia de NotiCel, un periódico de Puerto Rico que autorizó a Noticias Xtra a reescribir y publicar sus noticias.
+- Reescribe la noticia completa con la voz propia de Noticias Xtra: titular nuevo, subtítulo (description) nuevo y cuerpo nuevo. No copies oraciones de NotiCel; las citas textuales de las personas sí se mantienen exactas, entre comillas y con su autor.
+- La firma es de Noticias Xtra. Cuando un dato viene del reportaje de NotiCel (algo que NotiCel supo, preguntó u obtuvo), atribúyelo con naturalidad dentro del texto, como haría cualquier periódico: "según NotiCel", "informó NotiCel", "de acuerdo con NotiCel", "reveló NotiCel", "le dijo a NotiCel". Varía la forma, úsalo una o dos veces como máximo y solo donde haga falta; no en cada párrafo ni en hechos públicos (anuncios oficiales, conferencias de prensa, resultados, el tiempo).
+- Voz de Noticias Xtra: un periódico conservador, sobrio y serio. Titular y subtítulo también en ese tono.
+  - Pon primero los hechos que más importan a la familia puertorriqueña: la seguridad, la ley y el orden, el trabajo y el costo de vida, la fe, la educación de los hijos, el buen uso del dinero del pueblo y el respeto a las instituciones.
+  - Puedes cambiar el enfoque del titular y el orden de la noticia para ese tono: qué hecho va primero, qué se destaca y qué palabras se usan (por ejemplo, destacar el costo para el contribuyente, el cumplimiento de la ley o el impacto en las familias, si la noticia lo contiene).
+  - Lenguaje claro y respetuoso, sin sensacionalismo ni palabras de moda o ideológicas.
+- Límites del tono (nunca se cruzan): no cambies los hechos ni las cifras, no inventes datos, no le atribuyas a nadie algo que no dijo, no cambies las citas, no añadas opiniones propias en el texto de la noticia y no califiques a personas ni partidos. Las críticas y acusaciones siempre atribuidas. Si el enfoque conservador obligara a torcer un hecho, quédate con el hecho.
+- investigation: true si es una investigación propia de NotiCel (NotiCel Investiga, "investigación de NotiCel", documentos obtenidos en exclusiva, una serie investigativa). En ese caso skip: true.
+- creditNeeded: true SOLO si la noticia depende sobre todo de algo que NotiCel consiguió por su cuenta (su propia entrevista, un documento que obtuvo, un dato exclusivo) y no lo atribuiste ya en el texto. Si son hechos públicos o ya dijiste "según NotiCel" en el texto, creditNeeded: false.
+Añade al JSON: "investigation": false, "creditNeeded": false`;
+
 async function draftWithClaude(item, src) {
   const prompt = `Fuente: ${src.name}
-Sección sugerida: ${src.section || 'puerto-rico'}
+Sección sugerida: ${item.section || src.section || 'puerto-rico'}
 Enlace: ${item.link || 'no disponible'}
 Fecha de la fuente: ${item.published || 'no indicada'}
 Título original: ${item.title}
@@ -232,7 +286,7 @@ ${item.text.slice(0, 9000)}
     method: 'POST',
     headers: { 'x-api-key': API_KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
     // Room for the model's thinking plus a ~400-word story; medium effort keeps cost and time down
-    body: JSON.stringify({ model: MODEL, max_tokens: 8000, output_config: { effort: 'medium' }, system: SYSTEM, messages: [{ role: 'user', content: prompt }] }),
+    body: JSON.stringify({ model: MODEL, max_tokens: 8000, output_config: { effort: 'medium' }, system: SYSTEM + (src.type === 'noticel' ? NOTICEL : ''), messages: [{ role: 'user', content: prompt }] }),
     signal: AbortSignal.timeout(90000),
   });
   if (!res.ok) throw new Error(`Claude API ${res.status}: ${(await res.text()).slice(0, 300)}`);
@@ -257,8 +311,12 @@ async function saveStory(story, item, src) {
   for (let i = 2; await fs.access(file).then(() => true, () => false); i++) {
     file = path.join(OUT_DIR, `${slug}-${i}.md`);
   }
-  const section = SECTIONS.includes(story.section) ? story.section : src.section || 'puerto-rico';
-  const sources = [`  - name: ${yaml(src.name)}`, ...(item.link ? [`    url: ${yaml(item.link)}`] : [])];
+  const section = SECTIONS.includes(story.section) ? story.section : item.section || src.section || 'puerto-rico';
+  // NotiCel stories are signed by Noticias Xtra: no "Fuentes" line; only a small "Con información de NotiCel" when the
+  // story relies on NotiCel's own reporting (the editor still gets the link in the review issue or pull request)
+  const rewrite = src.type === 'noticel';
+  const sources = rewrite ? [] : [`  - name: ${yaml(src.name)}`, ...(item.link ? [`    url: ${yaml(item.link)}`] : [])];
+  const photo = item.photo ? [`image: ${yaml(item.photo.image)}`, ...(item.photo.imageCaption ? [`imageCaption: ${yaml(item.photo.imageCaption)}`] : []), `imageCredit: ${yaml(item.photo.imageCredit)}`] : [];
   const md = [
     '---',
     `title: ${yaml(story.title)}`,
@@ -270,8 +328,9 @@ async function saveStory(story, item, src) {
     'aiAssisted: true',
     'draft: false', // set to true to take the story off the site
     ...(src.breaking ? ['breaking: true'] : []), // e.g. weather alerts can go in the red ÚLTIMA HORA bar
-    'sources:',
-    ...sources,
+    ...photo,
+    ...(rewrite && story.creditNeeded ? [`via: ${yaml('Con información de NotiCel')}`] : []),
+    ...(sources.length ? ['sources:', ...sources] : []),
     '---',
     '',
     story.body.trim(),
@@ -323,6 +382,8 @@ async function main() {
     // Optional free pre-filter: only items that mention one of the source's keywords
     const keywords = (src.keywords || []).map((k) => k.toLowerCase());
     const matches = (item) => !keywords.length || keywords.some((k) => `${item.title} ${item.text}`.toLowerCase().includes(k));
+    // …and never items that mention one of its `skipIf` words (e.g. NotiCel's investigations)
+    const blocked = (item) => (src.skipIf || []).some((k) => `${item.title} ${item.text}`.toLowerCase().includes(k.toLowerCase()));
 
     const perSource = src.maxPerRun ?? 2; // keeps a mix of local, national and world news
     let fromThis = 0;
@@ -332,7 +393,7 @@ async function main() {
       if (!item.key || seen.has(item.key)) continue;
       const time = Date.parse(item.published);
       if (!Number.isNaN(time) && time < cutoff) { seen.add(item.key); continue; } // too old
-      if (!matches(item)) { seen.add(item.key); continue; } // not relevant
+      if (!matches(item) || blocked(item)) { seen.add(item.key); continue; } // not relevant, or not allowed
       seen.add(item.key);
 
       if (DRY_RUN) { console.log(`  [nuevo] ${item.title}`); continue; }
@@ -347,10 +408,10 @@ async function main() {
         aiCalls++;
         callsHere++;
         const story = await draftWithClaude(item, src);
-        if (story.skip) { skipped.push(`${item.title} (${story.skipReason || 'descartada por la IA'})`); continue; }
+        if (story.skip || story.investigation) { skipped.push(`${item.title} (${story.investigation ? 'investigación de NotiCel: no se usa' : story.skipReason || 'descartada por la IA'})`); continue; }
         const file = await saveStory(story, item, src);
         fromThis++;
-        const section = SECTIONS.includes(story.section) ? story.section : src.section || 'puerto-rico';
+        const section = SECTIONS.includes(story.section) ? story.section : item.section || src.section || 'puerto-rico';
         const level = levelFor(story, src, section);
         created.push({ file, level, title: story.title, source: src.name, link: item.link, note: story.editorNote });
         if (story.needsHumanCheck) flagged.push(story.title);
