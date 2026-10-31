@@ -1,1 +1,174 @@
-[]
+[
+  {
+    "league": "nba",
+    "date": "2026-10-30T23:00:00.000Z",
+    "away": "Hornets",
+    "home": "Wizards",
+    "awayFull": "Charlotte Hornets",
+    "homeFull": "Washington Wizards",
+    "status": "final",
+    "src": "highlightly:442183788",
+    "homeScore": 95,
+    "awayScore": 79
+  },
+  {
+    "league": "nba",
+    "date": "2026-10-30T23:30:00.000Z",
+    "away": "Knicks",
+    "home": "76ers",
+    "awayFull": "New York Knicks",
+    "homeFull": "Philadelphia 76ers",
+    "status": "final",
+    "src": "highlightly:442186341",
+    "homeScore": 98,
+    "awayScore": 93
+  },
+  {
+    "league": "nba",
+    "date": "2026-10-30T23:30:00.000Z",
+    "away": "Pistons",
+    "home": "Nets",
+    "awayFull": "Detroit Pistons",
+    "homeFull": "Brooklyn Nets",
+    "status": "final",
+    "src": "highlightly:442185490",
+    "homeScore": 94,
+    "awayScore": 110
+  },
+  {
+    "league": "nba",
+    "date": "2026-10-31T00:00:00.000Z",
+    "away": "Pacers",
+    "home": "Heat",
+    "awayFull": "Indiana Pacers",
+    "homeFull": "Miami Heat",
+    "status": "final",
+    "src": "highlightly:442189745",
+    "homeScore": 145,
+    "awayScore": 125
+  },
+  {
+    "league": "nba",
+    "date": "2026-10-31T00:00:00.000Z",
+    "away": "Rockets",
+    "home": "Mavericks",
+    "awayFull": "Houston Rockets",
+    "homeFull": "Dallas Mavericks",
+    "status": "final",
+    "src": "highlightly:442188894",
+    "homeScore": 116,
+    "awayScore": 111
+  },
+  {
+    "league": "nba",
+    "date": "2026-10-31T00:00:00.000Z",
+    "away": "Clippers",
+    "home": "Timberwolves",
+    "awayFull": "Los Angeles Clippers",
+    "homeFull": "Minnesota Timberwolves",
+    "status": "final",
+    "src": "highlightly:442188043",
+    "homeScore": 127,
+    "awayScore": 101
+  },
+  {
+    "league": "nba",
+    "date": "2026-10-31T02:00:00.000Z",
+    "away": "Nuggets",
+    "home": "Suns",
+    "awayFull": "Denver Nuggets",
+    "homeFull": "Phoenix Suns",
+    "status": "final",
+    "src": "highlightly:442191447",
+    "homeScore": 120,
+    "awayScore": 127
+  },
+  {
+    "league": "nba",
+    "date": "2026-10-31T02:00:00.000Z",
+    "away": "Lakers",
+    "home": "Warriors",
+    "awayFull": "Los Angeles Lakers",
+    "homeFull": "Golden State Warriors",
+    "status": "final",
+    "src": "highlightly:442190596",
+    "homeScore": 112,
+    "awayScore": 95
+  },
+  {
+    "league": "nba",
+    "date": "2026-10-31T19:00:00.000Z",
+    "away": "Trail Blazers",
+    "home": "Jazz",
+    "awayFull": "Portland Trail Blazers",
+    "homeFull": "Utah Jazz",
+    "status": "en-vivo",
+    "src": "highlightly:442192298",
+    "homeScore": 53,
+    "awayScore": 77,
+    "note": "3er cuarto · 7'"
+  },
+  {
+    "league": "nba",
+    "date": "2026-10-31T22:00:00.000Z",
+    "away": "76ers",
+    "home": "Hornets",
+    "awayFull": "Philadelphia 76ers",
+    "homeFull": "Charlotte Hornets",
+    "status": "programado",
+    "src": "highlightly:442193149"
+  },
+  {
+    "league": "nba",
+    "date": "2026-10-31T23:00:00.000Z",
+    "away": "Hawks",
+    "home": "Pelicans",
+    "awayFull": "Atlanta Hawks",
+    "homeFull": "New Orleans Pelicans",
+    "status": "programado",
+    "src": "highlightly:442194000"
+  },
+  {
+    "league": "nba",
+    "date": "2026-11-01T00:00:00.000Z",
+    "away": "Cavaliers",
+    "home": "Bucks",
+    "awayFull": "Cleveland Cavaliers",
+    "homeFull": "Milwaukee Bucks",
+    "status": "programado",
+    "src": "highlightly:442196553"
+  },
+  {
+    "league": "nba",
+    "date": "2026-11-01T00:00:00.000Z",
+    "away": "Kings",
+    "home": "Grizzlies",
+    "awayFull": "Sacramento Kings",
+    "homeFull": "Memphis Grizzlies",
+    "status": "programado",
+    "src": "highlightly:442195702"
+  },
+  {
+    "league": "nba",
+    "date": "2026-11-01T00:00:00.000Z",
+    "away": "Timberwolves",
+    "home": "Spurs",
+    "awayFull": "Minnesota Timberwolves",
+    "homeFull": "San Antonio Spurs",
+    "status": "programado",
+    "src": "highlightly:442194851"
+  },
+  {
+    "league": "nba",
+    "date": "2026-11-01T00:30:00.000Z",
+    "away": "Thunder",
+    "home": "Rockets",
+    "awayFull": "Oklahoma City Thunder",
+    "homeFull": "Houston Rockets",
+    "status": "programado",
+    "src": "highlightly:442197404"
+  },
+  {
+    "_checked": "2026-10-31"
+  }
+]
