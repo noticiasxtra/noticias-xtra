@@ -24,7 +24,7 @@
     "review": "check",
     "place": "Puerto Rico",
     "maxPerRun": 5,
-    "_nota": "Con permiso de NotiCel (2026-10-31): se reescriben sus noticias con la voz de Noticias Xtra. Nunca: NotiCel Investiga, Opiniones, Editorial, Auspiciado, Fact Check, videos y galerías, ni las noticias de EFE que NotiCel publica.",
+    "_nota": "Con permiso de NotiCel (2026-10-31): se reescriben sus noticias con la voz de Noticias Xtra. Nunca: NotiCel Investiga, Opiniones, Editorial, Auspiciado, Fact Check, videos y galerías, ni las noticias de EFE que NotiCel publica. Deportes: solo locales (ligas de Puerto Rico y atletas o equipos boricuas).",
     "excludeCategories": [
       76,
       48,
@@ -35,7 +35,8 @@
       61,
       60,
       59,
-      77
+      77,
+      38
     ],
     "skipIf": [
       "NotiCel Investiga",

@@ -2,6 +2,10 @@
 // Used by the "Clima" box (right column) and the small chip at the end of the section bar; one request per page.
 
 export const WEATHER_URL = 'https://api.weather.gov/stations/TJSJ/observations?limit=6';
+// When the airport station reports no temperature (its sensor sometimes goes quiet for hours): Isla Grande (TJIG),
+// then the NWS hourly forecast for San Juan
+const BACKUP_STATION = 'https://api.weather.gov/stations/TJIG/observations?limit=6';
+const HOURLY = 'https://api.weather.gov/gridpoints/SJU/162,132/forecast/hourly';
 
 const SKY: Record<string, string> = {
   clear: 'Despejado', sunny: 'Soleado', 'mostly sunny': 'Mayormente soleado', 'partly sunny': 'Parcialmente soleado',
@@ -27,12 +31,21 @@ let once: Promise<Weather | null> | null = null;
 export function getWeather(): Promise<Weather | null> {
   return (once ??= (async () => {
     try {
+      const get = async (u: string) => (await fetch(u, { headers: { Accept: 'application/geo+json' } })).json();
       // Recent readings, newest first; stations sometimes skip a value, so use the newest complete one
-      const list = (await (await fetch(WEATHER_URL, { headers: { Accept: 'application/geo+json' } })).json()).features ?? [];
-      const p = list.map((f: { properties: any }) => f.properties).find((x: any) => typeof x?.temperature?.value === 'number');
-      if (!p) return null;
-      const c = p.temperature.value, desc = String(p.textDescription || '');
-      return { temp: F(c), feels: F(typeof p.heatIndex?.value === 'number' ? p.heatIndex.value : c), sky: SKY[desc.toLowerCase()] ?? '', desc };
+      const reading = (list: Array<{ properties: any }>) => list.map((f) => f.properties).find((x: any) => typeof x?.temperature?.value === 'number');
+      const main = (await get(WEATHER_URL)).features ?? [];
+      const sky = String(main.map((f: { properties: any }) => f.properties?.textDescription).find(Boolean) ?? ''); // the airport's sky, even without a temperature
+      const p = reading(main) ?? reading((await get(BACKUP_STATION).catch(() => ({}))).features ?? []);
+      if (p) {
+        const c = p.temperature.value, desc = String(p.textDescription || sky);
+        return { temp: F(c), feels: F(typeof p.heatIndex?.value === 'number' ? p.heatIndex.value : c), sky: SKY[desc.toLowerCase()] ?? '', desc };
+      }
+      const h = (await get(HOURLY)).properties?.periods?.[0];
+      if (typeof h?.temperature !== 'number') return null;
+      const tf = h.temperatureUnit === 'C' ? Math.round((h.temperature * 9) / 5 + 32) : h.temperature;
+      const desc = String(sky || h.shortForecast || '');
+      return { temp: `${tf}°`, feels: `${tf}°`, sky: SKY[desc.toLowerCase()] ?? '', desc };
     } catch { return null; }
   })());
 }
