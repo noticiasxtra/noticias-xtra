@@ -861,7 +861,7 @@ a.sp-games-teams:hover span:first-child,a.sp-games-teams:hover span:last-child{c
   .lg-main{grid-area:main}.lg-right{grid-area:right}.lg-left{grid-area:left}
 }
 @media (max-width:860px){
-  .lg-grid{grid-template-columns:1fr;grid-template-areas:"main" "right" "left"}
+  .lg-grid{grid-template-columns:1fr;grid-template-areas:"main" "left" "right"}
   .lg-title{flex-wrap:wrap}
   .lg-site{margin-left:0}
   .lg-more{grid-template-columns:repeat(2,1fr)}
@@ -4481,3 +4481,12 @@ a,button,summary,label{-webkit-tap-highlight-color:transparent}
 .gm-vid b{font-size:14px;line-height:1.3}
 .gm-vid small{color:var(--muted);font-size:12px}
 .gm-vid:hover b{text-decoration:underline}
+/* League pages on phones: the story and games, then Titulares, then the standings, then the rest, the team list last */
+@media (max-width:860px){
+  .lg-grid{display:flex;flex-direction:column}
+  .lg-left,.lg-right{display:contents}
+  .lg-left > *{order:1}
+  .lg-right > *{order:3}
+  .lg-right > #posiciones{order:2}
+  .lg-left > #equipos{order:4}
+}

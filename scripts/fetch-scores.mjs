@@ -27,6 +27,8 @@ const LEAGUES = [
   { id: 'nba', base: 'https://basketball.highlightly.net', leagueId: 10996 },
   // NFL is Highlightly's separate "NFL API" product (its own free plan, same key); until it's added it's skipped
   { id: 'nfl', base: 'https://american-football.highlightly.net', league: 'NFL', football: true },
+  // MLB ("MLB API" product): between seasons only a manual run asks (final standings); spring training starts in February
+  { id: 'mlb', base: 'https://baseball.highlightly.net', league: 'MLB', baseball: true, starts: '2027-02-20', ends: '2026-11-08' },
 ];
 
 const DETAILS_PER_RUN = 5; // each one is 2 requests: the game's stats and its video highlights
@@ -137,6 +139,48 @@ function nflTables(data) {
   return { table: { updated: `Temporada ${confs[0].year}. Fuente: Highlightly`, groups }, stats };
 }
 
+// MLB games: innings, hits and errors
+function toBaseball(league, m) {
+  const st = m.state?.description ?? 'Unknown';
+  const [home, away] = String(m.state?.score?.current ?? '').split('-').map((x) => Number.parseInt(x, 10));
+  const final = st === 'Finished', live = ['In Progress', 'Period End', 'Half Time', 'Rain Delay'].includes(st);
+  const g = {
+    league, date: m.date, away: m.awayTeam.name ?? m.awayTeam.displayName, home: m.homeTeam.name ?? m.homeTeam.displayName,
+    awayFull: m.awayTeam.displayName, homeFull: m.homeTeam.displayName,
+    status: final ? 'final' : live ? 'en-vivo' : 'programado', src: `highlightly:${m.id}`, id: `${league}-${m.id}`, statsChecked: true,
+  };
+  if ((final || live) && Number.isFinite(home) && Number.isFinite(away)) { g.homeScore = home; g.awayScore = away; }
+  const sc = m.state?.score ?? {};
+  const inn = Math.max(sc.home?.innings?.length ?? 0, sc.away?.innings?.length ?? 0);
+  if (live) g.note = st === 'Rain Delay' ? 'Retraso por lluvia' : inn ? `${inn}.ª entrada` : 'En juego';
+  if (final && inn > 9) g.note = `${inn} entradas`;
+  if (OFF[st] || st === 'Canceled') g.note = OFF[st] ?? 'Cancelado';
+  if (inn && (final || live)) {
+    const row = (s) => Array.from({ length: inn }, (_, i) => s?.innings?.[i] ?? '');
+    g.linescore = { labels: Array.from({ length: inn }, (_, i) => String(i + 1)), away: row(sc.away), home: row(sc.home), totals: ['C', 'H', 'E'],
+      awayTotals: [g.awayScore ?? '', sc.away?.hits ?? '', sc.away?.errors ?? ''], homeTotals: [g.homeScore ?? '', sc.home?.hits ?? '', sc.home?.errors ?? ''] };
+  }
+  return g;
+}
+
+// MLB standings: the American and National League tables of the regular season
+function mlbTable(data) {
+  const latest = new Map();
+  for (const c of (data.data || []).filter((c) => /regular/i.test(c.seasonType ?? '') && /^(AL|NL)$/.test(c.abbreviation))) {
+    const prev = latest.get(c.abbreviation);
+    if (!prev || Date.parse(c.endDate) > Date.parse(prev.endDate)) latest.set(c.abbreviation, c);
+  }
+  const NAME = { AL: 'Liga Americana', NL: 'Liga Nacional' };
+  const groups = [...latest.values()].sort((a, b) => a.abbreviation.localeCompare(b.abbreviation)).map((c) => {
+    const stat = (t, ab) => t.stats?.find((s) => s.abbreviation === ab)?.displayValue ?? '';
+    const rows = c.data.map((t) => ({ team: t.name, w: Number(stat(t, 'W')) || 0, l: Number(stat(t, 'L')) || 0 })).sort((a, b) => b.w - a.w || a.l - b.l);
+    const top = rows[0];
+    rows.forEach((r) => { const gb = ((top.w - r.w) + (r.l - top.l)) / 2; r.gb = gb === 0 ? '—' : String(gb); });
+    return { name: NAME[c.abbreviation], rows };
+  }).filter((g) => g.rows.length);
+  return groups.length ? { updated: `Temporada ${[...latest.values()][0].year}. Fuente: Highlightly`, groups } : null;
+}
+
 function toGame(league, m) {
   const st = m.state?.description ?? 'Unknown';
   const [home, away] = String(m.state?.score?.current ?? '').split('-').map((x) => Number.parseInt(x, 10));
@@ -190,15 +234,16 @@ async function main() {
 
   const now = Date.now();
   for (const l of LEAGUES) {
-    if (l.starts && now > Date.parse(l.ends) && now < Date.parse(l.starts) - 3 * 864e5) { console.log(`${l.id}: fuera de temporada`); continue; }
+    const offSeason = l.starts && now > Date.parse(l.ends) && now < Date.parse(l.starts) - 3 * 864e5;
+    if (offSeason && process.env.FULL !== '1') { console.log(`${l.id}: fuera de temporada`); continue; }
     try {
       // Today on every run; the first run of the day also yesterday's finals and the coming days' games
       // (NFL: the next 6 days, since it plays mostly on Sundays; basketball: tomorrow)
       const ahead = Array.from({ length: l.football ? 6 : 1 }, (_, i) => day(i + 1));
       for (const d of firstOfDay ? [day(-1), day(), ...ahead] : [day()]) {
-        const r = await get(l.base, `/matches?${l.football ? `league=${l.league}` : `leagueId=${l.leagueId}`}&date=${d}&timezone=${encodeURIComponent(TZ)}&limit=100`);
+        const r = await get(l.base, `/matches?${l.league ? `league=${l.league}` : `leagueId=${l.leagueId}`}&date=${d}&timezone=${encodeURIComponent(TZ)}&limit=100`);
         for (const m of r.data || []) {
-          const old = byKey.get(`highlightly:${m.id}`), g = l.football ? toFootball(l.id, m) : toGame(l.id, m);
+          const old = byKey.get(`highlightly:${m.id}`), g = l.football ? toFootball(l.id, m) : l.baseball ? toBaseball(l.id, m) : toGame(l.id, m);
           if (old?.statsChecked && g.status === 'final') Object.assign(g, { stats: old.stats, venue: old.venue, videos: old.videos, statsChecked: true });
           byKey.set(`highlightly:${m.id}`, g);
         }
@@ -210,7 +255,13 @@ async function main() {
         if (t) { tables[l.id] = t.table; teamStats[l.id] = t.stats; }
         console.log(`${l.id}: posiciones ${t ? 'actualizadas' : 'sin datos'}`);
       }
-      if (firstOfDay && !l.football) {
+      if (firstOfDay && l.baseball) {
+        const year = Number(day().slice(0, 4)), month = Number(day().slice(5, 7));
+        const t = mlbTable(await get(l.base, `/standings?leagueType=${l.league}&year=${month < 3 ? year - 1 : year}&limit=10`));
+        if (t) tables[l.id] = t;
+        console.log(`${l.id}: posiciones ${t ? 'actualizadas' : 'sin datos'}`);
+      }
+      if (firstOfDay && !l.football && !l.baseball) {
         // The current season first (NBA 2026 = 2026-27); before it has a table, the one before
         const year = Number(day().slice(0, 4));
         let t = null, season = year;
