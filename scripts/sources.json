@@ -289,5 +289,43 @@
     "place": "Mundo",
     "enabled": false,
     "_nota": "Desactivada hasta confirmar que las condiciones de uso de la ONU permiten reescribir su contenido."
+  },
+  {
+    "name": "Noticias ONU (Naciones Unidas)",
+    "type": "rss",
+    "url": "https://news.un.org/feed/subscribe/es/news/all/rss.xml",
+    "section": "mundo",
+    "review": "check",
+    "place": "Mundo",
+    "maxPerRun": 2,
+    "fullText": true,
+    "_nota": "Servicio oficial de noticias de la ONU en español (feed público). Se usan con crédito; se reescriben."
+  },
+  {
+    "name": "Compañía de Turismo de Puerto Rico",
+    "type": "rss",
+    "url": "https://www.prtourism.com/feed/",
+    "section": "entretenimiento",
+    "review": "check",
+    "place": "Puerto Rico",
+    "maxPerRun": 1,
+    "fullText": true,
+    "_nota": "Comunicados oficiales: eventos, turismo y economía del visitante. La IA escoge la sección (entretenimiento o economía)."
+  },
+  {
+    "name": "Negociado del Censo de EE.UU.",
+    "type": "rss",
+    "url": "https://www.census.gov/newsroom/press-releases.xml",
+    "section": "economia",
+    "review": "check",
+    "place": "Estados Unidos",
+    "maxPerRun": 1,
+    "fullText": true,
+    "keywords": [
+      "Puerto Rico",
+      "territor",
+      "island areas"
+    ],
+    "_nota": "Datos oficiales (población, ingresos, comercio). Solo los comunicados que mencionan a Puerto Rico."
   }
 ]
