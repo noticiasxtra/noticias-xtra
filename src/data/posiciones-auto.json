@@ -280,5 +280,754 @@
         ]
       }
     ]
+  },
+  "nfl": {
+    "updated": "Temporada 2026. Fuente: Highlightly",
+    "groups": [
+      {
+        "name": "AFC",
+        "columns": [
+          "PF",
+          "PC",
+          "RACHA"
+        ],
+        "rows": [
+          {
+            "team": "Kansas City Chiefs",
+            "w": 2,
+            "l": 0,
+            "extra": [
+              "64",
+              "40",
+              "G2"
+            ],
+            "gb": "—"
+          },
+          {
+            "team": "Buffalo Bills",
+            "w": 2,
+            "l": 0,
+            "extra": [
+              "77",
+              "62",
+              "G2"
+            ],
+            "gb": "—"
+          },
+          {
+            "team": "Cincinnati Bengals",
+            "w": 2,
+            "l": 0,
+            "extra": [
+              "53",
+              "33",
+              "G2"
+            ],
+            "gb": "—"
+          },
+          {
+            "team": "Las Vegas Raiders",
+            "w": 2,
+            "l": 0,
+            "extra": [
+              "53",
+              "27",
+              "G2"
+            ],
+            "gb": "—"
+          },
+          {
+            "team": "Jacksonville Jaguars",
+            "w": 1,
+            "l": 1,
+            "extra": [
+              "47",
+              "30",
+              "P1"
+            ],
+            "gb": "1"
+          },
+          {
+            "team": "New England Patriots",
+            "w": 1,
+            "l": 1,
+            "extra": [
+              "30",
+              "16",
+              "G1"
+            ],
+            "gb": "1"
+          },
+          {
+            "team": "Baltimore Ravens",
+            "w": 1,
+            "l": 1,
+            "extra": [
+              "58",
+              "47",
+              "P1"
+            ],
+            "gb": "1"
+          },
+          {
+            "team": "New York Jets",
+            "w": 1,
+            "l": 1,
+            "extra": [
+              "40",
+              "30",
+              "P1"
+            ],
+            "gb": "1"
+          },
+          {
+            "team": "Denver Broncos",
+            "w": 1,
+            "l": 1,
+            "extra": [
+              "30",
+              "44",
+              "G1"
+            ],
+            "gb": "1"
+          },
+          {
+            "team": "Cleveland Browns",
+            "w": 1,
+            "l": 1,
+            "extra": [
+              "33",
+              "53",
+              "G1"
+            ],
+            "gb": "1"
+          },
+          {
+            "team": "Pittsburgh Steelers",
+            "w": 1,
+            "l": 1,
+            "extra": [
+              "23",
+              "33",
+              "P1"
+            ],
+            "gb": "1"
+          },
+          {
+            "team": "Houston Texans",
+            "w": 0,
+            "l": 2,
+            "extra": [
+              "37",
+              "56",
+              "P2"
+            ],
+            "gb": "2"
+          },
+          {
+            "team": "Miami Dolphins",
+            "w": 0,
+            "l": 2,
+            "extra": [
+              "26",
+              "62",
+              "P2"
+            ],
+            "gb": "2"
+          },
+          {
+            "team": "Indianapolis Colts",
+            "w": 0,
+            "l": 2,
+            "extra": [
+              "53",
+              "74",
+              "P2"
+            ],
+            "gb": "2"
+          },
+          {
+            "team": "Los Angeles Chargers",
+            "w": 0,
+            "l": 2,
+            "extra": [
+              "28",
+              "52",
+              "P2"
+            ],
+            "gb": "2"
+          },
+          {
+            "team": "Tennessee Titans",
+            "w": 0,
+            "l": 2,
+            "extra": [
+              "30",
+              "47",
+              "P2"
+            ],
+            "gb": "2"
+          }
+        ]
+      },
+      {
+        "name": "AFC",
+        "columns": [
+          "PF",
+          "PC",
+          "RACHA"
+        ],
+        "rows": [
+          {
+            "team": "Kansas City Chiefs",
+            "w": 5,
+            "l": 1,
+            "extra": [
+              "143",
+              "103",
+              "P1"
+            ],
+            "gb": "—"
+          },
+          {
+            "team": "Buffalo Bills",
+            "w": 5,
+            "l": 1,
+            "extra": [
+              "197",
+              "171",
+              "G2"
+            ],
+            "gb": "—"
+          },
+          {
+            "team": "Cleveland Browns",
+            "w": 5,
+            "l": 2,
+            "extra": [
+              "133",
+              "146",
+              "G2"
+            ],
+            "gb": "0.5"
+          },
+          {
+            "team": "Denver Broncos",
+            "w": 5,
+            "l": 2,
+            "extra": [
+              "144",
+              "141",
+              "G3"
+            ],
+            "gb": "0.5"
+          },
+          {
+            "team": "Pittsburgh Steelers",
+            "w": 5,
+            "l": 2,
+            "extra": [
+              "153",
+              "138",
+              "G3"
+            ],
+            "gb": "0.5"
+          },
+          {
+            "team": "Jacksonville Jaguars",
+            "w": 4,
+            "l": 2,
+            "extra": [
+              "154",
+              "104",
+              "P1"
+            ],
+            "gb": "1"
+          },
+          {
+            "team": "Cincinnati Bengals",
+            "w": 4,
+            "l": 2,
+            "extra": [
+              "163",
+              "122",
+              "G2"
+            ],
+            "gb": "1"
+          },
+          {
+            "team": "New England Patriots",
+            "w": 4,
+            "l": 3,
+            "extra": [
+              "160",
+              "143",
+              "P1"
+            ],
+            "gb": "1.5"
+          },
+          {
+            "team": "Baltimore Ravens",
+            "w": 4,
+            "l": 3,
+            "extra": [
+              "169",
+              "167",
+              "P2"
+            ],
+            "gb": "1.5"
+          },
+          {
+            "team": "Las Vegas Raiders",
+            "w": 3,
+            "l": 4,
+            "extra": [
+              "183",
+              "197",
+              "P4"
+            ],
+            "gb": "2.5"
+          },
+          {
+            "team": "New York Jets",
+            "w": 2,
+            "l": 5,
+            "extra": [
+              "137",
+              "150",
+              "P2"
+            ],
+            "gb": "3.5"
+          },
+          {
+            "team": "Indianapolis Colts",
+            "w": 2,
+            "l": 5,
+            "extra": [
+              "154",
+              "180",
+              "P3"
+            ],
+            "gb": "3.5"
+          },
+          {
+            "team": "Houston Texans",
+            "w": 2,
+            "l": 5,
+            "extra": [
+              "165",
+              "170",
+              "P1"
+            ],
+            "gb": "3.5"
+          },
+          {
+            "team": "Miami Dolphins",
+            "w": 1,
+            "l": 5,
+            "extra": [
+              "98",
+              "157",
+              "G1"
+            ],
+            "gb": "4"
+          },
+          {
+            "team": "Tennessee Titans",
+            "w": 1,
+            "l": 6,
+            "extra": [
+              "108",
+              "156",
+              "P1"
+            ],
+            "gb": "4.5"
+          },
+          {
+            "team": "Los Angeles Chargers",
+            "w": 0,
+            "l": 6,
+            "extra": [
+              "90",
+              "151",
+              "P6"
+            ],
+            "gb": "5"
+          }
+        ]
+      },
+      {
+        "name": "NFC",
+        "columns": [
+          "PF",
+          "PC",
+          "RACHA"
+        ],
+        "rows": [
+          {
+            "team": "Minnesota Vikings",
+            "w": 2,
+            "l": 0,
+            "extra": [
+              "48",
+              "25",
+              "G2"
+            ],
+            "gb": "—"
+          },
+          {
+            "team": "Seattle Seahawks",
+            "w": 2,
+            "l": 0,
+            "extra": [
+              "44",
+              "17",
+              "G2"
+            ],
+            "gb": "—"
+          },
+          {
+            "team": "Philadelphia Eagles",
+            "w": 2,
+            "l": 0,
+            "extra": [
+              "48",
+              "42",
+              "G2"
+            ],
+            "gb": "—"
+          },
+          {
+            "team": "San Francisco 49ers",
+            "w": 2,
+            "l": 0,
+            "extra": [
+              "62",
+              "20",
+              "G2"
+            ],
+            "gb": "—"
+          },
+          {
+            "team": "Carolina Panthers",
+            "w": 1,
+            "l": 1,
+            "extra": [
+              "71",
+              "62",
+              "G1"
+            ],
+            "gb": "1"
+          },
+          {
+            "team": "Detroit Lions",
+            "w": 1,
+            "l": 1,
+            "extra": [
+              "62",
+              "71",
+              "P1"
+            ],
+            "gb": "1"
+          },
+          {
+            "team": "Chicago Bears",
+            "w": 1,
+            "l": 1,
+            "extra": [
+              "62",
+              "46",
+              "P1"
+            ],
+            "gb": "1"
+          },
+          {
+            "team": "Los Angeles Rams",
+            "w": 1,
+            "l": 1,
+            "extra": [
+              "35",
+              "33",
+              "G1"
+            ],
+            "gb": "1"
+          },
+          {
+            "team": "New York Giants",
+            "w": 1,
+            "l": 1,
+            "extra": [
+              "34",
+              "48",
+              "P1"
+            ],
+            "gb": "1"
+          },
+          {
+            "team": "Dallas Cowboys",
+            "w": 1,
+            "l": 1,
+            "extra": [
+              "57",
+              "48",
+              "G1"
+            ],
+            "gb": "1"
+          },
+          {
+            "team": "Green Bay Packers",
+            "w": 1,
+            "l": 1,
+            "extra": [
+              "42",
+              "56",
+              "G1"
+            ],
+            "gb": "1"
+          },
+          {
+            "team": "New Orleans Saints",
+            "w": 1,
+            "l": 1,
+            "extra": [
+              "54",
+              "48",
+              "G1"
+            ],
+            "gb": "1"
+          },
+          {
+            "team": "Arizona Cardinals",
+            "w": 1,
+            "l": 1,
+            "extra": [
+              "33",
+              "45",
+              "P1"
+            ],
+            "gb": "1"
+          },
+          {
+            "team": "Washington Commanders",
+            "w": 0,
+            "l": 2,
+            "extra": [
+              "42",
+              "61",
+              "P2"
+            ],
+            "gb": "2"
+          },
+          {
+            "team": "Tampa Bay Buccaneers",
+            "w": 0,
+            "l": 2,
+            "extra": [
+              "46",
+              "56",
+              "P2"
+            ],
+            "gb": "2"
+          },
+          {
+            "team": "Atlanta Falcons",
+            "w": 0,
+            "l": 2,
+            "extra": [
+              "16",
+              "54",
+              "P2"
+            ],
+            "gb": "2"
+          }
+        ]
+      },
+      {
+        "name": "NFC",
+        "columns": [
+          "PF",
+          "PC",
+          "RACHA"
+        ],
+        "rows": [
+          {
+            "team": "Minnesota Vikings",
+            "w": 6,
+            "l": 0,
+            "extra": [
+              "125",
+              "74",
+              "G6"
+            ],
+            "gb": "—"
+          },
+          {
+            "team": "San Francisco 49ers",
+            "w": 6,
+            "l": 1,
+            "extra": [
+              "197",
+              "139",
+              "P1"
+            ],
+            "gb": "0.5"
+          },
+          {
+            "team": "Chicago Bears",
+            "w": 5,
+            "l": 2,
+            "extra": [
+              "180",
+              "143",
+              "G2"
+            ],
+            "gb": "1.5"
+          },
+          {
+            "team": "Green Bay Packers",
+            "w": 5,
+            "l": 3,
+            "extra": [
+              "171",
+              "164",
+              "G1"
+            ],
+            "gb": "2"
+          },
+          {
+            "team": "Detroit Lions",
+            "w": 4,
+            "l": 2,
+            "extra": [
+              "184",
+              "165",
+              "G2"
+            ],
+            "gb": "2"
+          },
+          {
+            "team": "New York Giants",
+            "w": 4,
+            "l": 2,
+            "extra": [
+              "163",
+              "161",
+              "G1"
+            ],
+            "gb": "2"
+          },
+          {
+            "team": "Seattle Seahawks",
+            "w": 4,
+            "l": 3,
+            "extra": [
+              "168",
+              "125",
+              "G1"
+            ],
+            "gb": "2.5"
+          },
+          {
+            "team": "Carolina Panthers",
+            "w": 3,
+            "l": 4,
+            "extra": [
+              "178",
+              "193",
+              "P2"
+            ],
+            "gb": "3.5"
+          },
+          {
+            "team": "Atlanta Falcons",
+            "w": 3,
+            "l": 4,
+            "extra": [
+              "171",
+              "173",
+              "G1"
+            ],
+            "gb": "3.5"
+          },
+          {
+            "team": "Los Angeles Rams",
+            "w": 3,
+            "l": 4,
+            "extra": [
+              "170",
+              "159",
+              "G1"
+            ],
+            "gb": "3.5"
+          },
+          {
+            "team": "Dallas Cowboys",
+            "w": 3,
+            "l": 4,
+            "extra": [
+              "189",
+              "180",
+              "G1"
+            ],
+            "gb": "3.5"
+          },
+          {
+            "team": "Tampa Bay Buccaneers",
+            "w": 2,
+            "l": 5,
+            "extra": [
+              "162",
+              "151",
+              "G1"
+            ],
+            "gb": "4.5"
+          },
+          {
+            "team": "New Orleans Saints",
+            "w": 2,
+            "l": 5,
+            "extra": [
+              "162",
+              "194",
+              "P1"
+            ],
+            "gb": "4.5"
+          },
+          {
+            "team": "Arizona Cardinals",
+            "w": 2,
+            "l": 5,
+            "extra": [
+              "142",
+              "208",
+              "P1"
+            ],
+            "gb": "4.5"
+          },
+          {
+            "team": "Philadelphia Eagles",
+            "w": 2,
+            "l": 5,
+            "extra": [
+              "127",
+              "175",
+              "P5"
+            ],
+            "gb": "4.5"
+          },
+          {
+            "team": "Washington Commanders",
+            "w": 1,
+            "l": 4,
+            "extra": [
+              "132",
+              "172",
+              "P1"
+            ],
+            "gb": "4.5"
+          }
+        ]
+      }
+    ]
   }
 }

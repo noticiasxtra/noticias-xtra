@@ -8,9 +8,122 @@
     "homeFull": "Washington Wizards",
     "status": "final",
     "src": "highlightly:442183788",
+    "id": "nba-442183788",
     "homeScore": 95,
     "awayScore": 79,
-    "id": "nba-442183788"
+    "linescore": {
+      "labels": [
+        "1",
+        "2",
+        "3",
+        "4"
+      ],
+      "home": [
+        22,
+        29,
+        28,
+        16
+      ],
+      "away": [
+        26,
+        20,
+        13,
+        20
+      ],
+      "totals": [
+        "T"
+      ],
+      "homeTotals": [
+        95
+      ],
+      "awayTotals": [
+        79
+      ]
+    },
+    "stats": [
+      {
+        "label": "Tiros de campo",
+        "away": "101",
+        "home": "73"
+      },
+      {
+        "label": "Triples",
+        "away": "56",
+        "home": "30"
+      },
+      {
+        "label": "Tiros libres",
+        "away": "12",
+        "home": "35"
+      },
+      {
+        "label": "Rebotes",
+        "away": "55",
+        "home": "53"
+      },
+      {
+        "label": "Rebotes ofensivos",
+        "away": "18",
+        "home": "9"
+      },
+      {
+        "label": "Rebotes defensivos",
+        "away": "37",
+        "home": "44"
+      },
+      {
+        "label": "Asistencias",
+        "away": "22",
+        "home": "18"
+      },
+      {
+        "label": "Robos",
+        "away": "12",
+        "home": "6"
+      },
+      {
+        "label": "Tapones",
+        "away": "1",
+        "home": "4"
+      },
+      {
+        "label": "Pérdidas",
+        "away": "12",
+        "home": "15"
+      },
+      {
+        "label": "Faltas",
+        "away": "27",
+        "home": "17"
+      },
+      {
+        "label": "Puntos de contraataque",
+        "away": "7",
+        "home": "11"
+      },
+      {
+        "label": "Successful Field Goals",
+        "away": "30",
+        "home": "28"
+      },
+      {
+        "label": "Successful 3 Pointers",
+        "away": "12",
+        "home": "10"
+      },
+      {
+        "label": "Successful Free Throws",
+        "away": "7",
+        "home": "29"
+      },
+      {
+        "label": "Points Off Turnovers",
+        "away": "10",
+        "home": "9"
+      }
+    ],
+    "venue": "Capital One Arena, Washington, D.C.",
+    "statsChecked": true
   },
   {
     "league": "nba",
@@ -21,9 +134,122 @@
     "homeFull": "Philadelphia 76ers",
     "status": "final",
     "src": "highlightly:442186341",
+    "id": "nba-442186341",
     "homeScore": 98,
     "awayScore": 93,
-    "id": "nba-442186341"
+    "linescore": {
+      "labels": [
+        "1",
+        "2",
+        "3",
+        "4"
+      ],
+      "home": [
+        29,
+        24,
+        24,
+        21
+      ],
+      "away": [
+        21,
+        23,
+        24,
+        25
+      ],
+      "totals": [
+        "T"
+      ],
+      "homeTotals": [
+        98
+      ],
+      "awayTotals": [
+        93
+      ]
+    },
+    "stats": [
+      {
+        "label": "Tiros de campo",
+        "away": "86",
+        "home": "75"
+      },
+      {
+        "label": "Triples",
+        "away": "41",
+        "home": "34"
+      },
+      {
+        "label": "Tiros libres",
+        "away": "14",
+        "home": "16"
+      },
+      {
+        "label": "Rebotes",
+        "away": "45",
+        "home": "39"
+      },
+      {
+        "label": "Rebotes ofensivos",
+        "away": "14",
+        "home": "5"
+      },
+      {
+        "label": "Rebotes defensivos",
+        "away": "31",
+        "home": "34"
+      },
+      {
+        "label": "Asistencias",
+        "away": "23",
+        "home": "26"
+      },
+      {
+        "label": "Robos",
+        "away": "8",
+        "home": "7"
+      },
+      {
+        "label": "Tapones",
+        "away": "2",
+        "home": "4"
+      },
+      {
+        "label": "Pérdidas",
+        "away": "13",
+        "home": "14"
+      },
+      {
+        "label": "Faltas",
+        "away": "15",
+        "home": "15"
+      },
+      {
+        "label": "Puntos de contraataque",
+        "away": "5",
+        "home": "10"
+      },
+      {
+        "label": "Successful Field Goals",
+        "away": "35",
+        "home": "37"
+      },
+      {
+        "label": "Successful 3 Pointers",
+        "away": "13",
+        "home": "12"
+      },
+      {
+        "label": "Successful Free Throws",
+        "away": "10",
+        "home": "12"
+      },
+      {
+        "label": "Points Off Turnovers",
+        "away": "21",
+        "home": "23"
+      }
+    ],
+    "venue": "Xfinity Mobile Arena, Philadelphia, PA",
+    "statsChecked": true
   },
   {
     "league": "nba",
@@ -34,9 +260,122 @@
     "homeFull": "Brooklyn Nets",
     "status": "final",
     "src": "highlightly:442185490",
+    "id": "nba-442185490",
     "homeScore": 94,
     "awayScore": 110,
-    "id": "nba-442185490"
+    "linescore": {
+      "labels": [
+        "1",
+        "2",
+        "3",
+        "4"
+      ],
+      "home": [
+        28,
+        21,
+        17,
+        28
+      ],
+      "away": [
+        21,
+        35,
+        36,
+        18
+      ],
+      "totals": [
+        "T"
+      ],
+      "homeTotals": [
+        94
+      ],
+      "awayTotals": [
+        110
+      ]
+    },
+    "stats": [
+      {
+        "label": "Tiros de campo",
+        "away": "90",
+        "home": "77"
+      },
+      {
+        "label": "Triples",
+        "away": "41",
+        "home": "37"
+      },
+      {
+        "label": "Tiros libres",
+        "away": "28",
+        "home": "26"
+      },
+      {
+        "label": "Rebotes",
+        "away": "41",
+        "home": "50"
+      },
+      {
+        "label": "Rebotes ofensivos",
+        "away": "9",
+        "home": "9"
+      },
+      {
+        "label": "Rebotes defensivos",
+        "away": "32",
+        "home": "41"
+      },
+      {
+        "label": "Asistencias",
+        "away": "25",
+        "home": "20"
+      },
+      {
+        "label": "Robos",
+        "away": "14",
+        "home": "8"
+      },
+      {
+        "label": "Tapones",
+        "away": "3",
+        "home": "10"
+      },
+      {
+        "label": "Pérdidas",
+        "away": "12",
+        "home": "24"
+      },
+      {
+        "label": "Faltas",
+        "away": "19",
+        "home": "23"
+      },
+      {
+        "label": "Puntos de contraataque",
+        "away": "27",
+        "home": "11"
+      },
+      {
+        "label": "Successful Field Goals",
+        "away": "38",
+        "home": "31"
+      },
+      {
+        "label": "Successful 3 Pointers",
+        "away": "12",
+        "home": "11"
+      },
+      {
+        "label": "Successful Free Throws",
+        "away": "22",
+        "home": "21"
+      },
+      {
+        "label": "Points Off Turnovers",
+        "away": "27",
+        "home": "14"
+      }
+    ],
+    "venue": "Barclays Center, Brooklyn, NY",
+    "statsChecked": true
   },
   {
     "league": "nba",
@@ -47,9 +386,122 @@
     "homeFull": "Miami Heat",
     "status": "final",
     "src": "highlightly:442189745",
+    "id": "nba-442189745",
     "homeScore": 145,
     "awayScore": 125,
-    "id": "nba-442189745"
+    "linescore": {
+      "labels": [
+        "1",
+        "2",
+        "3",
+        "4"
+      ],
+      "home": [
+        36,
+        32,
+        35,
+        42
+      ],
+      "away": [
+        42,
+        19,
+        27,
+        37
+      ],
+      "totals": [
+        "T"
+      ],
+      "homeTotals": [
+        145
+      ],
+      "awayTotals": [
+        125
+      ]
+    },
+    "stats": [
+      {
+        "label": "Tiros de campo",
+        "away": "91",
+        "home": "93"
+      },
+      {
+        "label": "Triples",
+        "away": "37",
+        "home": "40"
+      },
+      {
+        "label": "Tiros libres",
+        "away": "27",
+        "home": "23"
+      },
+      {
+        "label": "Rebotes",
+        "away": "37",
+        "home": "48"
+      },
+      {
+        "label": "Rebotes ofensivos",
+        "away": "14",
+        "home": "15"
+      },
+      {
+        "label": "Rebotes defensivos",
+        "away": "23",
+        "home": "33"
+      },
+      {
+        "label": "Asistencias",
+        "away": "28",
+        "home": "38"
+      },
+      {
+        "label": "Robos",
+        "away": "11",
+        "home": "8"
+      },
+      {
+        "label": "Tapones",
+        "away": "1",
+        "home": "3"
+      },
+      {
+        "label": "Pérdidas",
+        "away": "15",
+        "home": "16"
+      },
+      {
+        "label": "Faltas",
+        "away": "21",
+        "home": "20"
+      },
+      {
+        "label": "Puntos de contraataque",
+        "away": "18",
+        "home": "15"
+      },
+      {
+        "label": "Successful Field Goals",
+        "away": "44",
+        "home": "54"
+      },
+      {
+        "label": "Successful 3 Pointers",
+        "away": "17",
+        "home": "18"
+      },
+      {
+        "label": "Successful Free Throws",
+        "away": "20",
+        "home": "19"
+      },
+      {
+        "label": "Points Off Turnovers",
+        "away": "26",
+        "home": "21"
+      }
+    ],
+    "venue": "Kaseya Center, Miami, FL",
+    "statsChecked": true
   },
   {
     "league": "nba",
@@ -60,9 +512,122 @@
     "homeFull": "Dallas Mavericks",
     "status": "final",
     "src": "highlightly:442188894",
+    "id": "nba-442188894",
     "homeScore": 116,
     "awayScore": 111,
-    "id": "nba-442188894"
+    "linescore": {
+      "labels": [
+        "1",
+        "2",
+        "3",
+        "4"
+      ],
+      "home": [
+        27,
+        17,
+        32,
+        40
+      ],
+      "away": [
+        20,
+        31,
+        33,
+        27
+      ],
+      "totals": [
+        "T"
+      ],
+      "homeTotals": [
+        116
+      ],
+      "awayTotals": [
+        111
+      ]
+    },
+    "stats": [
+      {
+        "label": "Tiros de campo",
+        "away": "96",
+        "home": "81"
+      },
+      {
+        "label": "Triples",
+        "away": "29",
+        "home": "33"
+      },
+      {
+        "label": "Tiros libres",
+        "away": "33",
+        "home": "27"
+      },
+      {
+        "label": "Rebotes",
+        "away": "48",
+        "home": "41"
+      },
+      {
+        "label": "Rebotes ofensivos",
+        "away": "20",
+        "home": "12"
+      },
+      {
+        "label": "Rebotes defensivos",
+        "away": "28",
+        "home": "29"
+      },
+      {
+        "label": "Asistencias",
+        "away": "26",
+        "home": "24"
+      },
+      {
+        "label": "Robos",
+        "away": "12",
+        "home": "8"
+      },
+      {
+        "label": "Tapones",
+        "away": "3",
+        "home": "4"
+      },
+      {
+        "label": "Pérdidas",
+        "away": "13",
+        "home": "18"
+      },
+      {
+        "label": "Faltas",
+        "away": "23",
+        "home": "24"
+      },
+      {
+        "label": "Puntos de contraataque",
+        "away": "10",
+        "home": "28"
+      },
+      {
+        "label": "Successful Field Goals",
+        "away": "40",
+        "home": "42"
+      },
+      {
+        "label": "Successful 3 Pointers",
+        "away": "7",
+        "home": "12"
+      },
+      {
+        "label": "Successful Free Throws",
+        "away": "24",
+        "home": "20"
+      },
+      {
+        "label": "Points Off Turnovers",
+        "away": "17",
+        "home": "20"
+      }
+    ],
+    "venue": "American Airlines Center, Dallas, TX",
+    "statsChecked": true
   },
   {
     "league": "nba",
@@ -73,9 +638,122 @@
     "homeFull": "Minnesota Timberwolves",
     "status": "final",
     "src": "highlightly:442188043",
+    "id": "nba-442188043",
     "homeScore": 127,
     "awayScore": 101,
-    "id": "nba-442188043"
+    "linescore": {
+      "labels": [
+        "1",
+        "2",
+        "3",
+        "4"
+      ],
+      "home": [
+        34,
+        35,
+        29,
+        29
+      ],
+      "away": [
+        24,
+        32,
+        25,
+        20
+      ],
+      "totals": [
+        "T"
+      ],
+      "homeTotals": [
+        127
+      ],
+      "awayTotals": [
+        101
+      ]
+    },
+    "stats": [
+      {
+        "label": "Tiros de campo",
+        "away": "85",
+        "home": "96"
+      },
+      {
+        "label": "Triples",
+        "away": "30",
+        "home": "43"
+      },
+      {
+        "label": "Tiros libres",
+        "away": "22",
+        "home": "11"
+      },
+      {
+        "label": "Rebotes",
+        "away": "42",
+        "home": "43"
+      },
+      {
+        "label": "Rebotes ofensivos",
+        "away": "11",
+        "home": "12"
+      },
+      {
+        "label": "Rebotes defensivos",
+        "away": "31",
+        "home": "31"
+      },
+      {
+        "label": "Asistencias",
+        "away": "24",
+        "home": "32"
+      },
+      {
+        "label": "Robos",
+        "away": "7",
+        "home": "7"
+      },
+      {
+        "label": "Tapones",
+        "away": "7",
+        "home": "6"
+      },
+      {
+        "label": "Pérdidas",
+        "away": "18",
+        "home": "12"
+      },
+      {
+        "label": "Faltas",
+        "away": "16",
+        "home": "20"
+      },
+      {
+        "label": "Puntos de contraataque",
+        "away": "9",
+        "home": "18"
+      },
+      {
+        "label": "Successful Field Goals",
+        "away": "35",
+        "home": "51"
+      },
+      {
+        "label": "Successful 3 Pointers",
+        "away": "12",
+        "home": "18"
+      },
+      {
+        "label": "Successful Free Throws",
+        "away": "19",
+        "home": "7"
+      },
+      {
+        "label": "Points Off Turnovers",
+        "away": "16",
+        "home": "28"
+      }
+    ],
+    "venue": "Target Center, Minneapolis, MN",
+    "statsChecked": true
   },
   {
     "league": "nba",
@@ -86,9 +764,38 @@
     "homeFull": "Phoenix Suns",
     "status": "final",
     "src": "highlightly:442191447",
+    "id": "nba-442191447",
     "homeScore": 120,
     "awayScore": 127,
-    "id": "nba-442191447"
+    "linescore": {
+      "labels": [
+        "1",
+        "2",
+        "3",
+        "4"
+      ],
+      "home": [
+        37,
+        30,
+        26,
+        27
+      ],
+      "away": [
+        32,
+        39,
+        32,
+        24
+      ],
+      "totals": [
+        "T"
+      ],
+      "homeTotals": [
+        120
+      ],
+      "awayTotals": [
+        127
+      ]
+    }
   },
   {
     "league": "nba",
@@ -99,9 +806,38 @@
     "homeFull": "Golden State Warriors",
     "status": "final",
     "src": "highlightly:442190596",
+    "id": "nba-442190596",
     "homeScore": 112,
     "awayScore": 95,
-    "id": "nba-442190596"
+    "linescore": {
+      "labels": [
+        "1",
+        "2",
+        "3",
+        "4"
+      ],
+      "home": [
+        15,
+        38,
+        32,
+        27
+      ],
+      "away": [
+        38,
+        15,
+        27,
+        15
+      ],
+      "totals": [
+        "T"
+      ],
+      "homeTotals": [
+        112
+      ],
+      "awayTotals": [
+        95
+      ]
+    }
   },
   {
     "league": "nba",
@@ -112,10 +848,39 @@
     "homeFull": "Utah Jazz",
     "status": "en-vivo",
     "src": "highlightly:442192298",
-    "homeScore": 64,
-    "awayScore": 88,
-    "note": "3er cuarto · 10'",
-    "id": "nba-442192298"
+    "id": "nba-442192298",
+    "homeScore": 72,
+    "awayScore": 94,
+    "note": "4to cuarto · 3'",
+    "linescore": {
+      "labels": [
+        "1",
+        "2",
+        "3",
+        "4"
+      ],
+      "home": [
+        18,
+        24,
+        22,
+        8
+      ],
+      "away": [
+        27,
+        32,
+        29,
+        6
+      ],
+      "totals": [
+        "T"
+      ],
+      "homeTotals": [
+        72
+      ],
+      "awayTotals": [
+        94
+      ]
+    }
   },
   {
     "league": "nba",
