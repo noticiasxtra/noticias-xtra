@@ -34,7 +34,7 @@ const title = `${g.awayFull ?? g.away} vs. ${g.homeFull ?? g.home}`;
           <div class:list={['gm-team', { win: awayWin }]}>
             <TeamLogo league={g.league} name={g.awayFull ?? g.away} size={64} />
             <strong>{g.awayFull ?? g.away}</strong>
-            {g.awayRecord && <span>{g.awayRecord}</span>}
+            {g.awayRecord && <span>{g.awayRecord}{g.awayPlace && ` · ${g.awayPlace}`}</span>}
             <small>Visitante</small>
           </div>
           <div class="gm-score">
@@ -44,7 +44,7 @@ const title = `${g.awayFull ?? g.away} vs. ${g.homeFull ?? g.home}`;
           <div class:list={['gm-team', 'home', { win: homeWin }]}>
             <TeamLogo league={g.league} name={g.homeFull ?? g.home} size={64} />
             <strong>{g.homeFull ?? g.home}</strong>
-            {g.homeRecord && <span>{g.homeRecord}</span>}
+            {g.homeRecord && <span>{g.homeRecord}{g.homePlace && ` · ${g.homePlace}`}</span>}
             <small>Local</small>
           </div>
         </div>

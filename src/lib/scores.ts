@@ -35,6 +35,8 @@ export type Game = {
   linescore?: { labels: string[]; away: Array<number | string>; home: Array<number | string>; totals: string[]; awayTotals: Array<number | string>; homeTotals: Array<number | string> };
   stats?: Array<{ label: string; away: string; home: string }>;
   plays?: Array<{ when: string; text: string }>; // newest first
+  awayPlace?: string; // e.g. "2.º en la Conferencia Este" (from the automatic standings; game page)
+  homePlace?: string;
   videos?: Array<{ title: string; url: string; embed: string; img: string; channel: string }>; // highlights (scripts/fetch-scores.mjs)
 };
 
@@ -65,12 +67,16 @@ const demo = SITE.sportsDemo;
 const recordOf = (league: string, name?: string, short?: string) => {
   for (const grp of (autoStandings as Record<string, Standings>)[league]?.groups ?? []) {
     const i = grp.rows.findIndex((r) => r.team === name || r.team === short); // MLB tables use the short name
-    if (i >= 0) return `${grp.rows[i].w}-${grp.rows[i].l}${grp.name ? ` · ${i + 1}.º en ${/^Grupo/.test(grp.name) ? 'el' : 'la'} ${grp.name}` : ''}`;
+    if (i >= 0) return { rec: `${grp.rows[i].w}-${grp.rows[i].l}`, place: grp.name ? `${i + 1}.º en ${/^Grupo/.test(grp.name) ? 'el' : 'la'} ${grp.name}` : undefined };
   }
   return undefined;
 };
 const auto = (autoGames as Array<Game & { _checked?: string }>).filter((g) => g.league)
-  .map((g) => ({ ...g, awayRecord: g.awayRecord ?? recordOf(g.league, g.awayFull, g.away), homeRecord: g.homeRecord ?? recordOf(g.league, g.homeFull, g.home) }));
+  .map((g) => {
+    const a = recordOf(g.league, g.awayFull, g.away), h = recordOf(g.league, g.homeFull, g.home);
+    // The short record ("4-1") goes everywhere; the place in the table only on the game page
+    return { ...g, awayRecord: g.awayRecord ?? a?.rec, homeRecord: g.homeRecord ?? h?.rec, awayPlace: a?.place, homePlace: h?.place };
+  });
 const autoLeagues = new Set(auto.map((g) => g.league));
 const allGames = (): Game[] => [...auto, ...(realGames as Game[]).filter((g) => !autoLeagues.has(g.league)), ...(demo ? DEMO_GAMES : [])];
 
