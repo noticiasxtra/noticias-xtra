@@ -4410,7 +4410,12 @@ a,button,summary,label{-webkit-tap-highlight-color:transparent}
 .hero-wide .related li{padding:11px 0 11px 18px}
 .hero-side{container-type:inline-size;align-self:stretch}
 .hero-side .hero-ad{margin:18px auto 0}
-@container (max-width:299px){ .hero-side .hero-ad{display:none} }
+/* Under the three smaller stories the square ad shrinks to the column's width (same shape), so it fills the space on
+   narrower screens too; only below 240px wide it hides */
+.hero-side .hero-ad{width:100%;max-width:300px}
+.hero-side .hero-ad :is(.ad-box,.ad-rot,.ad-rot a,.ad-google){width:100%;max-width:300px;height:auto;aspect-ratio:300/250}
+.hero-side .hero-ad .ad-rot :is(img,video){width:100%;height:100%}
+@container (max-width:239px){ .hero-side .hero-ad{display:none} }
 /* Tablets (iPad portrait and landscape, small laptops): the main story takes the full width and the three smaller
    stories sit in a row of three under it, photo on top, instead of a squeezed column beside it */
 @media (min-width:761px) and (max-width:1199px){
