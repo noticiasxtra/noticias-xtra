@@ -3,13 +3,14 @@ title: "Junta Fiscal advierte que suspender el IVU a alimentos preparados costar
 description: "La Junta Fiscal pidió identificar fondos y evaluar el impacto en el presupuesto antes de suspender el IVU. La gobernadora Jenniffer González Colón dijo que la propuesta sigue en discusión."
 section: gobierno
 place: "Puerto Rico"
-date: 2026-10-30T21:35:35.000Z
-aiAssisted: true
-draft: true
-pending: true
+date: 2026-10-30T21:35:00.000Z
+author: "Noticias Xtra"
 image: "https://cdn.noticel.com/2026/10/30173832/IVUX.jpg"
 imageCaption: "“El problema no es la cifra de esta propuesta; el problema es la práctica”, sostuvo el organismo en la comunicación del miércoles"
 imageCredit: "Foto: Archivo/NotiCel"
+sectionLead: true
+aiAssisted: true
+draft: false
 ---
 
 La Junta de Supervisión Fiscal advirtió que suspender en noviembre y diciembre la porción estatal del IVU, de 6 %, a alimentos preparados, bebidas carbonatadas, dulces y productos de confitería representaría unos $56.8 millones en ingresos que el Gobierno dejaría de recibir. El IVU es el impuesto sobre ventas y uso.
