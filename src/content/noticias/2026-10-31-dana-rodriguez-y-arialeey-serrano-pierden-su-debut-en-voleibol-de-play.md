@@ -9,7 +9,6 @@ image: "https://cdn.noticel.com/2026/10/31111913/voleiplaya-Cropped.jpg"
 imageCaption: "La dupla puertorriqueña de Dana Rodríguez y Arialeey Serrano perdió su primer partido"
 imageCredit: "Foto suministrada"
 sectionLead: true
-sectionPinned: true
 aiAssisted: true
 draft: false
 ---
