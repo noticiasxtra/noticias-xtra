@@ -3,13 +3,13 @@ title: "Gobernadora asigna $598,261 para asfaltar la PR-346 y reinaugura el coli
 description: "Durante su visita a Hormigueros, Jenniffer González Colón firmó un acuerdo para repavimentar 3.6 kilómetros de la PR-346 y reinauguró el coliseo y el cine teatro municipal, ambos remodelados con fondos federales."
 section: gobierno
 place: "Puerto Rico"
-date: 2026-10-31T20:34:35.000Z
-aiAssisted: true
-draft: true
-pending: true
+date: 2026-10-31T20:34:00.000Z
+author: "Noticias Xtra"
 image: "https://cdn.noticel.com/2026/10/31164054/coliseo.jpg"
 imageCaption: "Imagen de la ceremonia de reinuaguración del Coliseo Dr. Wilfredo Toro Vázquez . (Foto tomada de redes)"
 imageCredit: "Foto: NotiCel"
+aiAssisted: true
+draft: false
 ---
 
 La gobernadora Jenniffer González Colón visitó Hormigueros bajo el programa "Cumpliendo contigo". Estuvo acompañada de personal de la Oficina de Gerencia y Presupuesto, el Departamento de Recursos Naturales y Ambientales, COR3 (la oficina que supervisa los fondos federales de recuperación), Vivienda y la Policía. Trabajó con el alcalde Pedro García y el representante Emilio Carlo.
