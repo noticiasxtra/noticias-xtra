@@ -5,7 +5,7 @@
  * hand-typed marcadores.json and posiciones.json (src/lib/scores.ts merges them; these win for the leagues they cover).
  * Covered on the account (checked 2026-10-31, scripts/sports-discovery.json): BSN, NBA, NFL and MLB. Highlightly has no
  * La Pro, Doble A or Puerto Rico volleyball: La Pro and Doble A are read from the leagues' own websites (readLaPro,
- * readDobleA, about once an hour, no Highlightly requests); volleyball stays hand-typed.
+ * readDobleA, about once an hour, no Highlightly requests), and so are LVSM and LVSF (readVolley, fedpurvoli.com).
  * Free plan: 100 requests a day per sport. Each run asks for today's games (1 request per league); the first run of
  * the day also asks for yesterday's finals and the standings; each finished game is asked once more for its team
  * stats and arena (game page), at most DETAILS_PER_RUN per run.
@@ -299,6 +299,56 @@ async function readDobleA() {
   });
 }
 
+// Volleyball (fedpurvoli.com): one "Calendario y resultados" page per league and season, a table with the day, date,
+// time, home and visiting towns and the result in sets. The towns become team names (the ones the site uses).
+const VOLLEY_TEAMS = {
+  lvsm: { Yauco: 'Cafeteros de Yauco', Lares: 'Patriotas de Lares', Corozal: 'Plataneros de Corozal', Naranjito: 'Changos de Naranjito',
+    Adjuntas: 'Gigantes de Adjuntas', Carolina: 'Gigantes de Carolina', 'San Sebastian': 'Caribes de San Sebastián', Guaynabo: 'Mets de Guaynabo' },
+  lvsf: { Santurce: 'Cangrejeras de Santurce', Caguas: 'Criollas de Caguas', Corozal: 'Pinkin de Corozal', Ponce: 'Leonas de Ponce',
+    Manati: 'Atenienses de Manatí', Juncos: 'Valencianas de Juncos', Mayaguez: 'Indias de Mayagüez', Naranjito: 'Changas de Naranjito' },
+};
+const plain = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
+async function readVolley(league) {
+  const year = Number(day().slice(0, 4));
+  // LVSM plays October to January (season named for the October year); LVSF plays January to April
+  const seasons = league === 'lvsm' ? [year, year - 1] : [year + 1, year];
+  for (const season of seasons) {
+    let html;
+    try { html = await page(`https://fedpurvoli.com/calendario-y-resultados-${league}-${season}/`); } catch { continue; }
+    const table = html.match(/<table[\s\S]*?<\/table>/)?.[0]; if (!table) continue;
+    const rows = [...table.matchAll(/<tr[\s\S]*?<\/tr>/g)].map((r) => [...r[0].matchAll(/<t[dh][^>]*>([\s\S]*?)<\/t[dh]>/g)].map((c) => text(c[1])));
+    const head = rows.find((r) => r.some((c) => /^LOCAL$/i.test(c))); if (!head) continue;
+    const col = (re) => head.findIndex((c) => re.test(c));
+    const iDate = col(/^FECHA$/i), iTime = col(/^HORA$/i), iHome = col(/^LOCAL$/i), iAway = col(/^VIS/i), iRes = col(/^RESULTADO$/i);
+    const homeFirst = iHome < iAway;
+    const names = VOLLEY_TEAMS[league];
+    const team = (town) => names[Object.keys(names).find((k) => plain(k) === plain(town))] ?? town;
+    const nick = (full) => { const n = full.split(/\s+de\s+/i)[0]; return Object.values(names).filter((x) => x.startsWith(`${n} de `)).length > 1 ? full : n; };
+    const games = [];
+    let lastDate = '';
+    for (const [k, r] of rows.entries()) {
+      if (r === head || !r[iHome] || !r[iAway]) continue;
+      if (r[iDate]) lastDate = r[iDate];
+      const d = lastDate.match(/(\d{1,2}) de (\w+)/i), t = (r[iTime] || '').match(/(\d{1,2}):(\d{2})\s*([AP])M/i);
+      if (!d || !t) continue;
+      const month = MONTHS[plain(d[2]).toLowerCase()]; if (month === undefined) continue;
+      const y = league === 'lvsm' && month < 7 ? season + 1 : season;
+      const date = new Date(Date.UTC(y, month, Number(d[1]), (Number(t[1]) % 12) + (t[3].toUpperCase() === 'P' ? 12 : 0) + 4, Number(t[2]))).toISOString();
+      const homeFull = team(r[iHome]), awayFull = team(r[iAway]);
+      const g = { league, date, away: nick(awayFull), home: nick(homeFull), awayFull, homeFull, src: `fpv-${league}:${season}-${k}`, status: 'programado' };
+      const sets = (r[iRes] || '').match(/(\d)\s*[–-]\s*(\d)/);
+      if (sets) {
+        const [a, b] = [Number(sets[1]), Number(sets[2])];
+        [g.homeScore, g.awayScore] = homeFirst ? [a, b] : [b, a];
+        g.status = 'final';
+      }
+      games.push(g);
+    }
+    if (games.length) return games;
+  }
+  return [];
+}
+
 async function main() {
   if (!KEY) { console.log('HIGHLIGHTLY_API_KEY no está configurada. No se buscaron marcadores.'); return; }
   const games = await readJson(GAMES_FILE, []);
@@ -352,7 +402,7 @@ async function main() {
 
   // Puerto Rico leagues from their own sites: about once an hour (the first run of each hour), free
   if (firstOfDay || new Date().getUTCMinutes() < 30) {
-    for (const [id, read] of [['invernal', readLaPro], ['doble-a', readDobleA]]) {
+    for (const [id, read] of [['invernal', readLaPro], ['doble-a', readDobleA], ['lvsm', () => readVolley('lvsm')], ['lvsf', () => readVolley('lvsf')]]) {
       try {
         const r = await read();
         const list = Array.isArray(r) ? r : r.games;

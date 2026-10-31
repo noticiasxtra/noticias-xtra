@@ -15,7 +15,7 @@ import AdSlot from '../../components/AdSlot.astro';
 import { getStories, url } from '../../lib/site';
 import { LEAGUES, type League } from '../../lib/leagues';
 import { standings, isDemoTable, scores, recent } from '../../lib/scores';
-import { TEAMS } from '../../lib/teams';
+import { TEAMS, teamSite } from '../../lib/teams';
 import teamsData from '../../data/equipos.json';
 
 export function getStaticPaths() {
@@ -98,7 +98,7 @@ const tabs: Array<[keyof typeof ICON, string]> = individual ? [['noticias', 'Not
             {teamCount ? teamGroups.map(([group, list]) => (
               <>
                 {group && <h3 class="lg-group">{group}</h3>}
-                <ul class="lg-teams">{list.map((t) => <li><TeamLogo league={l.id} name={t} size={30} /><span class="notranslate" translate="no">{t}</span></li>)}</ul>
+                <ul class="lg-teams">{list.map((t) => { const site = teamSite(l.id, t); const inner = <><TeamLogo league={l.id} name={t} size={30} /><span class="notranslate" translate="no">{t}</span>{site && <i class="lg-team-go" aria-hidden="true">↗</i>}</>; return <li>{site ? <a href={site} target="_blank" rel="noopener" title={`Página oficial de ${t}`}>{inner}</a> : inner}</li>; })}</ul>
               </>
             )) : <p class="sp-note">La lista de equipos se publicará con la temporada.</p>}
           </section>}

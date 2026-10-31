@@ -4490,3 +4490,7 @@ a,button,summary,label{-webkit-tap-highlight-color:transparent}
   .lg-right > #posiciones{order:2}
   .lg-left > #equipos{order:4}
 }
+/* League page → Equipos: a team with an official page is a link */
+.lg-teams li > a{display:flex;align-items:center;gap:inherit;flex:1;min-width:0;color:inherit}
+.lg-teams li > a:hover span{color:var(--purple);text-decoration:underline}
+.lg-team-go{margin-left:auto;font-style:normal;font-size:12px;color:var(--muted)}

@@ -199,3 +199,15 @@ export function team(league: string, name: string): Team {
   const bySuffix = Object.keys(TEAMS).find((k) => k.startsWith(`${league}:`) && k.endsWith(` ${name}`));
   return TEAMS[`${league}:${name}`] ?? TEAMS[`${league}:${short}`] ?? (byPrefix ? TEAMS[byPrefix] : undefined) ?? (bySuffix ? TEAMS[bySuffix] : undefined) ?? fallback;
 }
+
+/** Each team's official page, for the "Equipos" list on its league page (opens in a new tab).
+ *  BSN: the team pages on the league's site, bsnpr.com/equipos/<code>. */
+const BSN_CODES: Record<string, string> = {
+  'Santeros de Aguada': 'AGU', 'Capitanes de Arecibo': 'ARE', 'Vaqueros de Bayamón': 'BAY', 'Criollos de Caguas': 'CAG',
+  'Gigantes de Carolina': 'CAR', 'Mets de Guaynabo': 'GBO', 'Osos de Manatí': 'MAN', 'Indios de Mayagüez': 'MAY',
+  'Leones de Ponce': 'PON', 'Piratas de Quebradillas': 'QUE', 'Cangrejeros de Santurce': 'SCE', 'Atléticos de San Germán': 'SGE',
+};
+export function teamSite(league: string, name: string): string | undefined {
+  if (league === 'bsn' && BSN_CODES[name]) return `https://www.bsnpr.com/equipos/${BSN_CODES[name]}`;
+  return undefined;
+}
