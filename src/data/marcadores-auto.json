@@ -1,5 +1,57 @@
 [
   {
+    "league": "lvsm",
+    "date": "2026-10-25T22:00:00.000Z",
+    "away": "Patriotas",
+    "home": "Gigantes de Carolina",
+    "awayFull": "Patriotas de Lares",
+    "homeFull": "Gigantes de Carolina",
+    "src": "fpv-lvsm:2026-7",
+    "status": "final",
+    "homeScore": 1,
+    "awayScore": 3,
+    "id": "lvsm-2026-7"
+  },
+  {
+    "league": "lvsm",
+    "date": "2026-10-25T23:00:00.000Z",
+    "away": "Gigantes de Adjuntas",
+    "home": "Changos",
+    "awayFull": "Gigantes de Adjuntas",
+    "homeFull": "Changos de Naranjito",
+    "src": "fpv-lvsm:2026-5",
+    "status": "final",
+    "homeScore": 3,
+    "awayScore": 0,
+    "id": "lvsm-2026-5"
+  },
+  {
+    "league": "lvsm",
+    "date": "2026-10-25T23:00:00.000Z",
+    "away": "Plataneros",
+    "home": "Cafeteros",
+    "awayFull": "Plataneros de Corozal",
+    "homeFull": "Cafeteros de Yauco",
+    "src": "fpv-lvsm:2026-6",
+    "status": "final",
+    "homeScore": 3,
+    "awayScore": 2,
+    "id": "lvsm-2026-6"
+  },
+  {
+    "league": "lvsm",
+    "date": "2026-10-30T00:00:00.000Z",
+    "away": "Patriotas",
+    "home": "Gigantes de Adjuntas",
+    "awayFull": "Patriotas de Lares",
+    "homeFull": "Gigantes de Adjuntas",
+    "src": "fpv-lvsm:2026-9",
+    "status": "final",
+    "homeScore": 2,
+    "awayScore": 3,
+    "id": "lvsm-2026-9"
+  },
+  {
     "league": "nba",
     "date": "2026-10-30T23:00:00.000Z",
     "away": "Hornets",
@@ -756,6 +808,32 @@
     "statsChecked": true
   },
   {
+    "league": "lvsm",
+    "date": "2026-10-31T00:00:00.000Z",
+    "away": "Gigantes de Carolina",
+    "home": "Plataneros",
+    "awayFull": "Gigantes de Carolina",
+    "homeFull": "Plataneros de Corozal",
+    "src": "fpv-lvsm:2026-10",
+    "status": "final",
+    "homeScore": 2,
+    "awayScore": 3,
+    "id": "lvsm-2026-10"
+  },
+  {
+    "league": "lvsm",
+    "date": "2026-10-31T00:00:00.000Z",
+    "away": "Cafeteros",
+    "home": "Changos",
+    "awayFull": "Cafeteros de Yauco",
+    "homeFull": "Changos de Naranjito",
+    "src": "fpv-lvsm:2026-11",
+    "status": "final",
+    "homeScore": 0,
+    "awayScore": 3,
+    "id": "lvsm-2026-11"
+  },
+  {
     "league": "nba",
     "date": "2026-10-31T02:00:00.000Z",
     "away": "Nuggets",
@@ -1054,12 +1132,11 @@
     "home": "Jazz",
     "awayFull": "Portland Trail Blazers",
     "homeFull": "Utah Jazz",
-    "status": "en-vivo",
+    "status": "final",
     "src": "highlightly:442192298",
     "id": "nba-442192298",
     "homeScore": 90,
     "awayScore": 112,
-    "note": "4to cuarto · 9'",
     "linescore": {
       "labels": [
         "1",
@@ -1088,7 +1165,111 @@
       "awayTotals": [
         112
       ]
-    }
+    },
+    "stats": [
+      {
+        "label": "Tiros de campo anotados",
+        "away": "31",
+        "home": "29"
+      },
+      {
+        "label": "Tiros de campo intentados",
+        "away": "76",
+        "home": "78"
+      },
+      {
+        "label": "Triples anotados",
+        "away": "16",
+        "home": "11"
+      },
+      {
+        "label": "Triples intentados",
+        "away": "44",
+        "home": "40"
+      },
+      {
+        "label": "Tiros libres anotados",
+        "away": "34",
+        "home": "21"
+      },
+      {
+        "label": "Tiros libres intentados",
+        "away": "41",
+        "home": "26"
+      },
+      {
+        "label": "Rebotes",
+        "away": "48",
+        "home": "37"
+      },
+      {
+        "label": "Rebotes ofensivos",
+        "away": "9",
+        "home": "7"
+      },
+      {
+        "label": "Rebotes defensivos",
+        "away": "39",
+        "home": "30"
+      },
+      {
+        "label": "Asistencias",
+        "away": "16",
+        "home": "23"
+      },
+      {
+        "label": "Robos",
+        "away": "13",
+        "home": "12"
+      },
+      {
+        "label": "Tapones",
+        "away": "3",
+        "home": "7"
+      },
+      {
+        "label": "Pérdidas",
+        "away": "19",
+        "home": "20"
+      },
+      {
+        "label": "Faltas",
+        "away": "26",
+        "home": "26"
+      },
+      {
+        "label": "Puntos de contraataque",
+        "away": "6",
+        "home": "14"
+      },
+      {
+        "label": "Puntos tras pérdidas",
+        "away": "20",
+        "home": "11"
+      },
+      {
+        "label": "Points In The Paint",
+        "away": "26",
+        "home": "28"
+      },
+      {
+        "label": "Second Chance Points",
+        "away": "18",
+        "home": "6"
+      },
+      {
+        "label": "Biggest Lead",
+        "away": "28",
+        "home": "1"
+      },
+      {
+        "label": "Flagrant Fouls",
+        "away": "0",
+        "home": "0"
+      }
+    ],
+    "venue": "Delta Center, Salt Lake City, UT",
+    "statsChecked": true
   },
   {
     "league": "nba",
@@ -1311,6 +1492,39 @@
     "id": "nba-442199106"
   },
   {
+    "league": "lvsm",
+    "date": "2026-11-01T22:00:00.000Z",
+    "away": "Gigantes de Carolina",
+    "home": "Changos",
+    "awayFull": "Gigantes de Carolina",
+    "homeFull": "Changos de Naranjito",
+    "src": "fpv-lvsm:2026-13",
+    "status": "programado",
+    "id": "lvsm-2026-13"
+  },
+  {
+    "league": "lvsm",
+    "date": "2026-11-01T23:00:00.000Z",
+    "away": "Plataneros",
+    "home": "Patriotas",
+    "awayFull": "Plataneros de Corozal",
+    "homeFull": "Patriotas de Lares",
+    "src": "fpv-lvsm:2026-12",
+    "status": "programado",
+    "id": "lvsm-2026-12"
+  },
+  {
+    "league": "lvsm",
+    "date": "2026-11-01T23:00:00.000Z",
+    "away": "Gigantes de Adjuntas",
+    "home": "Cafeteros",
+    "awayFull": "Gigantes de Adjuntas",
+    "homeFull": "Cafeteros de Yauco",
+    "src": "fpv-lvsm:2026-14",
+    "status": "programado",
+    "id": "lvsm-2026-14"
+  },
+  {
     "league": "nfl",
     "date": "2026-11-02T01:20:00.000Z",
     "away": "Eagles",
@@ -1357,6 +1571,72 @@
     "statsChecked": true
   },
   {
+    "league": "invernal",
+    "date": "2026-11-04T23:00:00.000Z",
+    "away": "Cangrejeros",
+    "home": "Leones",
+    "awayFull": "Cangrejeros de Santurce",
+    "homeFull": "Leones de Ponce",
+    "src": "ligapr:599",
+    "status": "programado",
+    "id": "invernal-599"
+  },
+  {
+    "league": "invernal",
+    "date": "2026-11-04T23:00:00.000Z",
+    "away": "Criollos",
+    "home": "Senadores",
+    "awayFull": "Criollos de Caguas",
+    "homeFull": "Senadores de San Juan",
+    "src": "ligapr:600",
+    "status": "programado",
+    "id": "invernal-600"
+  },
+  {
+    "league": "invernal",
+    "date": "2026-11-04T23:00:00.000Z",
+    "away": "Gigantes",
+    "home": "Indios",
+    "awayFull": "Gigantes de Carolina",
+    "homeFull": "Indios de Mayagüez",
+    "src": "ligapr:601",
+    "status": "programado",
+    "id": "invernal-601"
+  },
+  {
+    "league": "invernal",
+    "date": "2026-11-05T23:00:00.000Z",
+    "away": "Leones",
+    "home": "Cangrejeros",
+    "awayFull": "Leones de Ponce",
+    "homeFull": "Cangrejeros de Santurce",
+    "src": "ligapr:602",
+    "status": "programado",
+    "id": "invernal-602"
+  },
+  {
+    "league": "invernal",
+    "date": "2026-11-05T23:00:00.000Z",
+    "away": "Senadores",
+    "home": "Criollos",
+    "awayFull": "Senadores de San Juan",
+    "homeFull": "Criollos de Caguas",
+    "src": "ligapr:603",
+    "status": "programado",
+    "id": "invernal-603"
+  },
+  {
+    "league": "invernal",
+    "date": "2026-11-05T23:00:00.000Z",
+    "away": "Indios",
+    "home": "Gigantes",
+    "awayFull": "Indios de Mayagüez",
+    "homeFull": "Gigantes de Carolina",
+    "src": "ligapr:604",
+    "status": "programado",
+    "id": "invernal-604"
+  },
+  {
     "league": "nfl",
     "date": "2026-11-06T01:15:00.000Z",
     "away": "Jaguars",
@@ -1367,6 +1647,61 @@
     "src": "highlightly:739788",
     "id": "nfl-739788",
     "statsChecked": true
+  },
+  {
+    "league": "invernal",
+    "date": "2026-11-06T23:00:00.000Z",
+    "away": "Criollos",
+    "home": "Leones",
+    "awayFull": "Criollos de Caguas",
+    "homeFull": "Leones de Ponce",
+    "src": "ligapr:605",
+    "status": "programado",
+    "id": "invernal-605"
+  },
+  {
+    "league": "invernal",
+    "date": "2026-11-06T23:00:00.000Z",
+    "away": "Gigantes",
+    "home": "Senadores",
+    "awayFull": "Gigantes de Carolina",
+    "homeFull": "Senadores de San Juan",
+    "src": "ligapr:606",
+    "status": "programado",
+    "id": "invernal-606"
+  },
+  {
+    "league": "invernal",
+    "date": "2026-11-06T23:00:00.000Z",
+    "away": "Cangrejeros",
+    "home": "Indios",
+    "awayFull": "Cangrejeros de Santurce",
+    "homeFull": "Indios de Mayagüez",
+    "src": "ligapr:607",
+    "status": "programado",
+    "id": "invernal-607"
+  },
+  {
+    "league": "invernal",
+    "date": "2026-11-07T21:00:00.000Z",
+    "away": "Criollos",
+    "home": "Senadores",
+    "awayFull": "Criollos de Caguas",
+    "homeFull": "Senadores de San Juan",
+    "src": "ligapr:609",
+    "status": "programado",
+    "id": "invernal-609"
+  },
+  {
+    "league": "invernal",
+    "date": "2026-11-07T21:00:00.000Z",
+    "away": "Leones",
+    "home": "Gigantes",
+    "awayFull": "Leones de Ponce",
+    "homeFull": "Gigantes de Carolina",
+    "src": "ligapr:610",
+    "status": "programado",
+    "id": "invernal-610"
   },
   {
     "_checked": "2026-10-31"
