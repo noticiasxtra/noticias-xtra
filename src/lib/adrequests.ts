@@ -75,6 +75,17 @@ export function updateRequest(id: string, patch: Partial<AdRequest>) {
   const { where, ...rest } = patch;
   void staffApi(`ad_requests?id=eq.${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify({ ...rest, ...(where !== undefined ? { placement: where } : {}) }) });
 }
+/** Admin only: deletes requests for good (the database also only lets the admin delete). A campaign already on the
+ *  site isn't affected: approving copied it to the campaigns. Returns false if it couldn't. */
+export async function deleteRequests(ids: string[]): Promise<boolean> {
+  if (!ids.length) return true;
+  if (!hasBackend()) return store(listRequests().filter((r) => !ids.includes(r.id)));
+  const r = await staffApi(`ad_requests?id=in.(${ids.map((id) => `"${id.replace(/"/g, '')}"`).join(',')})`, { method: 'DELETE', headers: { Prefer: 'return=representation' } });
+  if (!r?.ok) return false;
+  const gone: Array<{ id: string }> = await r.json().catch(() => []);
+  if (cache) cache = cache.filter((x) => !gone.some((g) => g.id === x.id));
+  return gone.length === ids.length;
+}
 /** The client's page, after paying online: marks the request paid (the team still checks the payment). */
 export async function markPaid(id: string) {
   if (!hasBackend()) { updateRequest(id, { paid: true }); return; }

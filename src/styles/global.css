@@ -4515,3 +4515,26 @@ a,button,summary,label{-webkit-tap-highlight-color:transparent}
 .dk-desk{display:grid;gap:14px}
 .dk-desk [data-dk-new]{justify-self:start}
 .dk-desk .cl-fields select{font:inherit;font-weight:400;font-size:15px;border:1px solid var(--line);border-radius:10px;padding:9px 12px;background:var(--card);color:var(--ink)}
+/* Panel layout pass (2026-10-31): even spacing between blocks, list rows that breathe, buttons that never squeeze */
+.pnl-pane{display:grid;gap:18px;align-content:start}
+.pnl-pane > .pnl-h{margin-bottom:-8px}
+.pnl-todo{gap:10px}
+.pnl-todo li{padding:14px 16px;line-height:1.45}
+.pnl-todo li > span{min-width:0}
+.pnl-todo-pins{display:block!important}
+.pnl-todo-pins summary{cursor:pointer;list-style:none}
+.pnl-todo-pins summary::-webkit-details-marker{display:none}
+.pnl-todo-pins ul{list-style:none;margin:10px 0 6px;padding:0;display:grid;gap:6px;font-size:14px}
+.pnl-todo-pins ul li{display:block;padding:0;border:0;background:none}
+.pnl-row{padding:14px 18px}
+.pnl-row-acts .adp-btn{white-space:nowrap}
+.pnl-list{display:grid;gap:10px}
+@media (max-width:700px){
+  .pnl-row{flex-direction:column;align-items:stretch;gap:12px;padding:14px}
+  .pnl-row-acts{flex-wrap:wrap;gap:8px}
+  .pnl-row-acts .adp-btn{flex:1 1 auto;justify-content:center;text-align:center}
+  .pnl-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+.pnl-pane[hidden]{display:none!important}
+.apr-tools{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 14px;border:1px dashed var(--line);border-radius:12px;margin-bottom:12px}
+.apr-tools p{margin:0;flex:1 1 260px}

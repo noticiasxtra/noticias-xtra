@@ -24,7 +24,7 @@ const Tag = embedded ? 'section' : 'main';
     <button type="button" role="tab" aria-selected="true" data-f="revisar">Por revisar <b data-n="revisar"></b></button>
     <button type="button" role="tab" aria-selected="false" data-f="disenar">Por diseñar <b data-n="disenar"></b></button>
     <button type="button" role="tab" aria-selected="false" data-f="cambios">Esperando al cliente <b data-n="cambios"></b></button>
-    <button type="button" role="tab" aria-selected="false" data-f="hechas">Listas <b data-n="hechas"></b></button>
+    <button type="button" role="tab" aria-selected="false" data-f="hechas" title="Anuncios ya aprobados o rechazados">Terminadas <b data-n="hechas"></b></button>
   </nav>
   <div class="apr-list" data-list></div>
   <div class="apn-toast" data-toast role="status" hidden></div>
@@ -32,13 +32,15 @@ const Tag = embedded ? 'section' : 'main';
 <script>
   import { ask, askText } from '../lib/dialogs';
   import { drawAd, THEMES } from '../lib/adcreative';
-  import { listRequests, loadRequests, saveRequest, updateRequest, type AdRequest } from '../lib/adrequests';
+  import { listRequests, loadRequests, saveRequest, updateRequest, deleteRequests, type AdRequest } from '../lib/adrequests';
   import { hasBackend, publishCampaign, campaignStats } from '../lib/backend';
   import type { Campaign, AdSize } from '../lib/ads';
   const page = document.querySelector<HTMLElement>('[data-apr]')!;
   const FMT: Array<{ id: string; name: string; slots: string[]; art: number[][]; where: string }> = JSON.parse(page.dataset.formats!);
   const money = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
   const esc = (s = '') => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
+  // The signed-in staff member (the panel keeps it in nx-staff); only the admin can delete requests
+  const isAdmin = () => { try { return JSON.parse(localStorage.getItem('nx-staff') || 'null')?.role === 'admin'; } catch { return false; } };
   const toast = (m: string) => { const t = page.querySelector<HTMLElement>('[data-toast]')!; t.textContent = m; t.hidden = false; clearTimeout((t as any).tm); (t as any).tm = setTimeout(() => (t.hidden = true), 3500); };
   const ago = (iso: string) => { const h = Math.round((Date.now() - new Date(iso).valueOf()) / 36e5); return h < 1 ? 'hace un momento' : h < 24 ? `hace ${h} h` : `hace ${Math.round(h / 24)} días`; };
   const CHECKS = ['Tamaño y calidad de imagen bien', 'Texto claro y sin errores', 'Cumple las reglas (nada prohibido ni engañoso)', 'El enlace funciona'];
@@ -100,8 +102,10 @@ const Tag = embedded ? 'section' : 'main';
     Object.entries(groups).forEach(([k, l]) => (page.querySelector(`[data-n="${k}"]`)!.textContent = l.length ? String(l.length) : ''));
     const list = groups[filter];
     const box = page.querySelector<HTMLElement>('[data-list]')!;
-    if (!list.length) { box.innerHTML = `<p class="apr-empty">${filter === 'hechas' ? 'Todavía no hay anuncios aprobados.' : '🎉 Nada pendiente aquí.'}</p>`; return; }
-    box.innerHTML = list.map((r) => {
+    if (!list.length) { box.innerHTML = `<p class="apr-empty">${filter === 'hechas' ? 'No hay anuncios terminados.' : '🎉 Nada pendiente aquí.'}</p>`; return; }
+    // Terminadas: the admin can empty the list (or delete one); a campaign already on the site stays
+    const tools = filter === 'hechas' && isAdmin() ? `<div class="apr-tools"><p class="apn-small">Solo el administrador ve esto. Borrar quita la solicitud de esta lista; un anuncio aprobado sigue saliendo en el sitio hasta su fecha final.</p><button type="button" class="apr-reject" data-empty>Vaciar terminadas (${list.length})</button></div>` : '';
+    box.innerHTML = tools + list.map((r) => {
       const design = r.art.mode === 'design';
       const sizes = [...new Map(FMT.filter((f) => r.formats.includes(f.id)).flatMap((f) => f.art).map((s) => [s.join('x'), s])).values()];
       const art = design && r.status !== 'aprobada'
@@ -133,6 +137,7 @@ const Tag = embedded ? 'section' : 'main';
         ${r.note ? `<p class="apr-notes">💬 ${esc(r.note)}</p>` : ''}
         ${art}
         ${r.status === 'aprobada' ? progress(r) : ''}
+        ${done && isAdmin() ? '<div class="apr-acts"><button type="button" class="apr-reject" data-act="delete">Borrar</button></div>' : ''}
         ${done ? (r.status === 'aprobada' && !hasBackend() ? `<details class="apr-code"><summary>Código para publicarlo</summary><p class="apn-small">1) Descarga las imágenes y guárdalas en <code>public/anuncios/</code>. 2) Pega esto dentro de <code>CAMPAIGNS</code> en <code>src/lib/ads.ts</code>. (Cuando conectemos la base de datos, esto será automático.)</p><textarea readonly rows="4">${esc(campaign(r))}</textarea><button type="button" class="adp-btn ghost-dark" data-copy>Copiar</button></details>` : '')
         : `<fieldset class="apr-checks"><legend>Antes de aprobar</legend>${CHECKS.map((c) => `<label class="adb-check"><input type="checkbox" data-chk /> ${c}</label>`).join('')}</fieldset>
         <div class="apr-acts">
@@ -163,6 +168,14 @@ const Tag = embedded ? 'section' : 'main';
   page.addEventListener('click', async (e) => {
     const t = e.target as HTMLElement;
     const card = t.closest<HTMLElement>('[data-id]');
+    // Admin: delete one finished request, or empty Terminadas
+    if (t.closest('[data-empty]') || (card && t.closest('[data-act="delete"]'))) {
+      if (!isAdmin()) return toast('Solo el administrador puede borrar.');
+      const ids = card ? [card.dataset.id!] : listRequests().filter((r) => r.status === 'aprobada' || r.status === 'rechazada').map((r) => r.id);
+      if (!(await ask(ids.length === 1 ? '¿Borrar esta solicitud? No se puede deshacer. Si el anuncio está aprobado, sigue saliendo en el sitio.' : `¿Borrar las ${ids.length} solicitudes terminadas? No se puede deshacer. Los anuncios aprobados siguen saliendo en el sitio.`, { ok: 'Borrar', danger: true }))) return;
+      if (await deleteRequests(ids)) { toast(ids.length === 1 ? 'Borrada.' : 'Terminadas vaciadas.'); render(); } else toast('No se pudo borrar. Solo el administrador puede hacerlo.');
+      return;
+    }
     if (t.matches('[data-f]') || t.closest('[data-f]')) {
       const b = t.closest<HTMLElement>('[data-f]')!; filter = b.dataset.f!;
       page.querySelectorAll('[data-f]').forEach((x) => x.setAttribute('aria-selected', String(x === b))); render(); return;
