@@ -3,12 +3,12 @@ title: "ASEM pide prudencia en Halloween y asegura que la actualización de sus 
 description: "El director de la Administración de Servicios Médicos exhortó a evitar accidentes durante el fin de semana. Informó que los servicios al paciente seguirán con normalidad pese a trabajos tecnológicos."
 section: puerto-rico
 place: "Puerto Rico"
-date: 2026-10-30T20:25:44.000Z
-aiAssisted: true
-draft: true
-pending: true
+date: 2026-10-30T20:25:00.000Z
+author: "Noticias Xtra"
 image: "https://cdn.noticel.com/2026/10/30162816/regino.jpg"
 imageCredit: "Foto: Regino Colón Alsina/Foto suministrada"
+aiAssisted: true
+draft: false
 ---
 
 El director ejecutivo de la Administración de Servicios Médicos de Puerto Rico (ASEM), Dr. Regino Colón Alsina, pidió a la ciudadanía actuar con prudencia y responsabilidad durante el fin de semana de Halloween. El objetivo, explicó, es prevenir accidentes y situaciones que pongan en riesgo la salud y la seguridad de las personas.
