@@ -8,6 +8,7 @@ import realGames from '../data/marcadores.json';
 import autoGames from '../data/marcadores-auto.json';
 import autoStandings from '../data/posiciones-auto.json';
 import autoStats from '../data/estadisticas-auto.json';
+import autoBrackets from '../data/llaves-auto.json';
 import standingsData from '../data/posiciones.json';
 import bracketsData from '../data/llaves.json';
 import statsData from '../data/estadisticas.json';
@@ -99,7 +100,7 @@ export const games = (): Game[] => allGames().filter((g) => g.id);
 export const standings = (league: string): Standings | undefined =>
   (autoStandings as Record<string, Standings>)[league] ?? (standingsData as Record<string, Standings>)[league] ?? (demo ? DEMO_STANDINGS[league] : undefined);
 export const bracket = (league: string): Bracket | undefined =>
-  (bracketsData as Record<string, Bracket>)[league] ?? (demo ? DEMO_BRACKETS[league] : undefined);
+  (autoBrackets as Record<string, Bracket>)[league] ?? (bracketsData as Record<string, Bracket>)[league] ?? (demo ? DEMO_BRACKETS[league] : undefined);
 export const teamStats = (league: string): TeamStats | undefined =>
   (autoStats as Record<string, TeamStats>)[league] ?? (statsData as Record<string, TeamStats>)[league] ?? (demo ? DEMO_STATS[league] : undefined);
 /** True when this league's tables are showing demo numbers. */

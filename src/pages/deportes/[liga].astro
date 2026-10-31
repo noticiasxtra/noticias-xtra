@@ -16,7 +16,7 @@ import TeamStatsTable from '../../components/deportes/TeamStatsTable.astro';
 import AdSlot from '../../components/AdSlot.astro';
 import { getStories, url } from '../../lib/site';
 import { LEAGUES, type League } from '../../lib/leagues';
-import { standings, isDemoTable, scores, recent } from '../../lib/scores';
+import { standings, isDemoTable, scores, recent, teamStats } from '../../lib/scores';
 import { TEAMS, teamSite } from '../../lib/teams';
 import teamsData from '../../data/equipos.json';
 
@@ -54,9 +54,10 @@ const ICON = {
   equipos: '<circle cx="9" cy="8" r="3.5" /><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6 6 0 0 1 3.5 6" />',
   noticias: '<rect x="3" y="4" width="18" height="16" rx="2" /><path d="M7 8h10M7 12h10M7 16h6" />',
 };
-const tabs: Array<[keyof typeof ICON, string]> = individual ? [['noticias', 'Noticias']] : [
+// Only the sections this league has (no button that leads nowhere)
+const tabs: Array<[keyof typeof ICON, string]> = individual ? [['noticias', 'Noticias']] : ([
   ['posiciones', 'Posiciones'], ['estadisticas', 'Estadísticas'], ['equipos', 'Equipos'], ['noticias', 'Noticias'],
-];
+] as Array<[keyof typeof ICON, string]>).filter(([id]) => (id === 'estadisticas' ? !!teamStats(l.id) : id === 'posiciones' ? !!standings(l.id)?.groups?.length : true));
 ---
 <Base title={`${l.full} | Deportes`} active="deportes" description={`${l.full}: ${l.about}`}>
   <div class="ys lg" id="inicio">

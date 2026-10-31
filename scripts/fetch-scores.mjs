@@ -18,6 +18,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const GAMES_FILE = path.join(ROOT, 'src/data/marcadores-auto.json');
 const TABLES_FILE = path.join(ROOT, 'src/data/posiciones-auto.json');
 const STATS_FILE = path.join(ROOT, 'src/data/estadisticas-auto.json'); // team stats tables (NFL: points per game)
+const BRACKETS_FILE = path.join(ROOT, 'src/data/llaves-auto.json'); // playoff brackets (MLB postseason)
 const KEY = process.env.HIGHLIGHTLY_API_KEY;
 const TZ = 'America/Puerto_Rico';
 
@@ -164,6 +165,39 @@ function toBaseball(league, m) {
   return g;
 }
 
+// MLB postseason bracket: every postseason game from late September, grouped into series (same two teams, same round),
+// with each side's wins. Highlightly's "round" names the stage; when it doesn't, a team's 1st, 2nd… series sets it.
+const STAGES = [[/wild/i, 'Serie de Comodines'], [/division/i, 'Serie Divisional'], [/champion|lcs/i, 'Serie de Campeonato'], [/world/i, 'Serie Mundial']];
+async function mlbBracket(l) {
+  const year = Number(day().slice(0, 4));
+  const games = [];
+  for (let t = Date.UTC(year, 8, 29); t <= Date.now() && t < Date.UTC(year, 10, 10); t += 864e5) {
+    const d = new Date(t).toISOString().slice(0, 10);
+    const r = await get(l.base, `/matches?league=${l.league}&date=${d}&timezone=${encodeURIComponent(TZ)}&limit=100`);
+    games.push(...(r.data || []).filter((m) => m.round && !/regular|spring|pre/i.test(m.round) && m.state?.description === 'Finished'));
+  }
+  if (!games.length) return null;
+  const series = new Map();
+  for (const m of games.sort((a, b) => Date.parse(a.date) - Date.parse(b.date))) {
+    const [x, y] = [m.awayTeam.displayName, m.homeTeam.displayName].sort();
+    const key = `${x}|${y}`;
+    const s = series.get(key) ?? { a: x, b: y, aWins: 0, bWins: 0, round: m.round, start: m.date };
+    const [home, away] = String(m.state.score?.current ?? '').split('-').map((n) => Number.parseInt(n, 10));
+    const winner = home > away ? m.homeTeam.displayName : m.awayTeam.displayName;
+    if (winner === s.a) s.aWins++; else s.bWins++;
+    series.set(key, s);
+  }
+  const list = [...series.values()].sort((a, b) => Date.parse(a.start) - Date.parse(b.start));
+  const stageOf = (s) => {
+    const named = STAGES.find(([re]) => re.test(s.round));
+    if (named) return named[1];
+    const before = list.filter((o) => Date.parse(o.start) < Date.parse(s.start) && [o.a, o.b].some((t) => t === s.a || t === s.b)).length;
+    return ['Serie de Comodines', 'Serie Divisional', 'Serie de Campeonato', 'Serie Mundial'][Math.min(before, 3)];
+  };
+  const rounds = STAGES.map(([, name]) => ({ name, series: list.filter((s) => stageOf(s) === name).map(({ a, b, aWins, bWins }) => ({ a, b, aWins, bWins })) })).filter((r) => r.series.length);
+  return { name: `Postemporada MLB ${year}`, updated: `${new Date().toLocaleDateString('es-PR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: TZ })}. Fuente: Highlightly`, rounds };
+}
+
 // MLB standings: the American and National League tables of the regular season
 function mlbTable(data) {
   const latest = new Map();
@@ -208,6 +242,15 @@ function toGame(league, m) {
 }
 
 const GROUP = { 'Eastern Conference': 'Conferencia Este', 'Western Conference': 'Conferencia Oeste' };
+// Basketball team stats from the standings: points per game for and against (the 10 best offenses)
+function basketStats(data) {
+  const seen = new Map();
+  for (const grp of data.groups || []) for (const r of grp.standings || []) if (r.gamesPlayed && !seen.has(r.team.name)) seen.set(r.team.name, r);
+  const per = (x, g) => (x / g).toFixed(1);
+  const rows = [...seen.values()].sort((a, b) => b.scoredPoints / b.gamesPlayed - a.scoredPoints / a.gamesPlayed).slice(0, 10)
+    .map((r) => { const dif = r.scoredPoints - r.receivedPoints; return { team: r.team.name, values: [per(r.scoredPoints, r.gamesPlayed), per(r.receivedPoints, r.gamesPlayed), `${dif >= 0 ? '+' : ''}${dif}`, String(r.gamesPlayed)] }; });
+  return rows.length ? { columns: ['PTS/J', 'PC/J', 'DIF', 'J'], rows } : null;
+}
 function toTable(data, season) {
   let src = data.groups || [];
   if (src.some((g) => /Conference$/.test(g.name))) src = src.filter((g) => /Conference$/.test(g.name)); // NBA: the two conferences, not divisions
@@ -354,6 +397,7 @@ async function main() {
   const games = await readJson(GAMES_FILE, []);
   const tables = await readJson(TABLES_FILE, {});
   const teamStats = await readJson(STATS_FILE, {});
+  const brackets = await readJson(BRACKETS_FILE, {});
   const firstOfDay = !games.some((g) => g._checked === day()) || process.env.FULL === '1';
   const byKey = new Map(games.filter((g) => !g._checked).map((g) => [g.src, g]));
 
@@ -384,17 +428,23 @@ async function main() {
         const year = Number(day().slice(0, 4)), month = Number(day().slice(5, 7));
         const t = mlbTable(await get(l.base, `/standings?leagueType=${l.league}&year=${month < 3 ? year - 1 : year}&limit=10`));
         if (t) tables[l.id] = t;
+        // Postseason (October–early November): the bracket, rebuilt once a day (and on a manual run)
+        if (month >= 10 && month <= 11) { try { const b = await mlbBracket(l); if (b) brackets[l.id] = b; console.log(`${l.id}: llaves ${b ? 'actualizadas' : 'sin juegos'}`); } catch (e) { console.warn(`${l.id} llaves: ${e.message}`); } }
         console.log(`${l.id}: posiciones ${t ? 'actualizadas' : 'sin datos'}`);
       }
       if (firstOfDay && !l.football && !l.baseball) {
         // The current season first (NBA 2026 = 2026-27); before it has a table, the one before
         const year = Number(day().slice(0, 4));
         let t = null, season = year;
+        let raw = null;
         for (season of [year, year - 1]) {
-          t = toTable(await get(l.base, `/standings?leagueId=${l.leagueId}&season=${season}`), l.id === 'nba' ? `${season}-${String(season + 1).slice(2)}` : String(season));
+          raw = await get(l.base, `/standings?leagueId=${l.leagueId}&season=${season}`);
+          t = toTable(raw, l.id === 'nba' ? `${season}-${String(season + 1).slice(2)}` : String(season));
           if (t) break;
         }
         if (t) tables[l.id] = t;
+        const ts = t && basketStats(raw);
+        if (ts) teamStats[l.id] = ts;
         console.log(`${l.id}: posiciones ${t ? 'actualizadas' : 'sin datos'} (temporada ${season})`);
       }
     } catch (e) { console.warn(`${l.id}: ${e.message}`); }
@@ -451,6 +501,7 @@ async function main() {
   await fs.writeFile(GAMES_FILE, JSON.stringify([...list, { _checked: day() }], null, 2) + '\n');
   await fs.writeFile(TABLES_FILE, JSON.stringify(tables, null, 2) + '\n');
   await fs.writeFile(STATS_FILE, JSON.stringify(teamStats, null, 2) + '\n');
+  await fs.writeFile(BRACKETS_FILE, JSON.stringify(brackets, null, 2) + '\n');
   console.log(`Listo: ${list.length} juegos guardados, ${calls} consultas.`);
 }
 main().catch((e) => { console.error(e); process.exit(1); });
