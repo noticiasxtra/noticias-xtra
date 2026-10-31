@@ -3,13 +3,14 @@ title: "Puerto Rico cierra con tres victorias y cuatro derrotas su primera Copa 
 description: "La selección boricua quedó eliminada en Bakú, Azerbaiyán, tras vencer a Nueva Zelanda, Guinea-Bisáu e Israel en su debut mundialista masculino."
 section: deportes
 place: "Bakú, Azerbaiyán"
-date: 2026-10-31T16:58:54.000Z
-aiAssisted: true
-draft: true
-pending: true
+date: 2026-10-31T16:58:00.000Z
+author: "Noticias Xtra"
 image: "https://cdn.noticel.com/2026/10/31130229/baku-Cropped.jpg"
 imageCaption: "Acción del partido entre Puerto Rico y Kuwait. (Foto tomada de redes)"
 imageCredit: "Foto: NotiCel"
+sectionPinned: true
+aiAssisted: true
+draft: false
 ---
 
 La selección de Puerto Rico terminó su participación en la Copa Mundial & Festival Sub-15 de fútbol, celebrada en Bakú, Azerbaiyán. El equipo cerró con tres victorias y cuatro derrotas. Fue la primera vez que Puerto Rico participó en un mundial de fútbol masculino.
