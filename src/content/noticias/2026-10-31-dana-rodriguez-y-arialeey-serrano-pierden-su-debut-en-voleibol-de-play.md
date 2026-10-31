@@ -3,13 +3,15 @@ title: "Dana Rodríguez y Arialeey Serrano pierden su debut en voleibol de playa
 description: "La dupla boricua cayó ante Suiza en dos parciales en los Juegos Olímpicos de la Juventud. Jugará dos partidos más mañana para cerrar la fase de grupos."
 section: deportes
 place: "Dakar, Senegal"
-date: 2026-10-31T15:11:43.000Z
-aiAssisted: true
-draft: true
-pending: true
+date: 2026-10-31T15:11:00.000Z
+author: "Noticias Xtra"
 image: "https://cdn.noticel.com/2026/10/31111913/voleiplaya-Cropped.jpg"
 imageCaption: "La dupla puertorriqueña de Dana Rodríguez y Arialeey Serrano perdió su primer partido"
 imageCredit: "Foto suministrada"
+sectionLead: true
+sectionPinned: true
+aiAssisted: true
+draft: false
 ---
 
 La pareja puertorriqueña de Dana Rodríguez y Arialeey Serrano perdió este sábado ante las suizas Noemi Eugster y Anja Gaehwiler, por 21-14 y 21-6. Fue su primer juego en el torneo femenino de voleibol de playa de los Juegos Olímpicos de la Juventud Dakar 2026.
