@@ -4,9 +4,10 @@ description: "Vitality Works Inc. retira un lote de cápsulas de ashwagandha de 
 section: salud
 place: "Albuquerque, Nuevo México"
 date: 2026-10-30T16:16:00.000Z
+author: "Noticias Xtra"
+sectionLead: true
 aiAssisted: true
-draft: true
-pending: true
+draft: false
 sources:
   - name: "FDA (retiros de productos del mercado)"
     url: "http://www.fda.gov/safety/recalls-market-withdrawals-safety-alerts/vitality-works-inc-recalls-365-whole-foods-market-ashwagandha-capsules-sold-nationwide-due-potential"
