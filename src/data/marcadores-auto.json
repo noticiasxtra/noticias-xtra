@@ -795,7 +795,111 @@
       "awayTotals": [
         127
       ]
-    }
+    },
+    "stats": [
+      {
+        "label": "Tiros de campo anotados",
+        "away": "42",
+        "home": "46"
+      },
+      {
+        "label": "Tiros de campo intentados",
+        "away": "80",
+        "home": "94"
+      },
+      {
+        "label": "Triples anotados",
+        "away": "20",
+        "home": "18"
+      },
+      {
+        "label": "Triples intentados",
+        "away": "37",
+        "home": "42"
+      },
+      {
+        "label": "Tiros libres anotados",
+        "away": "23",
+        "home": "10"
+      },
+      {
+        "label": "Tiros libres intentados",
+        "away": "30",
+        "home": "11"
+      },
+      {
+        "label": "Rebotes",
+        "away": "40",
+        "home": "42"
+      },
+      {
+        "label": "Rebotes ofensivos",
+        "away": "12",
+        "home": "15"
+      },
+      {
+        "label": "Rebotes defensivos",
+        "away": "28",
+        "home": "27"
+      },
+      {
+        "label": "Asistencias",
+        "away": "30",
+        "home": "34"
+      },
+      {
+        "label": "Robos",
+        "away": "11",
+        "home": "10"
+      },
+      {
+        "label": "Tapones",
+        "away": "3",
+        "home": "5"
+      },
+      {
+        "label": "Pérdidas",
+        "away": "19",
+        "home": "15"
+      },
+      {
+        "label": "Faltas",
+        "away": "13",
+        "home": "22"
+      },
+      {
+        "label": "Puntos de contraataque",
+        "away": "14",
+        "home": "11"
+      },
+      {
+        "label": "Puntos tras pérdidas",
+        "away": "16",
+        "home": "28"
+      },
+      {
+        "label": "Points In The Paint",
+        "away": "32",
+        "home": "50"
+      },
+      {
+        "label": "Second Chance Points",
+        "away": "20",
+        "home": "12"
+      },
+      {
+        "label": "Biggest Lead",
+        "away": "13",
+        "home": "7"
+      },
+      {
+        "label": "Flagrant Fouls",
+        "away": "0",
+        "home": "1"
+      }
+    ],
+    "venue": "Mortgage Matchup Center, Phoenix, AZ",
+    "statsChecked": true
   },
   {
     "league": "nba",
@@ -837,7 +941,111 @@
       "awayTotals": [
         95
       ]
-    }
+    },
+    "stats": [
+      {
+        "label": "Tiros de campo anotados",
+        "away": "33",
+        "home": "38"
+      },
+      {
+        "label": "Tiros de campo intentados",
+        "away": "82",
+        "home": "89"
+      },
+      {
+        "label": "Triples anotados",
+        "away": "11",
+        "home": "22"
+      },
+      {
+        "label": "Triples intentados",
+        "away": "39",
+        "home": "46"
+      },
+      {
+        "label": "Tiros libres anotados",
+        "away": "18",
+        "home": "14"
+      },
+      {
+        "label": "Tiros libres intentados",
+        "away": "24",
+        "home": "17"
+      },
+      {
+        "label": "Rebotes",
+        "away": "45",
+        "home": "44"
+      },
+      {
+        "label": "Rebotes ofensivos",
+        "away": "16",
+        "home": "15"
+      },
+      {
+        "label": "Rebotes defensivos",
+        "away": "29",
+        "home": "29"
+      },
+      {
+        "label": "Asistencias",
+        "away": "18",
+        "home": "31"
+      },
+      {
+        "label": "Robos",
+        "away": "8",
+        "home": "11"
+      },
+      {
+        "label": "Tapones",
+        "away": "11",
+        "home": "5"
+      },
+      {
+        "label": "Pérdidas",
+        "away": "22",
+        "home": "17"
+      },
+      {
+        "label": "Faltas",
+        "away": "21",
+        "home": "21"
+      },
+      {
+        "label": "Puntos de contraataque",
+        "away": "9",
+        "home": "18"
+      },
+      {
+        "label": "Puntos tras pérdidas",
+        "away": "25",
+        "home": "27"
+      },
+      {
+        "label": "Points In The Paint",
+        "away": "36",
+        "home": "28"
+      },
+      {
+        "label": "Second Chance Points",
+        "away": "17",
+        "home": "21"
+      },
+      {
+        "label": "Biggest Lead",
+        "away": "25",
+        "home": "17"
+      },
+      {
+        "label": "Flagrant Fouls",
+        "away": "0",
+        "home": "0"
+      }
+    ],
+    "venue": "Chase Center, San Francisco, CA",
+    "statsChecked": true
   },
   {
     "league": "nba",
@@ -849,9 +1057,9 @@
     "status": "en-vivo",
     "src": "highlightly:442192298",
     "id": "nba-442192298",
-    "homeScore": 72,
-    "awayScore": 94,
-    "note": "4to cuarto · 3'",
+    "homeScore": 73,
+    "awayScore": 96,
+    "note": "4to cuarto · 4'",
     "linescore": {
       "labels": [
         "1",
@@ -863,22 +1071,22 @@
         18,
         24,
         22,
-        8
+        9
       ],
       "away": [
         27,
         32,
         29,
-        6
+        8
       ],
       "totals": [
         "T"
       ],
       "homeTotals": [
-        72
+        73
       ],
       "awayTotals": [
-        94
+        96
       ]
     }
   },
@@ -947,6 +1155,218 @@
     "status": "programado",
     "src": "highlightly:442197404",
     "id": "nba-442197404"
+  },
+  {
+    "league": "nfl",
+    "date": "2026-11-01T18:00:00.000Z",
+    "away": "Titans",
+    "home": "Bengals",
+    "awayFull": "Tennessee Titans",
+    "homeFull": "Cincinnati Bengals",
+    "status": "programado",
+    "src": "highlightly:718166",
+    "id": "nfl-718166",
+    "statsChecked": true
+  },
+  {
+    "league": "nfl",
+    "date": "2026-11-01T18:00:00.000Z",
+    "away": "Vikings",
+    "home": "Lions",
+    "awayFull": "Minnesota Vikings",
+    "homeFull": "Detroit Lions",
+    "status": "programado",
+    "src": "highlightly:718165",
+    "id": "nfl-718165",
+    "statsChecked": true
+  },
+  {
+    "league": "nfl",
+    "date": "2026-11-01T18:00:00.000Z",
+    "away": "Raiders",
+    "home": "Jets",
+    "awayFull": "Las Vegas Raiders",
+    "homeFull": "New York Jets",
+    "status": "programado",
+    "src": "highlightly:718164",
+    "id": "nfl-718164",
+    "statsChecked": true
+  },
+  {
+    "league": "nfl",
+    "date": "2026-11-01T18:00:00.000Z",
+    "away": "Colts",
+    "home": "Jaguars",
+    "awayFull": "Indianapolis Colts",
+    "homeFull": "Jacksonville Jaguars",
+    "status": "programado",
+    "src": "highlightly:718163",
+    "id": "nfl-718163",
+    "statsChecked": true
+  },
+  {
+    "league": "nfl",
+    "date": "2026-11-01T18:00:00.000Z",
+    "away": "Browns",
+    "home": "Steelers",
+    "awayFull": "Cleveland Browns",
+    "homeFull": "Pittsburgh Steelers",
+    "status": "programado",
+    "src": "highlightly:718162",
+    "id": "nfl-718162",
+    "statsChecked": true
+  },
+  {
+    "league": "nfl",
+    "date": "2026-11-01T18:00:00.000Z",
+    "away": "Ravens",
+    "home": "Bills",
+    "awayFull": "Baltimore Ravens",
+    "homeFull": "Buffalo Bills",
+    "status": "programado",
+    "src": "highlightly:718161",
+    "id": "nfl-718161",
+    "statsChecked": true
+  },
+  {
+    "league": "nfl",
+    "date": "2026-11-01T18:00:00.000Z",
+    "away": "Falcons",
+    "home": "Buccaneers",
+    "awayFull": "Atlanta Falcons",
+    "homeFull": "Tampa Bay Buccaneers",
+    "status": "programado",
+    "src": "highlightly:718160",
+    "id": "nfl-718160",
+    "statsChecked": true
+  },
+  {
+    "league": "nfl",
+    "date": "2026-11-01T18:00:00.000Z",
+    "away": "Cardinals",
+    "home": "Cowboys",
+    "awayFull": "Arizona Cardinals",
+    "homeFull": "Dallas Cowboys",
+    "status": "programado",
+    "src": "highlightly:718159",
+    "id": "nfl-718159",
+    "statsChecked": true
+  },
+  {
+    "league": "nba",
+    "date": "2026-11-01T20:30:00.000Z",
+    "away": "Celtics",
+    "home": "Magic",
+    "awayFull": "Boston Celtics",
+    "homeFull": "Orlando Magic",
+    "status": "programado",
+    "src": "highlightly:442198255",
+    "id": "nba-442198255"
+  },
+  {
+    "league": "nfl",
+    "date": "2026-11-01T21:05:00.000Z",
+    "away": "Chargers",
+    "home": "Rams",
+    "awayFull": "Los Angeles Chargers",
+    "homeFull": "Los Angeles Rams",
+    "status": "programado",
+    "src": "highlightly:718167",
+    "id": "nfl-718167",
+    "statsChecked": true
+  },
+  {
+    "league": "nfl",
+    "date": "2026-11-01T21:25:00.000Z",
+    "away": "Patriots",
+    "home": "Dolphins",
+    "awayFull": "New England Patriots",
+    "homeFull": "Miami Dolphins",
+    "status": "programado",
+    "src": "highlightly:718169",
+    "id": "nfl-718169",
+    "statsChecked": true
+  },
+  {
+    "league": "nfl",
+    "date": "2026-11-01T21:25:00.000Z",
+    "away": "Chiefs",
+    "home": "Broncos",
+    "awayFull": "Kansas City Chiefs",
+    "homeFull": "Denver Broncos",
+    "status": "programado",
+    "src": "highlightly:718168",
+    "id": "nfl-718168",
+    "statsChecked": true
+  },
+  {
+    "league": "nba",
+    "date": "2026-11-01T22:00:00.000Z",
+    "away": "Nets",
+    "home": "Pacers",
+    "awayFull": "Brooklyn Nets",
+    "homeFull": "Indiana Pacers",
+    "status": "programado",
+    "src": "highlightly:442199106",
+    "id": "nba-442199106"
+  },
+  {
+    "league": "nfl",
+    "date": "2026-11-02T01:20:00.000Z",
+    "away": "Eagles",
+    "home": "Commanders",
+    "awayFull": "Philadelphia Eagles",
+    "homeFull": "Washington Commanders",
+    "status": "programado",
+    "src": "highlightly:718170",
+    "id": "nfl-718170",
+    "statsChecked": true
+  },
+  {
+    "league": "nba",
+    "date": "2026-11-02T01:30:00.000Z",
+    "away": "Clippers",
+    "home": "Warriors",
+    "awayFull": "Los Angeles Clippers",
+    "homeFull": "Golden State Warriors",
+    "status": "programado",
+    "src": "highlightly:442199957",
+    "id": "nba-442199957"
+  },
+  {
+    "league": "nba",
+    "date": "2026-11-02T02:00:00.000Z",
+    "away": "Raptors",
+    "home": "Lakers",
+    "awayFull": "Toronto Raptors",
+    "homeFull": "Los Angeles Lakers",
+    "status": "programado",
+    "src": "highlightly:442200808",
+    "id": "nba-442200808"
+  },
+  {
+    "league": "nfl",
+    "date": "2026-11-03T01:15:00.000Z",
+    "away": "Bears",
+    "home": "Seahawks",
+    "awayFull": "Chicago Bears",
+    "homeFull": "Seattle Seahawks",
+    "status": "programado",
+    "src": "highlightly:720438",
+    "id": "nfl-720438",
+    "statsChecked": true
+  },
+  {
+    "league": "nfl",
+    "date": "2026-11-06T01:15:00.000Z",
+    "away": "Jaguars",
+    "home": "Ravens",
+    "awayFull": "Jacksonville Jaguars",
+    "homeFull": "Baltimore Ravens",
+    "status": "programado",
+    "src": "highlightly:739788",
+    "id": "nfl-739788",
+    "statsChecked": true
   },
   {
     "_checked": "2026-10-31"
