@@ -1,0 +1,63 @@
+{
+  "checked": "2026-10-31T20:47:03.459Z",
+  "sports": {
+    "basketball": {
+      "base": "https://basketball.highlightly.net",
+      "status": 200,
+      "plan": {
+        "tier": "BASIC",
+        "message": "All data available with current plan."
+      },
+      "puertoRico": [
+        {
+          "id": 65460,
+          "name": "BSN",
+          "country": "Puerto Rico",
+          "seasons": [
+            2024,
+            2025,
+            2026
+          ]
+        }
+      ],
+      "other": [
+        {
+          "id": 10996,
+          "name": "NBA",
+          "country": "USA",
+          "seasons": [
+            2024,
+            2025,
+            2026
+          ]
+        }
+      ]
+    },
+    "baseball": {
+      "base": null,
+      "status": 404,
+      "plan": null,
+      "puertoRico": [],
+      "other": [],
+      "error": "Cannot GET /baseball/leagues?countryName=Puerto%20Rico&limit=100"
+    },
+    "volleyball": {
+      "base": "https://volleyball.highlightly.net",
+      "status": 200,
+      "plan": {
+        "tier": "BASIC",
+        "message": "All data available with current plan."
+      },
+      "puertoRico": [],
+      "other": []
+    },
+    "american-football": {
+      "base": null,
+      "status": 404,
+      "plan": null,
+      "puertoRico": [],
+      "other": [],
+      "error": "Cannot GET /american-football/leagues?countryName=Puerto%20Rico&limit=100"
+    }
+  }
+}
