@@ -3,13 +3,14 @@ title: "Rivera Schatz releva al senador Héctor Joaquín Sánchez de una comisi�
 description: "El presidente del Senado ordenó iniciar un procedimiento ético tras una querella contra Sánchez por la participación de jóvenes de Loíza en una actividad política. El senador pidió ser relevado como medida cautelar."
 section: politica
 place: "Puerto Rico"
-date: 2026-10-31T20:09:07.000Z
-aiAssisted: true
-draft: true
-pending: true
+date: 2026-10-31T20:09:00.000Z
+author: "Noticias Xtra"
 image: "https://cdn.noticel.com/2026/10/31161144/25-09-16-COMISION-ATIENDE-PROYECTO-QUE-BUSCA-EXIMIR-MULTAS-A-NUEVOS-DUENOS-DE-VEHICULOS-EJMM-0017-.jpg"
 imageCaption: "El senador Héctor Joaquín Sánchez Álvarez fue relevado de la presidencia de su comisión"
 imageCredit: "Foto: Archivo/NotiCel"
+sectionLead: true
+aiAssisted: true
+draft: false
 ---
 
 El presidente del Senado, Thomas Rivera Schatz, relevó al senador Héctor Joaquín Sánchez de la presidencia de la Comisión de Transportación, Telecomunicaciones, Servicios Públicos y Asuntos del Consumidor. También ordenó iniciar un procedimiento ético. La decisión sigue a una querella presentada contra Sánchez.
