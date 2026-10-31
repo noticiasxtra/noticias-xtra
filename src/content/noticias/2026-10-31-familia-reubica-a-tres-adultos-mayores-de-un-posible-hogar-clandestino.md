@@ -3,12 +3,14 @@ title: "Familia reubica a tres adultos mayores de un posible hogar clandestino e
 description: "El Departamento de la Familia inspecciona un establecimiento de Carolina que operaría sin autorización y gestiona un nuevo lugar de cuidado para tres residentes de edad avanzada."
 section: gobierno
 place: "Carolina"
-date: 2026-10-31T15:50:21.000Z
-aiAssisted: true
-draft: true
-pending: true
+date: 2026-10-31T15:50:00.000Z
+author: "Noticias Xtra"
 image: "https://cdn.noticel.com/2026/10/31120538/24-07-20-NATALICIO-LMR-JRCR-420455-1.jpg"
 imageCredit: "Foto: Archivo/NotiCel"
+trending: true
+sectionLead: true
+aiAssisted: true
+draft: false
 ---
 
 El Departamento de la Familia informó el viernes que comenzó a reubicar a tres adultos mayores que permanecen en un establecimiento de Carolina. El lugar está bajo investigación por operar supuestamente sin las autorizaciones requeridas.
