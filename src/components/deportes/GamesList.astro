@@ -1,5 +1,6 @@
 ---
 // League page: live, upcoming and recent games in a list
+import TeamLogo from './TeamLogo.astro';
 import { scores, gameTime, type Game } from '../../lib/scores';
 import { url } from '../../lib/site';
 interface Props { league: string; season?: string }
@@ -7,9 +8,11 @@ const { league, season } = Astro.props;
 const all = scores(league, 60);
 const groups: Array<[string, Game[]]> = [
   ['En vivo', all.filter((g) => g.status === 'en-vivo')],
-  ['Próximos juegos', all.filter((g) => g.status === 'programado').slice(0, 10)],
+  // A game whose time passed without a result isn't "upcoming" (old hand-typed data): it's left out
+  ['Próximos juegos', all.filter((g) => g.status === 'programado' && Date.parse(g.date) > Date.now() - 6 * 36e5).slice(0, 10)],
   ['Resultados', all.filter((g) => g.status === 'final').slice(0, 10)],
 ];
+const day = (g: Game) => new Date(g.date).toLocaleDateString('es-PR', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'America/Puerto_Rico' });
 ---
 <section class="sp-panel">
   <h2>Juegos{all.some((g) => g.demo) && <span class="sp-demo">DEMO</span>}</h2>
@@ -22,11 +25,11 @@ const groups: Array<[string, Game[]]> = [
         {gs.map((g) => (
           <li>
             <a class="sp-games-teams" href={g.id ? url(`deportes/juego/${g.id}`) : undefined}>
-              <span class:list={{ win: g.status === 'final' && (g.awayScore ?? 0) > (g.homeScore ?? 0) }}>{g.away}{g.status !== 'programado' && <strong>{g.awayScore}</strong>}</span>
-              <span class:list={{ win: g.status === 'final' && (g.homeScore ?? 0) > (g.awayScore ?? 0) }}>{g.home}{g.status !== 'programado' && <strong>{g.homeScore}</strong>}</span>
+              <span class:list={{ win: g.status === 'final' && (g.awayScore ?? 0) > (g.homeScore ?? 0) }}><i><TeamLogo league={league} name={g.away} size={22} />{g.awayFull ?? g.away}</i>{g.status !== 'programado' && <strong>{g.awayScore}</strong>}</span>
+              <span class:list={{ win: g.status === 'final' && (g.homeScore ?? 0) > (g.awayScore ?? 0) }}><i><TeamLogo league={league} name={g.home} size={22} />{g.homeFull ?? g.home}</i>{g.status !== 'programado' && <strong>{g.homeScore}</strong>}</span>
             </a>
             <div class="sp-games-meta">
-              {g.status === 'en-vivo' ? <b class="live">● EN VIVO</b> : g.status === 'final' ? <b>Final</b> : <b>{gameTime(g.date)}</b>}
+              {g.status === 'en-vivo' ? <b class="live">● EN VIVO</b> : g.status === 'final' ? <b>Final · {day(g)}</b> : <b>{gameTime(g.date)}</b>}
               {g.note && <span>{g.note}</span>}
               {g.id && <a href={url(`deportes/juego/${g.id}`)}>{g.status === 'programado' ? 'Previa ›' : 'Ver juego ›'}</a>}
             </div>

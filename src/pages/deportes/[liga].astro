@@ -16,13 +16,19 @@ import AdSlot from '../../components/AdSlot.astro';
 import { getStories, url } from '../../lib/site';
 import { LEAGUES, type League } from '../../lib/leagues';
 import { standings, isDemoTable } from '../../lib/scores';
+import { TEAMS } from '../../lib/teams';
 import teamsData from '../../data/equipos.json';
 
 export function getStaticPaths() {
   return LEAGUES.map((l) => ({ params: { liga: l.id }, props: { l } }));
 }
 const { l } = Astro.props as { l: League };
-const news = (await getStories()).filter((s) => s.data.section === 'deportes' && s.data.league === l.id);
+const sports = (await getStories()).filter((s) => s.data.section === 'deportes');
+// The league's stories; when none is tagged with it, the sports stories that name the league or one of its teams
+const nick = Object.keys(TEAMS).filter((k) => k.startsWith(`${l.id}:`)).map((k) => k.split(':')[1].split(' ').pop()!).filter((n) => n.length > 3);
+const named = new RegExp(`\\b(${[l.abbr, ...new Set(nick)].map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})\\b`);
+const tagged = sports.filter((s) => s.data.league === l.id);
+const news = tagged.length ? tagged : sports.filter((s) => named.test(`${s.data.title} ${s.data.description}`));
 const top = news[0];
 const more = news.slice(1);
 const season = 'season' in l ? l.season : undefined;
@@ -109,7 +115,7 @@ const tabs: Array<[keyof typeof ICON, string]> = individual ? [['noticias', 'Not
           ) : (
             <section class="ys-card lg-empty" id="noticias">
               <LeagueBadge id={l.id} size="md" />
-              <div><h2>{l.full}</h2><p>{season ?? 'Muy pronto publicaremos noticias de esta liga.'}</p></div>
+              <div><h2>{l.full}</h2><p>{season ?? `Aquí salen los resultados, las posiciones y las noticias de ${l.name}.`} <a href={url('seccion/deportes')}>Ver todas las noticias de Xtra Deportes ›</a></p></div>
             </section>
           )}
 

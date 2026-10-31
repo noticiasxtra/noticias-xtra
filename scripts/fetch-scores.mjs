@@ -3,10 +3,11 @@
  * Real scores and standings from Highlightly (https://highlightly.net), run by .github/workflows/scores.yml.
  * Writes src/data/marcadores-auto.json (games) and src/data/posiciones-auto.json (standings), the same shapes as the
  * hand-typed marcadores.json and posiciones.json (src/lib/scores.ts merges them; these win for the leagues they cover).
- * Covered on the account (checked 2026-10-31, scripts/sports-discovery.json): BSN and NBA. Highlightly has no
+ * Covered on the account (checked 2026-10-31, scripts/sports-discovery.json): BSN and NBA; NFL once its plan is added. Highlightly has no
  * La Pro, Doble A or Puerto Rico volleyball; those stay hand-typed.
  * Free plan: 100 requests a day per sport. Each run asks for today's games (1 request per league); the first run of
- * the day also asks for yesterday's finals and the standings.
+ * the day also asks for yesterday's finals and the standings; each finished game is asked once more for its team
+ * stats and arena (game page), at most DETAILS_PER_RUN per run.
  */
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -15,6 +16,7 @@ import { fileURLToPath } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const GAMES_FILE = path.join(ROOT, 'src/data/marcadores-auto.json');
 const TABLES_FILE = path.join(ROOT, 'src/data/posiciones-auto.json');
+const STATS_FILE = path.join(ROOT, 'src/data/estadisticas-auto.json'); // team stats tables (NFL: points per game)
 const KEY = process.env.HIGHLIGHTLY_API_KEY;
 const TZ = 'America/Puerto_Rico';
 
@@ -22,7 +24,39 @@ const TZ = 'America/Puerto_Rico';
 const LEAGUES = [
   { id: 'bsn', base: 'https://basketball.highlightly.net', leagueId: 65460 },
   { id: 'nba', base: 'https://basketball.highlightly.net', leagueId: 10996 },
+  // NFL is Highlightly's separate "NFL API" product (its own free plan, same key); until it's added it's skipped
+  { id: 'nfl', base: 'https://american-football.highlightly.net', league: 'NFL', football: true },
 ];
+
+const DETAILS_PER_RUN = 6;
+// Team stats on the game page, in this order (Highlightly's names → Spanish); anything else is left out
+const STAT = [
+  ['Points', 'Puntos'], ['Field Goals', 'Tiros de campo'], ['Field Goal %', '% tiros de campo'], ['Field Goals %', '% tiros de campo'],
+  ['3 Pointers', 'Triples'], ['Three Pointers', 'Triples'], ['3 Point %', '% de triples'], ['Three Point %', '% de triples'],
+  ['Free Throws', 'Tiros libres'], ['Free Throw %', '% tiros libres'], ['Rebounds', 'Rebotes'], ['Total Rebounds', 'Rebotes'],
+  ['Offensive Rebounds', 'Rebotes ofensivos'], ['Defensive Rebounds', 'Rebotes defensivos'], ['Assists', 'Asistencias'],
+  ['Steals', 'Robos'], ['Blocks', 'Tapones'], ['Turnovers', 'Pérdidas'], ['Fouls', 'Faltas'], ['Personal Fouls', 'Faltas'],
+  ['Points In Paint', 'Puntos en la pintura'], ['Fast Break Points', 'Puntos de contraataque'], ['Largest Lead', 'Mayor ventaja'],
+];
+const statLabel = new Map(STAT.map(([en, es]) => [en.toLowerCase(), es]));
+const fmt = (v) => (typeof v === 'number' && !Number.isInteger(v) ? v.toFixed(1) : String(v));
+function toStats(g, list) {
+  const side = (name) => list.find((x) => x.team?.name === name)?.statistics ?? [];
+  const away = side(g.awayFull), home = side(g.homeFull);
+  const out = [];
+  for (const [en, es] of STAT) {
+    if (out.some((s) => s.label === es)) continue;
+    const a = away.find((s) => s.displayName?.toLowerCase() === en.toLowerCase()), h = home.find((s) => s.displayName?.toLowerCase() === en.toLowerCase());
+    if (a && h) out.push({ label: es, away: fmt(a.value), home: fmt(h.value) });
+  }
+  // Stats with a name not in the list still show (with Highlightly's name) so nothing is lost; translate them above
+  for (const a of away) {
+    if (out.length >= 16 || statLabel.has(a.displayName?.toLowerCase())) continue;
+    const h = home.find((s) => s.displayName === a.displayName);
+    if (h) out.push({ label: a.displayName, away: fmt(a.value), home: fmt(h.value) });
+  }
+  return out;
+}
 
 const readJson = async (f, fb) => { try { return JSON.parse(await fs.readFile(f, 'utf8')); } catch { return fb; } };
 const day = (offset = 0) => new Date(Date.now() + offset * 864e5).toLocaleDateString('en-CA', { timeZone: TZ }); // YYYY-MM-DD in PR
@@ -43,6 +77,54 @@ const short = (league, name) => {
 };
 const PERIOD = { 'First quarter': '1er cuarto', 'Second quarter': '2do cuarto', 'Third quarter': '3er cuarto', 'Fourth quarter': '4to cuarto', 'Over time': 'Tiempo extra', 'Half time': 'Medio tiempo', 'Break time': 'Descanso' };
 const OFF = { Postponed: 'Pospuesto', Cancelled: 'Cancelado', Suspended: 'Suspendido', Abandoned: 'Suspendido' };
+
+// NFL games come in a slightly different shape (state "In progress" + period, team displayName)
+const QTR = ['', '1er cuarto', '2do cuarto', '3er cuarto', '4to cuarto'];
+function toFootball(league, m) {
+  const st = m.state?.description ?? 'Unknown';
+  const [home, away] = String(m.state?.score?.current ?? '').split('-').map((x) => Number.parseInt(x, 10));
+  const final = st === 'Finished', live = ['In progress', 'End period', 'Half time'].includes(st);
+  const g = {
+    league, date: m.date, away: m.awayTeam.name, home: m.homeTeam.name, awayFull: m.awayTeam.displayName, homeFull: m.homeTeam.displayName,
+    status: final ? 'final' : live ? 'en-vivo' : 'programado', src: `highlightly:${m.id}`, id: `${league}-${m.id}`, statsChecked: true,
+  };
+  if ((final || live) && Number.isFinite(home) && Number.isFinite(away)) { g.homeScore = home; g.awayScore = away; }
+  if (live) g.note = st === 'Half time' ? 'Medio tiempo' : (m.state.period > 4 ? 'Tiempo extra' : QTR[m.state.period] ?? 'En vivo') + (st === 'In progress' && m.state.clock ? ` · ${m.state.clock}'` : '');
+  if (final && /OT/i.test(m.state?.report ?? '')) g.note = 'Final · tiempo extra';
+  if (OFF[st]) g.note = OFF[st];
+  const sc = m.state?.score ?? {};
+  const parts = [['firstPeriod', '1'], ['secondPeriod', '2'], ['thirdPeriod', '3'], ['fourthPeriod', '4'], ['firstOvertimePeriod', 'TE']].filter(([k]) => sc[k]);
+  if (parts.length && (final || live)) {
+    const split = (k) => String(sc[k]).split('-').map((x) => Number.parseInt(x, 10));
+    g.linescore = { labels: parts.map(([, n]) => n), home: parts.map(([k]) => split(k)[0]), away: parts.map(([k]) => split(k)[1]), totals: ['T'], homeTotals: [g.homeScore ?? ''], awayTotals: [g.awayScore ?? ''] };
+  }
+  return g;
+}
+
+// NFL standings: Highlightly gives each conference (AFC, NFC) with its teams' season stats. Returns the table and the
+// "points per game" stats table built from the same numbers.
+function nflTables(data) {
+  const confs = (data.data || []).filter((c) => /regular/i.test(c.seasonType ?? '') && /^(AFC|NFC)$/.test(c.abbreviation));
+  if (!confs.length) return null;
+  const val = (t, ...names) => { const s = t.statistics?.find((x) => names.some((n) => x.displayName?.toLowerCase() === n)); return s ? String(s.value) : ''; };
+  const num = (v) => Number.parseFloat(v) || 0;
+  const all = [];
+  const groups = confs.map((c) => {
+    const rows = c.data.map((t) => {
+      const w = num(val(t, 'wins')), l = num(val(t, 'losses')), pf = num(val(t, 'points for', 'pointsfor')), pa = num(val(t, 'points against', 'pointsagainst'));
+      const row = { team: t.team.displayName, w, l, extra: [String(pf), String(pa), val(t, 'streak').replace(/^W/, 'G').replace(/^L/, 'P')] };
+      all.push({ team: t.team.displayName, games: w + l + num(val(t, 'ties')), pf, pa });
+      return row;
+    }).sort((a, b) => b.w - a.w || a.l - b.l);
+    const top = rows[0];
+    rows.forEach((r) => { const gb = ((top.w - r.w) + (r.l - top.l)) / 2; r.gb = gb === 0 ? '—' : String(gb); });
+    return { name: c.abbreviation, columns: ['PF', 'PC', 'RACHA'], rows };
+  });
+  const per = (x, g) => (g ? (x / g).toFixed(1) : '0.0');
+  const stats = { columns: ['PTS/J', 'PC/J', 'DIF', 'J'], rows: all.filter((t) => t.games).sort((a, b) => b.pf / b.games - a.pf / a.games).slice(0, 10)
+    .map((t) => ({ team: t.team, values: [per(t.pf, t.games), per(t.pa, t.games), `${t.pf - t.pa >= 0 ? '+' : ''}${t.pf - t.pa}`, String(t.games)] })) };
+  return { table: { updated: `Temporada ${confs[0].year}. Fuente: Highlightly`, groups }, stats };
+}
 
 function toGame(league, m) {
   const st = m.state?.description ?? 'Unknown';
@@ -91,17 +173,28 @@ async function main() {
   if (!KEY) { console.log('HIGHLIGHTLY_API_KEY no está configurada. No se buscaron marcadores.'); return; }
   const games = await readJson(GAMES_FILE, []);
   const tables = await readJson(TABLES_FILE, {});
+  const teamStats = await readJson(STATS_FILE, {});
   const firstOfDay = !games.some((g) => g._checked === day()) || process.env.FULL === '1';
   const byKey = new Map(games.filter((g) => !g._checked).map((g) => [g.src, g]));
 
   for (const l of LEAGUES) {
     try {
       for (const d of firstOfDay ? [day(-1), day()] : [day()]) {
-        const r = await get(l.base, `/matches?leagueId=${l.leagueId}&date=${d}&timezone=${encodeURIComponent(TZ)}&limit=100`);
-        for (const m of r.data || []) byKey.set(`highlightly:${m.id}`, toGame(l.id, m));
+        const r = await get(l.base, `/matches?${l.football ? `league=${l.league}` : `leagueId=${l.leagueId}`}&date=${d}&timezone=${encodeURIComponent(TZ)}&limit=100`);
+        for (const m of r.data || []) {
+          const old = byKey.get(`highlightly:${m.id}`), g = l.football ? toFootball(l.id, m) : toGame(l.id, m);
+          if (old?.statsChecked && g.status === 'final') Object.assign(g, { stats: old.stats, venue: old.venue, statsChecked: true });
+          byKey.set(`highlightly:${m.id}`, g);
+        }
         console.log(`${l.id} ${d}: ${(r.data || []).length} juegos`);
       }
-      if (firstOfDay) {
+      if (firstOfDay && l.football) {
+        const year = Number(day().slice(0, 4)), month = Number(day().slice(5, 7));
+        const t = nflTables(await get(l.base, `/standings?leagueType=${l.league}&year=${month < 3 ? year - 1 : year}&limit=10`));
+        if (t) { tables[l.id] = t.table; teamStats[l.id] = t.stats; }
+        console.log(`${l.id}: posiciones ${t ? 'actualizadas' : 'sin datos'}`);
+      }
+      if (firstOfDay && !l.football) {
         // The current season first (NBA 2026 = 2026-27); before it has a table, the one before
         const year = Number(day().slice(0, 4));
         let t = null, season = year;
@@ -115,11 +208,29 @@ async function main() {
     } catch (e) { console.warn(`${l.id}: ${e.message}`); }
   }
 
+  // Finished games: team stats and arena once (one request each), so the game page has more than the score
+  let details = 0;
+  for (const g of byKey.values()) {
+    if (g.status !== 'final' || g.statsChecked || details >= DETAILS_PER_RUN || !g.src) continue;
+    const l = LEAGUES.find((x) => x.id === g.league); if (!l) continue;
+    try {
+      details++;
+      const r = await get(l.base, `/matches/${g.src.split(':')[1]}`);
+      const m = Array.isArray(r) ? r[0] : r.data?.[0] ?? r;
+      const stats = toStats(g, m?.statistics ?? []);
+      if (stats.length) g.stats = stats;
+      if (m?.venue?.name) g.venue = [m.venue.name, m.venue.city].filter(Boolean).join(', ');
+      g.statsChecked = true;
+    } catch (e) { console.warn(`detalles de ${g.id}: ${e.message}`); }
+  }
+  if (details) console.log(`Detalles de ${details} juegos terminados`);
+
   // Keep the last 7 days of results and the next 7 days of games
   const keep = (g) => Math.abs(Date.parse(g.date) - Date.now()) < 7 * 864e5;
   const list = [...byKey.values()].filter(keep).sort((a, b) => Date.parse(a.date) - Date.parse(b.date));
   await fs.writeFile(GAMES_FILE, JSON.stringify([...list, { _checked: day() }], null, 2) + '\n');
   await fs.writeFile(TABLES_FILE, JSON.stringify(tables, null, 2) + '\n');
+  await fs.writeFile(STATS_FILE, JSON.stringify(teamStats, null, 2) + '\n');
   console.log(`Listo: ${list.length} juegos guardados, ${calls} consultas.`);
 }
 main().catch((e) => { console.error(e); process.exit(1); });
