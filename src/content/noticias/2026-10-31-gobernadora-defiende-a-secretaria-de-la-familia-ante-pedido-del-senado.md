@@ -3,13 +3,14 @@ title: "Gobernadora defiende a secretaria de la Familia ante pedido del Senado d
 description: "Jenniffer González Colón dijo que los viajes de jefes de agencia son parte de sus funciones y acusó al presidente del Senado de querer debilitar su gabinete. Un senador pedirá a Suzanne Roig detalles de un viaje a México."
 section: gobierno
 place: "Puerto Rico"
-date: 2026-10-30T21:42:20.000Z
-aiAssisted: true
-draft: true
-pending: true
+date: 2026-10-30T21:42:00.000Z
+author: "Noticias Xtra"
 image: "https://cdn.noticel.com/2026/10/30172914/WhatsApp-Image-2026-10-07-at-3.15.27-PM-1-1.jpeg"
 imageCaption: "Suzanne Roig Fuertes es investigada por la Comisión de Familia, Mujer, personas de la Tercera Edad y Población con Diversidad Funcional e Impedimentos"
 imageCredit: "Foto: Juan Costa / NotiCel"
+featured: true
+aiAssisted: true
+draft: false
 ---
 
 La gobernadora Jenniffer González Colón defendió a la secretaria del Departamento de la Familia, Suzanne Roig Fuertes, ante los nuevos cuestionamientos sobre sus viajes. Dijo que los señalamientos carecen de trascendencia y que los viajes de jefes de agencia no son fuera de lo común. Habló en una conferencia de prensa tras abrir el ASORE Restaurant Show 2026, en el Centro de Convenciones.
